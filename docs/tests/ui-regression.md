@@ -113,6 +113,63 @@ Sign out returns to `/console/login`, and Back does not show the console again.
 
 ## 5. Questionnaires — QST (authoring), EDT (editor), QF (commerce), GEN (generation), CHAT (chat), ONB (onboarding)
 
+**QST-01 · The listing shows the account's questionnaires, ten per page**
+Sign in as `owner@acme.test`, open Questionnaires. **Expected:** the header says "12 questionnaires"; ten rows, newest
+first, each with its title, "N questions", type (Standard, Diagnostic, Chaining, Process mapping), an Active switch and
+the creation date; the pager says "1–10 of 12" and page 2 shows the other two. "Globex product feedback" never appears.
+
+**QST-02 · The page size changes and goes back to page 1**
+On page 2, choose 20 per page. **Expected:** all twelve rows on one page, "1–12 of 12".
+
+**QST-03 · Search runs on the server, every word, any case or accent**
+Press Ctrl+K (the search box gets the focus) and type `CLIMA encuesta`. **Expected:** only "Encuesta de clima laboral".
+Type `pulse 3` instead: only "Team pulse, week 3".
+
+**QST-04 · A search that finds nothing says so and clears**
+Search `zzz`. **Expected:** "Nothing matches "zzz"." with "Clear search"; pressing it empties the box and the twelve rows
+come back.
+
+**QST-05 · Type and state filters, and "No matches"**
+Type: Diagnostic → only "AI maturity diagnostic". Type: All types, State: Inactive → only "Onboarding feedback". Type:
+Quiz funnel with State: Active → "No matches" with "Clear filters", which resets every filter and the search.
+
+**QST-06 · Sort by update, ascending or descending, and the date column follows**
+Choose "Sort: Updated" and "Ascending". **Expected:** the date column header reads "Updated"; the oldest update comes
+first. Switch back to "Sort: Created" / "Descending".
+
+**QST-07 · Local or UTC dates, remembered**
+Choose Time zone: UTC. **Expected:** the dates shift to UTC. Reload the page: UTC is still chosen.
+
+**QST-08 · The Active switch saves at once and survives a reload**
+Turn off "Team pulse, week 1". **Expected:** the switch flips immediately and reads "Inactive"; reload: still inactive;
+State: Inactive lists it. Turn it back on.
+
+**QST-09 · A failed toggle reverts**
+In DevTools set the network offline, toggle any row. **Expected:** the switch flips back and a red message appears. Go
+back online.
+
+**QST-10 · Row actions**
+On "Customer satisfaction survey": the eye opens `/f/acme-satisfaction` in a new tab; the copy icon says "Link copied"
+and the clipboard holds that link; the pencil and the title open `/questionnaires/…/edit`; "Answers" opens its answers
+page; "Analytics" (with the "New" badge) opens its dashboard.
+
+**QST-11 · A read-only member only reads**
+Sign in as `reader@acme.test`, open Questionnaires. **Expected:** "New Questionnaire", the Active switches and the pencils
+are disabled and say "Your read-only role can't …" on hover; the title opens the public page in a new tab; View, Copy
+link, Answers and Analytics still work.
+
+**QST-12 · A brand-new account sees what the section is for**
+Sign in as `owner@newco.test` (finish onboarding first if the console asks), open Questionnaires. **Expected:** "No questionnaires created yet / Create your first questionnaire to start collecting
+responses." with "New Questionnaire" going to `/questionnaires/new`.
+
+**QST-13 · The public flow opens by slug; an unknown one is "not found"**
+Open `/api/v1/flow/acme-satisfaction`. **Expected:** JSON whose questionnaire state only carries `questionnaire_id`;
+`/api/v1/flow/acme-ai-maturity` shows no tiers anywhere; `/api/v1/flow/nope` answers 404 `FLOW_NOT_FOUND`.
+
+**QST-14 · Spanish**
+Switch the sidebar language to Español on Questionnaires. **Expected:** "Cuestionarios", "12 cuestionarios", "Nuevo
+cuestionario", the filters, columns, types ("Estándar", "Diagnóstico", "Encadenado") and empty states are all Spanish.
+
 <!-- QST-01 – 15: authoring. EDT-01 – 25: editor. QF-01 – 15: commerce. GEN-01 – 05: generation.
      CHAT-01 – 15: chat. ONB-01 – 10: onboarding. -->
 

@@ -1,3 +1,62 @@
 {
-  "title": "Cuestionarios"
+  "title": "Cuestionarios",
+  "count_one": "{{count}} cuestionario",
+  "count_other": "{{count}} cuestionarios",
+  "new": "Nuevo cuestionario",
+  "toolbar": {
+    "search": "Buscar cuestionarios",
+    "searchPlaceholder": "Buscar por título… (Ctrl+K)",
+    "type": "Tipo",
+    "status": "Estado",
+    "sortBy": "Ordenar por",
+    "order": "Orden",
+    "timeZone": "Zona horaria"
+  },
+  "filters": {
+    "allTypes": "Todos los tipos",
+    "allStatus": "Todos los estados",
+    "active": "Activos",
+    "inactive": "Inactivos",
+    "sortCreated": "Orden: Creación",
+    "sortUpdated": "Orden: Actualización",
+    "desc": "Descendente",
+    "asc": "Ascendente",
+    "local": "Hora local",
+    "utc": "UTC"
+  },
+  "kind": {
+    "default": "Estándar",
+    "quiz_funnel": "Quiz funnel",
+    "diagnostic": "Diagnóstico",
+    "process_mapping": "Mapeo de procesos",
+    "chain": "Encadenado"
+  },
+  "columns": {
+    "title": "Título",
+    "type": "Tipo",
+    "state": "Estado",
+    "created": "Creado",
+    "updated": "Actualizado",
+    "actions": "Acciones"
+  },
+  "questionCount_one": "{{count}} pregunta",
+  "questionCount_other": "{{count}} preguntas",
+  "actions": {
+    "view": "Ver {{title}}",
+    "copyLink": "Copiar el enlace de {{title}}",
+    "edit": "Editar {{title}}",
+    "answers": "Respuestas",
+    "analytics": "Analítica",
+    "new": "Nuevo"
+  },
+  "linkCopied": "Enlace copiado",
+  "linkNotCopied": "No pudimos copiar el enlace. Abre el cuestionario y cópialo desde la barra de direcciones.",
+  "empty": {
+    "noneTitle": "Aún no has creado cuestionarios",
+    "noneBody": "Crea tu primer cuestionario para empezar a recibir respuestas.",
+    "filteredTitle": "Sin resultados",
+    "filteredBody": "Ningún cuestionario coincide con estos filtros.",
+    "searchTitle": "Nada coincide con \"{{query}}\".",
+    "searchBody": "Prueba con otras palabras o limpia la búsqueda."
+  }
 }
