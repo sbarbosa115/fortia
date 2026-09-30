@@ -132,7 +132,7 @@ class QuestionnaireSession
      */
     public function answer(array $questions, \DateTimeImmutable $at): void
     {
-        $this->document['questions'] = array_values($questions);
+        $this->document['questions'] = $questions;
         $this->updatedAt = $at;
     }
 

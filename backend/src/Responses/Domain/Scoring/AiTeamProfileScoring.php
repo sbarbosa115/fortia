@@ -74,7 +74,7 @@ final class AiTeamProfileScoring
             'top10' => self::TOP10,
             'percentile' => self::STAGES[$stage][2],
             'potential' => (int) round((30 - $total) / 30 * 100),
-            'strengths' => array_values(array_column(array_filter($dimensions, static fn (array $d): bool => $d['score'] >= 4), 'id')),
+            'strengths' => array_column(array_filter($dimensions, static fn (array $d): bool => $d['score'] >= 4), 'id'),
             'opportunity' => $ascending[0]['id'],
             'roadmap' => [
                 ['days' => '1-30', 'dimension' => $ascending[0]['id']],

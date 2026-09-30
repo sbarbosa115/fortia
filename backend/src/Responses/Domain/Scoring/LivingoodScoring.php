@@ -47,7 +47,7 @@ final class LivingoodScoring
             'type' => 'livingood',
             'scores' => $scores,
             'profile' => $ascending[0]['id'],
-            'action_plan' => array_values(array_column(array_filter($ascending, static fn (array $s): bool => $s['score'] < self::ACTION_THRESHOLD), 'id')),
+            'action_plan' => array_column(array_filter($ascending, static fn (array $s): bool => $s['score'] < self::ACTION_THRESHOLD), 'id'),
         ];
     }
 

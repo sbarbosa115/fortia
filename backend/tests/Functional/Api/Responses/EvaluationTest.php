@@ -83,7 +83,11 @@ final class EvaluationTest extends ApiTestCase
         $this->assertApiError($this->api('POST', '/api/v1/questionnaire/session/'.$session['session_id'].'/answers/q1/evaluate', ['id' => 'q1']), 400, 'VALIDATION_ERROR');
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> ...$questions
+     *
+     * @return array<string, mixed>
+     */
     private function sessionWith(array ...$questions): array
     {
         $this->account('ACME0001');

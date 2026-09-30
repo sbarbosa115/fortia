@@ -140,7 +140,11 @@ trait SessionFixtures
         return $session;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param list<string> $criteria
+     *
+     * @return array<string, mixed>
+     */
     protected static function textQuestion(string $id, string $title, int $maxFollowups = 0, array $criteria = []): array
     {
         return [
@@ -163,7 +167,11 @@ trait SessionFixtures
         ];
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $parameters
+     *
+     * @return array<string, mixed>
+     */
     protected static function state(string $id, string $type, ?string $next = null, array $parameters = []): array
     {
         return ['state_id' => str_pad($id, 15, '0'), 'type' => $type, 'parameters' => $parameters, 'outputs' => [], 'next' => null === $next ? null : str_pad($next, 15, '0')];

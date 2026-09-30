@@ -49,7 +49,7 @@ final class SessionAnswers
             }
         }
 
-        return array_values($stored);
+        return $stored;
     }
 
     /**
@@ -83,7 +83,7 @@ final class SessionAnswers
             }
         }
 
-        return array_values($previous);
+        return $previous;
     }
 
     /**
@@ -102,7 +102,7 @@ final class SessionAnswers
             }
         }
 
-        return array_values($questions);
+        return $questions;
     }
 
     /**
@@ -129,7 +129,7 @@ final class SessionAnswers
             }
         }
 
-        return array_values($questions);
+        return $questions;
     }
 
     /** @param array<string, mixed> $question */

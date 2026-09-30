@@ -48,6 +48,7 @@ final class SessionApiTest extends ApiTestCase
         $this->assertApiError($this->api('POST', '/api/v1/questionnaire/'.Ids::uuid4().'/session'), 404, 'QUESTIONNAIRE_NOT_FOUND', 'unknown');
         $this->assertApiError($this->api('POST', '/api/v1/questionnaire/'.$assigned.'/session'), 404, 'QUESTIONNAIRE_NOT_FOUND', '§8.4: assigned to an organization, only answered through /a/');
         $this->assertApiError($this->api('POST', '/api/v1/questionnaire/not-a-uuid/session'), 400, 'INVALID_UUID');
+        $this->assertApiError($this->api('POST', '/api/v1/questionnaire/'.$assigned.'/session', headers: ['Authorization' => 'Bearer rt.invalid']), 401, 'UNAUTHORIZED', 'D7: an invalid respondent token is 401, never ignored');
     }
 
     public function testOnlyARootQuestionnaireNeedsResponseCapacity(): void

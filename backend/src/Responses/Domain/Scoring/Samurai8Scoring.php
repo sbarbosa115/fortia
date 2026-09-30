@@ -64,7 +64,7 @@ final class Samurai8Scoring
             'score' => ['value' => $total, 'max' => 30],
             'tier' => $tier,
             'dimensions' => $dimensions,
-            'strengths' => array_values(array_column(array_filter($dimensions, static fn (array $d): bool => $d['score'] >= 4), 'id')),
+            'strengths' => array_column(array_filter($dimensions, static fn (array $d): bool => $d['score'] >= 4), 'id'),
             'weakest' => $ascending[0]['id'],
             'quick_wins' => array_column(\array_slice($ascending, 0, 2), 'id'),
             'roadmap_days' => 'explorador' === $tier['id'] ? 30 : 90,
