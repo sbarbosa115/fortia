@@ -82,6 +82,10 @@ below is added by the item that builds the endpoint.
 | `/api/v1/signed-urls` | POST | public for `answer_media` (only a session being filled, of that `customer_id`, with that question: D4); signed in and own account for `prompt` | `{url, fields, key, expires_in:900}` (form upload, 1 B–500 MB) or `{url, key, expires_in}` (PUT). 400 `VALIDATION_ERROR`, 401, 403 `FORBIDDEN`, 404 `SESSION_NOT_FOUND` / `QUESTION_NOT_FOUND` / `CUSTOMER_NOT_FOUND`, 429 |
 | `/api/v1/answers-media/download-urls` | POST | signed in | `{key, disposition}` → `{url, expires_in:900}`. 400 `VALIDATION_ERROR` (key = 4 segments, no `..`), 403 `FORBIDDEN` (another account's key; Admin passes) |
 | `/api/v1/transcription/token` | GET | public, rate limited | `{token, provider, expires_in}`: `provider` `browser` = transcribe with the Web Speech API (default), `openai` = Realtime client secret (`TRANSCRIPTION_PROVIDER=openai`). 502 when the provider fails |
+| `/api/v1/organizations` | GET | signed in | **bare** `{organizations:[{…org, organization_users:[…]}]}`, newest first, members in one extra query (no N+1). Admin sees every account |
+| `/api/v1/organizations` | POST | AG, Cap(`organizations`) | `{name, domain_email?, description?, active?, organization_users[]}` (no extra fields, also in members). 201 the organization with its members. Names/emails/phones normalized (§6.13). 400 `VALIDATION_ERROR` (each member with an email or phone, unique emails in the list), 403 `FORBIDDEN`, 409 `DOMAIN_EMAIL_CONFLICT` (any account), 429 plan. `OrganizationCreated` counts `organizations` |
+| `/api/v1/organizations/{id}` | PUT | write permission, owner or Admin (D1) | partial, at least one field; `organization_users` is reconciled (by id, then email, then name + phone; the rest deleted). 200 the organization. 400 `VALIDATION_ERROR`/`INVALID_UUID`, 403 `FORBIDDEN` (read-only), 404 `ORGANIZATION_NOT_FOUND` (also another account's), 409 `DOMAIN_EMAIL_CONFLICT` |
+| `/api/v1/organizations/{id}` | DELETE | write permission, owner or Admin (D1) | 204; deletes its members too (D2). 404 `ORGANIZATION_NOT_FOUND`, 409 `ORGANIZATION_HAS_ASSIGNATIONS` while assignations or projects point at it. `OrganizationDeleted` counts `organizations` |
 
 Every endpoint answers `{message, data}` or `{error: {code, message, details?}}` (PRD §8.1); `X-Assume-Customer-Id`
 lets a platform Admin act as an account's root user (logged in `impersonation_log`).
@@ -100,6 +104,12 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
 - **Signed local storage** keeps the PRD's object keys and the `{url, fields, key, expires_in}` upload contract.
 - **Dev stack speed:** `vendor/` and `var/` in volumes and Symfony without debug freshness checks (a reloader clears
   the cache on change): on Docker Desktop, reading them through the bind mount cost ~20 s per request.
+- **Organizations (D1, D2).** `PUT`/`DELETE /organizations/{id}` require the caller's own organization (another
+  account's is 404) or an Admin, and write permission (read-only is 403). Deleting an organization deletes its members,
+  and is **refused with 409 `ORGANIZATION_HAS_ASSIGNATIONS`** while any assignation or project points at it: deleting
+  them would lose answers and reviews, and keeping them would orphan respondents who log in against its members. Delete
+  (or move) the assignations and projects first. Member ids sent for new members are ignored (a fresh id is minted), and
+  a reconciliation frees emails before rewriting them, so members can swap emails in one update.
 
 ## Known gaps
 

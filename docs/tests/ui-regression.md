@@ -297,6 +297,80 @@ Switch to Español in the editor. **Expected:** every label, step, button, messa
 
 ## 7. Organizations, assignations and projects — ORG, ASG, ARS, PRJ
 
+**ORG-01 · The card grid**
+As `owner@acme.test` open Organizations. **Expected:** one card per organization (Acme Retail, Acme Logistics; never
+Globex Labs) with an initial on a colour that stays the same across reloads, the name (cut to 16 characters with "…"),
+Active/Inactive, the domain ("No domain" when empty), "N members", and View, Edit, Delete.
+
+**ORG-02 · Search and "filtered to nothing"**
+Type `retail` in the search: only Acme Retail. Type `zzz`: "No matches" with "Clear filters", which brings every card
+back.
+
+**ORG-03 · Nothing at all**
+As `owner@globex.test` delete Globex Labs (or on a fresh account). **Expected:** "No organizations yet. Create your first
+one." with the "New Organization" button.
+
+**ORG-04 · Read-only and plan gates**
+As `reader@acme.test`: "New Organization", Edit and Delete are disabled with "Your read-only role can't create
+resources." / "…can't make changes." on hover; View works; `/organizations/new` and `/:id/edit` redirect to the list.
+As an account whose plan lacks organizations (or has used them up), "New Organization" is disabled with the plan text.
+
+**ORG-05 · Create: required name**
+Press "New Organization", then "Create organization" with nothing typed. **Expected:** "Name is required" under Name,
+the toast "Check the highlighted fields before saving.", nothing is sent.
+
+**ORG-06 · Create by hand**
+Name `Acme  Manual Team`, domain `acme-manual.test`, "Add member" twice: `Ramón  Díaz` / ` Ramon@Gmail.com`, and
+`Dup Person` with phone `+57 (300) 555-1212`, role `Driver`, area `Logistics`. Leaving each row normalizes it
+("ramon diaz", "ramon@gmail.com", "+573005551212"). Create. **Expected:** "Organization created." and the detail page of
+"Acme Manual Team" (single space) with both members; the card shows "2 members".
+
+**ORG-07 · Member rules in the form**
+Add a member with only a name and press save: "Each member needs at least an email or a phone". Type `ana@` as email:
+"Enter a valid email". Type the same email (any case) in two rows: "This member is already in the list" at once, before
+saving.
+
+**ORG-08 · Domain warning**
+With domain `acme-manual.test` and a member `x@gmail.com`: "1 member uses a domain other than acme-manual.test. They
+will be saved anyway." Save works.
+
+**ORG-09 · CSV import**
+Download the template: `organization_members_template.csv` with `name,email,phone,role,area`. Import a `;` file with a
+BOM and the header `nombre;correo;teléfono;cargo;área`, a quoted `"Ruiz, Carlos"`, a row with no email or phone, one with
+`not-an-email`, one repeating an email already in the list and one without a name. **Expected:** "Imported 2 members",
+"4 rows were skipped:" and one line per row, e.g. "Row 4 — Sin Correo: it has no email or phone", "Row 6 — Ramon Again:
+already in the list", "Row 7 — (no name): the name is empty". The imported rows appear in the list, normalized.
+
+**ORG-10 · CSV without the needed columns**
+Import a file whose header has no name column: "The CSV must include a 'name' column". One with a name but neither
+email nor phone: "The CSV must include at least an 'email' or 'phone' column". Nothing is added.
+
+**ORG-11 · Edit: members keep their ids**
+Edit Acme Manual Team: change a member's role, remove another with its trash button, "Save changes". **Expected:**
+"Organization saved.", the detail shows the change and the removed member is gone; an assignation respondent who was
+kept (ASG) still logs in (their id did not change).
+
+**ORG-12 · Domain in use**
+Edit Acme Retail and set the domain to `globex.test` (Globex's). **Expected:** the toast "Another organization already
+uses that email domain." and the form stays as typed.
+
+**ORG-13 · Errors point to the member row**
+(Needs a value the form accepts and the API refuses, e.g. a 51-character phone pasted via dev tools.) **Expected:**
+"Member {position} ({name}): {detail}" above the list.
+
+**ORG-14 · Detail and delete**
+View Acme Retail: status, domain, created and updated dates, description, and the members table (Name, Email, Phone,
+Role, Area) with Edit. Back on the list, Delete Acme Manual Team: "Delete organization?" / "This will permanently delete
+"Acme Manual Team" and cannot be undone." → Delete: "\"Acme Manual Team\" was deleted." and the card is gone. An
+organization with assignations or projects is not deleted: "This organization has assignations or projects. Delete them
+first, then delete the organization."
+
+**ORG-15 · Español**
+Switch the language to Español on the list, the form and the detail. **Expected:** "Organizaciones", "Nueva
+organización", "Editar organización", "Miembros (4)", "Añadir miembro", "Importar CSV", "Descargar plantilla",
+"Guardar cambios", the domain warning and the delete dialog, all in Spanish (member error texts from the API stay as the
+API writes them).
+
 <!-- ORG-01 – 15: organizations. ASG-01 – 30: assignations. ARS-01 – 15: assignation-respondent.
      PRJ-01 – 12: projects. PRJ-13 – 20: project-wizard. -->
 

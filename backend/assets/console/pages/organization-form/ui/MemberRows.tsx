@@ -80,7 +80,7 @@ export function MemberRows({
                       position,
                     })}
                     aria-invalid={
-                      visible.length > 0 && invalidColumn(rowErrors, column, showErrors)
+                      visible.length > 0 && invalidColumn(member, rowErrors, column, showErrors)
                         ? true
                         : undefined
                     }
@@ -115,6 +115,7 @@ export function MemberRows({
 }
 
 function invalidColumn(
+  member: MemberDraft,
   errors: MemberErrors | undefined,
   column: Column,
   showErrors: boolean,
@@ -122,7 +123,7 @@ function invalidColumn(
   if (!errors) {
     return false;
   }
-  if (errors.duplicate && (column === 'email' || column === 'phone')) {
+  if (errors.duplicate && column === (member.email.trim() ? 'email' : 'phone')) {
     return true;
   }
   if (!showErrors) {
