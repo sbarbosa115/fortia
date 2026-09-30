@@ -1,3 +1,44 @@
 {
-  "title": "Organización"
+  "title": "Organización",
+  "newTitle": "Nueva organización",
+  "editTitle": "Editar organización",
+  "subtitle": "Los datos de la organización y las personas que la forman.",
+  "details": "Datos",
+  "name": "Nombre",
+  "domain": "Dominio de correo",
+  "domainPlaceholder": "ejemplo.com",
+  "domainHint": "El dominio que usan los correos de tus miembros, si comparten uno.",
+  "description": "Descripción",
+  "active": "Activa",
+  "create": "Crear organización",
+  "created": "Organización creada.",
+  "updated": "Organización guardada.",
+  "fixErrors": "Revisa los campos marcados antes de guardar.",
+  "backToList": "Volver a organizaciones",
+  "domainWarning_one": "{{count}} miembro usa un dominio distinto de {{domain}}. Se guardará de todas formas.",
+  "domainWarning_other": "{{count}} miembros usan un dominio distinto de {{domain}}. Se guardarán de todas formas.",
+  "memberError": "Miembro {{position}} ({{name}}): {{detail}}",
+  "errors": {
+    "nameRequired": "El nombre es obligatorio"
+  },
+  "members": {
+    "title_one": "Miembros ({{count}})",
+    "title_other": "Miembros ({{count}})",
+    "add": "Añadir miembro",
+    "empty": "Aún no hay miembros",
+    "emptyBody": "Añádelos uno a uno o importa un archivo CSV.",
+    "name": "Nombre",
+    "email": "Correo",
+    "phone": "Teléfono",
+    "role": "Cargo",
+    "area": "Área",
+    "namePlaceholder": "Nombre completo",
+    "emailPlaceholder": "nombre@empresa.com",
+    "phonePlaceholder": "+57 300 000 0000",
+    "rolePlaceholder": "Opcional",
+    "areaPlaceholder": "Opcional",
+    "cellLabel": "{{field}} del miembro {{position}}",
+    "remove": "Quitar miembro {{position}}",
+    "noName": "sin nombre"
+  }
 }

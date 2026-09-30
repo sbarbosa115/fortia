@@ -1,3 +1,44 @@
 {
-  "title": "Organization"
+  "title": "Organization",
+  "newTitle": "New Organization",
+  "editTitle": "Edit organization",
+  "subtitle": "The organization's details and the people in it.",
+  "details": "Details",
+  "name": "Name",
+  "domain": "Email domain",
+  "domainPlaceholder": "ejemplo.com",
+  "domainHint": "The domain your members' emails use, if they share one.",
+  "description": "Description",
+  "active": "Active",
+  "create": "Create organization",
+  "created": "Organization created.",
+  "updated": "Organization saved.",
+  "fixErrors": "Check the highlighted fields before saving.",
+  "backToList": "Back to organizations",
+  "domainWarning_one": "{{count}} member uses a domain other than {{domain}}. They will be saved anyway.",
+  "domainWarning_other": "{{count}} members use a domain other than {{domain}}. They will be saved anyway.",
+  "memberError": "Member {{position}} ({{name}}): {{detail}}",
+  "errors": {
+    "nameRequired": "Name is required"
+  },
+  "members": {
+    "title_one": "Members ({{count}})",
+    "title_other": "Members ({{count}})",
+    "add": "Add member",
+    "empty": "No members yet",
+    "emptyBody": "Add them one by one or import a CSV file.",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "area": "Area",
+    "namePlaceholder": "Full name",
+    "emailPlaceholder": "name@company.com",
+    "phonePlaceholder": "+57 300 000 0000",
+    "rolePlaceholder": "Optional",
+    "areaPlaceholder": "Optional",
+    "cellLabel": "{{field}} of member {{position}}",
+    "remove": "Remove member {{position}}",
+    "noName": "no name"
+  }
 }

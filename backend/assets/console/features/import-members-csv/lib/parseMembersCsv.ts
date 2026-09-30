@@ -109,7 +109,7 @@ export function parseMembersCsv(
   text: string,
   existing: MemberDraft[] = [],
 ): ImportResult {
-  const content = text.replace(/^﻿/, '');
+  const content = text.replace(/^\uFEFF/, '');
   const rows = parseCsv(content, detectDelimiter(content));
   const header = rows.shift();
   if (!header) {

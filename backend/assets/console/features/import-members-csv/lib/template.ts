@@ -10,7 +10,7 @@ export const TEMPLATE_CSV = [
 
 /** Downloads the template as a UTF-8 file (with a BOM, so spreadsheet apps read the accents). */
 export function downloadTemplate(): void {
-  const blob = new Blob(['﻿', TEMPLATE_CSV], {
+  const blob = new Blob(['\uFEFF', TEMPLATE_CSV], {
     type: 'text/csv;charset=utf-8',
   });
   const url = URL.createObjectURL(blob);

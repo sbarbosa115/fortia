@@ -1,3 +1,22 @@
 {
-  "title": "Organización"
+  "title": "Organización",
+  "backToList": "Volver a organizaciones",
+  "details": "Datos",
+  "status": "Estado",
+  "domain": "Dominio de correo",
+  "created": "Creada",
+  "updated": "Actualizada",
+  "description": "Descripción",
+  "members": {
+    "title_one": "Miembros ({{count}})",
+    "title_other": "Miembros ({{count}})",
+    "caption": "Miembros de {{name}}",
+    "empty": "Aún no hay miembros",
+    "emptyBody": "Edita la organización para añadir sus miembros.",
+    "name": "Nombre",
+    "email": "Correo",
+    "phone": "Teléfono",
+    "role": "Cargo",
+    "area": "Área"
+  }
 }

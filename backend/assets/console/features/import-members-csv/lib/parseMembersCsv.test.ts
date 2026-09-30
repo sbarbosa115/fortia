@@ -41,7 +41,7 @@ describe('member import (PRD §10.10)', () => {
 
   it('strips the UTF-8 BOM and picks ";" when the header has more of them', () => {
     const result = parseMembersCsv(
-      '﻿nombre;correo;teléfono;cargo;área\nAna;ana@x.test;;Jefa, ventas;Norte',
+      '\uFEFFnombre;correo;teléfono;cargo;área\nAna;ana@x.test;;Jefa, ventas;Norte',
     );
 
     expect(result.error).toBeNull();

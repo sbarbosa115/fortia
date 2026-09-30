@@ -1,0 +1,66 @@
+/* Organizations (item 8): /organizations/new and /:id/edit. */
+.org-form__active {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 10px;
+}
+.org-form__warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #f59e0b;
+  border-radius: var(--radius-input);
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 14px;
+}
+.org-form__api-errors {
+  margin: 0;
+  padding: 10px 12px 10px 30px;
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-input);
+  background: #fef2f2;
+  color: var(--color-danger);
+  font-size: 14px;
+}
+.org-members__head,
+.org-members__cells {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr 1.1fr 1fr 1fr 40px;
+  gap: var(--space-2);
+  align-items: center;
+}
+.org-members__head {
+  padding: 0 0 6px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+.org-members__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.org-members__errors {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  color: var(--color-danger);
+  font-size: 13px;
+}
+@media (max-width: 900px) {
+  .org-members__head {
+    display: none;
+  }
+  .org-members__cells {
+    grid-template-columns: 1fr 1fr;
+  }
+  .org-members__row {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+}

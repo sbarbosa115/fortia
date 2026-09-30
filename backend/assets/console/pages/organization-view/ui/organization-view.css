@@ -1,0 +1,37 @@
+/* Organizations (item 8): /organizations/:id/view. */
+.org-view__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.org-view__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.org-view__facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+}
+.org-view__facts dt {
+  margin-bottom: 4px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.org-view__facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.org-view__description {
+  grid-column: 1 / -1;
+}
+.org-view__description dd {
+  white-space: pre-line;
+}
+@media (max-width: 720px) {
+  .org-view__facts {
+    grid-template-columns: 1fr 1fr;
+  }
+}

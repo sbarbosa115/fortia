@@ -1,3 +1,22 @@
 {
-  "title": "Organization"
+  "title": "Organization",
+  "backToList": "Back to organizations",
+  "details": "Details",
+  "status": "Status",
+  "domain": "Email domain",
+  "created": "Created",
+  "updated": "Updated",
+  "description": "Description",
+  "members": {
+    "title_one": "Members ({{count}})",
+    "title_other": "Members ({{count}})",
+    "caption": "Members of {{name}}",
+    "empty": "No members yet",
+    "emptyBody": "Edit the organization to add its members.",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role",
+    "area": "Area"
+  }
 }
