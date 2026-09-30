@@ -1,0 +1,17 @@
+public/
+vendor/
+var/
+node_modules/
+assets/types/api.d.ts
+assets/types/openapi.json
+*.min.js
+composer.lock
+package-lock.json
+symfony.lock
+config/
+templates/
+translations/
+migrations/
+src/
+tests/
+*.md

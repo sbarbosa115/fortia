@@ -1,0 +1,13 @@
+{
+  "documentTitle": "Mappi - Iniciar sesión",
+  "title": "Iniciar sesión",
+  "email": "Correo",
+  "password": "Contraseña",
+  "submit": "Iniciar sesión",
+  "forgot": "¿Olvidaste tu contraseña?",
+  "errors": {
+    "email": "Ingresa un correo válido.",
+    "password": "La contraseña debe tener al menos 8 caracteres.",
+    "generic": "Algo salió mal. Intenta de nuevo."
+  }
+}

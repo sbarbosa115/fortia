@@ -1,0 +1,13 @@
+{
+  "documentTitle": "Mappi - Sign in",
+  "title": "Sign in",
+  "email": "Email",
+  "password": "Password",
+  "submit": "Sign in",
+  "forgot": "Forgot your password?",
+  "errors": {
+    "email": "Enter a valid email address.",
+    "password": "Password must be at least 8 characters.",
+    "generic": "Something went wrong. Please try again."
+  }
+}

@@ -4,6 +4,10 @@ framework:
     http_method_override: false
     trusted_proxies: '127.0.0.1,REMOTE_ADDR'
     trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port']
+    # A rule's refusal is an expected answer (4xx), not an incident: ApiExceptionSubscriber logs the 5xx ones.
+    exceptions:
+        App\Shared\Domain\Error\DomainError:
+            log_level: info
 
 when@test:
     framework:

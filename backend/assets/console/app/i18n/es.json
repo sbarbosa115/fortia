@@ -1,0 +1,50 @@
+{
+  "brand": "Mappi",
+  "eyebrow": "Consola de administración",
+  "titleTemplate": "Mappi - {{title}}",
+  "nav": {
+    "label": "Navegación principal",
+    "groups": {
+      "design": "Diseñar",
+      "send": "Enviar y hacer seguimiento",
+      "settings": "Configuración"
+    },
+    "aiExperience": "Experiencia IA",
+    "designExperience": "Diseñar experiencia",
+    "questionnaires": "Cuestionarios",
+    "customization": "Personalización",
+    "organizations": "Organizaciones",
+    "assignations": "Asignaciones",
+    "projects": "Proyectos",
+    "users": "Usuarios",
+    "integrations": "Integraciones",
+    "profile": "Perfil",
+    "documentation": "Documentación",
+    "logout": "Cerrar sesión",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
+  },
+  "language": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English"
+  },
+  "account": {
+    "label": "Tu cuenta"
+  },
+  "roles": {
+    "Admin": "Administrador",
+    "Customer-Admin": "Administrador",
+    "Customer-Read-Only": "Solo lectura"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "¡Ups! Página no encontrada",
+    "home": "Volver al inicio"
+  },
+  "error": {
+    "title": "Algo salió mal",
+    "reload": "Recargar"
+  },
+  "loading": "Cargando…"
+}

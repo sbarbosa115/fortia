@@ -6,8 +6,14 @@ x-php: &php
   working_dir: /app
   volumes:
     - ./backend:/app
+    # var/ and vendor/ live in volumes, not on the bind mount: on Docker Desktop (Windows/macOS) reading vendor/
+    # through the mount made every request take ~20 s. The host keeps marker files in backend/vendor/bin
+    # (scripts/stack.sh) so the skill's gate sees the tools; they run in the container.
     - php_var:/app/var
+    - php_vendor:/app/vendor
   environment:
+    # No per-request freshness checks (slow over the bind mount): the reloader service clears the cache on change.
+    APP_DEBUG: "0"
     APP_URL: http://localhost:${HTTP_PORT:-8080}
     FRONTEND_URL: http://localhost:${HTTP_PORT:-8080}
     ADMIN_FRONTEND_URL: http://localhost:${HTTP_PORT:-8080}/console
@@ -22,6 +28,17 @@ services:
   worker:
     <<: *php
     command: php bin/console messenger:consume async scheduler_default --time-limit=3600 --memory-limit=256M -vv
+    restart: unless-stopped
+
+  # Dev only: clears the Symfony cache and restarts the worker when src/, config/, templates/ or translations/ change.
+  reloader:
+    <<: *php
+    command: sh /usr/local/bin/dev-reload.sh
+    volumes:
+      - ./backend:/app
+      - php_var:/app/var
+      - php_vendor:/app/vendor
+      - ./docker/php/dev-reload.sh:/usr/local/bin/dev-reload.sh:ro
     restart: unless-stopped
 
   nginx:
@@ -80,3 +97,4 @@ services:
 volumes:
   db_data:
   php_var:
+  php_vendor:

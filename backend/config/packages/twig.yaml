@@ -1,7 +1,13 @@
 twig:
     file_name_pattern: '*.twig'
+    # The dev stack runs without debug (see docker-compose.yml): templates still reload on change.
+    auto_reload: true
     globals:
         support_email: '%app.support_email%'
+
+when@prod:
+    twig:
+        auto_reload: false
 
 when@test:
     twig:

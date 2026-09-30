@@ -1,5 +1,9 @@
 # PHPStan (steps/05-static-analysis.md §5.2). Raise the level one step at a time once clean; never lower it.
 # Findings are fixed, not baselined: a deliberate exception goes in ignoreErrors with its reason.
+includes:
+    # Warms the debug test container and points the Symfony extension at its XML dump.
+    - tests/phpstan-container.php
+
 parameters:
     level: 6
     paths:
@@ -7,7 +11,6 @@ parameters:
         - tests
     excludePaths:
         - tests/bootstrap.php
-    symfony:
-        containerXmlPath: var/cache/test/App_KernelTestDebugContainer.xml  # the test container: it knows the test services (warm it: bin/console cache:warmup --env=test)
+        - tests/phpstan-container.php
     doctrine:
         objectManagerLoader: tests/object-manager.php

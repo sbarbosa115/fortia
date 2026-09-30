@@ -1,0 +1,41 @@
+/*
+ * The respondent app's default look (PRD Appendix A.2), used until the customer's brand is applied (§9.15 maps the
+ * brand's styles onto these same tokens at runtime): warm off-white background, zinc-900 text and primary, white
+ * cards, a terracotta accent, Montserrat for text and a serif for headings.
+ */
+:root {
+  --color-bg: hsl(40deg 30% 96%);
+  --color-surface: #ffffff;
+  --color-input-bg: #ffffff;
+  --color-text: #18181b;
+  --color-text-muted: #52525b;
+  --color-border: color-mix(in srgb, #18181b 14%, hsl(40deg 30% 96%));
+  --color-hover: color-mix(in srgb, #18181b 6%, hsl(40deg 30% 96%));
+  --color-primary: #18181b;
+  --color-primary-hover: #3f3f46;
+  --color-primary-soft: color-mix(in srgb, #c45a3d 12%, #ffffff);
+  --color-primary-strong: #18181b;
+  --color-primary-contrast: #ffffff;
+  --color-accent: #c45a3d;
+  --color-success: hsl(142deg 76% 36%);
+  --color-warning: hsl(38deg 92% 50%);
+  --color-danger: #dc2626;
+  --radius-card: 1rem;
+  --radius-input: 0.5rem;
+  --radius-button: 999px;
+  --font-body: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+}
+
+.serif-heading {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+/* The neutral skeleton shown until the brand is applied (PRD §9.2 "Global"). */
+.boot-skeleton {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: #fafafa;
+}
