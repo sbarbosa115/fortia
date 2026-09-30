@@ -15,9 +15,14 @@ MAILPIT_PORT=$(port MAILPIT_PORT); MAILPIT_PORT=${MAILPIT_PORT:-8025}
 php() { docker compose exec -T php "$@"; }
 
 # backend/vendor lives in a Docker volume (docker-compose.yml). The skill's gate.sh looks for the tools under
-# backend/vendor/bin on the host before running them in the container: leave a marker for each.
+# backend/vendor/bin and backend/node_modules/.bin on the host before running them in the containers (both are
+# volumes): leave a marker for each.
 markers() {
     mkdir -p backend/vendor/bin
+    mkdir -p backend/node_modules/.bin
+    for tool in prettier eslint; do
+        [ -e "backend/node_modules/.bin/$tool" ] || printf '#!/bin/sh\n# Marker: %s runs in the node container (backend/node_modules is a volume).\n' "$tool" > "backend/node_modules/.bin/$tool"
+    done
     for tool in php-cs-fixer phpstan deptrac; do
         [ -e "backend/vendor/bin/$tool" ] || printf '#!/bin/sh\n# Marker: %s runs in the php container (backend/vendor is a volume).\n' "$tool" > "backend/vendor/bin/$tool"
         chmod +x "backend/vendor/bin/$tool" 2>/dev/null || true

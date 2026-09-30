@@ -75,7 +75,9 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app
-    command: sh -c "[ -d node_modules/.bin ] || npm ci --no-audit --no-fund; npm run watch"
+      # Like vendor/: node_modules in a volume, or Vitest workers time out loading it through the bind mount.
+      - node_modules:/app/node_modules
+    command: sh -c "[ -f node_modules/.bin/encore ] || npm ci --no-audit --no-fund; npm run watch"
 
   mailpit:
     image: axllent/mailpit:latest
@@ -88,6 +90,7 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app
+      - node_modules:/app/node_modules
     environment:
       E2E_BASE_URL: http://nginx
     command: npx playwright test
@@ -98,3 +101,4 @@ volumes:
   db_data:
   php_var:
   php_vendor:
+  node_modules:
