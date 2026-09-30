@@ -117,7 +117,13 @@ describe('QuestionnaireEditorPage', () => {
       canWrite: true,
     } as Viewer);
     vi.mocked(usePlanUsage).mockReturnValue({
-      data: {features: {regular: {allowed: true}, diagnostic: {allowed: true}, chain: {allowed: true}}},
+      data: {
+        features: {
+          regular: {allowed: true},
+          diagnostic: {allowed: true},
+          chain: {allowed: true},
+        },
+      },
       isPending: false,
       isError: false,
     } as unknown as ReturnType<typeof usePlanUsage>);
@@ -129,7 +135,13 @@ describe('QuestionnaireEditorPage', () => {
       customer_id: 'ACME0001',
       questionnaire_id: 'q1',
       states: [
-        {state_id: 's', type: 'questionnaire', parameters: {}, outputs: {}, next: null},
+        {
+          state_id: 's',
+          type: 'questionnaire',
+          parameters: {},
+          outputs: {},
+          next: null,
+        },
       ],
     });
     vi.mocked(fetchHasAnswers).mockResolvedValue(false);
@@ -139,45 +151,79 @@ describe('QuestionnaireEditorPage', () => {
     vi.mocked(createQuestionnaire).mockResolvedValue('q1');
     renderAt('/questionnaires/create/regular');
 
-    expect(screen.getByText('Draft · saved when you create it')).toBeInTheDocument();
+    expect(
+      screen.getByText('Draft · saved when you create it'),
+    ).toBeInTheDocument();
     const next = screen.getByRole('button', {name: 'Continue'});
     expect(next, 'a disabled action says why').toBeDisabled();
-    expect(screen.getAllByText('Write a title to continue.').length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText('Write a title to continue.').length,
+    ).toBeGreaterThan(0);
 
-    await userEvent.type(screen.getByRole('textbox', {name: /Title/}), 'Customer survey');
+    await userEvent.type(
+      screen.getByRole('textbox', {name: /Title/}),
+      'Customer survey',
+    );
     await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
-
-    expect(screen.getByRole('heading', {name: 'Questions'})).toBeInTheDocument();
-    await userEvent.type(screen.getByRole('textbox', {name: /^Question\*?$/}), 'How was it?');
-    await userEvent.type(screen.getByRole('textbox', {name: 'Question 1 · Choice 1'}), 'Good');
-    await userEvent.type(screen.getByRole('textbox', {name: 'Question 1 · Choice 2'}), 'Bad');
-    await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
-
-    expect(screen.getByRole('heading', {name: 'When it ends'})).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', {name: 'Create'}));
-    const dialog = screen.getByRole('dialog', {name: 'Create the questionnaire?'});
-    expect(createQuestionnaire, 'nothing is saved before confirming').not.toHaveBeenCalled();
-    await userEvent.click(within(dialog).getByRole('button', {name: 'Yes, create'}));
 
     expect(
-      await screen.findByRole('heading', {name: 'Questionnaire created successfully!'}),
+      screen.getByRole('heading', {name: 'Questions'}),
+    ).toBeInTheDocument();
+    await userEvent.type(
+      screen.getByRole('textbox', {name: /^Question\*?$/}),
+      'How was it?',
+    );
+    await userEvent.type(
+      screen.getByRole('textbox', {name: 'Question 1 · Choice 1'}),
+      'Good',
+    );
+    await userEvent.type(
+      screen.getByRole('textbox', {name: 'Question 1 · Choice 2'}),
+      'Bad',
+    );
+    await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
+
+    expect(
+      screen.getByRole('heading', {name: 'When it ends'}),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: 'Create'}));
+    const dialog = screen.getByRole('dialog', {
+      name: 'Create the questionnaire?',
+    });
+    expect(
+      createQuestionnaire,
+      'nothing is saved before confirming',
+    ).not.toHaveBeenCalled();
+    await userEvent.click(
+      within(dialog).getByRole('button', {name: 'Yes, create'}),
+    );
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Questionnaire created successfully!',
+      }),
     ).toBeInTheDocument();
     const body = vi.mocked(createQuestionnaire).mock.calls[0]![0];
     expect(body.states[0]).toMatchObject({
       type: 'questionnaire',
-      parameters: {questionnaire: {title: 'Customer survey', landing_page: true}},
+      parameters: {
+        questionnaire: {title: 'Customer survey', landing_page: true},
+      },
     });
     expect(screen.getByRole('button', {name: 'Copy link'})).toBeInTheDocument();
-    expect(screen.getByRole('button', {name: 'Keep editing'})).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {name: 'Keep editing'}),
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Create another'})).toHaveAttribute(
       'href',
       '/questionnaires/new',
     );
-    expect(screen.getByRole('link', {name: 'View questionnaire'})).toHaveAttribute(
-      'href',
-      '/f/customer-survey',
-    );
-    expect(screen.getByRole('link', {name: 'Go to Questionnaires'})).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {name: 'View questionnaire'}),
+    ).toHaveAttribute('href', '/f/customer-survey');
+    expect(
+      screen.getByRole('link', {name: 'Go to Questionnaires'}),
+    ).toBeInTheDocument();
   });
 
   it('opens an existing regular questionnaire in its editor and saves without asking', async () => {
@@ -187,10 +233,14 @@ describe('QuestionnaireEditorPage', () => {
     expect(
       await screen.findByText('Editing · saved when you save changes'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('textbox', {name: /Title/})).toHaveValue('Customer survey');
+    expect(screen.getByRole('textbox', {name: /Title/})).toHaveValue(
+      'Customer survey',
+    );
     await userEvent.click(screen.getByRole('button', {name: 'Save changes'}));
 
-    expect(await screen.findByRole('heading', {name: 'Changes saved'})).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', {name: 'Changes saved'}),
+    ).toBeInTheDocument();
     expect(updateQuestionnaire).toHaveBeenCalledWith(
       'q1',
       expect.objectContaining({slug: 'customer-survey'}),
@@ -199,19 +249,27 @@ describe('QuestionnaireEditorPage', () => {
 
   it('redirects /edit to the editor of its type', async () => {
     renderAt('/questionnaires/q1/edit');
-    expect(await screen.findByDisplayValue('Customer survey')).toBeInTheDocument();
-    expect(screen.getByRole('button', {name: 'Save changes'})).toBeInTheDocument();
+    expect(
+      await screen.findByDisplayValue('Customer survey'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {name: 'Save changes'}),
+    ).toBeInTheDocument();
   });
 
   it('locks a questionnaire with answers and offers a copy', async () => {
     vi.mocked(fetchHasAnswers).mockResolvedValue(true);
     renderAt('/questionnaires/q1/edit');
 
-    expect(await screen.findByText('Locked to preserve answers')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Locked to preserve answers'),
+    ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', {name: 'Create a copy'}));
     expect(
       screen.getByRole('dialog', {name: 'Create a copy?'}),
-    ).toHaveTextContent('A new questionnaire is created in your account, with no answers, ready to edit.');
+    ).toHaveTextContent(
+      'A new questionnaire is created in your account, with no answers, ready to edit.',
+    );
   });
 
   it('goes back to Details with the conflict message when the slug is taken', async () => {

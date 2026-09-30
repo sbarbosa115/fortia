@@ -112,7 +112,9 @@ describe('QuestionnairesPage', () => {
           questionnaire_id: 'q-3',
           title: 'Maturity',
           question_count: 8,
-          on_completed: {type: 'diagnostic'} as QuestionnaireRow['on_completed'],
+          on_completed: {
+            type: 'diagnostic',
+          } as QuestionnaireRow['on_completed'],
         }),
       ]),
     );
@@ -129,10 +131,9 @@ describe('QuestionnairesPage', () => {
     expect(table.getByText('Chaining')).toBeInTheDocument();
     expect(table.getByText('Diagnostic')).toBeInTheDocument();
     expect(table.getByText('Standard')).toBeInTheDocument();
-    expect(screen.getByRole('link', {name: 'View Customer survey'})).toHaveAttribute(
-      'href',
-      '/f/customer-survey',
-    );
+    expect(
+      screen.getByRole('link', {name: 'View Customer survey'}),
+    ).toHaveAttribute('href', '/f/customer-survey');
     expect(fetchMock).toHaveBeenCalledWith(
       expect.objectContaining({page: 1, pageSize: 10, sortBy: 'created_at'}),
     );
@@ -161,11 +162,14 @@ describe('QuestionnairesPage', () => {
     renderPage();
 
     expect(
-      await screen.findByRole('heading', {name: 'No questionnaires created yet'}),
+      await screen.findByRole('heading', {
+        name: 'No questionnaires created yet',
+      }),
     ).toBeInTheDocument();
     expect(
-      within(screen.getByText(/Create your first questionnaire/).parentElement!)
-        .getByRole('link', {name: 'New Questionnaire'}),
+      within(
+        screen.getByText(/Create your first questionnaire/).parentElement!,
+      ).getByRole('link', {name: 'New Questionnaire'}),
     ).toHaveAttribute('href', '/questionnaires/new');
   });
 
@@ -252,7 +256,9 @@ describe('QuestionnairesPage', () => {
     expect(
       screen.getByRole('button', {name: 'Edit Customer survey'}),
     ).toBeDisabled();
-    expect(screen.getByRole('button', {name: 'New Questionnaire'})).toBeDisabled();
+    expect(
+      screen.getByRole('button', {name: 'New Questionnaire'}),
+    ).toBeDisabled();
   });
 
   it('shows the error with a retry', async () => {
@@ -261,7 +267,9 @@ describe('QuestionnairesPage', () => {
 
     renderPage();
 
-    await userEvent.click(await screen.findByRole('button', {name: 'Try again'}));
+    await userEvent.click(
+      await screen.findByRole('button', {name: 'Try again'}),
+    );
     expect(
       await screen.findByRole('link', {name: 'Customer survey'}),
     ).toBeInTheDocument();

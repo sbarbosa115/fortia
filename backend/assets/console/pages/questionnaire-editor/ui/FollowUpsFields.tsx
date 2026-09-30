@@ -27,7 +27,9 @@ export function FollowUpsFields({question}: {question: DraftQuestion}) {
       </Field>
       {question.maxFollowups > 0 ? (
         <fieldset className="options">
-          <legend className="field__label">{t('questions.criteriaLabel')}</legend>
+          <legend className="field__label">
+            {t('questions.criteriaLabel')}
+          </legend>
           <span className="field__hint">{t('questions.criteriaHint')}</span>
           {criteria.map((criterion, i) => (
             <div key={i} className="options__row">

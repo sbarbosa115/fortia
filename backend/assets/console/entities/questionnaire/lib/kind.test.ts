@@ -21,7 +21,11 @@ describe('questionnaireKind', () => {
       }),
     ).toBe('process_mapping');
     expect(
-      questionnaireKind({is_chain: false, on_completed: null, type: 'ecommerce'}),
+      questionnaireKind({
+        is_chain: false,
+        on_completed: null,
+        type: 'ecommerce',
+      }),
     ).toBe('quiz_funnel');
     expect(
       questionnaireKind({
@@ -31,7 +35,11 @@ describe('questionnaireKind', () => {
       }),
     ).toBe('diagnostic');
     expect(
-      questionnaireKind({is_chain: false, on_completed: null, type: 'samurai8'}),
+      questionnaireKind({
+        is_chain: false,
+        on_completed: null,
+        type: 'samurai8',
+      }),
     ).toBe('default');
   });
 });

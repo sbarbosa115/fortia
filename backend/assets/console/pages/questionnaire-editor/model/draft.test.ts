@@ -22,7 +22,9 @@ const titles = (list: {title: string; category: string}[]) =>
 describe('the draft', () => {
   it('starts new questionnaires with the landing page on and one question', () => {
     const draft = emptyDraft('regular');
-    expect(draft.landingPage, 'on by default for new questionnaires').toBe(true);
+    expect(draft.landingPage, 'on by default for new questionnaires').toBe(
+      true,
+    );
     expect(draft.questions).toHaveLength(1);
     expect(draft.questions[0]!.required, 'Required: on by default').toBe(true);
   });
@@ -48,16 +50,14 @@ describe('the draft', () => {
 
   it('moves a question to the category it is dropped onto', () => {
     const list = questions(['a', 'X'], ['b', 'X'], ['c', 'Y']);
-    expect(titles(moveQuestion(list, 'a', {overKey: 'c'})), 'onto a question').toEqual([
-      'b@X',
-      'c@Y',
-      'a@Y',
-    ]);
-    expect(titles(moveQuestion(list, 'c', {category: 'X'})), 'onto a category').toEqual([
-      'a@X',
-      'b@X',
-      'c@X',
-    ]);
+    expect(
+      titles(moveQuestion(list, 'a', {overKey: 'c'})),
+      'onto a question',
+    ).toEqual(['b@X', 'c@Y', 'a@Y']);
+    expect(
+      titles(moveQuestion(list, 'c', {category: 'X'})),
+      'onto a category',
+    ).toEqual(['a@X', 'b@X', 'c@X']);
   });
 
   it('duplicates a question without its stored ids', () => {

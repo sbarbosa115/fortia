@@ -563,7 +563,7 @@ final class FlowDraft
             $add('layout', 'Each layout block can appear at most once.');
         }
 
-        return array_values($layout);
+        return $layout;
     }
 
     /**

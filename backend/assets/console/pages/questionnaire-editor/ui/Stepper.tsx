@@ -12,7 +12,9 @@ export function Stepper() {
   const labels: Record<Step, string> = {
     1: t('steps.details'),
     2: t('steps.questions'),
-    3: t(`steps.${editor.draft.kind === 'generic' ? 'regular' : editor.draft.kind}`),
+    3: t(
+      `steps.${editor.draft.kind === 'generic' ? 'regular' : editor.draft.kind}`,
+    ),
   };
   return (
     <ol className="stepper" aria-label={t('steps.label')}>

@@ -3,11 +3,7 @@ import type {QuestionnaireRow} from '../api/questionnaires';
 
 /** What a row shows in the Type column (PRD §10.6). */
 export type QuestionnaireKind =
-  | 'default'
-  | 'quiz_funnel'
-  | 'diagnostic'
-  | 'process_mapping'
-  | 'chain';
+  'default' | 'quiz_funnel' | 'diagnostic' | 'process_mapping' | 'chain';
 
 /**
  * A chain first; else the kind of its result (on_completed.type); else its own type (a quiz funnel or diagnostic);

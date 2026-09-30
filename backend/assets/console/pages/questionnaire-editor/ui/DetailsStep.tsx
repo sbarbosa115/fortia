@@ -41,7 +41,9 @@ export function DetailsStep() {
                 <>
                   {t('details.slugHint')}{' '}
                   <span className="editor__slug-preview">
-                    {t('details.slugPreview', {url: publicFlowUrl(previewSlug)})}
+                    {t('details.slugPreview', {
+                      url: publicFlowUrl(previewSlug),
+                    })}
                   </span>
                 </>
               }

@@ -39,7 +39,12 @@ export type SavedResult = {
   slug: string | null;
 };
 
-const PLAN_OFF = ['FEATURE_NOT_IN_PLAN', 'NO_PLAN', 'PLAN_INACTIVE', 'PLAN_NOT_FOUND'];
+const PLAN_OFF = [
+  'FEATURE_NOT_IN_PLAN',
+  'NO_PLAN',
+  'PLAN_INACTIVE',
+  'PLAN_NOT_FOUND',
+];
 
 /**
  * The creation container's state (PRD §10.5): the draft, the current step, the preview, the create confirmation,
@@ -300,12 +305,15 @@ export function useEditor({
     updateQuestion,
     setQuestionType: (key: string, type: FieldType) =>
       setQuestions((questions) =>
-        questions.map((q) => (q.key === key ? withType(q, type, draft.kind) : q)),
+        questions.map((q) =>
+          q.key === key ? withType(q, type, draft.kind) : q,
+        ),
       ),
     moveQuestion: (
       activeKey: string,
       target: {overKey: string} | {category: string},
-    ) => setQuestions((questions) => moveQuestion(questions, activeKey, target)),
+    ) =>
+      setQuestions((questions) => moveQuestion(questions, activeKey, target)),
     // Diagnostic
     reseedTiers: () => {
       const names = t('results.seedNames', {returnObjects: true}) as string[];

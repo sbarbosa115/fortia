@@ -18,7 +18,10 @@ function question(
 describe('the maximum score (PRD §10.5)', () => {
   it('sums the scores of multiple selection with score and of ranking', () => {
     expect(
-      questionMax(question('selection_with_score', ['1', '2', '3']), 'diagnostic'),
+      questionMax(
+        question('selection_with_score', ['1', '2', '3']),
+        'diagnostic',
+      ),
       'selection_with_score: the sum of its options',
     ).toBe(6);
     expect(

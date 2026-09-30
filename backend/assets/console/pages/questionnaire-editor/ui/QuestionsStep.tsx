@@ -91,7 +91,10 @@ export function QuestionsStep() {
         ))}
       </DndContext>
       <div className="row">
-        <Button icon={<Icon name="plus" />} onClick={() => editor.addQuestion()}>
+        <Button
+          icon={<Icon name="plus" />}
+          onClick={() => editor.addQuestion()}
+        >
           {t('questions.add')}
         </Button>
       </div>

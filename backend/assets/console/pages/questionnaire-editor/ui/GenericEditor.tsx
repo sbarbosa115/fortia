@@ -65,7 +65,9 @@ export function GenericEditor() {
               aria-pressed={editor.previewOpen}
               onClick={editor.togglePreview}
             >
-              {editor.previewOpen ? t('actions.hidePreview') : t('actions.preview')}
+              {editor.previewOpen
+                ? t('actions.hidePreview')
+                : t('actions.preview')}
             </Button>
             <Link className="btn btn--secondary" to="/questionnaires">
               {t('actions.back')}
@@ -76,7 +78,9 @@ export function GenericEditor() {
       </header>
       <div
         className={
-          editor.previewOpen ? 'editor__body editor__body--preview' : 'editor__body'
+          editor.previewOpen
+            ? 'editor__body editor__body--preview'
+            : 'editor__body'
         }
       >
         <main className="editor__main stack">

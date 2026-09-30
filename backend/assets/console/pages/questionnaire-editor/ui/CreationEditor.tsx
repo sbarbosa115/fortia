@@ -74,14 +74,18 @@ export function CreationEditor() {
               aria-pressed={editor.previewOpen}
               onClick={editor.togglePreview}
             >
-              {editor.previewOpen ? t('actions.hidePreview') : t('actions.preview')}
+              {editor.previewOpen
+                ? t('actions.hidePreview')
+                : t('actions.preview')}
             </Button>
             {step > 1 ? (
               <Button onClick={editor.back}>{t('actions.back')}</Button>
             ) : (
               <Link
                 className="btn btn--secondary"
-                to={mode === 'create' ? '/questionnaires/new' : '/questionnaires'}
+                to={
+                  mode === 'create' ? '/questionnaires/new' : '/questionnaires'
+                }
               >
                 {t('actions.back')}
               </Link>
@@ -100,7 +104,9 @@ export function CreationEditor() {
 
       <div
         className={
-          editor.previewOpen ? 'editor__body editor__body--preview' : 'editor__body'
+          editor.previewOpen
+            ? 'editor__body editor__body--preview'
+            : 'editor__body'
         }
       >
         <main className="editor__main">
@@ -110,7 +116,9 @@ export function CreationEditor() {
           {step === 3 && draft.kind === 'diagnostic' ? (
             <DiagnosticResultsStep />
           ) : null}
-          {step === 3 && draft.kind === 'chaining' ? <ChainPromptsStep /> : null}
+          {step === 3 && draft.kind === 'chaining' ? (
+            <ChainPromptsStep />
+          ) : null}
           <IssueList issues={issues} />
         </main>
         {editor.previewOpen ? <Preview /> : null}

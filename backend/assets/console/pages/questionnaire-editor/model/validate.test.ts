@@ -9,7 +9,10 @@ const t = (issue: Issue) =>
   i18n.t(issue.key, {ns: 'pages.questionnaire-editor', ...issue.params});
 const messages = (issues: Issue[]) => issues.map(t);
 
-function q(overrides: Partial<DraftQuestion> = {}, kind: Draft['kind'] = 'regular') {
+function q(
+  overrides: Partial<DraftQuestion> = {},
+  kind: Draft['kind'] = 'regular',
+) {
   return {
     ...newQuestion(kind),
     title: 'How was it?',
@@ -19,7 +22,12 @@ function q(overrides: Partial<DraftQuestion> = {}, kind: Draft['kind'] = 'regula
 }
 
 function regular(overrides: Partial<Draft> = {}): Draft {
-  return {...emptyDraft('regular'), title: 'Survey', questions: [q()], ...overrides};
+  return {
+    ...emptyDraft('regular'),
+    title: 'Survey',
+    questions: [q()],
+    ...overrides,
+  };
 }
 
 function tier(name: string, min: string, max: string): DraftTier {
@@ -62,9 +70,9 @@ describe('Step 1. Details (PRD §10.5)', () => {
     expect(
       messages(validateStep(regular({disclaimerOn: true, disclaimer: ''}), 1)),
     ).toEqual(['Write the disclaimer text to continue.']);
-    expect(validateStep(regular({disclaimerOn: false, disclaimer: ''}), 1)).toEqual(
-      [],
-    );
+    expect(
+      validateStep(regular({disclaimerOn: false, disclaimer: ''}), 1),
+    ).toEqual([]);
   });
 });
 
@@ -76,17 +84,21 @@ describe('Step 2. Questions — validation messages (PRD §10.5)', () => {
   });
 
   it('needs at least one answer choice, each with a label', () => {
-    expect(messages(validateStep(regular({questions: [q({options: []})]}), 2))).toEqual([
-      'Question 1 needs at least one answer choice.',
-    ]);
+    expect(
+      messages(validateStep(regular({questions: [q({options: []})]}), 2)),
+    ).toEqual(['Question 1 needs at least one answer choice.']);
     expect(
       messages(
         validateStep(
-          regular({questions: [q({options: [newOption('Good'), newOption(' ')]})]}),
+          regular({
+            questions: [q({options: [newOption('Good'), newOption(' ')]})],
+          }),
           2,
         ),
       ),
-    ).toEqual(['All answer choices in question "How was it?" must have a label.']);
+    ).toEqual([
+      'All answer choices in question "How was it?" must have a label.',
+    ]);
   });
 
   it('needs a numeric and unique score on scored choices', () => {
@@ -95,10 +107,14 @@ describe('Step 2. Questions — validation messages (PRD §10.5)', () => {
         type: 'single_selection_with_score',
         options: scores.map((s, i) => newOption(`O${i}`, s)),
       });
-    expect(messages(validateStep(regular({questions: [scored(['1', 'x'])]}), 2))).toEqual([
+    expect(
+      messages(validateStep(regular({questions: [scored(['1', 'x'])]}), 2)),
+    ).toEqual([
       'All answer choices in question "How was it?" must have a numeric score.',
     ]);
-    expect(messages(validateStep(regular({questions: [scored(['2', '2'])]}), 2))).toEqual([
+    expect(
+      messages(validateStep(regular({questions: [scored(['2', '2'])]}), 2)),
+    ).toEqual([
       'All answer choices in question "How was it?" must have a unique score value.',
     ]);
   });
@@ -108,22 +124,32 @@ describe('Step 2. Questions — validation messages (PRD §10.5)', () => {
       q({type: 'range', options: [], rangeMin: min, rangeMax: max});
     const message =
       'Question "How was it?" range input: both min and max are required and min must be lower than max.';
-    expect(messages(validateStep(regular({questions: [range('', '5')]}), 2))).toEqual([
-      message,
-    ]);
-    expect(messages(validateStep(regular({questions: [range('5', '5')]}), 2))).toEqual([
-      message,
-    ]);
-    expect(validateStep(regular({questions: [range('0', '5')]}), 2)).toEqual([]);
+    expect(
+      messages(validateStep(regular({questions: [range('', '5')]}), 2)),
+    ).toEqual([message]);
+    expect(
+      messages(validateStep(regular({questions: [range('5', '5')]}), 2)),
+    ).toEqual([message]);
+    expect(validateStep(regular({questions: [range('0', '5')]}), 2)).toEqual(
+      [],
+    );
   });
 
   it('needs an acceptance criterion when follow-ups are allowed', () => {
-    const text = q({type: 'text', options: [], maxFollowups: 2, criteria: ['']});
+    const text = q({
+      type: 'text',
+      options: [],
+      maxFollowups: 2,
+      criteria: [''],
+    });
     expect(messages(validateStep(regular({questions: [text]}), 2))).toEqual([
       'Question 1 needs at least one acceptance criterion for its follow-ups.',
     ]);
     expect(
-      validateStep(regular({questions: [{...text, criteria: ['Mentions a date']}]}), 2),
+      validateStep(
+        regular({questions: [{...text, criteria: ['Mentions a date']}]}),
+        2,
+      ),
     ).toEqual([]);
   });
 
@@ -136,7 +162,9 @@ describe('Step 2. Questions — validation messages (PRD §10.5)', () => {
   it('asks a diagnostic for categories and one scorable question', () => {
     const base = diagnostic();
     const noCategory = {...base.questions[0]!, category: ''};
-    expect(messages(validateStep({...base, questions: [noCategory]}, 2))).toContain(
+    expect(
+      messages(validateStep({...base, questions: [noCategory]}, 2)),
+    ).toContain(
       'Every question needs a category — your tiers are built from these categories.',
     );
     const text = {
@@ -148,7 +176,9 @@ describe('Step 2. Questions — validation messages (PRD §10.5)', () => {
     ]);
     const select = {...q({type: 'select'}, 'diagnostic'), category: 'People'};
     expect(
-      messages(validateStep({...base, questions: [base.questions[0]!, select]}, 2)),
+      messages(
+        validateStep({...base, questions: [base.questions[0]!, select]}, 2),
+      ),
     ).toEqual(['Question 2 uses an input type a diagnostic does not allow.']);
   });
 });
@@ -157,7 +187,12 @@ describe('Step 3. Regular — "When it ends" (PRD §10.5)', () => {
   it('validates the call to action with its own messages', () => {
     const draft = regular({
       ctaOn: true,
-      cta: {title: '', description: 'x'.repeat(201), buttonText: '', url: 'example.com'},
+      cta: {
+        title: '',
+        description: 'x'.repeat(201),
+        buttonText: '',
+        url: 'example.com',
+      },
     });
     expect(messages(validateStep(draft, 3))).toEqual([
       'The call to action title is required.',
@@ -183,8 +218,15 @@ describe('Step 3. Regular — "When it ends" (PRD §10.5)', () => {
   it('ignores the call to action while it is off, and limits the thank-you texts to 300', () => {
     expect(validateStep(regular({ctaOn: false}), 3)).toEqual([]);
     expect(
-      messages(validateStep(regular({thankYouOn: true, thankYouTitle: 'x'.repeat(301)}), 3)),
-    ).toEqual(['The thank-you title and message can have at most 300 characters.']);
+      messages(
+        validateStep(
+          regular({thankYouOn: true, thankYouTitle: 'x'.repeat(301)}),
+          3,
+        ),
+      ),
+    ).toEqual([
+      'The thank-you title and message can have at most 300 characters.',
+    ]);
   });
 });
 
@@ -204,15 +246,23 @@ describe('Step 3. Diagnostic — tier rules (PRD §10.5)', () => {
         [tier('Low', '0', '4'), tier('High', '9', '5')],
         'A tier\'s "from" score can\'t be greater than its "to" score.',
       ],
-      [[tier('Low', '1', '4'), tier('High', '5', '9')], 'Your first tier must start at 0.'],
-      [[tier('Low', '0', '4'), tier('High', '5', '8')], 'Your tiers must reach the top score of 9.'],
+      [
+        [tier('Low', '1', '4'), tier('High', '5', '9')],
+        'Your first tier must start at 0.',
+      ],
+      [
+        [tier('Low', '0', '4'), tier('High', '5', '8')],
+        'Your tiers must reach the top score of 9.',
+      ],
       [
         [tier('Low', '0', '3'), tier('High', '5', '9')],
-        'Tiers can\'t leave gaps or overlap — each one must start right after the previous.',
+        "Tiers can't leave gaps or overlap — each one must start right after the previous.",
       ],
     ];
     for (const [tiers, message] of cases) {
-      expect(messages(validateStep(diagnostic({tiers}), 3)), message).toEqual([message]);
+      expect(messages(validateStep(diagnostic({tiers}), 3)), message).toEqual([
+        message,
+      ]);
     }
   });
 
@@ -234,7 +284,9 @@ describe('Step 3. Chaining — prompts (PRD §10.5)', () => {
         {key: 'b', text: ' '},
       ],
     };
-    expect(messages(validateStep(draft, 3))).toEqual(['Prompt 2 can\'t be empty.']);
+    expect(messages(validateStep(draft, 3))).toEqual([
+      "Prompt 2 can't be empty.",
+    ]);
   });
 });
 

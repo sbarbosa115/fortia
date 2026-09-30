@@ -26,7 +26,9 @@ const CREATE_KINDS: Record<string, {kind: EditorKind; feature: string}> = {
 export function QuestionnaireEditorPage() {
   const {id, kind} = useParams();
   if (id) {
-    return <EditExisting key={`${id}-${kind ?? ''}`} id={id} routeKind={kind} />;
+    return (
+      <EditExisting key={`${id}-${kind ?? ''}`} id={id} routeKind={kind} />
+    );
   }
   return <CreateNew key={kind} routeKind={kind ?? ''} />;
 }
@@ -35,9 +37,7 @@ function CreateNew({routeKind}: {routeKind: string}) {
   const viewer = useViewer();
   const usage = usePlanUsage(!viewer.isAdmin);
   const target = CREATE_KINDS[routeKind];
-  const [initial] = useState(() =>
-    target ? emptyDraft(target.kind) : null,
-  );
+  const [initial] = useState(() => (target ? emptyDraft(target.kind) : null));
   if (!target || !initial) {
     return <Navigate to="/questionnaires/new" replace />;
   }

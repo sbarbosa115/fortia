@@ -130,7 +130,10 @@ export function QuestionCard({
                 <Select
                   value={question.type}
                   onChange={(e) =>
-                    editor.setQuestionType(question.key, e.target.value as FieldType)
+                    editor.setQuestionType(
+                      question.key,
+                      e.target.value as FieldType,
+                    )
                   }
                   options={types.map((type) => ({
                     value: type,
@@ -171,7 +174,9 @@ export function QuestionCard({
             {question.type === 'text' || question.type === 'audio' ? (
               <FollowUpsFields question={question} />
             ) : null}
-            {question.type === 'range' ? <RangeFields question={question} /> : null}
+            {question.type === 'range' ? (
+              <RangeFields question={question} />
+            ) : null}
           </div>
         ) : null}
       </Card>

@@ -53,12 +53,20 @@ export function TextFormatFields({question}: {question: DraftQuestion}) {
         />
       </Field>
       {format.preset === 'free' ? (
-        <div className="row" role="group" aria-label={t('questions.dataTypes.free')}>
+        <div
+          className="row"
+          role="group"
+          aria-label={t('questions.dataTypes.free')}
+        >
           <Checkbox
             label={t('questions.charsets.all')}
             checked={format.all}
             onChange={(e) =>
-              set({...format, all: e.target.checked, charsets: e.target.checked ? [] : ['letters']})
+              set({
+                ...format,
+                all: e.target.checked,
+                charsets: e.target.checked ? [] : ['letters'],
+              })
             }
           />
           {TEXT_CHARSETS.map((charset) => (

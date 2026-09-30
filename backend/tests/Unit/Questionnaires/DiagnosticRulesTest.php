@@ -87,7 +87,11 @@ final class DiagnosticRulesTest extends TestCase
         self::assertSame([], $normalized['action_plan']);
     }
 
-    /** @return list<array<string, mixed>> */
+    /**
+     * @param array{0: int|float, 1: int|float} ...$ranges
+     *
+     * @return list<array<string, mixed>>
+     */
     private static function tiers(array ...$ranges): array
     {
         $tiers = [];

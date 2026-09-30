@@ -47,7 +47,9 @@ export function requiredLocked(type: FieldType, kind: EditorKind): boolean {
 export function newQuestion(
   kind: EditorKind,
   category = '',
-  type: FieldType = kind === 'diagnostic' ? 'single_selection_with_score' : 'radio',
+  type: FieldType = kind === 'diagnostic'
+    ? 'single_selection_with_score'
+    : 'radio',
 ): DraftQuestion {
   const scored = isScored(type, kind);
   return {

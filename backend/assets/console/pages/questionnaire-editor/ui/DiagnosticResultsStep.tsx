@@ -55,7 +55,10 @@ export function DiagnosticResultsStep() {
               <strong>{t('results.maxScore', {max: scores.total})}</strong>
               {scores.byCategory.map((c) => (
                 <span key={c.category} className="muted">
-                  {t('questions.categoryMax', {category: c.category, max: c.max})}
+                  {t('questions.categoryMax', {
+                    category: c.category,
+                    max: c.max,
+                  })}
                 </span>
               ))}
             </p>
@@ -82,21 +85,27 @@ export function DiagnosticResultsStep() {
                     <Field label={t('results.tierName')} required>
                       <TextInput
                         value={tier.name}
-                        onChange={(e) => setTier(tier.key, {name: e.target.value})}
+                        onChange={(e) =>
+                          setTier(tier.key, {name: e.target.value})
+                        }
                       />
                     </Field>
                     <Field label={t('results.tierFrom')} required>
                       <TextInput
                         inputMode="numeric"
                         value={tier.min}
-                        onChange={(e) => setTier(tier.key, {min: e.target.value})}
+                        onChange={(e) =>
+                          setTier(tier.key, {min: e.target.value})
+                        }
                       />
                     </Field>
                     <Field label={t('results.tierTo')} required>
                       <TextInput
                         inputMode="numeric"
                         value={tier.max}
-                        onChange={(e) => setTier(tier.key, {max: e.target.value})}
+                        onChange={(e) =>
+                          setTier(tier.key, {max: e.target.value})
+                        }
                       />
                     </Field>
                     <IconButton

@@ -67,7 +67,9 @@ export function QuestionnaireTable({
     {
       key: 'date',
       header:
-        dateField === 'created_at' ? t('columns.created') : t('columns.updated'),
+        dateField === 'created_at'
+          ? t('columns.created')
+          : t('columns.updated'),
       render: (row) => (
         <span className="questionnaires__date">
           {formatDateTime(row[dateField], i18n.language, timeZone)}

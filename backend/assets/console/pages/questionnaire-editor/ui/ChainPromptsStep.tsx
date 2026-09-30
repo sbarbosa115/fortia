@@ -40,7 +40,10 @@ export function ChainPromptsStep() {
         {draft.prompts.map((prompt, i) => (
           <li key={prompt.key} className="timeline__group">
             <div className="timeline__item">
-              <span className="timeline__dot timeline__dot--accent" aria-hidden />
+              <span
+                className="timeline__dot timeline__dot--accent"
+                aria-hidden
+              />
               <Card className="timeline__card">
                 <CardBody>
                   <div className="timeline__card-header">
@@ -52,7 +55,9 @@ export function ChainPromptsStep() {
                       disabled={draft.prompts.length === 1}
                       onClick={() =>
                         update({
-                          prompts: draft.prompts.filter((p) => p.key !== prompt.key),
+                          prompts: draft.prompts.filter(
+                            (p) => p.key !== prompt.key,
+                          ),
                         })
                       }
                     />
@@ -65,7 +70,9 @@ export function ChainPromptsStep() {
                       onChange={(e) =>
                         update({
                           prompts: draft.prompts.map((p) =>
-                            p.key === prompt.key ? {...p, text: e.target.value} : p,
+                            p.key === prompt.key
+                              ? {...p, text: e.target.value}
+                              : p,
                           ),
                         })
                       }
@@ -78,7 +85,9 @@ export function ChainPromptsStep() {
               <span className="timeline__dot" aria-hidden />
               <div>
                 <strong>{t('prompts.generated', {n: i + 1})}</strong>
-                <p className="muted">{t('prompts.generatedBody', {n: i + 1})}</p>
+                <p className="muted">
+                  {t('prompts.generatedBody', {n: i + 1})}
+                </p>
               </div>
             </div>
           </li>

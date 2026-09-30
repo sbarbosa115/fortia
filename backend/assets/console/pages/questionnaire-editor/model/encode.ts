@@ -249,7 +249,10 @@ function chainStates(
  * The flow to save (PRD §8.4, §10.5). A chain needs the storage keys of its prompt texts, uploaded first (§10.5
  * "On save"), in the prompts' order. The generic editor keeps the loaded flow's other states, layout and texts.
  */
-export function encodeFlow(draft: Draft, promptKeys: string[] = []): FlowPayload {
+export function encodeFlow(
+  draft: Draft,
+  promptKeys: string[] = [],
+): FlowPayload {
   const start: FlowState = {
     state_id: 'start',
     type: 'questionnaire',
@@ -264,7 +267,12 @@ export function encodeFlow(draft: Draft, promptKeys: string[] = []): FlowPayload
       slug,
       states: [
         {...start, next: 'diagnostic'},
-        {state_id: 'diagnostic', type: 'diagnostic', parameters: {}, next: null},
+        {
+          state_id: 'diagnostic',
+          type: 'diagnostic',
+          parameters: {},
+          next: null,
+        },
       ],
       cta: draft.blocks.cta ? cta : null,
       layout: LAYOUT_BLOCKS.filter((block) => draft.blocks[block]),

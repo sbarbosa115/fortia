@@ -171,7 +171,8 @@ export const RESULT_COPY_KEYS = [
 export type ResultCopyKey = (typeof RESULT_COPY_KEYS)[number];
 
 /** What a chain does after its last prompt: another questionnaire, finish, a diagnostic or a quiz funnel. */
-export type ChainEnding = 'questionnaire' | 'result' | 'diagnostic' | 'quiz_funnel';
+export type ChainEnding =
+  'questionnaire' | 'result' | 'diagnostic' | 'quiz_funnel';
 export const CHAIN_ENDINGS: ChainEnding[] = [
   'questionnaire',
   'result',

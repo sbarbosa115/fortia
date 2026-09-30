@@ -30,7 +30,9 @@ export function ListingBody({
     return <LoadingState />;
   }
   if (query.isError) {
-    return <ErrorState error={query.error} onRetry={() => void query.refetch()} />;
+    return (
+      <ErrorState error={query.error} onRetry={() => void query.refetch()} />
+    );
   }
 
   const empty = emptyKind(listing);

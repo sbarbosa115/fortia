@@ -4,10 +4,7 @@ export type QuestionnaireRow = Schema<'QuestionnaireListItemOutput'>;
 export type QuestionnairePage = Schema<'QuestionnaireListOutput'>;
 
 export type ListingType =
-  | 'default'
-  | 'quiz_funnel'
-  | 'diagnostic'
-  | 'process_mapping';
+  'default' | 'quiz_funnel' | 'diagnostic' | 'process_mapping';
 export type SortBy = 'created_at' | 'updated_at';
 export type SortOrder = 'asc' | 'desc';
 

@@ -65,11 +65,7 @@ export function editorKindOf(
 
 /** The segment of /questionnaires/:id/edit/:kind for each editor (§10.7: a chain is "prompt"). */
 export function editRouteKind(kind: EditorKind): string | null {
-  return kind === 'chaining'
-    ? 'prompt'
-    : kind === 'generic'
-      ? null
-      : kind;
+  return kind === 'chaining' ? 'prompt' : kind === 'generic' ? null : kind;
 }
 
 function textFormat(validations: Schema<'ValidationOutput'>[]): TextFormat {
@@ -107,7 +103,11 @@ function fieldType(
         ? {type: 'selection_with_score', rawType: null, scored: true}
         : {type: 'checkbox', rawType: null, scored: false};
     case 'ranking':
-      return {type: 'ranking', rawType: null, scored: numeric && kind === 'diagnostic'};
+      return {
+        type: 'ranking',
+        rawType: null,
+        scored: numeric && kind === 'diagnostic',
+      };
     case 'email':
     case 'tel':
     case 'phone':
@@ -126,7 +126,10 @@ function rangeBound(
   return value === null || value === undefined ? fallback : String(value);
 }
 
-export function decodeQuestion(question: Question, kind: EditorKind): DraftQuestion {
+export function decodeQuestion(
+  question: Question,
+  kind: EditorKind,
+): DraftQuestion {
   const control = question.options[0];
   const {type, rawType, scored} = fieldType(control, kind);
   const {options: _controls, ...base} = question;
@@ -169,7 +172,11 @@ function ending(states: FlowState[]): ChainEnding {
   const prompts = states.filter((s) => s.type === 'prompt');
   const last = prompts.at(-1);
   const next = states.find((s) => s.state_id === last?.next);
-  if (next?.type === 'result' || next?.type === 'diagnostic' || next?.type === 'quiz_funnel') {
+  if (
+    next?.type === 'result' ||
+    next?.type === 'diagnostic' ||
+    next?.type === 'quiz_funnel'
+  ) {
     return next.type;
   }
   return 'questionnaire';
