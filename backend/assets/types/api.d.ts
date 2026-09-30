@@ -86,6 +86,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bare. The caller's organizations with their members, newest first; an Admin sees every account's. */
+        get: operations["get_api_organizations_list"];
+        put?: never;
+        /** AG, Cap(organizations). Counts one "organizations" (OrganizationCreated). */
+        post: operations["post_api_organizations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Partial (at least one field). organization_users, when sent, is reconciled: by id, then email, then name + phone. */
+        put: operations["put_api_organizations_update"];
+        post?: never;
+        /** 204. Deletes the members too (D2). Counts one "organizations" (OrganizationDeleted). */
+        delete: operations["delete_api_organizations_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -414,6 +450,40 @@ export interface components {
         JobEnvelopeOutput: {
             job: components["schemas"]["JobOutput"];
         };
+        OrganizationUserOutput: {
+            organization_user_id: string;
+            organization_id: string;
+            name: string;
+            email?: string | null;
+            phone?: string | null;
+            role?: string | null;
+            area?: string | null;
+            created_at?: string | null;
+            updated_at?: string | null;
+        };
+        OrganizationOutput: {
+            organization_id: string;
+            customer_id: string;
+            name: string;
+            domain_email?: string | null;
+            description?: string | null;
+            active: boolean;
+            created_at?: string | null;
+            updated_at?: string | null;
+            organization_users: components["schemas"]["OrganizationUserOutput"][];
+        };
+        OrganizationListOutput: {
+            organizations: components["schemas"]["OrganizationOutput"][];
+        };
+        OrganizationInput: {
+            name?: string | null;
+            domain_email?: string | null;
+            description?: string | null;
+            active?: boolean | null;
+            organization_users?: {
+                [key: string]: unknown;
+            }[] | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -573,6 +643,180 @@ export interface operations {
             };
             /** @description JOB_NOT_FOUND */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_organizations_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bare: {organizations} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationListOutput"];
+                };
+            };
+        };
+    };
+    post_api_organizations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OrganizationInput"];
+            };
+        };
+        responses: {
+            /** @description The organization with its members */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DOMAIN_EMAIL_CONFLICT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_organizations_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OrganizationInput"];
+            };
+        };
+        responses: {
+            /** @description The organization with its members */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ORGANIZATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DOMAIN_EMAIL_CONFLICT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_organizations_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ORGANIZATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ORGANIZATION_HAS_ASSIGNATIONS */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

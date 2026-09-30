@@ -151,6 +151,153 @@
                 }
             }
         },
+        "/api/v1/organizations": {
+            "get": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Bare. The caller's organizations with their members, newest first; an Admin sees every account's.",
+                "operationId": "get_api_organizations_list",
+                "responses": {
+                    "200": {
+                        "description": "Bare: {organizations}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrganizationListOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "AG, Cap(organizations). Counts one \"organizations\" (OrganizationCreated).",
+                "operationId": "post_api_organizations_create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrganizationInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The organization with its members",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrganizationOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "409": {
+                        "description": "DOMAIN_EMAIL_CONFLICT"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/organizations/{id}": {
+            "put": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Partial (at least one field). organization_users, when sent, is reconciled: by id, then email, then name + phone.",
+                "operationId": "put_api_organizations_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrganizationInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The organization with its members",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrganizationOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ORGANIZATION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "DOMAIN_EMAIL_CONFLICT"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "204. Deletes the members too (D2). Counts one \"organizations\" (OrganizationDeleted).",
+                "operationId": "delete_api_organizations_delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ORGANIZATION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "ORGANIZATION_HAS_ASSIGNATIONS"
+                    }
+                }
+            }
+        },
         "/api/v1/health": {
             "get": {
                 "tags": [
@@ -1440,6 +1587,140 @@
                     }
                 },
                 "type": "object"
+            },
+            "OrganizationUserOutput": {
+                "required": [
+                    "organization_user_id",
+                    "organization_id",
+                    "name"
+                ],
+                "properties": {
+                    "organization_user_id": {
+                        "type": "string"
+                    },
+                    "organization_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "area": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "OrganizationOutput": {
+                "required": [
+                    "organization_id",
+                    "customer_id",
+                    "name",
+                    "active",
+                    "organization_users"
+                ],
+                "properties": {
+                    "organization_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "domain_email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "organization_users": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganizationUserOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "OrganizationListOutput": {
+                "required": [
+                    "organizations"
+                ],
+                "properties": {
+                    "organizations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganizationOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "OrganizationInput": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "domain_email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "organization_users": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "nullable": true
+                            }
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -1467,6 +1748,9 @@
         },
         {
             "name": "Jobs"
+        },
+        {
+            "name": "Organizations"
         },
         {
             "name": "Health"
