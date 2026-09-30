@@ -1,0 +1,7 @@
+flysystem:
+    storages:
+        # Answer files, prompt texts and other objects (PRD §13.5). Keys keep the PRD's structure.
+        objects.storage:
+            adapter: 'local'
+            options:
+                directory: '%env(resolve:STORAGE_DIR)%'

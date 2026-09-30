@@ -1,0 +1,14 @@
+nelmio_cors:
+    defaults:
+        origin_regex: true
+        allow_origin: ['%env(CORS_ALLOW_ORIGIN)%']
+        allow_methods: ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
+        allow_headers: ['Content-Type', 'Authorization', 'X-Assume-Customer-Id', 'X-API-Key']
+        max_age: 3600
+    paths:
+        # The store widget and external integrators call these from any origin; the rest only from the apps'
+        # origins (PRD §14.2, D24).
+        '^/api/v1/(questionnaire/find|external/)':
+            origin_regex: false
+            allow_origin: ['*']
+        '^/api/': ~

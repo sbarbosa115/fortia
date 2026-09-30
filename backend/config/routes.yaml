@@ -1,0 +1,16 @@
+# JSON API: every context's controllers in src/<Context>/UI/Http/Controller/, under /api/v1.
+api:
+    resource: '../src/*/UI/Http/Controller/**/*Controller.php'
+    type: attribute
+    prefix: /api/v1
+
+# Pages that are not the JSON API (the two React shells, signed storage, fake providers): src/<Context>/UI/Http/Web/.
+# The respondent app's legacy "/{id}" catch-all declares the lowest priority.
+web:
+    resource: '../src/*/UI/Http/Web/*Controller.php'
+    type: attribute
+
+api_doc:
+    path: /api/doc.json
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger }

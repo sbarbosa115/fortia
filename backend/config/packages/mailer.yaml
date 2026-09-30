@@ -1,0 +1,5 @@
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+        # Sent in the caller's process (the worker, for event handlers), so a failure reaches the caller.
+        message_bus: false

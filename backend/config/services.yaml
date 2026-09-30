@@ -1,0 +1,91 @@
+# Services of the whole app. A bounded context that needs its own wiring adds config/services/<context>.yaml
+# (imported below) instead of editing this file.
+imports:
+    - { resource: 'services/' }
+
+parameters:
+    app.url: '%env(APP_URL)%'
+    app.frontend_url: '%env(FRONTEND_URL)%'
+    app.admin_frontend_url: '%env(ADMIN_FRONTEND_URL)%'
+    app.marketing_site_url: '%env(MARKETING_SITE_URL)%'
+    app.support_email: '%env(SUPPORT_EMAIL)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        bind:
+            string $appUrl: '%app.url%'
+            string $frontendUrl: '%app.frontend_url%'
+            string $adminFrontendUrl: '%app.admin_frontend_url%'
+            string $supportEmail: '%app.support_email%'
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+            - '../src/*/Domain/Model/'
+            - '../src/*/Domain/Event/'
+            - '../src/*/Domain/Error/'
+            - '../src/*/UI/Http/Input/'
+            - '../src/*/UI/Http/Output/'
+            - '../src/Shared/Domain/'
+            - '../src/Shared/Infrastructure/Persistence/Model/'
+            # Defined in services/identity_security.yaml (a child of lexik's authenticator).
+            - '../src/Identity/Infrastructure/Security/ConsoleJwtAuthenticator.php'
+
+    App\Shared\Domain\Clock: '@App\Shared\Infrastructure\Clock\SystemClock'
+
+    # ── Ports → adapters chosen by environment (steps/04 §4.1: framework and providers at the edges) ─────────────
+    App\Shared\Application\Llm\LanguageModel:
+        factory: ['@App\Shared\Infrastructure\Llm\LanguageModelFactory', 'create']
+        arguments: ['%env(LLM_PROVIDER)%']
+
+    App\Shared\Infrastructure\Llm\AnthropicLanguageModel:
+        arguments:
+            $apiKey: '%env(ANTHROPIC_API_KEY)%'
+
+    App\Shared\Infrastructure\Llm\ModelCatalog:
+        arguments:
+            $generationModel: '%env(LLM_MODEL_GENERATION)%'
+            $fastModel: '%env(LLM_MODEL_FAST)%'
+
+    App\Shared\Infrastructure\Storage\LocalObjectStorage:
+        arguments:
+            $storage: '@objects.storage'
+            $signingSecret: '%env(STORAGE_SIGNING_SECRET)%'
+
+    App\Shared\Infrastructure\Security\JwtRespondentTokens:
+        arguments:
+            $secret: '%env(RESPONDENT_TOKEN_SECRET)%'
+            $ttlDays: '%env(int:RESPONDENT_TOKEN_TTL_DAYS)%'
+
+    App\Shared\UI\Http\Web\SpaController:
+        arguments:
+            $clientConfig:
+                marketingSiteUrl: '%env(MARKETING_SITE_URL)%'
+                googleSignInClientId: '%env(GOOGLE_OAUTH_CLIENT_ID)%'
+                googleSheetsClientId: '%env(GOOGLE_SHEETS_CLIENT_ID)%'
+                shopifyAppInstallUrl: '%env(SHOPIFY_APP_INSTALL_URL)%'
+                gaMeasurementId: '%env(GA_MEASUREMENT_ID)%'
+                metaPixelId: '%env(META_PIXEL_ID)%'
+                clarityId: '%env(CLARITY_ID)%'
+                tiktokPixelId: '%env(TIKTOK_PIXEL_ID)%'
+                diagnosticTitleOverrides: '%env(json:DIAGNOSTIC_TITLE_OVERRIDES)%'
+
+when@test:
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+            public: true
+
+        # A clock the tests can move ("today" drives plan windows, due dates and reminders).
+        App\Tests\Support\TestClock: ~
+        App\Tests\Support\EchoJobHandler: ~
+        App\Shared\Domain\Clock: '@App\Tests\Support\TestClock'
+
+        # Services the tests call directly even where no controller uses them yet.
+        App\Billing\Application\PlanGate: ~
+        App\Billing\Application\Usage: ~
+        App\Shared\Infrastructure\Llm\Fake\FakeLanguageModel: ~

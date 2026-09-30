@@ -1,0 +1,43 @@
+framework:
+    messenger:
+        failure_transport: failed
+        default_bus: command.bus
+        buses:
+            # Writes: one transaction per command. Handlers never flush; the middleware does (steps/04 §4.1).
+            command.bus:
+                middleware:
+                    - doctrine_ping_connection
+                    - doctrine_transaction
+            # Domain events: published after the command commits (DispatchAfterCurrentBusStamp).
+            event.bus:
+                default_middleware:
+                    enabled: true
+                    allow_no_handlers: true
+                middleware:
+                    - doctrine_ping_connection
+                    - doctrine_transaction
+            # Jobs: no transaction around them, so each stage the job reaches is committed and visible to polling.
+            job.bus:
+                middleware:
+                    - doctrine_ping_connection
+
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: async
+                retry_strategy:
+                    max_retries: 0
+            failed: 'doctrine://default?queue_name=failed'
+
+        routing:
+            # Anything marked async (jobs, emails, analytics events, webhook deliveries) goes to the worker.
+            App\Shared\Application\Message\AsyncMessage: async
+            App\Shared\Domain\Event\DomainEvent: async
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                # Jobs and async events run inside the request in tests, so a test can assert on their result.
+                async: 'sync://'

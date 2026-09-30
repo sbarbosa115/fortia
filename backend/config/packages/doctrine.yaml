@@ -1,0 +1,106 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        profiling_collect_backtrace: '%kernel.debug%'
+        default_table_options:
+            charset: utf8mb4
+            collation: utf8mb4_0900_ai_ci
+    orm:
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore
+        auto_mapping: true
+        # One mapping per bounded context: only Domain/Model holds entities (steps/04 §4.1).
+        mappings:
+            Shared:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Shared/Infrastructure/Persistence/Model'
+                prefix: 'App\Shared\Infrastructure\Persistence\Model'
+            Identity:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Identity/Domain/Model'
+                prefix: 'App\Identity\Domain\Model'
+            Billing:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Billing/Domain/Model'
+                prefix: 'App\Billing\Domain\Model'
+            Platform:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Platform/Domain/Model'
+                prefix: 'App\Platform\Domain\Model'
+            Jobs:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Jobs/Domain/Model'
+                prefix: 'App\Jobs\Domain\Model'
+            Questionnaires:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Questionnaires/Domain/Model'
+                prefix: 'App\Questionnaires\Domain\Model'
+            Responses:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Responses/Domain/Model'
+                prefix: 'App\Responses\Domain\Model'
+            Reporting:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Reporting/Domain/Model'
+                prefix: 'App\Reporting\Domain\Model'
+            Organizations:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Organizations/Domain/Model'
+                prefix: 'App\Organizations\Domain\Model'
+            Assignations:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Assignations/Domain/Model'
+                prefix: 'App\Assignations\Domain\Model'
+            Branding:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Branding/Domain/Model'
+                prefix: 'App\Branding\Domain\Model'
+            Commerce:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Commerce/Domain/Model'
+                prefix: 'App\Commerce\Domain\Model'
+            Integrations:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Integrations/Domain/Model'
+                prefix: 'App\Integrations\Domain\Model'
+            Content:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Content/Domain/Model'
+                prefix: 'App\Content\Domain\Model'
+
+when@test:
+    doctrine:
+        dbal:
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

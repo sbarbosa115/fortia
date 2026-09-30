@@ -1,0 +1,40 @@
+framework:
+    rate_limiter:
+        # Console sign-in: per email and IP (PRD §13.1 "with an attempt limit").
+        sign_in:
+            policy: sliding_window
+            limit: 10
+            interval: '15 minutes'
+        # Password recovery requests and code checks (PRD §8.2 429 TOO_MANY_ATTEMPTS).
+        password_recovery:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
+        # Public endpoints a respondent or a widget can hit (D24).
+        public_api:
+            policy: sliding_window
+            limit: 300
+            interval: '1 minute'
+
+when@test:
+    framework:
+        rate_limiter:
+            # One in-memory store per test kernel: limits hold across requests of a test, and each test starts fresh.
+            sign_in:
+                policy: sliding_window
+                limit: 10
+                interval: '15 minutes'
+                storage_service: app.test_rate_limiter_storage
+            password_recovery:
+                policy: sliding_window
+                limit: 5
+                interval: '15 minutes'
+                storage_service: app.test_rate_limiter_storage
+            public_api:
+                policy: sliding_window
+                limit: 300
+                interval: '1 minute'
+                storage_service: app.test_rate_limiter_storage
+    services:
+        app.test_rate_limiter_storage:
+            class: Symfony\Component\RateLimiter\Storage\InMemoryStorage

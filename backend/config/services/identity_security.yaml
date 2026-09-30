@@ -1,0 +1,7 @@
+# The console's JWT authenticator extends lexik's (a child definition: it cannot live next to _defaults).
+services:
+    app.console_jwt_authenticator:
+        class: App\Identity\Infrastructure\Security\ConsoleJwtAuthenticator
+        parent: lexik_jwt_authentication.security.jwt_authenticator
+        autowire: false
+        autoconfigure: false
