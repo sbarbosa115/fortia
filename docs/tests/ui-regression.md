@@ -176,6 +176,118 @@ Open a questionnaire that has answers (it is Locked, EDT-22) and press "Create a
 link is `…/f/{slug}-copia`; copying again gives "(copia - 2) {title}". A diagnostic copy keeps its tiers, a chain its
 prompts, and the copy has no answers.
 
+**EDT-01 · The type picker**
+As `owner@acme.test` press "New Questionnaire". **Expected:** "What do you want to create?" with four cards (Regular
+(Default) "Best for surveys", Diagnostic "Best for assessments", Quiz Funnel "Imports from your store", Chaining "Best for
+AI generation") and their PRD descriptions. As `owner@globex.test` (Starter), a type the plan lacks is disabled and says
+"Your plan doesn't include this feature." (or the limit text when used up). `/design-experience` lands here.
+
+**EDT-02 · The creation container**
+Open Regular. **Expected:** breadcrumb "Questionnaires / New Regular", chip "Draft · saved when you create it", steps
+Details → Questions → When it ends (2 and 3 disabled, "Complete the previous steps first." on hover), Preview, Back,
+Continue disabled with "Write a title to continue." in its tooltip and in the list under the form.
+
+**EDT-03 · Details: slug rules**
+Type a title: the hint shows `…/f/{slug-of-title}`. Type `My Survey` as slug: "Lowercase letters, numbers and hyphens
+only.". Type `acme-satisfaction` and create the questionnaire: back on Details with "That custom link (slug) is already
+in use by another questionnaire. Choose a different one." under the field.
+
+**EDT-04 · Details: landing and disclaimer**
+Landing page is on for a new questionnaire. Turn Disclaimer on: Continue says "Write the disclaimer text to continue."
+until its text is written.
+
+**EDT-05 · Questions: add, duplicate, delete**
+Add question, duplicate it (a copy right under it), delete one. The header of each card opens and closes it.
+
+**EDT-06 · Questions: drag and drop, categories**
+Give two questions categories A and B (type a new category, leave the field). **Expected:** they are grouped under A and B
+headers. Drag a question of A (the grip, mouse or Space + arrows) onto a question of B: it moves into B. Drop onto the
+B header area: same.
+
+**EDT-07 · Input types and their fields**
+Switch a question through every input type. **Expected:** option types show choices; the two "with score" types show a
+score per choice; text shows Data type (Free with All/Letters/Numbers/Symbols, RFC, NIT, Phone / WhatsApp) and Maximum
+follow-ups; above 0 follow-ups, Acceptance criteria (up to 10); range shows Min and Max; message and file show nothing
+more.
+
+**EDT-08 · Question validation messages**
+Leave a title empty ("Question 1 must have a title."), remove every choice ("Question 1 needs at least one answer
+choice."), empty a choice label, type a letter as a score, repeat a score, set range 5–5, set follow-ups 2 without
+criteria. **Expected:** each PRD message appears in the list and in Continue's tooltip.
+
+**EDT-09 · Live preview**
+Press Preview. **Expected:** a phone frame with the landing (title, description, Start) and each question with its
+choices; Desktop widens it; edits show at once. Under 1100 px width the preview is a side panel with a close button.
+
+**EDT-10 · Regular: When it ends**
+Thank-you message (Title/Message ≤ 300), Call to action (empty title → "The call to action title is required.", URL
+`example.com` → "Enter a full URL starting with http:// or https://."), Capture data.
+
+**EDT-11 · Create asks first; the success screen**
+Create → "Create the questionnaire?" / "Nothing has been saved yet…" / "Yes, create". **Expected:** "Questionnaire created
+successfully!" with its link, Copy link ("Link copied"), View questionnaire (new tab `/f/{slug}`), Keep editing (the
+editor, "Editing · saved when you save changes"), Go to Questionnaires (the new row is first), Create another.
+
+**EDT-12 · Diagnostic: categories and scores**
+New Diagnostic. **Expected:** the input types exclude Dropdown and Message; a question without category lists "Every
+question needs a category — your tiers are built from these categories."; only text questions → "Add at least one scored
+question…"; Required is locked on for scored types (tooltip says why); "Max score" and each area's total update live.
+
+**EDT-13 · Diagnostic: seeded tiers**
+With one question scored 0/9, continue to Results. **Expected:** "Top score: 9" and Beginner 0–2, Intermediate 3–5,
+Advanced 6–9; "Spread tiers evenly" re-seeds after the questions change.
+
+**EDT-14 · Diagnostic: tier rules**
+Empty a name ("Give every tier a name."), empty a "to", set from > to, start at 1, end below the top, leave a gap:
+each shows its PRD message under the tiers.
+
+**EDT-15 · Diagnostic: blocks and texts**
+Toggle each block (Tier, Total score, Score by area, Recommendations, Action plan, PDF report, Call to action, Capture
+data); Recommendations and Action plan show one field per tier; "Texts of the results page" has the 15 texts. Create:
+"Your diagnostic is ready." Reopen: the tiers, recommendations, blocks and texts are back.
+
+**EDT-16 · Chaining: prompts**
+New Chaining. **Expected:** the timeline Starting point → Prompt 1 → Questionnaire 1; "Add prompt" up to 10 (then disabled
+with "Up to 10 prompts."); an empty prompt → "Prompt N can't be empty."; Ending: Another questionnaire / Finish /
+Diagnostic / Quiz funnel.
+
+**EDT-17 · Chaining: saving uploads the prompts**
+Create a chain with two prompts. **Expected (network tab):** `GET /customer/usage` (live `chain` check), two
+`POST /signed-urls` with `upload_type: prompt` and two `PUT /storage/put`, then `POST /questionnaire`. Keep editing shows
+both prompt texts and the ending.
+
+**EDT-18 · Chain feature gone at save time**
+(Admin: set Acme's `chain` limit to 0 while the editor is open.) Create. **Expected:** "Your plan doesn't include chaining
+anymore, so this chain can't be saved." and nothing is created.
+
+**EDT-19 · /:id/edit opens the right editor**
+From the listing's pencil: a regular one → `/…/edit/regular`, "AI maturity diagnostic" → `/…/edit/diagnostic`, "Discovery
+chain" → `/…/edit/prompt`, each with every step available.
+
+**EDT-20 · Editing saves without asking**
+Change a title and press Save changes on any step. **Expected:** no confirmation; "Changes saved"; Keep editing returns to
+the editor; the listing shows the new title and update date.
+
+**EDT-21 · The generic editor**
+Pencil on "Process map: operations". **Expected:** one page (Details with the `…/f/acme-operations-map` preview,
+Questions, Call to action, Capture data) and "Update"; saving shows "Changes saved" and keeps its type in the listing.
+
+**EDT-22 · Locked**
+Answer a questionnaire (open its link, answer one question), then open its editor and save (or open it once the answers
+listing exists). **Expected:** "Locked" badge, "Locked to preserve answers", "Create a copy" → "Create a copy?" / "A new
+questionnaire is created in your account, with no answers, ready to edit." / "Yes, create copy" → the copy's editor,
+titled "(copia) …".
+
+**EDT-23 · Read-only users**
+As `reader@acme.test` open `/questionnaires/new` or any `/edit` URL. **Expected:** back to the listing.
+
+**EDT-24 · Unknown kinds**
+Open `/questionnaires/create/nope`. **Expected:** the type picker.
+
+**EDT-25 · Spanish**
+Switch to Español in the editor. **Expected:** every label, step, button, message and the success screen are Spanish
+("Detalles", "Continuar", "¡Cuestionario creado con éxito!", "Bloqueado para conservar las respuestas").
+
 <!-- QST-01 – 15: authoring. EDT-01 – 25: editor. QF-01 – 15: commerce. GEN-01 – 05: generation.
      CHAT-01 – 15: chat. ONB-01 – 10: onboarding. -->
 
