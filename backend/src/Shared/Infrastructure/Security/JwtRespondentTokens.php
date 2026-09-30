@@ -42,6 +42,8 @@ final class JwtRespondentTokens implements RespondentTokens
         return self::PREFIX.$this->config->builder()
             ->issuedBy(self::ISSUER)
             ->issuedAt($now)
+            // StrictValidAt (in parse) requires iat, nbf and exp: without nbf every token was refused.
+            ->canOnlyBeUsedAfter($now)
             ->expiresAt($now->modify(\sprintf('+%d days', $this->ttlDays)))
             ->withClaim('assignations_id', $assignationsId)
             ->withClaim('organization_user_id', $organizationUserId)

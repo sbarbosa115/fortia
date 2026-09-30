@@ -30,6 +30,9 @@ services:
             - '../src/*/UI/Http/Input/'
             - '../src/*/UI/Http/Output/'
             - '../src/Shared/Domain/'
+            # A value the CallerValueResolver builds per request, never a service: registered, it breaks `?Caller`
+            # controller arguments (the container refuses the optional reference to its unautowirable definition).
+            - '../src/Shared/Application/Security/Caller.php'
             - '../src/Shared/Infrastructure/Persistence/Model/'
             # Defined in services/identity_security.yaml (a child of lexik's authenticator).
             - '../src/Identity/Infrastructure/Security/ConsoleJwtAuthenticator.php'
