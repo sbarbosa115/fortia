@@ -1,0 +1,55 @@
+# --- Symfony (backend) ---
+.env.local
+.env.local.php
+.env.*.local
+.env.test.local
+var/
+vendor/
+public/bundles/
+config/secrets/*/*.decrypt.private.php
+config/jwt/*.pem
+
+# PHPUnit / static analysis caches
+.phpunit.result.cache
+.phpunit.cache/
+phpunit.xml
+.php-cs-fixer.cache
+.php-cs-fixer.php
+phpstan.neon
+coverage/
+
+# --- React (frontend) ---
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend build output served by Symfony
+public/build/
+
+# --- Tests / tooling ---
+test-results/
+playwright-report/
+playwright/.cache/
+
+# --- Docker ---
+docker-compose.override.yml
+compose.override.yaml
+
+# --- Claude Code (personal settings; shared config stays versioned) ---
+.claude/settings.local.json
+
+# --- IDE / OS ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

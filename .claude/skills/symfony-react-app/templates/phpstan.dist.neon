@@ -1,0 +1,9 @@
+# PHPStan (steps/05-static-analysis.md §5.2). Raise the level one step at a time once clean; never lower it.
+# Findings are fixed, not baselined: a deliberate exception goes in ignoreErrors with its reason.
+parameters:
+    level: 6
+    paths:
+        - src
+        - tests
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
