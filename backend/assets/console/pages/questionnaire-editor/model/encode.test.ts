@@ -349,7 +349,8 @@ describe('decoding a stored questionnaire', () => {
     const again = decodeDraft(
       {
         ...stored,
-        questions: questionnaireOf(encodeFlow(draft)).questions as typeof stored.questions,
+        questions: questionnaireOf(encodeFlow(draft))
+          .questions as unknown as typeof stored.questions,
       },
       flow,
       [],

@@ -112,7 +112,7 @@ describe('QuestionnairesPage', () => {
           questionnaire_id: 'q-3',
           title: 'Maturity',
           question_count: 8,
-          on_completed: {type: 'diagnostic'},
+          on_completed: {type: 'diagnostic'} as QuestionnaireRow['on_completed'],
         }),
       ]),
     );

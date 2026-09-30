@@ -13,9 +13,14 @@ export type QuestionnaireKind =
  * A chain first; else the kind of its result (on_completed.type); else its own type (a quiz funnel or diagnostic);
  * else a standard questionnaire. The same rule as the listing's type filter on the server.
  */
-export function questionnaireKind(
-  row: Pick<QuestionnaireRow, 'is_chain' | 'on_completed' | 'type'>,
-): QuestionnaireKind {
+export function questionnaireKind(row: {
+  is_chain: boolean;
+  on_completed?: Pick<
+    NonNullable<QuestionnaireRow['on_completed']>,
+    'type'
+  > | null;
+  type: string;
+}): QuestionnaireKind {
   if (row.is_chain) {
     return 'chain';
   }
