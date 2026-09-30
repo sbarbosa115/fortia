@@ -90,5 +90,6 @@ docker compose exec node npm run -s api:types         # after changing a control
 
 ## Git
 
-Commit in small steps on your branch; never push (see the memory note). End commit messages with the
+All code lives in this one folder (`fortia-mappi`): never create git worktrees or sibling project folders, even where
+the skill suggests them (§2b, §3). Work on `feature/mappi` here. Commit in small steps; never push. End commit messages with the
 `Co-Authored-By` line the session gives you.

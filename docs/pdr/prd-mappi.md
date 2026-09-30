@@ -78,6 +78,12 @@ Item 0 is built and committed on `feature/mappi` (the base branch). It fixed:
 
 ## Split
 
+**How the items are built (decision, 2026-09-30):** everything lives in the one `fortia-mappi` folder — no git
+worktrees or sibling project folders. The table below is the order of work and the ownership of each area; items are
+built one after another on `feature/mappi` in this folder (in wave order), each through the skill's steps 4–5 and 7.
+The first wave was started in parallel and stopped; its unfinished work is saved on the local branches
+`feature/mappi-<slug>` and is merged and finished item by item here.
+
 <!-- Case ID prefixes are per area; each item owns the whole range it is given. -->
 
 | # | Slug | Item | Owns (context / slice, files) | Tests first | Browser cases | Depends on |
