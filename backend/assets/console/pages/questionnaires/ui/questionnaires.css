@@ -1,0 +1,24 @@
+/* pages/questionnaires (item authoring): the listing's own layout; everything else is the house kit. */
+.questionnaires__title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.questionnaires__title a {
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.questionnaires__title a:hover,
+.questionnaires__title a:focus-visible {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+.questionnaires__title .muted {
+  font-size: 13px;
+}
+.questionnaires__date {
+  white-space: nowrap;
+}

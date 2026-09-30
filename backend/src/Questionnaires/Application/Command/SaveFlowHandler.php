@@ -63,7 +63,9 @@ final class SaveFlowHandler
         $this->define($flow, $command, $draft, $id, $slug, $now);
 
         $feature = $command->feature ?? Features::forQuestionnaireType($draft->usageType());
-        $this->events->publish(QuestionnaireCreated::of($command->customerId, $id, $feature, $command->source));
+        $this->events->publish($command->countsUsage
+            ? QuestionnaireCreated::of($command->customerId, $id, $feature, $command->source)
+            : new QuestionnaireCreated($command->customerId, null, ['questionnaire_id' => $id, 'source' => $command->source]));
 
         return $id;
     }

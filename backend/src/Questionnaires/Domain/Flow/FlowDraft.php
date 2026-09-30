@@ -4,10 +4,8 @@ namespace App\Questionnaires\Domain\Flow;
 
 use App\Questionnaires\Domain\Error\InvalidFlow;
 use App\Questionnaires\Domain\Model\Flow;
-use App\Shared\Domain\Document\OptionValues;
 use App\Shared\Domain\Document\QuestionnaireType;
 use App\Shared\Domain\Document\Questions;
-use App\Shared\Domain\Ids;
 use App\Shared\Domain\Text;
 
 /**
@@ -35,15 +33,15 @@ final class FlowDraft
     private const SCORING_KEYS = ['tiers', 'recommendations', 'action_plan'];
 
     /**
-     * @param list<array<string, mixed>>                                                                                                  $states
-     * @param array<string, mixed>                                                                                                        $fields      the questionnaire's own fields
-     * @param list<array<string, mixed>>                                                                                                  $questions
-     * @param array<string, mixed>|null                                                                                                   $onCompleted
+     * @param list<array<string, mixed>>                                                                                                          $states
+     * @param array<string, mixed>                                                                                                                $fields      the questionnaire's own fields
+     * @param list<array<string, mixed>>                                                                                                          $questions
+     * @param array<string, mixed>|null                                                                                                           $onCompleted
      * @param array{tiers: list<array<string, mixed>>, recommendations: list<array<string, mixed>>, action_plan: list<array<string, mixed>>}|null $diagnostic
-     * @param list<array{state_id: string, key: string|null, text: string|null, outcome: string|null, order: int}>                         $prompts
-     * @param array{title: string, description: string|null, button: array{text: string, url: string}}|null                               $cta
-     * @param list<string>|null                                                                                                           $layout
-     * @param array<string, string>|null                                                                                                  $resultCopy
+     * @param list<array{state_id: string, key: string|null, text: string|null, outcome: string|null, order: int}>                                $prompts
+     * @param array{title: string, description: string|null, button: array{text: string, url: string}}|null                                       $cta
+     * @param list<string>|null                                                                                                                   $layout
+     * @param array<string, string>|null                                                                                                          $resultCopy
      */
     private function __construct(
         public readonly array $states,
@@ -235,7 +233,7 @@ final class FlowDraft
     }
 
     /**
-     * @param array<int|string, mixed>        $states
+     * @param array<int|string, mixed>       $states
      * @param callable(string, string): void $add
      *
      * @return list<array<string, mixed>>

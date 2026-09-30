@@ -13,8 +13,8 @@ namespace App\Questionnaires\Application\Command;
 final class CreateGeneratedStage
 {
     /**
-     * @param list<array<string, mixed>>                                                           $questions
-     * @param array<string, mixed>|null                                                            $onCompleted
+     * @param list<array<string, mixed>>                                                                                                             $questions
+     * @param array<string, mixed>|null                                                                                                              $onCompleted
      * @param array{tiers?: list<array<string, mixed>>, recommendations?: list<array<string, mixed>>, action_plan?: list<array<string, mixed>>}|null $diagnostic
      */
     public function __construct(

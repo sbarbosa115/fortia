@@ -63,6 +63,13 @@ below is added by the item that builds the endpoint.
 | `/api/v1/auth/refresh` | POST | public | `{refresh_token}` → a new pair (refresh tokens rotate, 30 days). 401 `UNAUTHORIZED` |
 | `/api/v1/customer/onboarding` | GET, PATCH | signed in | `{onboarding_completed}`; PATCH `{completed}` (no extra fields). 404 `CUSTOMER_NOT_FOUND` |
 | `/api/v1/customer/usage` | GET | signed in | plan, period usage, one verdict per feature |
+| `/api/v1/questionnaire` | GET | signed in | listing `{items, page, page_size, total, total_pages}`: `type`, `sort_by`, `order`, `is_active`, `parent` (ROOT), `page`, `page_size` (≤ 100, default 20), `search` (every word in the title), paginated in SQL (D16, D17). 400 `INVALID_TYPE`/`INVALID_SORT`/`INVALID_ORDER`/`INVALID_IS_ACTIVE`. Admin sees every account |
+| `/api/v1/questionnaire` | POST, PUT | AG | a flow `{slug?, states[], cta?, layout?, result_copy?, detail?}` (+ `questionnaire_id` on PUT); the `questionnaire` state carries the questionnaire in `parameters.questionnaire`, a `prompt` state `parameters.key` (`prompts/{customer_id}/…`) or `parameters.text`, a diagnostic its scoring in `on_completed`. 201 `{questionnaire_id}` / 200 `data:null`. 400 `VALIDATION_ERROR` (§7.5 rules), 409 `SLUG_ALREADY_IN_USE`, 409 `QUESTIONNAIRE_ALREADY_ANSWERED`, 429 plan (by type) |
+| `/api/v1/questionnaire/{id}` | GET, PATCH | signed in; PATCH AG | GET: the questionnaire with the diagnostic merged into `on_completed`. PATCH: exactly `{is_active}` → the listing row. Another account's id: 404 `QUESTIONNAIRE_NOT_FOUND` |
+| `/api/v1/questionnaire/{id}/copy` | POST | AG, Cap(type) | 201 the copy: "(copia) X" / "(copy) X" by the account's language (D23), slug `<base>-copia[-N]`, diagnostic and prompts copied |
+| `/api/v1/questionnaire/{id}/prompts` | GET | AG | `{prompts:[{id, questionnaire_id, customer_id, s3_path, outcome, order, text}]}` |
+| `/api/v1/questionnaire/find?url=` | GET | public | bare `{questionnaire_url}` = `{FRONTEND_URL}/f/{flowId}` of the latest flow of that store page, else of its site. 400 `INVALID_REQUEST`, 404 `FLOW_NOT_FOUND`; rate limited |
+| `/api/v1/flow/{identifier}` | GET | public | by flow id, slug or questionnaire id; 404 `FLOW_NOT_FOUND` (also by slug/flow id when the questionnaire is assigned); rate limited |
 | `/api/v1/jobs/{job_id}` | GET | public | `{job}` without its payload. 404 `JOB_NOT_FOUND` |
 | `/api/v1/health` | GET | public | `data` = checks; 200 ok / 500 error |
 | `/storage/upload`, `/storage/put`, `/storage/download` | POST, PUT, GET | signed URL | the local object storage's signed URLs (15 min) |

@@ -1,3 +1,62 @@
 {
-  "title": "Questionnaires"
+  "title": "Questionnaires",
+  "count_one": "{{count}} questionnaire",
+  "count_other": "{{count}} questionnaires",
+  "new": "New Questionnaire",
+  "toolbar": {
+    "search": "Search questionnaires",
+    "searchPlaceholder": "Search by title… (Ctrl+K)",
+    "type": "Type",
+    "status": "State",
+    "sortBy": "Sort by",
+    "order": "Order",
+    "timeZone": "Time zone"
+  },
+  "filters": {
+    "allTypes": "All types",
+    "allStatus": "All status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "sortCreated": "Sort: Created",
+    "sortUpdated": "Sort: Updated",
+    "desc": "Descending",
+    "asc": "Ascending",
+    "local": "Local time",
+    "utc": "UTC"
+  },
+  "kind": {
+    "default": "Standard",
+    "quiz_funnel": "Quiz funnel",
+    "diagnostic": "Diagnostic",
+    "process_mapping": "Process mapping",
+    "chain": "Chaining"
+  },
+  "columns": {
+    "title": "Title",
+    "type": "Type",
+    "state": "State",
+    "created": "Created",
+    "updated": "Updated",
+    "actions": "Actions"
+  },
+  "questionCount_one": "{{count}} question",
+  "questionCount_other": "{{count}} questions",
+  "actions": {
+    "view": "View {{title}}",
+    "copyLink": "Copy the link of {{title}}",
+    "edit": "Edit {{title}}",
+    "answers": "Answers",
+    "analytics": "Analytics",
+    "new": "New"
+  },
+  "linkCopied": "Link copied",
+  "linkNotCopied": "We couldn't copy the link. Open the questionnaire and copy it from the address bar.",
+  "empty": {
+    "noneTitle": "No questionnaires created yet",
+    "noneBody": "Create your first questionnaire to start collecting responses.",
+    "filteredTitle": "No matches",
+    "filteredBody": "No questionnaire matches these filters.",
+    "searchTitle": "Nothing matches \"{{query}}\".",
+    "searchBody": "Try other words, or clear the search."
+  }
 }

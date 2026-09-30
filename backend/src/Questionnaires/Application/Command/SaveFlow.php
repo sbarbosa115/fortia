@@ -40,6 +40,8 @@ final class SaveFlow
         public readonly ?string $sourceUrl = null,
         public readonly string $source = 'console',
         public readonly ?string $feature = null,
+        /** false for data that is not a customer's action (the demo seed): QuestionnaireCreated then counts nothing. */
+        public readonly bool $countsUsage = true,
     ) {
     }
 }
