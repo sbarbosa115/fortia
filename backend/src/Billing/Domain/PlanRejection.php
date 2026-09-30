@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\Domain;
 
 /** Why the plan gate said no: one of the seven reasons of PRD Appendix B (PLAN_LIMIT_REACHED details.reason). */

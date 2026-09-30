@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Jobs\UI\Http\Output;
 
 use App\Jobs\Domain\Model\Job;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Identity\Domain\Model;
 
 use Doctrine\DBAL\Types\Types;
@@ -83,7 +81,7 @@ class User
     /** @return list<string> */
     public function groups(): array
     {
-        return array_values($this->groups);
+        return $this->groups;
     }
 
     public function isAdmin(): bool

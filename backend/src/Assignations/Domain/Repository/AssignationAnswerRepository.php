@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Assignations\Domain\Repository;
 
 use App\Assignations\Domain\Model\AssignationAnswer;

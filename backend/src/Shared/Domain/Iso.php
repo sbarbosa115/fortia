@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Domain;
 
 /** Dates as the API writes them: ISO-8601 UTC with "Z" for instants, YYYY-MM-DD for calendar dates (PRD §6). */

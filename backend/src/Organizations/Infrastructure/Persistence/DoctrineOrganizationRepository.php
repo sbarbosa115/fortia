@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Organizations\Infrastructure\Persistence;
 
 use App\Organizations\Domain\Model\Organization;
@@ -30,7 +28,7 @@ final class DoctrineOrganizationRepository extends DoctrineRepository implements
     {
         $criteria = null === $customerId ? [] : ['customerId' => $customerId];
 
-        return array_values($this->repository()->findBy($criteria, ['createdAt' => 'DESC']));
+        return $this->repository()->findBy($criteria, ['createdAt' => 'DESC']);
     }
 
     public function add(Organization $organization): void

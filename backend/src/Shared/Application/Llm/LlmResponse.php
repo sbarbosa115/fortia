@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Application\Llm;
 
 final class LlmResponse
@@ -17,6 +15,7 @@ final class LlmResponse
     ) {
     }
 
+    /** @param array<string, mixed> $json */
     public static function json(array $json): self
     {
         return new self((string) json_encode($json), $json);

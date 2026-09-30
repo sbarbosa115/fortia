@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Branding\Application\Query;
 
 use App\Branding\Domain\Repository\CustomerStylesRepository;

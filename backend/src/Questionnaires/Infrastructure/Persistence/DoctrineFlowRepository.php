@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Questionnaires\Infrastructure\Persistence;
 
 use App\Questionnaires\Domain\Model\Flow;

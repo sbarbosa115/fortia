@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Jobs\Application\Port;
 
 /** Hands a job to the worker once the current command's transaction has committed. */

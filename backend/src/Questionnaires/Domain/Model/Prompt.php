@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Questionnaires\Domain\Model;
 
 use Doctrine\ORM\Mapping as ORM;

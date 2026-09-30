@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Assignations\Infrastructure\Persistence;
 
 use App\Assignations\Domain\Model\Project;
@@ -25,7 +23,7 @@ final class DoctrineProjectRepository extends DoctrineRepository implements Proj
     {
         $criteria = null === $customerId ? [] : ['customerId' => $customerId];
 
-        return array_values($this->repository()->findBy($criteria, ['createdAt' => 'DESC']));
+        return $this->repository()->findBy($criteria, ['createdAt' => 'DESC']);
     }
 
     public function add(Project $project): void

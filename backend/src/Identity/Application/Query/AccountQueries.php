@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Identity\Application\Query;
 
 use App\Identity\Domain\Model\User;
@@ -58,7 +56,7 @@ final class AccountQueries
 
     /**
      * @return list<array{email: string, name: string, root: bool, role: string, customer_id: string}> root first,
-     *                                                                                                  then by name
+     *                                                                                                 then by name
      */
     public function usersOf(string $customerId): array
     {

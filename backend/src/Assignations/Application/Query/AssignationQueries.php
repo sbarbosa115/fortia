@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Assignations\Application\Query;
 
 use App\Assignations\Domain\Model\Assignation;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Questionnaires\Domain\Model;
 
 use Doctrine\DBAL\Types\Types;
@@ -77,10 +75,10 @@ class Flow
     /**
      * Replaces what an edit sends (PRD §7.5: "the flow keeps its id").
      *
-     * @param list<array<string, mixed>>  $states
-     * @param array<string, mixed>|null   $cta
-     * @param list<string>|null           $layout
-     * @param array<string, string>|null  $resultCopy
+     * @param list<array<string, mixed>> $states
+     * @param array<string, mixed>|null  $cta
+     * @param list<string>|null          $layout
+     * @param array<string, string>|null $resultCopy
      */
     public function redefine(string $slug, array $states, ?array $cta, ?array $layout, ?array $resultCopy, \DateTimeImmutable $at): void
     {

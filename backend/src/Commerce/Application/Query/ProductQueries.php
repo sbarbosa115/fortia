@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Commerce\Application\Query;
 
 use App\Commerce\Domain\Model\Product;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\UI\Http\Request;
 
 use App\Shared\Application\Security\RespondentClaims;

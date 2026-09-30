@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Responses\Domain\Error;
 
 use App\Shared\Domain\Error\NotFound;

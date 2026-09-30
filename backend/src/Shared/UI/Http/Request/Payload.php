@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\UI\Http\Request;
 
 /**
@@ -16,6 +14,9 @@ namespace App\Shared\UI\Http\Request;
 #[\Attribute(\Attribute::TARGET_PARAMETER)]
 final class Payload
 {
+    /**
+     * @param list<string>|null $groups
+     */
     public function __construct(
         /** PRD "No extra fields allowed": an unknown key is a validation error. */
         public readonly bool $allowExtraFields = true,

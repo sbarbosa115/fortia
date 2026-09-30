@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Platform\Infrastructure;
 
 use App\Platform\Application\SystemPrompts;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\Domain\Repository;
 
 use App\Billing\Domain\Model\Feature;

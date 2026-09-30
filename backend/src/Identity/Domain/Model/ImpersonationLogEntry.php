@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Identity\Domain\Model;
 
 use Doctrine\DBAL\Types\Types;
@@ -16,7 +14,7 @@ class ImpersonationLogEntry
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $id = null;
+    private int|string|null $id = null;
 
     public function __construct(
         #[ORM\Column(length: 180)]
@@ -32,7 +30,7 @@ class ImpersonationLogEntry
     ) {
     }
 
-    public function id(): ?string
+    public function id(): int|string|null
     {
         return $this->id;
     }

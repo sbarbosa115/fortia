@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Organizations\Domain\Repository;
 
 use App\Organizations\Domain\Model\OrganizationUser;

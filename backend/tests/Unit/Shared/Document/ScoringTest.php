@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Tests\Unit\Shared\Document;
 
 use App\Shared\Domain\Document\Scoring;

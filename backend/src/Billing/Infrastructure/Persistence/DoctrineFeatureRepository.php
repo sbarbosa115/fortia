@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\Infrastructure\Persistence;
 
 use App\Billing\Domain\Model\Feature;
@@ -23,7 +21,7 @@ final class DoctrineFeatureRepository extends DoctrineRepository implements Feat
 
     public function all(): array
     {
-        return array_values($this->repository()->findBy([], ['featureName' => 'ASC']));
+        return $this->repository()->findBy([], ['featureName' => 'ASC']);
     }
 
     public function add(Feature $feature): void

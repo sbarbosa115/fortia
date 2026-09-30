@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Responses\Infrastructure\Persistence;
 
 use App\Responses\Domain\Error\SessionNotFound;
@@ -48,12 +46,12 @@ final class DoctrineSessionRepository extends DoctrineRepository implements Sess
 
     public function allOfQuestionnaire(string $questionnaireId): array
     {
-        return array_values($this->repository()->findBy(['questionnaireId' => $questionnaireId], ['startedAt' => 'ASC']));
+        return $this->repository()->findBy(['questionnaireId' => $questionnaireId], ['startedAt' => 'ASC']);
     }
 
     public function listByAssignation(string $assignationsId): array
     {
-        return array_values($this->repository()->findBy(['assignationsId' => $assignationsId], ['startedAt' => 'ASC']));
+        return $this->repository()->findBy(['assignationsId' => $assignationsId], ['startedAt' => 'ASC']);
     }
 
     public function add(QuestionnaireSession $session): void

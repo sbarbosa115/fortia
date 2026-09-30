@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Tests\Functional\Api\Jobs;
 
 use App\Jobs\Application\Command\StartJob;

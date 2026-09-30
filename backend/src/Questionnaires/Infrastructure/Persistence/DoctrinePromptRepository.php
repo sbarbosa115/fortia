@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Questionnaires\Infrastructure\Persistence;
 
 use App\Questionnaires\Domain\Model\Prompt;
@@ -18,7 +16,7 @@ final class DoctrinePromptRepository extends DoctrineRepository implements Promp
 
     public function listByQuestionnaire(string $questionnaireId): array
     {
-        return array_values($this->repository()->findBy(['questionnaireId' => $questionnaireId], ['order' => 'ASC']));
+        return $this->repository()->findBy(['questionnaireId' => $questionnaireId], ['order' => 'ASC']);
     }
 
     public function add(Prompt $prompt): void

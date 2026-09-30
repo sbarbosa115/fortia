@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Domain\Document;
 
 /** PRD §6.5 Questionnaire.type. */
@@ -14,6 +12,8 @@ enum QuestionnaireType: string
     case AiTeamProfile = 'ai_team_profile';
     case Diagnostic = 'diagnostic';
     case Prompt = 'prompt';
+
+    public const VALUES = ['default', 'ecommerce', 'quiz_funnel', 'samurai8', 'ai_team_profile', 'diagnostic', 'prompt'];
 
     /** @return list<string> */
     public static function values(): array

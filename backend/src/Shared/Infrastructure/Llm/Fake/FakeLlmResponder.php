@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Infrastructure\Llm\Fake;
 
 use App\Shared\Application\Llm\LlmRequest;

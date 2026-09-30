@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Responses\Infrastructure\Persistence;
 
 use App\Responses\Domain\Model\SessionResults;

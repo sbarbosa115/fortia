@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Questionnaires\Infrastructure\Persistence;
 
 use App\Questionnaires\Domain\Error\QuestionnaireNotFound;
@@ -34,7 +32,7 @@ final class DoctrineQuestionnaireRepository extends DoctrineRepository implement
 
     public function childrenOf(string $rootQuestionnaireId): array
     {
-        return array_values($this->repository()->findBy(['parent' => $rootQuestionnaireId], ['createdAt' => 'ASC']));
+        return $this->repository()->findBy(['parent' => $rootQuestionnaireId], ['createdAt' => 'ASC']);
     }
 
     public function findByOriginSession(string $sessionId): ?Questionnaire

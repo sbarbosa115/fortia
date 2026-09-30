@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Infrastructure\Persistence\Model;
 
 use Doctrine\DBAL\Types\Types;
@@ -19,7 +17,7 @@ class DomainEventRecord
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $id = null;
+    private int|string|null $id = null;
 
     /**
      * @param array<string, mixed> $payload
@@ -38,7 +36,7 @@ class DomainEventRecord
     ) {
     }
 
-    public function id(): ?string
+    public function id(): int|string|null
     {
         return $this->id;
     }

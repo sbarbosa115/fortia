@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\UI\Http\Request;
 
 use App\Shared\Domain\Error\Rejected;
@@ -51,19 +49,13 @@ final class PayloadValueResolver implements ValueResolverInterface
                 AbstractObjectNormalizer::ALLOW_EXTRA_ATTRIBUTES => true,
             ]);
         } catch (PartialDenormalizationException $e) {
-            throw new ValidationFailed(array_map(
-                static fn (NotNormalizableValueException $error): array => [
-                    'field' => (string) $error->getPath(),
-                    'message' => \sprintf('This value should be of type %s.', implode('|', $error->getExpectedTypes() ?? ['?'])),
-                ],
-                $e->getErrors(),
-            ));
+            throw new ValidationFailed(array_map(static fn (NotNormalizableValueException $error): array => ['field' => (string) $error->getPath(), 'message' => \sprintf('This value should be of type %s.', implode('|', $error->getExpectedTypes() ?? ['?']))], $e->getErrors()));
         } catch (NotNormalizableValueException|ExtraAttributesException $e) {
             throw ValidationFailed::field('', $e->getMessage());
         }
 
         if ($input instanceof TracksProvidedFields) {
-            $input->markProvided(array_values(array_map('strval', array_keys($data))));
+            $input->markProvided(array_map('strval', array_keys($data)));
         }
 
         $violations = $this->validator->validate($input, null, $attribute->groups);

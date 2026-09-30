@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Commerce\Domain\Repository;
 
 use App\Commerce\Domain\Model\Product;

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\Infrastructure\Seed;
 
 use App\Billing\Domain\Model\Feature;

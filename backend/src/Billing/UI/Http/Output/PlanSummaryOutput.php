@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\UI\Http\Output;
 
 /** A plan without its feature list (GET /customer/usage). */

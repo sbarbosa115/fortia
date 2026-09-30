@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Organizations\Infrastructure\Persistence;
 
 use App\Organizations\Domain\Model\OrganizationUser;
@@ -23,7 +21,7 @@ final class DoctrineOrganizationUserRepository extends DoctrineRepository implem
 
     public function listByOrganization(string $organizationId): array
     {
-        return array_values($this->repository()->findBy(['organizationId' => $organizationId], ['name' => 'ASC']));
+        return $this->repository()->findBy(['organizationId' => $organizationId], ['name' => 'ASC']);
     }
 
     public function listByOrganizations(array $organizationIds): array

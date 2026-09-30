@@ -1,0 +1,1475 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Mappi API",
+        "description": "The contract of both React apps and of external integrators (PRD \u00a78).",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/v1/customer/usage": {
+            "get": {
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "The caller's plan, usage and feature verdicts; loaded once per account by the console (PRD \u00a710.21).",
+                "operationId": "get_api_customer_usage",
+                "responses": {
+                    "200": {
+                        "description": "Plan and usage",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerUsageOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/token": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "operationId": "post_api_auth_token",
+                "responses": {
+                    "200": {
+                        "description": "Signed in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenOutput"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "INVALID_CREDENTIALS"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "operationId": "post_api_auth_refresh",
+                "responses": {
+                    "200": {
+                        "description": "A new session",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenOutput"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/onboarding": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "get_api_onboarding_get",
+                "responses": {
+                    "200": {
+                        "description": "The onboarding flag",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OnboardingOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "patch_api_onboarding_set",
+                "responses": {
+                    "200": {
+                        "description": "The onboarding flag",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OnboardingOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/jobs/{jobId}": {
+            "get": {
+                "tags": [
+                    "Jobs"
+                ],
+                "summary": "A job's state, polled by both apps (PRD \u00a78.5). Public: its id is unguessable.",
+                "operationId": "get_api_job_get",
+                "parameters": [
+                    {
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The job",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "JOB_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/health": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "PRD \u00a78.14: data = the checks; 200 \"ok\" or 500 \"error\".",
+                "operationId": "get_api_health",
+                "responses": {
+                    "default": {
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TierOutput": {
+                "required": [
+                    "id",
+                    "name",
+                    "min",
+                    "max",
+                    "visible"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "min": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "max": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "visible": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "TierTextOutput": {
+                "required": [
+                    "tier_id"
+                ],
+                "properties": {
+                    "tier_id": {
+                        "type": "string"
+                    },
+                    "recommendation": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "action": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "visible": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "OnCompletedOutput": {
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "quiz_funnel",
+                            "diagnostic",
+                            "process_mapping"
+                        ]
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "nullable": true,
+                        "default": null
+                    },
+                    "tiers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TierOutput"
+                        },
+                        "nullable": true,
+                        "default": null
+                    },
+                    "recommendations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TierTextOutput"
+                        },
+                        "nullable": true,
+                        "default": null
+                    },
+                    "action_plan": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TierTextOutput"
+                        },
+                        "nullable": true,
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "OptionOutput": {
+                "required": [
+                    "label",
+                    "visibility"
+                ],
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "visibility": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "male",
+                                "female"
+                            ]
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationOutput": {
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "min",
+                            "max",
+                            "required",
+                            "format"
+                        ]
+                    },
+                    "value": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "boolean"
+                            }
+                        ],
+                        "default": null
+                    },
+                    "message": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "pattern": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "InputControlOutput": {
+                "required": [
+                    "name",
+                    "type",
+                    "options",
+                    "validations"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "radio",
+                            "checkbox",
+                            "select",
+                            "range",
+                            "text",
+                            "audio",
+                            "ranking",
+                            "file",
+                            "message",
+                            "email",
+                            "tel",
+                            "phone"
+                        ]
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OptionOutput"
+                        }
+                    },
+                    "validations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationOutput"
+                        }
+                    },
+                    "default_value": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "boolean"
+                            }
+                        ],
+                        "default": null
+                    },
+                    "value": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        ],
+                        "default": null
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "skipped": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "locked": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "ReviewOutput": {
+                "required": [
+                    "status",
+                    "attempt"
+                ],
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "approved",
+                            "rejected"
+                        ]
+                    },
+                    "comment": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "attempt": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionOutput": {
+                "required": [
+                    "id",
+                    "order",
+                    "title",
+                    "visibility",
+                    "options",
+                    "acceptance_criteria",
+                    "required"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "order": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "disclaimer": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "theme_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "gender",
+                            "quote",
+                            "weight",
+                            "height",
+                            "celebration",
+                            "user-capture-data",
+                            "jeans-size",
+                            "weight-composite",
+                            "organization-users-login"
+                        ]
+                    },
+                    "statements": {
+                        "nullable": true
+                    },
+                    "visibility": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "male",
+                                "female"
+                            ]
+                        }
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/InputControlOutput"
+                        }
+                    },
+                    "acceptance_criteria": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "maxItems": 10
+                    },
+                    "max_followups": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "attachment_required": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "category": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "improvement_message": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "flagged_answer": {
+                        "nullable": true,
+                        "default": null
+                    },
+                    "review": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ReviewOutput"
+                            }
+                        ],
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionnaireOutput": {
+                "required": [
+                    "questionnaire_id",
+                    "customer_id",
+                    "title",
+                    "capture_user_data",
+                    "landing_page",
+                    "type",
+                    "is_active",
+                    "parent",
+                    "question_count",
+                    "is_chain",
+                    "questions"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "disclaimer": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "capture_user_data": {
+                        "type": "boolean"
+                    },
+                    "landing_page": {
+                        "type": "boolean"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "ecommerce",
+                            "quiz_funnel",
+                            "samurai8",
+                            "ai_team_profile",
+                            "diagnostic",
+                            "prompt"
+                        ]
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "on_completed": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/OnCompletedOutput"
+                            }
+                        ]
+                    },
+                    "parent": {
+                        "description": "\"ROOT\" or the id of the chain's root questionnaire",
+                        "type": "string"
+                    },
+                    "origin_session_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "session_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "question_count": {
+                        "type": "integer"
+                    },
+                    "is_chain": {
+                        "type": "boolean"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionOutput"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "FlowStateOutput": {
+                "required": [
+                    "state_id",
+                    "type",
+                    "parameters",
+                    "outputs"
+                ],
+                "properties": {
+                    "state_id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "questionnaire",
+                            "regular",
+                            "quiz_funnel",
+                            "diagnostic",
+                            "prompt",
+                            "result"
+                        ]
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "outputs": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CtaOutput": {
+                "required": [
+                    "title",
+                    "button"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "button": {
+                        "required": [
+                            "text",
+                            "url"
+                        ],
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "url": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "FlowOutput": {
+                "required": [
+                    "id",
+                    "slug",
+                    "detail",
+                    "states",
+                    "customer_id",
+                    "questionnaire_id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "detail": {
+                        "type": "string"
+                    },
+                    "states": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FlowStateOutput"
+                        }
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "source_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "cta": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/CtaOutput"
+                            }
+                        ]
+                    },
+                    "layout": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "score",
+                                "tier",
+                                "categories",
+                                "recommendations",
+                                "action_plan",
+                                "pdf",
+                                "cta"
+                            ]
+                        },
+                        "nullable": true
+                    },
+                    "result_copy": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "SessionOutput": {
+                "required": [
+                    "session_id",
+                    "questionnaire_id",
+                    "customer_id",
+                    "title",
+                    "capture_user_data",
+                    "landing_page",
+                    "type",
+                    "is_active",
+                    "parent",
+                    "status",
+                    "attempt",
+                    "question_count",
+                    "questions"
+                ],
+                "properties": {
+                    "session_id": {
+                        "type": "string"
+                    },
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "disclaimer": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "capture_user_data": {
+                        "type": "boolean"
+                    },
+                    "landing_page": {
+                        "type": "boolean"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "ecommerce",
+                            "quiz_funnel",
+                            "samurai8",
+                            "ai_team_profile",
+                            "diagnostic",
+                            "prompt"
+                        ]
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "on_completed": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/OnCompletedOutput"
+                            }
+                        ]
+                    },
+                    "parent": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "flow_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "filling",
+                            "filled_out",
+                            "processing",
+                            "completed"
+                        ]
+                    },
+                    "user_data": {
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "email": {
+                                "type": "string"
+                            },
+                            "phone": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "assignations_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "organization_user_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "assignation_type": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "follow_up"
+                        ]
+                    },
+                    "attempt": {
+                        "type": "integer"
+                    },
+                    "question_count": {
+                        "type": "integer"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProductOutput": {
+                "required": [
+                    "product_id",
+                    "name",
+                    "description"
+                ],
+                "properties": {
+                    "product_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "product_url": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "DiagnosticResultOutput": {
+                "required": [
+                    "type",
+                    "score",
+                    "categories",
+                    "tiers",
+                    "recommendations",
+                    "action_plan"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "diagnostic"
+                        ]
+                    },
+                    "score": {
+                        "required": [
+                            "value",
+                            "max"
+                        ],
+                        "properties": {
+                            "value": {
+                                "type": "number"
+                            },
+                            "max": {
+                                "type": "number"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "id",
+                                "name",
+                                "score",
+                                "max"
+                            ],
+                            "properties": {
+                                "id": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "score": {
+                                    "type": "number"
+                                },
+                                "max": {
+                                    "type": "number"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "tiers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TierOutput"
+                        }
+                    },
+                    "recommendations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TierTextOutput"
+                        }
+                    },
+                    "action_plan": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TierTextOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "SessionResultsOutput": {
+                "required": [
+                    "session_id",
+                    "customer_id",
+                    "questionnaire_id"
+                ],
+                "properties": {
+                    "session_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "cta": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/CtaOutput"
+                            }
+                        ]
+                    },
+                    "layout": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "score",
+                                "tier",
+                                "categories",
+                                "recommendations",
+                                "action_plan",
+                                "pdf",
+                                "cta"
+                            ]
+                        },
+                        "nullable": true
+                    },
+                    "result_copy": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProductOutput"
+                        },
+                        "nullable": true
+                    },
+                    "ai_team_profile": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    },
+                    "diagnostic": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/DiagnosticResultOutput"
+                            }
+                        ]
+                    },
+                    "extra": {
+                        "type": "object",
+                        "nullable": true,
+                        "default": null,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "JobOutput": {
+                "required": [
+                    "job_id",
+                    "job_type",
+                    "status",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "job_id": {
+                        "type": "string"
+                    },
+                    "job_type": {
+                        "type": "string",
+                        "enum": [
+                            "styles",
+                            "profile_customization",
+                            "answer_evaluation",
+                            "linkedin_questionnaire",
+                            "prompt_questionnaire",
+                            "create_quiz_funnel",
+                            "scrape_products",
+                            "process_completed_session",
+                            "chat",
+                            "chat-questionnaire-created",
+                            "chat-questionnaire-drafted",
+                            "chat-questionnaire-approved"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "PROCESSING",
+                            "COMPLETED",
+                            "FAILED",
+                            "CANCELLED"
+                        ]
+                    },
+                    "result": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    },
+                    "stage": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerPlanOutput": {
+                "required": [
+                    "plan_id",
+                    "from_at",
+                    "to_at",
+                    "billing_interval"
+                ],
+                "properties": {
+                    "plan_id": {
+                        "type": "string"
+                    },
+                    "from_at": {
+                        "type": "string"
+                    },
+                    "to_at": {
+                        "type": "string"
+                    },
+                    "billing_interval": {
+                        "type": "string",
+                        "enum": [
+                            "month",
+                            "year"
+                        ]
+                    },
+                    "stripe_customer_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "stripe_subscription_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "trial_end": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "discount": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PlanSummaryOutput": {
+                "required": [
+                    "id",
+                    "plan_name",
+                    "plan_description",
+                    "currency",
+                    "trial_days"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "plan_name": {
+                        "type": "string"
+                    },
+                    "plan_description": {
+                        "type": "string"
+                    },
+                    "max_questionnaires": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "max_responses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "price_amount": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "yearly_price_amount": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "trial_days": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "UsagePeriodOutput": {
+                "required": [
+                    "questionnaires_used",
+                    "from_at",
+                    "to_at"
+                ],
+                "properties": {
+                    "questionnaires_used": {
+                        "type": "integer"
+                    },
+                    "from_at": {
+                        "type": "string"
+                    },
+                    "to_at": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "FeatureVerdictOutput": {
+                "required": [
+                    "allowed",
+                    "used"
+                ],
+                "properties": {
+                    "allowed": {
+                        "type": "boolean"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "NO_PLAN",
+                            "PLAN_INACTIVE",
+                            "PLAN_NOT_FOUND",
+                            "FEATURE_NOT_IN_PLAN",
+                            "FEATURE_LIMIT_REACHED",
+                            "RESPONSE_LIMIT_REACHED",
+                            "QUESTIONNAIRE_LIMIT_REACHED"
+                        ]
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "used": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerUsageOutput": {
+                "required": [
+                    "plan_active",
+                    "features"
+                ],
+                "properties": {
+                    "customer_plan": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/CustomerPlanOutput"
+                            }
+                        ]
+                    },
+                    "plan": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/PlanSummaryOutput"
+                            }
+                        ]
+                    },
+                    "usage": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/UsagePeriodOutput"
+                            }
+                        ]
+                    },
+                    "plan_active": {
+                        "type": "boolean"
+                    },
+                    "features": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/FeatureVerdictOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "TokenOutput": {
+                "required": [
+                    "id_token",
+                    "refresh_token",
+                    "expires_in"
+                ],
+                "properties": {
+                    "id_token": {
+                        "type": "string"
+                    },
+                    "refresh_token": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "OnboardingOutput": {
+                "required": [
+                    "onboarding_completed"
+                ],
+                "properties": {
+                    "onboarding_completed": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "JobEnvelopeOutput": {
+                "required": [
+                    "job"
+                ],
+                "properties": {
+                    "job": {
+                        "$ref": "#/components/schemas/JobOutput"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "Bearer": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "security": [
+        {
+            "Bearer": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Billing"
+        },
+        {
+            "name": "Auth"
+        },
+        {
+            "name": "Account"
+        },
+        {
+            "name": "Jobs"
+        },
+        {
+            "name": "Health"
+        }
+    ]
+}

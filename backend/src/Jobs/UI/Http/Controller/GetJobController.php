@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Jobs\UI\Http\Controller;
 
 use App\Jobs\Domain\Repository\JobRepository;

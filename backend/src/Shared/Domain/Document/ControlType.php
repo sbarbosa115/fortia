@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Domain\Document;
 
 /** The answer field of a question (PRD §6.5 InputControl.type). */
@@ -19,6 +17,8 @@ enum ControlType: string
     case Email = 'email';
     case Tel = 'tel';
     case Phone = 'phone';
+
+    public const VALUES = ['radio', 'checkbox', 'select', 'range', 'text', 'audio', 'ranking', 'file', 'message', 'email', 'tel', 'phone'];
 
     /** @return list<string> */
     public static function values(): array

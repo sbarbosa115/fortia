@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Responses\Domain\Repository;
 
 use App\Responses\Domain\Model\QuestionnaireSession;

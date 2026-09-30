@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Domain;
 
 /**
@@ -68,7 +66,7 @@ final class Text
         $query = mb_substr(trim($query), 0, $maxLength);
         $words = preg_split('/\s+/u', self::fold($query), -1, \PREG_SPLIT_NO_EMPTY);
 
-        return false === $words ? [] : array_values($words);
+        return false === $words ? [] : $words;
     }
 
     /** Whether every word of $query appears in $haystack, ignoring case and accents. */

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\Application\Query;
 
 use App\Billing\Domain\Model\Feature;

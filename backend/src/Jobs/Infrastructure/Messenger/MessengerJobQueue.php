@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Jobs\Infrastructure\Messenger;
 
 use App\Jobs\Application\Port\JobQueue;

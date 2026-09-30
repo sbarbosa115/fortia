@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Identity\Infrastructure\Persistence;
 
 use App\Identity\Domain\Error\CustomerNotFound;

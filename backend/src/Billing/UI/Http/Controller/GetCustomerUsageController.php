@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\UI\Http\Controller;
 
 use App\Billing\Application\Query\UsageQueries;

@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Identity\Infrastructure\Security;
 
-use App\Shared\UI\Http\Response\ApiResponse;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationFailureEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTCreatedEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * The id token carries what PRD §8.1 says: customer_id, groups, email, name and root. A bad or expired token gets
@@ -38,6 +36,7 @@ final class JwtEventsSubscriber
     #[AsEventListener(event: Events::AUTHENTICATION_FAILURE)]
     public function onFailure(AuthenticationFailureEvent $event): void
     {
-        $event->setResponse(ApiResponse::error('UNAUTHORIZED', 'No valid authentication.', 401));
+        // The API's error shape (ApiResponse::error), written out here so Infrastructure does not depend on UI.
+        $event->setResponse(new JsonResponse(['error' => ['code' => 'UNAUTHORIZED', 'message' => 'No valid authentication.']], 401));
     }
 }

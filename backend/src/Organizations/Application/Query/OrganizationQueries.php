@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Organizations\Application\Query;
 
 use App\Organizations\Domain\Model\Organization;

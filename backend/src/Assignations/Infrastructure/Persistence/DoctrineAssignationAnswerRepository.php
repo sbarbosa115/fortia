@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Assignations\Infrastructure\Persistence;
 
 use App\Assignations\Domain\Model\AssignationAnswer;
@@ -23,7 +21,7 @@ final class DoctrineAssignationAnswerRepository extends DoctrineRepository imple
 
     public function listByAssignation(string $assignationsId): array
     {
-        return array_values($this->repository()->findBy(['assignationsId' => $assignationsId]));
+        return $this->repository()->findBy(['assignationsId' => $assignationsId]);
     }
 
     public function add(AssignationAnswer $answer): void

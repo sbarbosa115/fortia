@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\Infrastructure\Persistence;
 
 use App\Billing\Domain\Model\Plan;
@@ -28,7 +26,7 @@ final class DoctrinePlanRepository extends DoctrineRepository implements PlanRep
 
     public function all(): array
     {
-        return array_values($this->repository()->findBy([], ['planName' => 'ASC']));
+        return $this->repository()->findBy([], ['planName' => 'ASC']);
     }
 
     public function add(Plan $plan): void

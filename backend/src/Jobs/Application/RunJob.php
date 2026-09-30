@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Jobs\Application;
 
 use App\Shared\Application\Message\AsyncMessage;

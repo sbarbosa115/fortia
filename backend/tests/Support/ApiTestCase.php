@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Tests\Support;
 
 use App\Billing\Domain\Model\CustomerPlan;
@@ -9,6 +7,7 @@ use App\Billing\Infrastructure\Seed\CatalogSeeder;
 use App\Identity\Domain\Model\Customer;
 use App\Identity\Domain\Model\User;
 use App\Identity\Infrastructure\Security\SecurityUser;
+use App\Shared\Domain\Clock;
 use App\Shared\Domain\Ids;
 use App\Shared\Domain\Iso;
 use App\Shared\Infrastructure\Llm\Fake\FakeLanguageModel;
@@ -48,7 +47,8 @@ abstract class ApiTestCase extends WebTestCase
 
     protected function clock(): TestClock
     {
-        return static::getContainer()->get(TestClock::class);
+        // The test container aliases the Clock to TestClock (config/services.yaml, when@test).
+        return static::getContainer()->get(Clock::class);
     }
 
     protected function llm(): FakeLanguageModel

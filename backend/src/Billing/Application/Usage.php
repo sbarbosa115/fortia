@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Billing\Application;
 
 use App\Billing\Domain\Repository\CustomerPlanRepository;

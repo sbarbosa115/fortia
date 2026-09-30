@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Branding\Infrastructure\Persistence;
 
 use App\Branding\Domain\Model\CustomerStyles;

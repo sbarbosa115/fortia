@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Jobs\Domain\Model;
 
 use Doctrine\DBAL\Types\Types;

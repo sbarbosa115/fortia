@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Domain\Document;
 
 /**
@@ -25,7 +23,7 @@ final class Questions
     public static function normalizeAll(array $questions, bool $keepRuntime = false): array
     {
         $out = [];
-        foreach (array_values($questions) as $i => $question) {
+        foreach ($questions as $i => $question) {
             $out[] = self::normalize($question, $i, $keepRuntime);
         }
 

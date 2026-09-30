@@ -16,3 +16,24 @@ nelmio_api_doc:
         default:
             path_patterns:
                 - ^/api/v1/
+    models:
+        # The shared document shapes (Shared\UI\Http\Output\Document): named here so the apps have their types even
+        # before an endpoint returns them. Endpoints reference them with #[Model(type: …)].
+        names:
+            - { alias: QuestionnaireOutput, type: App\Shared\UI\Http\Output\Document\QuestionnaireOutput }
+            - { alias: QuestionOutput, type: App\Shared\UI\Http\Output\Document\QuestionOutput }
+            - { alias: InputControlOutput, type: App\Shared\UI\Http\Output\Document\InputControlOutput }
+            - { alias: OptionOutput, type: App\Shared\UI\Http\Output\Document\OptionOutput }
+            - { alias: ValidationOutput, type: App\Shared\UI\Http\Output\Document\ValidationOutput }
+            - { alias: ReviewOutput, type: App\Shared\UI\Http\Output\Document\ReviewOutput }
+            - { alias: OnCompletedOutput, type: App\Shared\UI\Http\Output\Document\OnCompletedOutput }
+            - { alias: TierOutput, type: App\Shared\UI\Http\Output\Document\TierOutput }
+            - { alias: TierTextOutput, type: App\Shared\UI\Http\Output\Document\TierTextOutput }
+            - { alias: FlowOutput, type: App\Shared\UI\Http\Output\Document\FlowOutput }
+            - { alias: FlowStateOutput, type: App\Shared\UI\Http\Output\Document\FlowStateOutput }
+            - { alias: CtaOutput, type: App\Shared\UI\Http\Output\Document\CtaOutput }
+            - { alias: SessionOutput, type: App\Shared\UI\Http\Output\Document\SessionOutput }
+            - { alias: SessionResultsOutput, type: App\Shared\UI\Http\Output\Document\SessionResultsOutput }
+            - { alias: DiagnosticResultOutput, type: App\Shared\UI\Http\Output\Document\DiagnosticResultOutput }
+            - { alias: ProductOutput, type: App\Shared\UI\Http\Output\Document\ProductOutput }
+            - { alias: JobOutput, type: App\Jobs\UI\Http\Output\JobOutput }

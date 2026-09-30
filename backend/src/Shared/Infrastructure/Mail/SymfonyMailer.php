@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\Infrastructure\Mail;
 
 use App\Shared\Application\Mail\Mailer;

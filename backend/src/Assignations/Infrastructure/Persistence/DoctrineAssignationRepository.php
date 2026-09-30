@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Assignations\Infrastructure\Persistence;
 
 use App\Assignations\Domain\Model\Assignation;
@@ -47,12 +45,12 @@ final class DoctrineAssignationRepository extends DoctrineRepository implements 
 
     public function listByProject(string $projectId): array
     {
-        return array_values($this->repository()->findBy(['projectId' => $projectId], ['createdAt' => 'ASC']));
+        return $this->repository()->findBy(['projectId' => $projectId], ['createdAt' => 'ASC']);
     }
 
     public function activeFollowUps(): array
     {
-        return array_values($this->repository()->findBy(['type' => Assignation::FOLLOW_UP, 'active' => true]));
+        return $this->repository()->findBy(['type' => Assignation::FOLLOW_UP, 'active' => true]);
     }
 
     public function add(Assignation $assignation): void

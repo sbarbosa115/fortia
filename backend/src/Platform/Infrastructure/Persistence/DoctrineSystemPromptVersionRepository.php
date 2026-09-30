@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Platform\Infrastructure\Persistence;
 
 use App\Platform\Domain\Model\SystemPromptVersion;
@@ -28,7 +26,7 @@ final class DoctrineSystemPromptVersionRepository extends DoctrineRepository imp
 
     public function history(string $key): array
     {
-        return array_values($this->repository()->findBy(['key' => $key], ['updatedAt' => 'DESC']));
+        return $this->repository()->findBy(['key' => $key], ['updatedAt' => 'DESC']);
     }
 
     public function add(SystemPromptVersion $version): void

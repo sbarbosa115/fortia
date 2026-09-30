@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Questionnaires\Application\Query;
 
 use App\Questionnaires\Domain\Model\Diagnostic;

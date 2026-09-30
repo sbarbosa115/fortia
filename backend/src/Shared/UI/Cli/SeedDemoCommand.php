@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Shared\UI\Cli;
 
 use App\Shared\Application\Seed\DemoSeeder;
