@@ -1,0 +1,32 @@
+/* pages/questionnaire-new (item editor): the type picker, centered like the creation screens (PRD A.1). */
+.questionnaire-new {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--space-6) 0;
+}
+.questionnaire-new__title {
+  font-size: 34px;
+  margin: 0 0 var(--space-2);
+}
+.questionnaire-new > .muted {
+  margin: 0 0 var(--space-5);
+}
+.questionnaire-new .choice-card {
+  min-height: 170px;
+  padding: var(--space-5);
+}
+.questionnaire-new .choice-card__title {
+  font-size: 17px;
+}
+.questionnaire-new__extra {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-3);
+}
+.questionnaire-new__limit {
+  font-size: 13px;
+  color: var(--color-warning);
+}

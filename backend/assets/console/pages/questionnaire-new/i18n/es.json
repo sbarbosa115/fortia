@@ -1,3 +1,26 @@
 {
-  "title": "¿Qué quieres crear?"
+  "title": "¿Qué quieres crear?",
+  "subtitle": "Elige un tipo. Todo lo demás lo puedes cambiar antes de crearlo.",
+  "cards": {
+    "regular": {
+      "title": "Regular (predeterminado)",
+      "body": "Un cuestionario clásico que termina con el mensaje de agradecimiento que tú elijas.",
+      "label": "Ideal para encuestas"
+    },
+    "diagnostic": {
+      "title": "Diagnóstico",
+      "body": "Da un puntaje a cada encuestado y ubícalo en niveles, cada uno con su propio resultado y plan de acción.",
+      "label": "Ideal para evaluaciones"
+    },
+    "quizFunnel": {
+      "title": "Quiz Funnel",
+      "body": "Convierte a los visitantes de tu tienda en compradores con un quiz guiado que recomienda el producto adecuado al final.",
+      "label": "Importa desde tu tienda"
+    },
+    "chaining": {
+      "title": "Encadenado",
+      "body": "Agrega tus preguntas y un prompt; las respuestas y el prompt se usan para generar un cuestionario a la medida.",
+      "label": "Ideal para generar con IA"
+    }
+  }
 }

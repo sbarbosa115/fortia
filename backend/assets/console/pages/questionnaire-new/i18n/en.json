@@ -1,3 +1,26 @@
 {
-  "title": "What do you want to create?"
+  "title": "What do you want to create?",
+  "subtitle": "Pick a type. You can change everything else before you create it.",
+  "cards": {
+    "regular": {
+      "title": "Regular (Default)",
+      "body": "A classic questionnaire that ends with a custom thank-you message of your choice.",
+      "label": "Best for surveys"
+    },
+    "diagnostic": {
+      "title": "Diagnostic",
+      "body": "Score each respondent and place them into tiers, each with its own result and action plan.",
+      "label": "Best for assessments"
+    },
+    "quizFunnel": {
+      "title": "Quiz Funnel",
+      "body": "Turn store visitors into buyers with a guided quiz that recommends the right product at the end.",
+      "label": "Imports from your store"
+    },
+    "chaining": {
+      "title": "Chaining",
+      "body": "Add your questions plus a prompt; the answers and prompt are used to generate a tailored questionnaire.",
+      "label": "Best for AI generation"
+    }
+  }
 }
