@@ -40,9 +40,14 @@ export function testI18n(
     app === 'console'
       ? relativeTo(consoleFiles, '../../console/')
       : relativeTo(respondentFiles, '../../respondent/');
-  const resources = resourcesFromFiles({
-    ...appFiles,
-    ...relativeTo(sharedFiles, '../'),
-  });
+  // Vite keys the shared layer's own files as "./en.json" (relative to this file): name them "i18n/en.json" so
+  // they land in the "shared" namespace.
+  const shared = Object.fromEntries(
+    Object.entries(sharedFiles).map(([path, content]) => [
+      `i18n/${path.split('/').pop()}`,
+      content,
+    ]),
+  );
+  const resources = resourcesFromFiles({...appFiles, ...shared});
   return createI18n(resources, language);
 }

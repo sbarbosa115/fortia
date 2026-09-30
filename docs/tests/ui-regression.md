@@ -170,6 +170,12 @@ Open `/api/v1/flow/acme-satisfaction`. **Expected:** JSON whose questionnaire st
 Switch the sidebar language to Español on Questionnaires. **Expected:** "Cuestionarios", "12 cuestionarios", "Nuevo
 cuestionario", the filters, columns, types ("Estándar", "Diagnóstico", "Encadenado") and empty states are all Spanish.
 
+**QST-15 · A copy is named in the account's language**
+Open a questionnaire that has answers (it is Locked, EDT-22) and press "Create a copy" → "Yes, create copy".
+**Expected:** a new row "(copia) {title}" (Acme's language is Spanish; an English account gets "(copy) {title}") whose
+link is `…/f/{slug}-copia`; copying again gives "(copia - 2) {title}". A diagnostic copy keeps its tiers, a chain its
+prompts, and the copy has no answers.
+
 <!-- QST-01 – 15: authoring. EDT-01 – 25: editor. QF-01 – 15: commerce. GEN-01 – 05: generation.
      CHAT-01 – 15: chat. ONB-01 – 10: onboarding. -->
 

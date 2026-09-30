@@ -111,6 +111,7 @@ describe('QuestionnairesPage', () => {
         row({
           questionnaire_id: 'q-3',
           title: 'Maturity',
+          question_count: 8,
           on_completed: {type: 'diagnostic'},
         }),
       ]),
@@ -122,9 +123,12 @@ describe('QuestionnairesPage', () => {
       await screen.findByRole('link', {name: 'Customer survey'}),
     ).toHaveAttribute('href', '/questionnaires/q-1/edit');
     expect(screen.getByText('3 questionnaires')).toBeInTheDocument();
-    expect(screen.getByText('3 questions')).toBeInTheDocument();
-    expect(screen.getByText('Chaining')).toBeInTheDocument();
-    expect(screen.getByText('Diagnostic')).toBeInTheDocument();
+    const table = within(screen.getByRole('table'));
+    expect(table.getByText('3 questions')).toBeInTheDocument();
+    expect(table.getByText('1 question')).toBeInTheDocument();
+    expect(table.getByText('Chaining')).toBeInTheDocument();
+    expect(table.getByText('Diagnostic')).toBeInTheDocument();
+    expect(table.getByText('Standard')).toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'View Customer survey'})).toHaveAttribute(
       'href',
       '/f/customer-survey',
