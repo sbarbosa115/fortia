@@ -375,24 +375,8 @@ final class FlowDraft
             }
             $list[] = $question;
         }
-        $questions = OptionValues::dedupeQuestions(Questions::normalizeAll($list));
-        usort($questions, static fn (array $a, array $b): int => $a['order'] <=> $b['order']);
 
-        $seen = [];
-        foreach ($questions as $i => $question) {
-            if ('' === $question['id'] || isset($seen[$question['id']])) {
-                $questions[$i]['id'] = Ids::uuid4();
-            }
-            $seen[$questions[$i]['id']] = true;
-            $questions[$i]['order'] = $i;
-            foreach ($question['options'] as $j => $control) {
-                if ('' === $control['name']) {
-                    $questions[$i]['options'][$j]['name'] = Ids::uuid4();
-                }
-            }
-        }
-
-        return $questions;
+        return QuestionList::prepare($list);
     }
 
     /**

@@ -6,6 +6,43 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/v1/questionnaire/find": {
+            "get": {
+                "tags": [
+                    "Flows"
+                ],
+                "operationId": "get_api_questionnaire_find",
+                "parameters": [
+                    {
+                        "name": "url",
+                        "in": "query",
+                        "description": "The store page the widget is on",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bare JSON: the respondent link of the matching flow",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireUrlOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_REQUEST (url is missing)"
+                    },
+                    "404": {
+                        "description": "FLOW_NOT_FOUND"
+                    }
+                }
+            }
+        },
         "/api/v1/customer/usage": {
             "get": {
                 "tags": [
@@ -151,6 +188,294 @@
                 }
             }
         },
+        "/api/v1/flow/{identifier}": {
+            "get": {
+                "tags": [
+                    "Flows"
+                ],
+                "operationId": "get_api_flow_get",
+                "parameters": [
+                    {
+                        "name": "identifier",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The flow",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FlowOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "FLOW_NOT_FOUND (also when the questionnaire is assigned and was looked up by slug or flow id)"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire": {
+            "get": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "get_api_questionnaire_list",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "default",
+                                "quiz_funnel",
+                                "diagnostic",
+                                "process_mapping"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "created_at",
+                                "updated_at"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "is_active",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "true",
+                                "false",
+                                "1",
+                                "0"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "parent",
+                        "in": "query",
+                        "description": "ROOT (default) or a questionnaire id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Every word must appear in the title",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 200
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "One page of questionnaires",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_TYPE, INVALID_SORT, INVALID_ORDER, INVALID_IS_ACTIVE"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "put_api_questionnaire_update",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateFlowInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Saved (data: null)"
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "QUESTIONNAIRE_ALREADY_ANSWERED, SLUG_ALREADY_IN_USE"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "post_api_questionnaire_create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FlowInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireIdOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "409": {
+                        "description": "SLUG_ALREADY_IN_USE"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}/copy": {
+            "post": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "post_api_questionnaire_copy",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "The new questionnaire",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireOutput"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}/prompts": {
+            "get": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "get_api_questionnaire_prompts",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The chain's prompts in order, with their text",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PromptListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    }
+                }
+            }
+        },
         "/api/v1/health": {
             "get": {
                 "tags": [
@@ -161,6 +486,82 @@
                 "responses": {
                     "default": {
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}": {
+            "get": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "get_api_questionnaire_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The questionnaire, with the diagnostic merged into on_completed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "patch_api_questionnaire_set_active",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ActiveInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The updated row",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireListItemOutput"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
                     }
                 }
             }
@@ -1212,6 +1613,17 @@
                 },
                 "type": "object"
             },
+            "QuestionnaireUrlOutput": {
+                "required": [
+                    "questionnaire_url"
+                ],
+                "properties": {
+                    "questionnaire_url": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
             "CustomerPlanOutput": {
                 "required": [
                     "plan_id",
@@ -1440,6 +1852,316 @@
                     }
                 },
                 "type": "object"
+            },
+            "QuestionnaireListItemOutput": {
+                "required": [
+                    "questionnaire_id",
+                    "customer_id",
+                    "parent",
+                    "title",
+                    "is_active",
+                    "status",
+                    "landing_page",
+                    "capture_user_data",
+                    "question_count",
+                    "is_chain",
+                    "type"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "parent": {
+                        "description": "\"ROOT\" or the id of the chain's root questionnaire",
+                        "type": "string"
+                    },
+                    "origin_session_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "on_completed": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/OnCompletedOutput"
+                            }
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "active",
+                            "inactive"
+                        ]
+                    },
+                    "landing_page": {
+                        "type": "boolean"
+                    },
+                    "capture_user_data": {
+                        "type": "boolean"
+                    },
+                    "question_count": {
+                        "type": "integer"
+                    },
+                    "is_chain": {
+                        "type": "boolean"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "ecommerce",
+                            "quiz_funnel",
+                            "samurai8",
+                            "ai_team_profile",
+                            "diagnostic",
+                            "prompt"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionnaireListOutput": {
+                "required": [
+                    "items",
+                    "page",
+                    "page_size",
+                    "total",
+                    "total_pages"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionnaireListItemOutput"
+                        }
+                    },
+                    "page": {
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "total_pages": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateFlowInput": {
+                "required": [
+                    "questionnaire_id",
+                    "states"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "description": "Empty: generated from the title. ^[a-z0-9]+(-[a-z0-9]+)*$, unique across the system",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "states": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "cta": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    },
+                    "layout": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "score",
+                                "tier",
+                                "categories",
+                                "recommendations",
+                                "action_plan",
+                                "pdf",
+                                "cta"
+                            ]
+                        },
+                        "nullable": true,
+                        "default": null
+                    },
+                    "result_copy": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "detail": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "FlowInput": {
+                "required": [
+                    "states"
+                ],
+                "properties": {
+                    "slug": {
+                        "description": "Empty: generated from the title. ^[a-z0-9]+(-[a-z0-9]+)*$, unique across the system",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "states": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "cta": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    },
+                    "layout": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "score",
+                                "tier",
+                                "categories",
+                                "recommendations",
+                                "action_plan",
+                                "pdf",
+                                "cta"
+                            ]
+                        },
+                        "nullable": true,
+                        "default": null
+                    },
+                    "result_copy": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "detail": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionnaireIdOutput": {
+                "required": [
+                    "questionnaire_id"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "PromptOutput": {
+                "required": [
+                    "id",
+                    "questionnaire_id",
+                    "customer_id",
+                    "s3_path",
+                    "order",
+                    "text"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "s3_path": {
+                        "description": "The key of the text in object storage: prompts/{customer_id}/{uuid}.txt",
+                        "type": "string"
+                    },
+                    "outcome": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "diagnostic",
+                            "quiz_funnel",
+                            "result"
+                        ]
+                    },
+                    "order": {
+                        "type": "integer"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "PromptListOutput": {
+                "required": [
+                    "prompts"
+                ],
+                "properties": {
+                    "prompts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PromptOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ActiveInput": {
+                "required": [
+                    "is_active"
+                ],
+                "properties": {
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -1457,6 +2179,9 @@
     ],
     "tags": [
         {
+            "name": "Flows"
+        },
+        {
             "name": "Billing"
         },
         {
@@ -1467,6 +2192,9 @@
         },
         {
             "name": "Jobs"
+        },
+        {
+            "name": "Questionnaires"
         },
         {
             "name": "Health"

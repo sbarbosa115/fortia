@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/v1/questionnaire/find": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_questionnaire_find"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/usage": {
         parameters: {
             query?: never;
@@ -86,6 +102,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/flow/{identifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_flow_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_questionnaire_list"];
+        put: operations["put_api_questionnaire_update"];
+        post: operations["post_api_questionnaire_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}/copy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_questionnaire_copy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}/prompts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_questionnaire_prompts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -101,6 +181,22 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_questionnaire_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["patch_api_questionnaire_set_active"];
         trace?: never;
     };
 }
@@ -356,6 +452,9 @@ export interface components {
             created_at: string;
             updated_at: string;
         };
+        QuestionnaireUrlOutput: {
+            questionnaire_url: string;
+        };
         CustomerPlanOutput: {
             plan_id: string;
             from_at: string;
@@ -414,6 +513,88 @@ export interface components {
         JobEnvelopeOutput: {
             job: components["schemas"]["JobOutput"];
         };
+        QuestionnaireListItemOutput: {
+            questionnaire_id: string;
+            customer_id: string;
+            /** @description "ROOT" or the id of the chain's root questionnaire */
+            parent: string;
+            origin_session_id?: string | null;
+            title: string;
+            description?: string | null;
+            created_at?: string | null;
+            updated_at?: string | null;
+            is_active: boolean;
+            on_completed?: components["schemas"]["OnCompletedOutput"] | null;
+            /** @enum {string} */
+            status: "active" | "inactive";
+            landing_page: boolean;
+            capture_user_data: boolean;
+            question_count: number;
+            is_chain: boolean;
+            slug?: string | null;
+            /** @enum {string} */
+            type: "default" | "ecommerce" | "quiz_funnel" | "samurai8" | "ai_team_profile" | "diagnostic" | "prompt";
+        };
+        QuestionnaireListOutput: {
+            items: components["schemas"]["QuestionnaireListItemOutput"][];
+            page: number;
+            page_size: number;
+            total: number;
+            total_pages: number;
+        };
+        UpdateFlowInput: {
+            questionnaire_id: string;
+            /** @description Empty: generated from the title. ^[a-z0-9]+(-[a-z0-9]+)*$, unique across the system */
+            slug?: string | null;
+            states: {
+                [key: string]: unknown;
+            }[];
+            cta?: {
+                [key: string]: unknown;
+            } | null;
+            /** @default null */
+            layout: ("score" | "tier" | "categories" | "recommendations" | "action_plan" | "pdf" | "cta")[] | null;
+            result_copy?: {
+                [key: string]: string;
+            } | null;
+            detail?: string | null;
+        };
+        FlowInput: {
+            /** @description Empty: generated from the title. ^[a-z0-9]+(-[a-z0-9]+)*$, unique across the system */
+            slug?: string | null;
+            states: {
+                [key: string]: unknown;
+            }[];
+            cta?: {
+                [key: string]: unknown;
+            } | null;
+            /** @default null */
+            layout: ("score" | "tier" | "categories" | "recommendations" | "action_plan" | "pdf" | "cta")[] | null;
+            result_copy?: {
+                [key: string]: string;
+            } | null;
+            detail?: string | null;
+        };
+        QuestionnaireIdOutput: {
+            questionnaire_id: string;
+        };
+        PromptOutput: {
+            id: string;
+            questionnaire_id: string;
+            customer_id: string;
+            /** @description The key of the text in object storage: prompts/{customer_id}/{uuid}.txt */
+            s3_path: string;
+            /** @enum {string|null} */
+            outcome?: "diagnostic" | "quiz_funnel" | "result" | null;
+            order: number;
+            text: string;
+        };
+        PromptListOutput: {
+            prompts: components["schemas"]["PromptOutput"][];
+        };
+        ActiveInput: {
+            is_active: boolean;
+        };
     };
     responses: never;
     parameters: never;
@@ -423,6 +604,43 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    get_api_questionnaire_find: {
+        parameters: {
+            query: {
+                /** @description The store page the widget is on */
+                url: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bare JSON: the respondent link of the matching flow */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionnaireUrlOutput"];
+                };
+            };
+            /** @description INVALID_REQUEST (url is missing) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FLOW_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_api_customer_usage: {
         parameters: {
             query?: never;
@@ -580,6 +798,261 @@ export interface operations {
             };
         };
     };
+    get_api_flow_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The flow */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FlowOutput"];
+                };
+            };
+            /** @description FLOW_NOT_FOUND (also when the questionnaire is assigned and was looked up by slug or flow id) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_list: {
+        parameters: {
+            query?: {
+                type?: "default" | "quiz_funnel" | "diagnostic" | "process_mapping";
+                sort_by?: "created_at" | "updated_at";
+                order?: "asc" | "desc";
+                is_active?: "true" | "false" | "1" | "0";
+                /** @description ROOT (default) or a questionnaire id */
+                parent?: string;
+                page?: number;
+                page_size?: number;
+                /** @description Every word must appear in the title */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of questionnaires */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionnaireListOutput"];
+                };
+            };
+            /** @description INVALID_TYPE, INVALID_SORT, INVALID_ORDER, INVALID_IS_ACTIVE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_questionnaire_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UpdateFlowInput"];
+            };
+        };
+        responses: {
+            /** @description Saved (data: null) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_ALREADY_ANSWERED, SLUG_ALREADY_IN_USE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_questionnaire_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["FlowInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionnaireIdOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SLUG_ALREADY_IN_USE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_questionnaire_copy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The new questionnaire */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionnaireOutput"];
+                };
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_prompts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The chain's prompts in order, with their text */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptListOutput"];
+                };
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_api_health: {
         parameters: {
             query?: never;
@@ -590,6 +1063,75 @@ export interface operations {
         requestBody?: never;
         responses: {
             default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The questionnaire, with the diagnostic merged into on_completed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionnaireOutput"];
+                };
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    patch_api_questionnaire_set_active: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ActiveInput"];
+            };
+        };
+        responses: {
+            /** @description The updated row */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionnaireListItemOutput"];
+                };
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
