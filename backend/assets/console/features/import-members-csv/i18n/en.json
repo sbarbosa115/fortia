@@ -1,0 +1,23 @@
+{
+  "import": "Import CSV",
+  "template": "Download template",
+  "fileLabel": "CSV file of members",
+  "hint": "Columns: name, email, phone, role, area. Comma or semicolon separated.",
+  "imported_one": "Imported {{count}} member",
+  "imported_other": "Imported {{count}} members",
+  "skippedTitle_one": "{{count}} row was skipped:",
+  "skippedTitle_other": "{{count}} rows were skipped:",
+  "skippedRow": "Row {{line}} — {{name}}: {{reason}}",
+  "noName": "(no name)",
+  "reasons": {
+    "emptyName": "the name is empty",
+    "invalidEmail": "the email is not valid",
+    "noContact": "it has no email or phone",
+    "duplicate": "already in the list"
+  },
+  "errors": {
+    "missingName": "The CSV must include a 'name' column",
+    "missingContact": "The CSV must include at least an 'email' or 'phone' column",
+    "empty": "The CSV file is empty"
+  }
+}

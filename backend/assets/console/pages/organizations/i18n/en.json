@@ -1,3 +1,17 @@
 {
-  "title": "Organizations"
+  "title": "Organizations",
+  "subtitle": "The groups of people you send questionnaires to, with their members.",
+  "new": "New Organization",
+  "notInPlan": "Your plan does not include organizations.",
+  "search": "Search organizations",
+  "searchPlaceholder": "Search by name or domain",
+  "empty": "No organizations yet. Create your first one.",
+  "emptyBody": "Add the teams or companies you will assign questionnaires to, and their members.",
+  "domain": "Domain",
+  "noDomain": "No domain",
+  "members": "Members",
+  "deleteTitle": "Delete organization?",
+  "deleteBody": "This will permanently delete \"{{name}}\" and cannot be undone.",
+  "deleted": "\"{{name}}\" was deleted.",
+  "hasAssignations": "This organization has assignations or projects. Delete them first, then delete the organization."
 }

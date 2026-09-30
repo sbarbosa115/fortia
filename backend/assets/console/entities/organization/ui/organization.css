@@ -1,0 +1,11 @@
+/* Organizations (item 8): the organization's avatar. */
+.org-avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  color: #ffffff;
+  font-weight: 600;
+  line-height: 1;
+}

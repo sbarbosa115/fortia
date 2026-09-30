@@ -1,0 +1,23 @@
+{
+  "import": "Importar CSV",
+  "template": "Descargar plantilla",
+  "fileLabel": "Archivo CSV de miembros",
+  "hint": "Columnas: name, email, phone, role, area. Separadas por coma o punto y coma.",
+  "imported_one": "Se importó {{count}} miembro",
+  "imported_other": "Se importaron {{count}} miembros",
+  "skippedTitle_one": "Se omitió {{count}} fila:",
+  "skippedTitle_other": "Se omitieron {{count}} filas:",
+  "skippedRow": "Fila {{line}} — {{name}}: {{reason}}",
+  "noName": "(sin nombre)",
+  "reasons": {
+    "emptyName": "el nombre está vacío",
+    "invalidEmail": "el correo no es válido",
+    "noContact": "no tiene correo ni teléfono",
+    "duplicate": "ya está en la lista"
+  },
+  "errors": {
+    "missingName": "El CSV debe incluir una columna 'name'",
+    "missingContact": "El CSV debe incluir al menos una columna 'email' o 'phone'",
+    "empty": "El archivo CSV está vacío"
+  }
+}

@@ -1,3 +1,17 @@
 {
-  "title": "Organizaciones"
+  "title": "Organizaciones",
+  "subtitle": "Los grupos de personas a los que envías cuestionarios, con sus miembros.",
+  "new": "Nueva organización",
+  "notInPlan": "Tu plan no incluye organizaciones.",
+  "search": "Buscar organizaciones",
+  "searchPlaceholder": "Busca por nombre o dominio",
+  "empty": "Aún no hay organizaciones. Crea la primera.",
+  "emptyBody": "Agrega los equipos o empresas a los que asignarás cuestionarios, y sus miembros.",
+  "domain": "Dominio",
+  "noDomain": "Sin dominio",
+  "members": "Miembros",
+  "deleteTitle": "¿Eliminar organización?",
+  "deleteBody": "Esto eliminará \"{{name}}\" de forma permanente y no se puede deshacer.",
+  "deleted": "Se eliminó \"{{name}}\".",
+  "hasAssignations": "Esta organización tiene asignaciones o proyectos. Elimínalos primero y luego elimina la organización."
 }

@@ -1,0 +1,10 @@
+{
+  "members_one": "{{count}} miembro",
+  "members_other": "{{count}} miembros",
+  "errors": {
+    "nameRequired": "El nombre es obligatorio",
+    "contactRequired": "Cada miembro necesita al menos un correo o un teléfono",
+    "emailInvalid": "Ingresa un correo válido",
+    "duplicate": "Este miembro ya está en la lista"
+  }
+}
