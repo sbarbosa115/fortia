@@ -1,390 +1,390 @@
-# PRD — Mappi (reconstrucción agnóstica de Skyline)
+# PRD — Mappi (technology-agnostic rebuild of Skyline)
 
-| Campo | Valor |
+| Field | Value |
 |---|---|
-| Producto | **Mappi** (antes "Skyline" / "QuestionAIre") |
-| Tipo de documento | PRD de migración con paridad funcional 1:1 |
-| Fecha | 2026-09-30 |
-| Fuentes | `skyline-backend`, `skyline-ui` (app del respondente), `skyline-admin-ui` (consola del operador) |
-| Alcance | Todo lo que existe hoy, descrito de forma independiente de la tecnología |
-| Idioma | Español. Los nombres de campos, rutas, enums y códigos de error se dejan tal cual porque forman parte del contrato |
+| Product | **Mappi** (formerly "Skyline" / "QuestionAIre") |
+| Document type | Migration PRD with 1:1 functional parity |
+| Date | 2026-09-30 |
+| Sources | `skyline-backend`, `skyline-ui` (respondent app), `skyline-admin-ui` (operator console) |
+| Scope | Everything that exists today, described independently of the technology |
+| Language | English. Field names, routes, enums and error codes are left as-is because they are part of the contract |
 
 ---
 
-## 0. Cómo leer este documento
+## 0. How to read this document
 
-### 0.1 Principio de agnosticismo
+### 0.1 Agnosticism principle
 
-Este PRD describe **qué** debe hacer el sistema, no **con qué** construirlo. Cualquier lenguaje, framework, base de datos, nube o proveedor sirve si cumple los contratos y reglas descritos aquí.
+This PRD describes **what** the system must do, not **what to build it with**. Any language, framework, database, cloud or provider will do as long as it meets the contracts and rules described here.
 
-- Los proveedores externos se nombran por **capacidad**: "proveedor de identidad", "pasarela de pagos", "almacenamiento de objetos", "modelo de lenguaje (LLM)", "servicio de correo", "transcripción de voz en tiempo real", "scraper de catálogos", "plataforma de e-commerce".
-- La implementación actual de cada capacidad aparece **solo como referencia** en el [Anexo E](#anexo-e--referencia-de-la-implementación-actual). No es un requisito.
-- Los **contratos** (rutas HTTP, nombres de campos, enums, códigos de error, formatos de URL públicas) sí son requisito cuando haga falta compatibilidad hacia atrás: enlaces ya compartidos, integraciones externas con API key, receptores de webhooks. Si la migración decide romperlos, debe hacerlo de forma explícita y con un plan de redirección.
+- External providers are named by **capability**: "identity provider", "payment gateway", "object storage", "language model (LLM)", "email service", "real-time speech transcription", "catalog scraper", "e-commerce platform".
+- The current implementation of each capability appears **for reference only** in [Appendix E](#appendix-e--reference-of-the-current-implementation). It is not a requirement.
+- The **contracts** (HTTP routes, field names, enums, error codes, public URL formats) are a requirement wherever backward compatibility is needed: links already shared, external integrations using an API key, webhook receivers. If the migration decides to break them, it must do so explicitly and with a redirect plan.
 
-### 0.2 Convenciones
+### 0.2 Conventions
 
-- **DEBE**: requisito obligatorio para la paridad.
-- **DEBERÍA**: recomendado; puede cambiarse si hay una razón documentada.
-- **[DEUDA]**: comportamiento actual que parece un defecto o riesgo. Se documenta para que la migración decida de forma consciente si replicarlo o corregirlo (ver §15).
-- **[CLIENTE]**: lógica específica de un cliente que hoy está fija en el código. Recomendación: convertirla en configuración.
+- **MUST**: mandatory requirement for parity.
+- **SHOULD**: recommended; may be changed if there is a documented reason.
+- **[DEBT]**: current behavior that looks like a defect or risk. It is documented so the migration can consciously decide whether to replicate it or fix it (see §15).
+- **[CLIENT-SPECIFIC]**: logic specific to one customer that is currently hard-coded. Recommendation: turn it into configuration.
 
 ---
 
-## 1. Resumen del producto
+## 1. Product summary
 
-Mappi es una plataforma **SaaS B2B multi-tenant** para crear cuestionarios ("experiencias"), a menudo con ayuda de IA, enviarlos a respondentes y convertir sus respuestas en resultados accionables: recomendaciones de producto, diagnósticos con puntaje y niveles, perfiles, reportes y dashboards.
+Mappi is a **multi-tenant B2B SaaS** platform for creating questionnaires ("experiences"), often with AI assistance, sending them to respondents and turning their answers into actionable results: product recommendations, diagnostics with scores and tiers, profiles, reports and dashboards.
 
-### 1.1 Los tres flujos de negocio
+### 1.1 The three business flows
 
-1. **Quiz Funnel (e-commerce).** Se importa el catálogo de una tienda (por scraping de la web o sincronizando con la plataforma de e-commerce). La IA genera un cuestionario que se inserta como widget en la tienda. Cuando el visitante termina, la IA le recomienda productos del catálogo.
-2. **Mapeo de procesos / Organizaciones.** El cliente registra organizaciones y sus miembros, les **asigna** cuestionarios, sigue el progreso, revisa respuestas pregunta por pregunta, pide correcciones y agrupa las asignaciones en **proyectos** con fecha límite.
-3. **Evaluaciones y diagnósticos.** Un enlace público recoge respuestas. Un diagnóstico puntúa las respuestas por categorías, ubica al respondente en un nivel (tier) y le entrega recomendaciones, plan de acción y un PDF. Las **cadenas de prompts** permiten que un LLM genere la siguiente etapa del cuestionario a partir de las respuestas de la anterior.
+1. **Quiz Funnel (e-commerce).** A store's catalog is imported (by scraping the website or by syncing with the e-commerce platform). The AI generates a questionnaire that is embedded in the store as a widget. When the visitor finishes, the AI recommends products from the catalog.
+2. **Process mapping / Organizations.** The customer registers organizations and their members, **assigns** questionnaires to them, tracks progress, reviews answers question by question, requests corrections and groups assignations into **projects** with a due date.
+3. **Assessments and diagnostics.** A public link collects answers. A diagnostic scores the answers by category, places the respondent in a tier and gives them recommendations, an action plan and a PDF. **Prompt chains** let an LLM generate the next stage of the questionnaire from the answers to the previous one.
 
-### 1.2 Las tres piezas del sistema
+### 1.2 The three parts of the system
 
-| Pieza | Usuarios | Función |
+| Part | Users | Function |
 |---|---|---|
-| **API / Backend** | Las dos apps, integradores externos, pasarela de pagos, plataforma de e-commerce | Dueño de todos los datos y reglas. Trabajos asíncronos, tareas programadas, webhooks |
-| **App del respondente** | Visitantes anónimos, miembros de organizaciones | Responder cuestionarios y ver resultados |
-| **Consola del operador** | Usuarios del cliente (tenant) y super-admins | Crear, publicar, asignar, revisar, analizar, configurar marca, facturación e integraciones |
+| **API / Backend** | Both apps, external integrators, payment gateway, e-commerce platform | Owner of all data and rules. Asynchronous jobs, scheduled tasks, webhooks |
+| **Respondent app** | Anonymous visitors, organization members | Answer questionnaires and view results |
+| **Operator console** | Customer (tenant) users and super-admins | Create, publish, assign, review, analyze, configure branding, billing and integrations |
 
-Existe además una consola interna de super-admin ("tower") fuera del alcance de este PRD. Solo se documentan los endpoints `/admin/*` que consume.
-
----
-
-## 2. Objetivos y no objetivos
-
-### 2.1 Objetivos
-
-1. Reconstruir el producto en cualquier stack **sin perder funcionalidad** (paridad 1:1).
-2. Mantener la compatibilidad de los **enlaces públicos ya distribuidos** (`/q/{id}`, `/f/{id|slug}`, `/a/{id}`, `/session/{id}/results`) y de la **API externa** y los **webhooks**.
-3. Migrar los datos existentes sin pérdida: cuentas, cuestionarios, flujos, sesiones, resultados, organizaciones, asignaciones, proyectos, planes, productos, estilos, API keys, webhooks, archivos.
-4. Dejar documentadas las decisiones sobre deuda técnica (§15).
-
-### 2.2 No objetivos
-
-- Rediseñar el producto o añadir funciones nuevas (se pueden proponer por separado).
-- Reconstruir la consola "tower" de super-admin.
-- Reconstruir el servicio interno de analítica/uso. Se trata como dependencia externa con el contrato de §13.8. La migración puede decidir absorberlo.
+There is also an internal super-admin console ("tower") that is outside the scope of this PRD. Only the `/admin/*` endpoints it consumes are documented.
 
 ---
 
-## 3. Glosario
+## 2. Goals and non-goals
 
-| Término | Definición |
+### 2.1 Goals
+
+1. Rebuild the product on any stack **without losing functionality** (1:1 parity).
+2. Keep compatibility for the **public links already distributed** (`/q/{id}`, `/f/{id|slug}`, `/a/{id}`, `/session/{id}/results`) and for the **external API** and **webhooks**.
+3. Migrate existing data without loss: accounts, questionnaires, flows, sessions, results, organizations, assignations, projects, plans, products, styles, API keys, webhooks, files.
+4. Leave the decisions on technical debt documented (§15).
+
+### 2.2 Non-goals
+
+- Redesigning the product or adding new features (these can be proposed separately).
+- Rebuilding the "tower" super-admin console.
+- Rebuilding the internal analytics/usage service. It is treated as an external dependency with the contract in §13.8. The migration may decide to absorb it.
+
+---
+
+## 3. Glossary
+
+| Term | Definition |
 |---|---|
-| **Cuenta / Cliente / Tenant** | La empresa que paga. Se identifica con `customer_id` (8 caracteres alfanuméricos aleatorios) |
-| **Usuario** | Persona que entra a la consola. Pertenece a una sola cuenta |
-| **Root / Owner** | El usuario que creó la cuenta |
-| **Respondente** | Quien responde un cuestionario. Anónimo o miembro de una organización |
-| **Cuestionario / Experiencia** | Conjunto ordenado de preguntas con un comportamiento al terminar |
-| **Pregunta** | Unidad de pantalla del cuestionario. Tiene uno o varios controles, aunque en la práctica se usa el primero |
-| **Control (InputControl)** | El campo de respuesta de una pregunta (radio, checkbox, texto, audio, archivo…) |
-| **Flujo (Flow)** | Máquina de estados que envuelve al cuestionario: define la entrada, las etapas encadenadas y el resultado. Tiene `slug` público |
-| **Estado (State)** | Nodo del flujo: `questionnaire`, `prompt`, `diagnostic`, `quiz_funnel`, `result`, `regular` |
-| **Cadena (Chain)** | Flujo con estados `prompt`: cada etapa la genera un LLM a partir de las respuestas anteriores |
-| **Sesión** | Una respuesta en curso o terminada. Es una copia del cuestionario con los valores del respondente |
-| **Resultado de sesión** | Lo que se calcula al terminar: productos, diagnóstico, perfil |
-| **Diagnóstico** | Configuración de puntaje: tiers (niveles), recomendaciones y plan de acción por tier |
-| **Tier** | Banda de puntaje `[min, max]` con nombre y descripción |
-| **Organización** | Grupo de personas (miembros) de un cliente al que se le asignan cuestionarios |
-| **Miembro (OrganizationUser)** | Persona dentro de una organización. Tiene nombre, email y/o teléfono, rol y área |
-| **Asignación (Assignation)** | Envío de un cuestionario a una organización, con audiencia y tipo (`default` o `follow_up`) |
-| **Follow-up** | Asignación de sesión **compartida**: todos los miembros aportan a la misma sesión, con recordatorios diarios, revisión y reintentos |
-| **Intento (Attempt)** | Cada ronda de un follow-up. Un reintento ("enviar a corrección") crea el intento n+1 |
-| **Proyecto** | Agrupación de asignaciones follow-up de una misma organización, con fecha límite |
-| **Plan / Feature** | Catálogo comercial. Un plan asigna límites a cada feature |
-| **Job** | Trabajo asíncrono consultable por polling |
-| **Estilos (Styles)** | Marca visual de la cuenta aplicada a la app del respondente |
+| **Account / Customer / Tenant** | The paying company. Identified by `customer_id` (8 random alphanumeric characters) |
+| **User** | A person who signs in to the console. Belongs to a single account |
+| **Root / Owner** | The user who created the account |
+| **Respondent** | Whoever answers a questionnaire. Anonymous or a member of an organization |
+| **Questionnaire / Experience** | Ordered set of questions with a behavior on completion |
+| **Question** | Screen unit of the questionnaire. Has one or more controls, although in practice the first one is used |
+| **Control (InputControl)** | The answer field of a question (radio, checkbox, text, audio, file…) |
+| **Flow** | State machine that wraps the questionnaire: defines the entry point, the chained stages and the result. Has a public `slug` |
+| **State** | Node of the flow: `questionnaire`, `prompt`, `diagnostic`, `quiz_funnel`, `result`, `regular` |
+| **Chain** | Flow with `prompt` states: each stage is generated by an LLM from the previous answers |
+| **Session** | A response in progress or finished. It is a copy of the questionnaire with the respondent's values |
+| **Session result** | What is computed on completion: products, diagnostic, profile |
+| **Diagnostic** | Scoring configuration: tiers, and recommendations and action plan per tier |
+| **Tier** | Score band `[min, max]` with a name and description |
+| **Organization** | Group of people (members) belonging to a customer, to which questionnaires are assigned |
+| **Member (OrganizationUser)** | Person within an organization. Has a name, email and/or phone, role and area |
+| **Assignation** | Sending of a questionnaire to an organization, with an audience and a type (`default` or `follow_up`) |
+| **Follow-up** | Assignation with a **shared** session: all members contribute to the same session, with daily reminders, review and retries |
+| **Attempt** | Each round of a follow-up. A retry ("send for correction") creates attempt n+1 |
+| **Project** | Grouping of follow-up assignations from the same organization, with a due date |
+| **Plan / Feature** | Commercial catalog. A plan assigns limits to each feature |
+| **Job** | Asynchronous work that can be queried by polling |
+| **Styles** | The account's visual branding applied to the respondent app |
 
 ---
 
-## 4. Actores, roles y multi-tenancy
+## 4. Actors, roles and multi-tenancy
 
-### 4.1 Actores
+### 4.1 Actors
 
-| Actor | Autenticación | Accede a |
+| Actor | Authentication | Has access to |
 |---|---|---|
-| Visitante / respondente anónimo | Ninguna | App del respondente en rutas públicas |
-| Miembro de organización (respondente de asignación) | "Login" de identidad contra la lista de miembros; recibe un token de sesión de respondente | `/a/{id}` |
-| Usuario de consola `Customer-Admin` | Email + contraseña o Google | Toda la consola, lectura y escritura |
-| Usuario de consola `Customer-Read-Only` | Igual | Consola solo lectura |
-| Owner (`root = true`) | Igual | Igual que `Customer-Admin` |
-| Super-admin `Admin` | Igual (asignado a mano en el proveedor de identidad) | Todas las cuentas; endpoints `/admin/*`; "asumir" cualquier cuenta |
-| Integrador externo | Header `X-API-Key` | `/external/*` |
-| Pasarela de pagos | Firma en header | Webhook de pagos |
-| Plataforma de e-commerce | HMAC en header | Webhooks de cumplimiento (GDPR) |
-| Receptor de webhooks del cliente | Verifica la firma HMAC que enviamos | Recibe `questionnaire.completed` |
+| Visitor / anonymous respondent | None | Respondent app on public routes |
+| Organization member (assignation respondent) | Identity "login" against the member list; receives a respondent session token | `/a/{id}` |
+| `Customer-Admin` console user | Email + password or Google | The whole console, read and write |
+| `Customer-Read-Only` console user | Same | Read-only console |
+| Owner (`root = true`) | Same | Same as `Customer-Admin` |
+| `Admin` super-admin | Same (assigned by hand in the identity provider) | All accounts; `/admin/*` endpoints; "assume" any account |
+| External integrator | `X-API-Key` header | `/external/*` |
+| Payment gateway | Signature in header | Payments webhook |
+| E-commerce platform | HMAC in header | Compliance webhooks (GDPR) |
+| Customer's webhook receiver | Verifies the HMAC signature we send | Receives `questionnaire.completed` |
 
 ### 4.2 Roles
 
-| Rol | Significado | Cómo se otorga |
+| Role | Meaning | How it is granted |
 |---|---|---|
-| `Admin` | Super-usuario de toda la plataforma | Solo a mano en el proveedor de identidad |
-| `Customer-Admin` | Administrador de la cuenta | Automático al registrarse (root). Asignable con `POST /users` |
-| `Customer-Read-Only` | Miembro de solo lectura | Asignable con `POST /users` |
+| `Admin` | Super-user of the whole platform | Only by hand in the identity provider |
+| `Customer-Admin` | Account administrator | Automatically on sign-up (root). Assignable with `POST /users` |
+| `Customer-Read-Only` | Read-only member | Assignable with `POST /users` |
 
-- Atributo de usuario `root` (`"true"`/`"false"`) marca al dueño de la cuenta.
-- `ADMIN_GROUPS = {Admin, Customer-Admin}`: los grupos que pueden crear usuarios y usar endpoints de escritura "admin".
+- The user attribute `root` (`"true"`/`"false"`) marks the account owner.
+- `ADMIN_GROUPS = {Admin, Customer-Admin}`: the groups that can create users and use "admin" write endpoints.
 - `ASSIGNABLE_ROLES = {Customer-Admin, Customer-Read-Only}`.
-- **Permiso de escritura en la consola** = `root` **o** pertenece a `Admin` o `Customer-Admin`. Las comprobaciones usan la lista completa de grupos, nunca el rol mostrado.
-- **Rol mostrado** (precedencia): `Admin > Customer-Admin > Customer-Read-Only`.
+- **Write permission in the console** = `root` **or** belongs to `Admin` or `Customer-Admin`. Checks use the full list of groups, never the displayed role.
+- **Displayed role** (precedence): `Admin > Customer-Admin > Customer-Read-Only`.
 
-**Matriz de permisos mostrada al crear un usuario:**
+**Permission matrix shown when creating a user:**
 
-| Acción | Admin | Solo lectura |
+| Action | Admin | Read-only |
 |---|---|---|
-| Ver cuestionarios | ✓ | ✓ |
-| Crear y editar cuestionarios | ✓ | – |
-| Borrar cuestionarios | ✓ | – |
-| Ver respuestas | ✓ | ✓ |
-| Exportar reportes | ✓ | ✓ |
-| Invitar usuarios | ✓ | – |
-| Editar facturación y workspace | ✓ | – |
+| View questionnaires | ✓ | ✓ |
+| Create and edit questionnaires | ✓ | – |
+| Delete questionnaires | ✓ | – |
+| View responses | ✓ | ✓ |
+| Export reports | ✓ | ✓ |
+| Invite users | ✓ | – |
+| Edit billing and workspace | ✓ | – |
 
 ### 4.3 Multi-tenancy
 
-- El tenant es la **cuenta** (`customer_id`). Toda entidad del cliente DEBE llevar `customer_id`.
-- La identidad del usuario (nombre, email) vive en el proveedor de identidad, no en la fila de la cuenta.
-- La lectura y escritura DEBEN filtrarse por el `customer_id` del llamante, salvo para `Admin`, que ve todas las cuentas en los listados (cuestionarios, organizaciones, asignaciones).
-- Los emails de usuarios de consola son **únicos en todo el sistema**.
+- The tenant is the **account** (`customer_id`). Every customer entity MUST carry `customer_id`.
+- The user's identity (name, email) lives in the identity provider, not in the account row.
+- Reads and writes MUST be filtered by the caller's `customer_id`, except for `Admin`, who sees all accounts in listings (questionnaires, organizations, assignations).
+- Console user emails are **unique across the whole system**.
 
-### 4.4 Suplantación ("asumir cliente")
+### 4.4 Impersonation ("assume customer")
 
-- Un `Admin` puede enviar el header `X-Assume-Customer-Id: <customer_id>` (sin distinguir mayúsculas en el nombre).
-- La petición se ejecuta **como el usuario root de esa cuenta**: grupos `[Customer-Admin]`, `root = true`, email y nombre del root. No hay bypass de admin mientras se asume, y aplican los límites del plan del cliente asumido.
-- Un llamante que no es `Admin` y envía el header recibe `403 ASSUME_NOT_ALLOWED`. Una cuenta inexistente da `404 ASSUMED_CUSTOMER_NOT_FOUND`.
-- Los endpoints `/admin/*` ignoran el header y usan el llamante real.
-- [DEUDA] No se audita. Se recomienda registrar quién asumió a quién y cuándo.
+- An `Admin` can send the header `X-Assume-Customer-Id: <customer_id>` (header name is case-insensitive).
+- The request runs **as the root user of that account**: groups `[Customer-Admin]`, `root = true`, the root's email and name. There is no admin bypass while assuming, and the plan limits of the assumed customer apply.
+- A caller who is not `Admin` and sends the header receives `403 ASSUME_NOT_ALLOWED`. A nonexistent account gives `404 ASSUMED_CUSTOMER_NOT_FOUND`.
+- The `/admin/*` endpoints ignore the header and use the real caller.
+- [DEBT] It is not audited. Recording who assumed whom and when is recommended.
 
 ---
 
-## 5. Arquitectura lógica (agnóstica)
+## 5. Logical architecture (agnostic)
 
 ```
                  ┌────────────────────┐       ┌──────────────────────┐
- Respondentes ──►│ App del respondente│       │ Consola del operador │◄── Usuarios de cuenta / Admin
+ Respondents  ──►│   Respondent app   │       │   Operator console   │◄── Account users / Admin
                  └─────────┬──────────┘       └──────────┬───────────┘
                            │   HTTP JSON (API /api/v1)   │
                            ▼                             ▼
                  ┌───────────────────────────────────────────────────┐
- Integradores ──►│                       API                         │◄── Webhooks entrantes
- (X-API-Key)     │  auth · validación · gate de plan · casos de uso  │    (pagos, e-commerce)
+ Integrators  ──►│                       API                         │◄── Incoming webhooks
+ (X-API-Key)     │     auth · validation · plan gate · use cases     │    (payments, e-commerce)
                  └──┬──────────┬──────────┬──────────┬──────────┬────┘
                     │          │          │          │          │
-             Base de datos  Cola de    Almacén de  Bus de     Servicio de
-             (persistencia)  jobs      objetos     eventos    uso/analítica
+               Database     Job        Object      Event      Usage/analytics
+             (persistence)  queue      storage     bus        service
                     │          │                     │
-                    │     Workers asíncronos    Despachador de
-                    │    (IA, estilos, scraping) webhooks salientes
+                    │     Async workers         Outgoing webhook
+                    │    (AI, styles, scraping) dispatcher
                     │
-              Tarea programada diaria (recordatorios)
+              Daily scheduled task (reminders)
 
- Dependencias externas por capacidad: proveedor de identidad (+ login con Google),
- LLM, transcripción en tiempo real, correo transaccional, pasarela de pagos,
- plataforma de e-commerce, scraper de catálogos/perfiles, navegador headless,
- seguimiento de errores, píxeles de marketing.
+ External dependencies by capability: identity provider (+ Google sign-in),
+ LLM, real-time transcription, transactional email, payment gateway,
+ e-commerce platform, catalog/profile scraper, headless browser,
+ error tracking, marketing pixels.
 ```
 
-**Requisitos de arquitectura:**
+**Architecture requirements:**
 
-- **A1.** La API DEBE poder responder toda petición síncrona en ≤ 29 s. Todo lo que tarde más (generación por IA, scraping, estilos, evaluación de respuestas, recomendación de productos, chat) DEBE ejecutarse como **job asíncrono** consultable con `GET /jobs/{job_id}`.
-- **A2.** El orden de procesamiento de cada petición DEBE ser: **autenticación → validación de entrada → gate de plan → ejecución**.
-- **A3.** La consola no tiene datos propios: todo pasa por la API.
-- **A4.** No hay canal en tiempo real (websocket) entre la API y las apps. El progreso asíncrono se consulta por polling.
-- **A5.** Los eventos de uso y analítica se emiten de forma asíncrona y no deben bloquear la respuesta al usuario.
+- **A1.** The API MUST be able to answer every synchronous request in ≤ 29 s. Anything that takes longer (AI generation, scraping, styles, answer evaluation, product recommendation, chat) MUST run as an **asynchronous job** that can be queried with `GET /jobs/{job_id}`.
+- **A2.** The processing order of each request MUST be: **authentication → input validation → plan gate → execution**.
+- **A3.** The console has no data of its own: everything goes through the API.
+- **A4.** There is no real-time channel (websocket) between the API and the apps. Asynchronous progress is queried by polling.
+- **A5.** Usage and analytics events are emitted asynchronously and must not block the response to the user.
 
 ---
 
-## 6. Modelo de datos
+## 6. Data model
 
-Reglas generales:
+General rules:
 
-- Las fechas y horas se guardan en ISO-8601 UTC (`Z`). Las fechas de calendario van como `YYYY-MM-DD`.
-- Los IDs son UUIDv4 salvo que se indique otro formato.
-- **No hay borrado lógico** salvo en dos casos: las API keys se revocan (`status = revoked`) y los cuestionarios se desactivan (`is_active = false`). Todo lo demás se borra físicamente.
-- La elección de base de datos es libre. Los "índices" listados son **patrones de acceso** que la implementación DEBE soportar con eficiencia.
+- Dates and times are stored in ISO-8601 UTC (`Z`). Calendar dates are stored as `YYYY-MM-DD`.
+- IDs are UUIDv4 unless another format is stated.
+- **There is no soft delete** except in two cases: API keys are revoked (`status = revoked`) and questionnaires are deactivated (`is_active = false`). Everything else is physically deleted.
+- The choice of database is free. The listed "indexes" are **access patterns** that the implementation MUST support efficiently.
 
-### 6.1 Customer (cuenta)
+### 6.1 Customer (account)
 
-| Campo | Tipo | Notas |
+| Field | Type | Notes |
 |---|---|---|
-| `customer_id` | string(8) | PK, alfanumérico aleatorio |
+| `customer_id` | string(8) | PK, random alphanumeric |
 | `created_at` | datetime | |
 | `language` | enum `es-CO` \| `en-US` | Default `es-CO` |
-| `source` | string | Origen del registro, default `"default"`. Acceso por `source` + `created_at` |
-| `settings` | objeto `CustomerSettings` | Ver abajo |
-| `plan` | objeto `CustomerPlan` \| null | Embebido |
-| `shopify_shop`, `shopify_token`, `shopify_refresh_token` | string \| null | Conexión con la plataforma de e-commerce. Los tokens son secretos |
-| `onboarding_completed` | bool \| null | null = cuenta antigua (se deriva, §7.15) |
-| `stripe_trial_used_at` | datetime \| null | Marca de "ya usó su prueba en la pasarela". Se escribe una vez y nunca se borra |
+| `source` | string | Sign-up origin, default `"default"`. Accessed by `source` + `created_at` |
+| `settings` | `CustomerSettings` object | See below |
+| `plan` | `CustomerPlan` object \| null | Embedded |
+| `shopify_shop`, `shopify_token`, `shopify_refresh_token` | string \| null | Connection with the e-commerce platform. The tokens are secrets |
+| `onboarding_completed` | bool \| null | null = legacy account (derived, §7.15) |
+| `stripe_trial_used_at` | datetime \| null | "Already used their trial in the gateway" marker. Written once and never cleared |
 
 **CustomerSettings:**
 
-| Campo | Tipo | Regla |
+| Field | Type | Rule |
 |---|---|---|
-| `language` | `es-CO` \| `en-US` | Nunca null |
-| `transcription_url` | string \| null | URL alternativa del servicio de transcripción |
-| `pixel_id` | string ≤ 64 \| null | Píxel de Meta |
+| `language` | `es-CO` \| `en-US` | Never null |
+| `transcription_url` | string \| null | Alternative URL for the transcription service |
+| `pixel_id` | string ≤ 64 \| null | Meta pixel |
 | `linkedin_partner_id`, `linkedin_conversion_id` | string ≤ 64 \| null | |
 | `google_ads_id`, `google_ads_conversion_label` | string ≤ 64 \| null | |
-| `max_files` | int 1–20 | Default 10. Máximo de archivos por pregunta de tipo archivo |
+| `max_files` | int 1–20 | Default 10. Maximum number of files per file-type question |
 
-**CustomerPlan (embebido):**
+**CustomerPlan (embedded):**
 
-| Campo | Tipo |
+| Field | Type |
 |---|---|
 | `plan_id` | string |
-| `from_at`, `to_at` | date (vigencia, inclusiva) |
+| `from_at`, `to_at` | date (validity period, inclusive) |
 | `billing_interval` | `month` \| `year` (default `month`) |
-| `stripe_customer_id`, `stripe_subscription_id` | string \| null (IDs en la pasarela de pagos) |
+| `stripe_customer_id`, `stripe_subscription_id` | string \| null (IDs in the payment gateway) |
 | `trial_end` | datetime \| null |
 | `discount` | `{coupon_id, promotion_code?, percent_off?, amount_off?, currency?, duration, ends_at?}` \| null |
 | `created_at`, `updated_at` | datetime |
 
-### 6.2 User (vive en el proveedor de identidad)
+### 6.2 User (lives in the identity provider)
 
-| Campo | Notas |
+| Field | Notes |
 |---|---|
-| `email` | Único global; es el nombre de usuario; verificado automáticamente |
+| `email` | Globally unique; it is the username; automatically verified |
 | `name` | 1–50 |
 | `customer_id` | ≤ 16 |
 | `root` | `"true"` / `"false"` |
-| grupos | `Admin`, `Customer-Admin`, `Customer-Read-Only` |
+| groups | `Admin`, `Customer-Admin`, `Customer-Read-Only` |
 
-### 6.3 Feature (catálogo global)
+### 6.3 Feature (global catalog)
 
-- `id` = slug del nombre; no cambia nunca.
+- `id` = slug of the name; never changes.
 - `feature_name` (1–100), `feature_description` (≤ 1000, default `""`), timestamps.
-- **Slugs canónicos:** `regular`, `diagnostic`, `quiz-funnel`, `chain`, `chat`, `organizations`, `assignations`, `styles`, `analytics`, `dashboards`, `users`, `api`, `webhook`, `profile`, `responses`.
+- **Canonical slugs:** `regular`, `diagnostic`, `quiz-funnel`, `chain`, `chat`, `organizations`, `assignations`, `styles`, `analytics`, `dashboards`, `users`, `api`, `webhook`, `profile`, `responses`.
 
-### 6.4 Plan (catálogo global)
+### 6.4 Plan (global catalog)
 
-| Campo | Tipo | Regla |
+| Field | Type | Rule |
 |---|---|---|
-| `id` | string | Slug del nombre |
-| `plan_name` | 1–100 | Único |
+| `id` | string | Slug of the name |
+| `plan_name` | 1–100 | Unique |
 | `plan_description` | ≤ 1000 | Default `""` |
-| `features` | `[{feature_id, limit:int}]` | IDs únicos. **limit < 0 = ilimitado; 0 = no incluido** |
-| `max_questionnaires` | int \| null | null = sin tope; negativo = ilimitado |
-| `max_responses` | int \| null | Igual |
-| `price_amount` | int ≥ 0 \| null | En unidades menores (centavos). null = "precio a consultar" |
-| `currency` | 3 letras | Default `usd` |
-| `stripe_price_id` | ≤ 255 \| null | ID del precio mensual en la pasarela |
-| `yearly_price_amount`, `stripe_yearly_price_id` | | Precio anual |
+| `features` | `[{feature_id, limit:int}]` | Unique IDs. **limit < 0 = unlimited; 0 = not included** |
+| `max_questionnaires` | int \| null | null = no cap; negative = unlimited |
+| `max_responses` | int \| null | Same |
+| `price_amount` | int ≥ 0 \| null | In minor units (cents). null = "price on request" |
+| `currency` | 3 letters | Default `usd` |
+| `stripe_price_id` | ≤ 255 \| null | ID of the monthly price in the gateway |
+| `yearly_price_amount`, `stripe_yearly_price_id` | | Yearly price |
 | `trial_days` | 0–365 | Default 0 |
 
-DEBE existir un plan con id `starter` (plan de prueba al registrarse).
+A plan with id `starter` MUST exist (trial plan on sign-up).
 
 ### 6.5 Questionnaire
 
-| Campo | Tipo | Notas |
+| Field | Type | Notes |
 |---|---|---|
 | `questionnaire_id` | UUIDv4 | PK |
-| `customer_id` | string | Acceso por cuenta |
-| `title` | string | Requerido |
+| `customer_id` | string | Accessed by account |
+| `title` | string | Required |
 | `description`, `disclaimer` | string \| null | |
-| `capture_user_data` | bool | Default false. Pide nombre, email y teléfono al final |
-| `landing_page` | bool | Default false. Muestra una portada antes de empezar |
+| `capture_user_data` | bool | Default false. Asks for name, email and phone at the end |
+| `landing_page` | bool | Default false. Shows a cover page before starting |
 | `type` | enum | `default`, `ecommerce`, `quiz_funnel`, `samurai8`, `ai_team_profile`, `diagnostic`, `prompt` |
 | `is_active` | bool | Default true |
-| `on_completed` | `OnCompleted` \| null | Qué pasa al terminar |
-| `parent` | `"ROOT"` \| questionnaire_id | Las etapas generadas de una cadena apuntan a su raíz. Acceso por `parent` |
-| `origin_session_id` | UUID \| null | Sesión que originó la etapa generada. Acceso por este campo |
-| `session_id`, `started_at`, `ended_at` | null | Siempre null en el cuestionario guardado; se llenan en la sesión |
-| `question_count`, `is_chain`, `slug` | derivados | Copias desnormalizadas para listados |
+| `on_completed` | `OnCompleted` \| null | What happens on completion |
+| `parent` | `"ROOT"` \| questionnaire_id | The generated stages of a chain point to their root. Accessed by `parent` |
+| `origin_session_id` | UUID \| null | Session that originated the generated stage. Accessed by this field |
+| `session_id`, `started_at`, `ended_at` | null | Always null in the stored questionnaire; filled in on the session |
+| `question_count`, `is_chain`, `slug` | derived | Denormalized copies for listings |
 | `questions` | `Question[]` | |
 | `created_at`, `updated_at` | datetime | |
 
 **Question:**
 
-| Campo | Tipo | Notas |
+| Field | Type | Notes |
 |---|---|---|
 | `id` | UUID | |
-| `order` | int | Base 0 |
+| `order` | int | 0-based |
 | `title` | string | |
 | `description`, `disclaimer` | string \| null | |
 | `theme_name` | enum \| null | `gender`, `quote`, `weight`, `height`, `celebration`, `user-capture-data`, `jeans-size`, `weight-composite`, `organization-users-login` |
 | `statements` | any \| null | |
-| `visibility` | string[] | Géneros para los que se muestra (`male`, `female`) |
-| `options` | `InputControl[]` | Se usa el primer control que se pueda renderizar |
-| `acceptance_criteria` | string[] ≤ 10 | Criterios para la evaluación por IA |
-| `max_followups` | int 0–5 \| null | Reintentos permitidos cuando la IA rechaza la respuesta |
+| `visibility` | string[] | Genders for which it is shown (`male`, `female`) |
+| `options` | `InputControl[]` | The first control that can be rendered is used |
+| `acceptance_criteria` | string[] ≤ 10 | Criteria for the AI evaluation |
+| `max_followups` | int 0–5 \| null | Retries allowed when the AI rejects the answer |
 | `attachment_required` | bool \| null | |
-| `category` | string \| null | Categoría de puntaje del diagnóstico |
+| `category` | string \| null | Diagnostic scoring category |
 | `required` | bool | Default true |
-| *Solo en sesión:* `improvement_message`, `flagged_answer`, `review` | | Ver §6.10 |
+| *Session only:* `improvement_message`, `flagged_answer`, `review` | | See §6.10 |
 
 **InputControl:**
 
-| Campo | Tipo | Notas |
+| Field | Type | Notes |
 |---|---|---|
 | `name` | string (UUID) | |
 | `type` | enum | `radio`, `checkbox`, `select`, `range`, `text`, `audio`, `ranking`, `file`, `message`, `email`, `tel`, `phone` |
-| `options` | `[{label, value?, visibility[]}]` | Si `value` es null, se usa `label` |
+| `options` | `[{label, value?, visibility[]}]` | If `value` is null, `label` is used |
 | `validations` | `[{type, value?, message?, pattern?}]` | `type`: `min`, `max`, `required`, `format` |
-| `default_value` | any | Placeholder o valor inicial del slider |
-| *Solo en sesión:* `value` | string \| string[] | Seleccionados, transcripciones o claves de archivo |
-| *Solo en sesión:* `timestamp`, `skipped` (default false), `locked` | | `locked` se usa en reintentos |
+| `default_value` | any | Placeholder or initial slider value |
+| *Session only:* `value` | string \| string[] | Selected values, transcriptions or file keys |
+| *Session only:* `timestamp`, `skipped` (default false), `locked` | | `locked` is used in retries |
 
-**OnCompleted** (unión discriminada por `type`):
+**OnCompleted** (union discriminated by `type`):
 
 - `default {message?}`
 - `quiz_funnel {products[]}`
 - `diagnostic {tiers[], recommendations[], action_plan[]}`
   - Tier: `{id, name, description?, min, max, visible = true}`
-  - Recomendación: `{tier_id, recommendation, visible}`
-  - Acción: `{tier_id, action, visible}`
+  - Recommendation: `{tier_id, recommendation, visible}`
+  - Action: `{tier_id, action, visible}`
 - `process_mapping {message?}`
 
 ### 6.6 Flow
 
-| Campo | Tipo | Regla |
+| Field | Type | Rule |
 |---|---|---|
-| `id` | string(20) | ID corto |
-| `slug` | string 1–100 | `^[a-z0-9]+(-[a-z0-9]+)*$`, **único en todo el sistema** |
+| `id` | string(20) | Short ID |
+| `slug` | string 1–100 | `^[a-z0-9]+(-[a-z0-9]+)*$`, **unique across the whole system** |
 | `detail` | string | |
 | `customer_id` | string | |
-| `questionnaire_id` | UUID | **Un flujo por cuestionario** |
-| `source_url` | string \| null | Origen de la tienda (quiz funnel). Acceso por este campo |
-| `states` | `State[]` | Ver abajo |
-| `cta` | objeto \| null | `{title 1–120, description ≤ 200, button:{text 1–50, url 1–2048 que empieza con http(s)://}}` |
-| `layout` | string[] \| null | Cada uno de `score`, `tier`, `categories`, `recommendations`, `action_plan`, `pdf`, `cta` como máximo una vez |
-| `result_copy` | objeto \| null | 15 textos opcionales ≤ 300 caracteres (se recortan; vacío = texto por defecto): `eyebrow, title, subtitle, tier_label, overall_score, categories_title, categories_subtitle, chart_title, chart_subtitle, chart_legend, recommendations, action_plan, report_title, report_subtitle, download` |
+| `questionnaire_id` | UUID | **One flow per questionnaire** |
+| `source_url` | string \| null | Store origin (quiz funnel). Accessed by this field |
+| `states` | `State[]` | See below |
+| `cta` | object \| null | `{title 1–120, description ≤ 200, button:{text 1–50, url 1–2048 starting with http(s)://}}` |
+| `layout` | string[] \| null | Each of `score`, `tier`, `categories`, `recommendations`, `action_plan`, `pdf`, `cta` at most once |
+| `result_copy` | object \| null | 15 optional texts ≤ 300 characters (trimmed; empty = default text): `eyebrow, title, subtitle, tier_label, overall_score, categories_title, categories_subtitle, chart_title, chart_subtitle, chart_legend, recommendations, action_plan, report_title, report_subtitle, download` |
 | `created_at`, `updated_at` | datetime | |
 
-**State:** `{state_id (15 caracteres, único en el flujo), type, parameters{}, outputs{}, next?}`.
+**State:** `{state_id (15 characters, unique within the flow), type, parameters{}, outputs{}, next?}`.
 
 - `type`: `questionnaire`, `regular`, `quiz_funnel`, `diagnostic`, `prompt`, `result`.
-- `parameters.questionnaire_id` en los estados `questionnaire`.
-- Los estados `prompt` guardan la referencia al texto del prompt en el almacén de objetos.
+- `parameters.questionnaire_id` in `questionnaire` states.
+- `prompt` states store the reference to the prompt text in object storage.
 
-**Tipo mostrado del flujo:** el primer estado especial presente, en este orden de prioridad: `prompt` → `diagnostic` → `quiz_funnel` → si no hay ninguno, `default`.
+**Displayed flow type:** the first special state present, in this priority order: `prompt` → `diagnostic` → `quiz_funnel` → if none is present, `default`.
 
 ### 6.7 Diagnostic
 
-`{id, questionnaire_id, tiers, recommendations, action_plan}`. Acceso por `questionnaire_id`.
+`{id, questionnaire_id, tiers, recommendations, action_plan}`. Accessed by `questionnaire_id`.
 
 ### 6.8 Prompt
 
-`{id, questionnaire_id, customer_id, s3_path (referencia al texto en el almacén de objetos), outcome?, order = 0}`. Acceso por `questionnaire_id`.
+`{id, questionnaire_id, customer_id, s3_path (reference to the text in object storage), outcome?, order = 0}`. Accessed by `questionnaire_id`.
 
-### 6.9 Session (respuesta)
+### 6.9 Session (response)
 
-Copia completa del cuestionario más estos campos:
+Full copy of the questionnaire plus these fields:
 
-| Campo | Notas |
+| Field | Notes |
 |---|---|
-| `session_id` | UUIDv4, PK. Acceso por `questionnaire_id` |
+| `session_id` | UUIDv4, PK. Accessed by `questionnaire_id` |
 | `started_at`, `ended_at` | |
 | `flow_id` | |
-| `status` | Máquina de estados: `filling` → `filled_out` → `processing` → `completed`. Valores antiguos: `in_progress` (= filling), `submitted` (= filled_out) |
-| `user_data` | `{name, email, phone}` si se capturó |
-| `assignations_id`, `organization_user_id` | Solo en sesiones de asignación |
+| `status` | State machine: `filling` → `filled_out` → `processing` → `completed`. Legacy values: `in_progress` (= filling), `submitted` (= filled_out) |
+| `user_data` | `{name, email, phone}` if captured |
+| `assignations_id`, `organization_user_id` | Only in assignation sessions |
 | `assignation_type` | `follow_up` \| null |
 | `attempt` | int, default 1 |
-| Por pregunta: `review` | `{status: approved \| rejected, comment?, reviewed_at, attempt}` |
-| Por pregunta: `improvement_message`, `flagged_answer` | Resultado de la evaluación por IA |
+| Per question: `review` | `{status: approved \| rejected, comment?, reviewed_at, attempt}` |
+| Per question: `improvement_message`, `flagged_answer` | Result of the AI evaluation |
 
 ### 6.10 SessionResults
 
@@ -396,83 +396,83 @@ Copia completa del cuestionario más estos campos:
 { type: "diagnostic",
   score: {value, max},
   categories: [{id, name, score, max}],
-  tiers: [...solo los visibles],
+  tiers: [...visible ones only],
   recommendations: [{tier_id, recommendation}],
   action_plan: [{tier_id, action}] }
 ```
 
 ### 6.11 Product
 
-`{product_id, customer_id, name, description (HTML), price (decimal, se interpreta con tolerancia desde texto), image_url?, product_url?, source_url?, questionnaire_id?, created_at, updated_at}`.
+`{product_id, customer_id, name, description (HTML), price (decimal, leniently parsed from text), image_url?, product_url?, source_url?, questionnaire_id?, created_at, updated_at}`.
 
-Acceso por `customer_id`, `source_url` y `questionnaire_id`.
+Accessed by `customer_id`, `source_url` and `questionnaire_id`.
 
 ### 6.12 Organization
 
-`{organization_id (UUIDv4), customer_id, name (1–120), domain_email? (único en todo el sistema, en minúsculas), description? (≤ 1000), active = true, timestamps}`.
+`{organization_id (UUIDv4), customer_id, name (1–120), domain_email? (unique across the whole system, lowercase), description? (≤ 1000), active = true, timestamps}`.
 
-Acceso por `domain_email` y por `customer_id`.
+Accessed by `domain_email` and by `customer_id`.
 
-### 6.13 OrganizationUser (miembro)
+### 6.13 OrganizationUser (member)
 
-| Campo | Regla |
+| Field | Rule |
 |---|---|
 | `organization_user_id` | UUIDv4 |
-| `organization_id` | Acceso por este campo |
-| `name` | 1–200. **Normalizado:** minúsculas, sin acentos, espacios simples |
-| `email` | Minúsculas. Acceso por email |
-| `phone` | Solo dígitos con `+` inicial opcional, ≤ 50. Acceso por phone |
-| `role`, `area` | Texto libre ≤ 120 |
+| `organization_id` | Accessed by this field |
+| `name` | 1–200. **Normalized:** lowercase, no accents, single spaces |
+| `email` | Lowercase. Accessed by email |
+| `phone` | Digits only with optional leading `+`, ≤ 50. Accessed by phone |
+| `role`, `area` | Free text ≤ 120 |
 | timestamps | |
 
-Cada miembro necesita al menos email o teléfono. El email es único dentro de la organización.
+Each member needs at least an email or a phone. The email is unique within the organization.
 
 ### 6.14 Assignation
 
-| Campo | Regla |
+| Field | Rule |
 |---|---|
 | `assignations_id` | UUIDv4 |
-| `customer_id`, `organization_id`, `questionnaire_id` | Acceso por `questionnaire_id`, `customer_id` y `project_id` |
+| `customer_id`, `organization_id`, `questionnaire_id` | Accessed by `questionnaire_id`, `customer_id` and `project_id` |
 | `name` | 1–200 |
-| `description` | ≤ 2000. Nota interna; el respondente nunca la ve |
-| `max_follow_ups` | ≥ 0 (la consola envía 2) |
+| `description` | ≤ 2000. Internal note; the respondent never sees it |
+| `max_follow_ups` | ≥ 0 (the console sends 2) |
 | `active` | Default true |
-| `type` | `default` \| `follow_up`. **Inmutable** |
-| `due_date` | `YYYY-MM-DD`, solo en follow-up |
-| `audience` | `{type: all \| members \| area \| role, values[] ≤ 500}`. `all` sin valores; los demás con al menos uno. `members` = UUIDs de miembros. `area` y `role` se comparan sin distinguir mayúsculas ni acentos |
-| `questions` | ≥ 1. Es la **diapositiva de registro** (login del respondente), no el cuestionario |
-| *Gestionados por el servidor:* `project_id?`, `shared_session_id?`, `attempts[{number ≥ 1, session_id, created_at}]`, `last_reminder_sent_at?` | |
+| `type` | `default` \| `follow_up`. **Immutable** |
+| `due_date` | `YYYY-MM-DD`, follow-up only |
+| `audience` | `{type: all \| members \| area \| role, values[] ≤ 500}`. `all` has no values; the others have at least one. `members` = member UUIDs. `area` and `role` are compared ignoring case and accents |
+| `questions` | ≥ 1. This is the **registration slide** (respondent login), not the questionnaire |
+| *Server-managed:* `project_id?`, `shared_session_id?`, `attempts[{number ≥ 1, session_id, created_at}]`, `last_reminder_sent_at?` | |
 | timestamps | |
 
-**Regla:** un cuestionario se puede asignar a **una sola organización**.
+**Rule:** a questionnaire can be assigned to **only one organization**.
 
 ### 6.15 AssignationAnswer
 
-Clave `(assignations_id, organization_user_id)` → `{session_id}`. Se escribe cuando el miembro envía la primera etapa.
+Key `(assignations_id, organization_user_id)` → `{session_id}`. Written when the member submits the first stage.
 
 ### 6.16 Project
 
-`{project_id, customer_id, organization_id (inmutable), name (1–200), description? (≤ 2000), due_date (requerido al crear; puede ser null en filas antiguas), timestamps}`.
+`{project_id, customer_id, organization_id (immutable), name (1–200), description? (≤ 2000), due_date (required on creation; may be null in legacy rows), timestamps}`.
 
-Una asignación pertenece como máximo a un proyecto.
+An assignation belongs to at most one project.
 
 ### 6.17 Job
 
-| Campo | Valores |
+| Field | Values |
 |---|---|
-| `job_id` | `"job_"` + ID ordenable en el tiempo (tipo ULID) |
-| `job_type` | `styles`, `profile_customization` (antiguo), `answer_evaluation`, `linkedin_questionnaire`, `prompt_questionnaire`, `create_quiz_funnel`, `scrape_products`, `process_completed_session`, `chat`, `chat-questionnaire-created`, `chat-questionnaire-drafted`, `chat-questionnaire-approved` |
+| `job_id` | `"job_"` + time-sortable ID (ULID-like) |
+| `job_type` | `styles`, `profile_customization` (legacy), `answer_evaluation`, `linkedin_questionnaire`, `prompt_questionnaire`, `create_quiz_funnel`, `scrape_products`, `process_completed_session`, `chat`, `chat-questionnaire-created`, `chat-questionnaire-drafted`, `chat-questionnaire-approved` |
 | `status` | `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`, `CANCELLED` |
-| `payload` | Interno. **Nunca se devuelve** |
-| `result` | Si falla: `{error:{type, message}}` |
-| `stage` | Sub-etapa de progreso (p. ej. estilos: `reading_website` → `designing_styles` → `saving`) |
+| `payload` | Internal. **Never returned** |
+| `result` | On failure: `{error:{type, message}}` |
+| `stage` | Progress sub-stage (e.g. styles: `reading_website` → `designing_styles` → `saving`) |
 | timestamps | |
 
-Acceso por `job_type` y por `status`.
+Accessed by `job_type` and by `status`.
 
 ### 6.18 Styles
 
-Clave `customer_id` → `{website?, styles}`. `styles` (camelCase):
+Key `customer_id` → `{website?, styles}`. `styles` (camelCase):
 
 ```
 logoUrl
@@ -485,1602 +485,1602 @@ button.primary | button.secondary {background, backgroundHover, color, border, p
 input {background, color, placeholderColor, border, borderFocus, borderRadius, padding, fontSize}
 ```
 
-Hay un conjunto de **estilos por defecto** definido por la plataforma.
+There is a set of **default styles** defined by the platform.
 
 ### 6.19 QuestionnaireDashboard
 
-`{questionnaire_id (PK), customer_id, type, charts[{id, chart_type, title, question_ids[], order}], created_at}`. Se crea una sola vez.
+`{questionnaire_id (PK), customer_id, type, charts[{id, chart_type, title, question_ids[], order}], created_at}`. Created only once.
 
 - `type`: `satisfaction`, `knowledge`, `profiling`, `recommendations`, `eligibility`, `opinion`.
 - `chart_type`: `kpi`, `gauge`, `line`, `donut`, `bar`, `horizontal_bar`, `stacked_bar`, `treemap`, `histogram`, `boxplot`, `ranking_avg`, `heatmap`, `tier_distribution`.
 
 ### 6.20 ApiKey
 
-`{id = SHA-256 de la clave, customer_id, name (1–100), status: active | revoked, created_at, expires_at?, last_used_at?}`. **La clave en claro nunca se guarda.**
+`{id = SHA-256 of the key, customer_id, name (1–100), status: active | revoked, created_at, expires_at?, last_used_at?}`. **The plaintext key is never stored.**
 
 ### 6.21 Webhook
 
-`{id (UUID), customer_id, url (solo https), event_type: questionnaire.completed, method: POST, timestamps}`.
+`{id (UUID), customer_id, url (https only), event_type: questionnaire.completed, method: POST, timestamps}`.
 
-### 6.22 Video (documentación)
+### 6.22 Video (documentation)
 
 `{id (UUID), title (1–200), description (≤ 2000), url (1–500, YouTube), language: es | en, category (≤ 100), order ≥ 0, duration_minutes ≥ 0, timestamps}`.
 
 ### 6.23 AppSetting
 
-`{key, value}`. Ejemplo: modelo de LLM por defecto para generar cuestionarios.
+`{key, value}`. Example: default LLM model for generating questionnaires.
 
 ### 6.24 SystemPrompt
 
-Texto Markdown **versionado** por clave (12 claves, ver [Anexo D](#anexo-d--claves-de-system-prompts)). El historial de versiones es el historial de ediciones: `{key, text, version_id, updated_at, updated_by}`.
+**Versioned** Markdown text per key (12 keys, see [Appendix D](#appendix-d--system-prompt-keys)). The version history is the edit history: `{key, text, version_id, updated_at, updated_by}`.
 
-### 6.25 Datos que NO se guardan localmente
+### 6.25 Data that is NOT stored locally
 
-- **Cupones y códigos promocionales:** viven solo en la pasarela de pagos.
-- **Pagos:** viven en la pasarela y en el servicio de uso/analítica.
-- **Contadores de uso:** viven en el servicio de uso/analítica (§13.8).
-- Hay tablas antiguas (`session`, `questionnaire-analytics`) que la migración puede descartar tras verificar que no tienen datos vivos.
+- **Coupons and promotion codes:** live only in the payment gateway.
+- **Payments:** live in the gateway and in the usage/analytics service.
+- **Usage counters:** live in the usage/analytics service (§13.8).
+- There are legacy tables (`session`, `questionnaire-analytics`) that the migration may discard after verifying they hold no live data.
 
 ---
 
-## 7. Reglas de negocio
+## 7. Business rules
 
-### 7.1 Gate de plan
+### 7.1 Plan gate
 
-**Plan aplicable.** La cuenta DEBE tener un plan, la fila del plan DEBE existir y la fecha de hoy (UTC) DEBE estar en `from_at..to_at` inclusive. Si no, se rechaza con:
+**Applicable plan.** The account MUST have a plan, the plan row MUST exist, and today's date (UTC) MUST fall within `from_at..to_at` inclusive. Otherwise the request is rejected with:
 
-| Condición | Razón |
+| Condition | Reason |
 |---|---|
-| La cuenta no tiene plan | `NO_PLAN` |
-| Hoy está fuera de la vigencia | `PLAN_INACTIVE` |
-| El plan no existe en el catálogo | `PLAN_NOT_FOUND` |
+| The account has no plan | `NO_PLAN` |
+| Today is outside the validity window | `PLAN_INACTIVE` |
+| The plan does not exist in the catalog | `PLAN_NOT_FOUND` |
 
-**Límites:**
+**Limits:**
 
-- Feature ausente del plan → `FEATURE_NOT_IN_PLAN`. `limit < 0` → ilimitado. `limit ≥ 0` → se rechaza cuando `used >= limit` (`FEATURE_LIMIT_REACHED`).
-- `max_questionnaires` limita la **suma** de los contadores `regular + diagnostic + quiz-funnel + chain + chat` → `QUESTIONNAIRE_LIMIT_REACHED`.
-- `responses` se limita con `max_responses`, no con la lista de features → `RESPONSE_LIMIT_REACHED`.
-- Respuesta de rechazo: `429 PLAN_LIMIT_REACHED` con `details: {reason, feature}`.
-- Si el servicio de uso no responde: `503 USAGE_UNAVAILABLE`.
+- Feature missing from the plan → `FEATURE_NOT_IN_PLAN`. `limit < 0` → unlimited. `limit ≥ 0` → rejected when `used >= limit` (`FEATURE_LIMIT_REACHED`).
+- `max_questionnaires` limits the **sum** of the counters `regular + diagnostic + quiz-funnel + chain + chat` → `QUESTIONNAIRE_LIMIT_REACHED`.
+- `responses` is limited by `max_responses`, not by the feature list → `RESPONSE_LIMIT_REACHED`.
+- Rejection response: `429 PLAN_LIMIT_REACHED` with `details: {reason, feature}`.
+- If the usage service does not respond: `503 USAGE_UNAVAILABLE`.
 
-**Dos tipos de gate:**
+**Two kinds of gate:**
 
-| Tipo | Qué comprueba | Consume cuota | Puede dar 503 |
+| Kind | What it checks | Consumes quota | Can return 503 |
 |---|---|---|---|
-| **Capacidad** | Límite contra contadores de uso | Sí (la acción cuenta) | Sí |
-| **Feature** | Solo que el plan incluye la feature (límite presente y ≠ 0) | No | No |
+| **Capacity** | Limit against usage counters | Yes (the action counts) | Yes |
+| **Feature** | Only that the plan includes the feature (limit present and ≠ 0) | No | No |
 
-- `Admin` siempre pasa el gate.
-- **No se aplica gate a:** endpoints admin, borrados, etapas hijas de una cadena, generación desde LinkedIn, checkout, onboarding, cambio de idioma de la cuenta.
-- Los contadores son **por periodo mensual** (ventana del plan).
+- `Admin` always passes the gate.
+- **No gate applies to:** admin endpoints, deletions, child stages of a chain, generation from LinkedIn, checkout, onboarding, changing the account language.
+- Counters are **per monthly period** (the plan window).
 
-### 7.2 Qué cuenta como uso
+### 7.2 What counts as usage
 
-| Acción | Feature que suma |
+| Action | Feature incremented |
 |---|---|
-| Crear cuestionario (POST, copia, quiz funnel, chat, LinkedIn) | Según su tipo: `regular`, `diagnostic`, `quiz-funnel`, `chain`, `chat`. LinkedIn cuenta como `diagnostic` |
-| Completar la **última etapa** de una cadena (o un cuestionario simple) | `responses` (una por respondente) |
-| Job de estilos completado (si falla, no cuenta) | `styles` |
-| Consultar analítica o datos del dashboard | `analytics` |
-| Generar un dashboard (una vez por cuestionario) | `dashboards` |
-| Cada llamada a la API externa | `api` |
-| Cada entrega exitosa de webhook | `webhook` |
-| Editar settings de la cuenta (salvo idioma) | `profile` |
-| Crear un usuario de equipo | `users` |
-| Crear o borrar una organización | `organizations` |
-| Crear o borrar una asignación | `assignations` |
+| Create a questionnaire (POST, copy, quiz funnel, chat, LinkedIn) | By its type: `regular`, `diagnostic`, `quiz-funnel`, `chain`, `chat`. LinkedIn counts as `diagnostic` |
+| Complete the **last stage** of a chain (or a simple questionnaire) | `responses` (one per respondent) |
+| Styles job completed (if it fails, it does not count) | `styles` |
+| Query analytics or dashboard data | `analytics` |
+| Generate a dashboard (once per questionnaire) | `dashboards` |
+| Each call to the external API | `api` |
+| Each successful webhook delivery | `webhook` |
+| Edit account settings (except language) | `profile` |
+| Create a team user | `users` |
+| Create or delete an organization | `organizations` |
+| Create or delete an assignation | `assignations` |
 
-### 7.3 Registro y prueba gratuita
+### 7.3 Sign-up and free trial
 
-- **Registro nativo o primer login con Google:** crea la cuenta con un `customer_id` nuevo, el usuario root en `Customer-Admin`, `onboarding_completed = false` y el plan `starter` desde hoy hasta hoy + 1 mes calendario (el día se ajusta a la longitud del mes).
-- **Prueba en la pasarela de pagos:** una sola vez por cuenta, y solo si el plan tiene `trial_days > 0`. Siempre se pide tarjeta. Si no hay método de pago al terminar la prueba, se cancela la suscripción. La primera vez que una suscripción entra en prueba se marca `stripe_trial_used_at`.
+- **Native sign-up or first Google login:** creates the account with a new `customer_id`, the root user in `Customer-Admin`, `onboarding_completed = false`, and the `starter` plan from today until today + 1 calendar month (the day is clamped to the month's length).
+- **Trial in the payment gateway:** only once per account, and only if the plan has `trial_days > 0`. A card is always required. If there is no payment method when the trial ends, the subscription is canceled. The first time a subscription enters a trial, `stripe_trial_used_at` is set.
 
-### 7.4 Facturación
+### 7.4 Billing
 
 **Checkout:**
 
-- Es una suscripción con una sola línea en la página de pago alojada por la pasarela.
-- Metadatos: `{customer_id, plan_id, billing_interval}`.
-- Reutiliza el cliente de la pasarela si ya existe. Siempre admite códigos promocionales.
-- URLs de retorno: `{ADMIN_URL}/profile/plans?checkout=success|cancel`.
+- It is a subscription with a single line item on the payment page hosted by the gateway.
+- Metadata: `{customer_id, plan_id, billing_interval}`.
+- Reuses the gateway customer if one already exists. Promotion codes are always allowed.
+- Return URLs: `{ADMIN_URL}/profile/plans?checkout=success|cancel`.
 
-**Clasificación de un cambio de plan** (se compara contra el plan que la pasarela realmente cobra hoy). Se aplica la primera regla que coincida:
+**Classifying a plan change** (compared against the plan the gateway is actually charging today). The first matching rule applies:
 
-1. El destino no tiene precio → **downgrade**.
-2. De anual a mensual → siempre **downgrade**.
-3. El plan actual no tiene precio, o el destino cuesta más → **upgrade**.
-4. El destino cuesta menos → **downgrade**.
-5. Mismo precio, de mensual a anual → **upgrade**. Cualquier otro caso de mismo precio → **downgrade**.
+1. The target has no price → **downgrade**.
+2. From yearly to monthly → always **downgrade**.
+3. The current plan has no price, or the target costs more → **upgrade**.
+4. The target costs less → **downgrade**.
+5. Same price, from monthly to yearly → **upgrade**. Any other same-price case → **downgrade**.
 
-**Efecto:**
+**Effect:**
 
-- **Upgrade:** cambio inmediato del precio; se cobra al momento la diferencia prorrateada. Si ese cobro falla, el cambio falla.
-- **Downgrade:** se programa el plan más barato como siguiente fase por un ciclo. Luego se libera la programación y la suscripción se renueva en el plan nuevo.
-- Upgrade y cancelación liberan antes cualquier programación pendiente.
-- **Cancelar** = cancelar al final del periodo. **Reanudar** = quitar esa cancelación (idempotente).
-- **Revertir** = anular un downgrade programado.
+- **Upgrade:** immediate price change; the prorated difference is charged right away. If that charge fails, the change fails.
+- **Downgrade:** the cheaper plan is scheduled as the next phase for one cycle. The schedule is then released and the subscription renews on the new plan.
+- Upgrade and cancellation first release any pending schedule.
+- **Cancel** = cancel at period end. **Resume** = remove that cancellation (idempotent).
+- **Revert** = undo a scheduled downgrade.
 
-**Eventos del webhook de pagos** (todos idempotentes):
+**Payment webhook events** (all idempotent):
 
-| Evento | Efecto |
+| Event | Effect |
 |---|---|
-| `checkout.session.completed` | Asignar el plan con el periodo de la suscripción; evento `SubscriptionCreated` |
-| `invoice.paid` | Reasignar el periodo; registrar el pago en analítica (deduplicado por id de evento; si falla, responder 500 para que la pasarela reintente). Si `billing_reason = subscription_cycle`, evento `SubscriptionRenewed` |
-| `customer.subscription.updated` | Reasignar. Si cambió el plan: evento `PlanChanged`; si el plan nuevo es más caro, **reiniciar a 0 todos los contadores de uso** |
-| `customer.subscription.deleted` | Evento `SubscriptionCancelled`; borrar el id de suscripción guardado. La ventana pagada expira sola |
-| `customer.subscription.trial_will_end` | Evento `TrialWillEnd` |
-| `invoice.payment_failed` | Evento `PaymentFailed` |
+| `checkout.session.completed` | Assign the plan with the subscription's period; `SubscriptionCreated` event |
+| `invoice.paid` | Reassign the period; record the payment in analytics (deduplicated by event id; if it fails, respond 500 so the gateway retries). If `billing_reason = subscription_cycle`, `SubscriptionRenewed` event |
+| `customer.subscription.updated` | Reassign. If the plan changed: `PlanChanged` event; if the new plan is more expensive, **reset all usage counters to 0** |
+| `customer.subscription.deleted` | `SubscriptionCancelled` event; delete the stored subscription id. The paid window expires on its own |
+| `customer.subscription.trial_will_end` | `TrialWillEnd` event |
+| `invoice.payment_failed` | `PaymentFailed` event |
 
-**Cupones:**
+**Coupons:**
 
-- La pasarela solo restringe cupones por producto, así que los intervalos de facturación se controlan por producto. Un plan cuyo precio mensual y anual comparten producto no admite un cupón limitado a un solo intervalo (`COUPON_INTERVAL_NEEDS_OWN_PRODUCT`).
-- Sin `plan_ids`, el cupón aplica a todos los planes comprables.
-- Si falla la creación del código promocional, se borra el cupón.
+- The gateway only restricts coupons by product, so billing intervals are controlled per product. A plan whose monthly and yearly prices share a product cannot accept a coupon limited to a single interval (`COUPON_INTERVAL_NEEDS_OWN_PRODUCT`).
+- Without `plan_ids`, the coupon applies to all purchasable plans.
+- If creating the promotion code fails, the coupon is deleted.
 
-### 7.5 Creación y edición de cuestionarios y flujos
+### 7.5 Creating and editing questionnaires and flows
 
-**Validación del flujo:**
+**Flow validation:**
 
-- Exactamente **un** estado `questionnaire`.
-- `state_id` únicos; `next` debe apuntar a un estado existente.
-- Como máximo **10** estados `prompt`.
-- Un estado `diagnostic` necesita tiers, salvo que sea el último estado de una cadena de prompts (sin `next`). En ese caso el LLM genera los tiers.
+- Exactly **one** `questionnaire` state.
+- Unique `state_id`s; `next` must point to an existing state.
+- At most **10** `prompt` states.
+- A `diagnostic` state needs tiers, unless it is the last state of a prompt chain (no `next`). In that case the LLM generates the tiers.
 
-**El diagnóstico DEBE ser puntuable:**
+**The diagnostic MUST be scorable:**
 
-- al menos un tier; ids de tier únicos; `min ≤ max`;
-- recomendaciones y acciones referencian tiers existentes;
-- puntaje máximo > 0;
-- los tiers ordenados empiezan en 0, terminan exactamente en el máximo y son **contiguos**: `siguiente.min = anterior.max + 1`.
+- at least one tier; unique tier ids; `min ≤ max`;
+- recommendations and actions reference existing tiers;
+- maximum score > 0;
+- the sorted tiers start at 0, end exactly at the maximum, and are **contiguous**: `next.min = previous.max + 1`.
 
-**Puntaje máximo de una pregunta:** suma sobre sus controles. Un control `checkbox` o `ranking` aporta la **suma** de los valores de sus opciones; cualquier otro control aporta el **mayor** valor.
+**Maximum score of a question:** sum over its controls. A `checkbox` or `ranking` control contributes the **sum** of its option values; any other control contributes the **highest** value.
 
-**Valores de opción duplicados** dentro de un control se corrigen solos: un número repetido se sube por encima del mayor en uso; un texto repetido recibe sufijo `-2`, `-3`…
+**Duplicate option values** within a control are fixed automatically: a repeated number is bumped above the highest one in use; a repeated text gets a `-2`, `-3`… suffix.
 
-**Bloqueo por respuestas:**
+**Locking by responses:**
 
-- Un cuestionario con alguna respuesta (valor o skip en cualquier sesión) **no se puede editar**: `409 QUESTIONNAIRE_ALREADY_ANSWERED`. La UI ofrece crear una copia.
-- Al editar, se reconstruyen el diagnóstico y los prompts y el flujo conserva su id.
+- A questionnaire with any response (value or skip in any session) **cannot be edited**: `409 QUESTIONNAIRE_ALREADY_ANSWERED`. The UI offers to create a copy.
+- On edit, the diagnostic and prompts are rebuilt and the flow keeps its id.
 
-**Otras reglas:**
+**Other rules:**
 
-- El `outcome` de un prompt es el siguiente estado terminal del flujo (`diagnostic`, `quiz_funnel` o `result`).
-- **Copiar:**
-  - Título `"(copia) X"`; si ya existe, `"(copia - N) X"`.
+- A prompt's `outcome` is the next terminal state in the flow (`diagnostic`, `quiz_funnel`, or `result`).
+- **Copy:**
+  - Title `"(copia) X"`; if it already exists, `"(copia - N) X"` ("(copy) X").
   - Slug `<base>-copia[-N]`.
-  - Se copian el diagnóstico y los prompts.
-  - [DEUDA] Los prefijos están fijos en español.
+  - The diagnostic and prompts are copied.
+  - [DEBT] The prefixes are hard-coded in Spanish.
 
-### 7.6 Limpieza de la salida del LLM (siempre al generar preguntas)
+### 7.6 Cleaning up LLM output (always when generating questions)
 
-1. Conservar solo el primer control de cada pregunta.
-2. Eliminar preguntas sin control.
-3. Vaciar los campos de ejecución que el LLM haya llenado.
-4. Renumerar `order` desde 0.
-5. Deduplicar los valores de opción (§7.5).
-6. Asignar un UUID nuevo a cada pregunta y a cada nombre de control.
-7. Si no queda ninguna pregunta, fallar.
+1. Keep only the first control of each question.
+2. Remove questions without a control.
+3. Clear any runtime fields the LLM filled in.
+4. Renumber `order` from 0.
+5. Deduplicate option values (§7.5).
+6. Assign a new UUID to each question and each control name.
+7. If no question remains, fail.
 
-### 7.7 Procesamiento al enviar una sesión
+### 7.7 Processing on session submission
 
-1. Marcar `ended_at` y `status = filled_out`.
-2. Calcular el resultado según el tipo:
-   - **Diagnóstico:**
-     - Solo cuentan las preguntas con `category` y máximo > 0.
-     - Puntaje de categoría = suma de los valores seleccionados. Total = suma de categorías, redondeo *half-up*.
-     - Tier = la banda que contiene el total.
-     - Un diagnóstico al final de una cadena puntúa **todas las etapas juntas**, con los ids de pregunta prefijados por etapa.
-   - **E-commerce / quiz funnel** (asíncrono, devuelve job):
-     - El LLM elige ids de producto del catálogo guardado. Se busca primero por cuestionario y luego por cuenta.
-     - Catálogo vacío → sin productos y sin llamar al LLM.
-     - Se guardan los resultados.
+1. Set `ended_at` and `status = filled_out`.
+2. Compute the result according to the type:
+   - **Diagnostic:**
+     - Only questions with a `category` and a maximum > 0 count.
+     - Category score = sum of the selected values. Total = sum of categories, rounded *half-up*.
+     - Tier = the band that contains the total.
+     - A diagnostic at the end of a chain scores **all stages together**, with question ids prefixed by stage.
+   - **E-commerce / quiz funnel** (asynchronous, returns a job):
+     - The LLM picks product ids from the stored catalog. It looks up first by questionnaire and then by account.
+     - Empty catalog → no products and no LLM call.
+     - The results are stored.
    - **AI Team Profile:**
-     - Puntaje fijo sobre 8 preguntas radio mapeadas a 5 dimensiones (D1–D5).
-     - 5 etapas, de "No usage" a "Transformation".
-     - Radar, percentiles de referencia y estructura de reporte fija.
-   - **Samurai8** [CLIENTE] (un questionnaire_id fijo o el cliente `mateo`):
-     - 5 dimensiones; una dimensión de 3 preguntas se escala `round(suma × 6 / 9)`.
+     - Fixed scoring over 8 radio questions mapped to 5 dimensions (D1–D5).
+     - 5 stages, from "No usage" to "Transformation".
+     - Radar, reference percentiles, and a fixed report structure.
+   - **Samurai8** [CLIENT-SPECIFIC] (a fixed questionnaire_id or the `mateo` customer):
+     - 5 dimensions; a 3-question dimension is scaled `round(sum × 6 / 9)`.
      - Tiers: 0–5 Explorador, 6–10 Practicante, 11–15 Estratega, 16–20 Arquitecto, 21–25 Constructor, 26–30 Maestro.
-     - Devuelve fortalezas (dimensiones ≥ 4), dimensión más débil, quick wins, roadmap y CTA.
-   - **Livingood** [CLIENTE] (cliente `livingood`): cuatro puntajes sobre 100 (Fat Loss, Gut Health, Hormone Balance, Energy & Vitality), más perfil y plan de acción.
+     - Returns strengths (dimensions ≥ 4), weakest dimension, quick wins, roadmap, and CTA.
+   - **Livingood** [CLIENT-SPECIFIC] (`livingood` customer): four scores out of 100 (Fat Loss, Gut Health, Hormone Balance, Energy & Vitality), plus profile and action plan.
    - **Default:** `{type: "default"}`.
-3. Luego, **en todos los casos**:
+3. Then, **in all cases**:
    - `status = completed`;
-   - publicar el evento de webhook `questionnaire.completed`;
-   - emitir el evento `QuestionnaireSessionCompleted`;
-   - contar 1 respuesta (solo en la etapa final de una cadena).
-4. La respuesta incluye el `cta`, `layout` y `result_copy` del flujo cuando existen.
+   - publish the `questionnaire.completed` webhook event;
+   - emit the `QuestionnaireSessionCompleted` event;
+   - count 1 response (only on the final stage of a chain).
+4. The response includes the flow's `cta`, `layout`, and `result_copy` when they exist.
 
-### 7.8 Cadenas de prompts
+### 7.8 Prompt chains
 
-- Cada etapa se genera a partir de: las respuestas de la etapa anterior, el prompt del dueño de la cuenta (**tratado como dato no confiable**) y las reglas de la plataforma.
-- Archivos adjuntos a respuestas: hasta **5** por etapa y **32 MB** en total.
+- Each stage is generated from: the previous stage's answers, the account owner's prompt (**treated as untrusted data**), and the platform rules.
+- Files attached to answers: up to **5** per stage and **32 MB** in total.
 
-  | Tipo | Límite |
+  | Type | Limit |
   |---|---|
   | pdf | ≤ 32 MB |
   | png, jpg, jpeg, webp, gif | ≤ 20 MB |
-  | txt, md, csv, json | ≤ 256 KB y ≤ 100 000 caracteres |
+  | txt, md, csv, json | ≤ 256 KB and ≤ 100,000 characters |
 
-- Hasta 3 intentos de generación. Se reintenta si el resultado viene vacío o si algún tier no trae recomendaciones.
-- Las bandas de tiers se calculan en el servidor.
-- Las etapas generadas se guardan como cuestionarios hijos (`parent` = raíz, `origin_session_id` = sesión).
+- Up to 3 generation attempts. A retry happens if the result is empty or if any tier comes without recommendations.
+- Tier bands are computed on the server.
+- Generated stages are stored as child questionnaires (`parent` = root, `origin_session_id` = session).
 
-### 7.9 Evaluación de respuestas por IA (follow-ups)
+### 7.9 AI evaluation of answers (follow-ups)
 
-- Aplica a preguntas `text` o `audio` con `max_followups > 0` y respuesta no vacía.
-- El LLM califica cada criterio de aceptación de 0 a 50.
-- **Aprueba** si la respuesta está relacionada con la pregunta **y** el promedio es ≥ 30.
-- Si no aprueba: `max_followups` baja en 1 (mínimo 0) y se devuelve `improvement_message`. El resultado es `{type:"evaluation", status:"not_sense", question}`. Si aprueba: `status:"success"`.
-- La app del respondente **falla abierta**: si la evaluación falla o se agota el tiempo, el respondente avanza.
+- Applies to `text` or `audio` questions with `max_followups > 0` and a non-empty answer.
+- The LLM grades each acceptance criterion from 0 to 50.
+- **Passes** if the answer is related to the question **and** the average is ≥ 30.
+- If it does not pass: `max_followups` decreases by 1 (minimum 0) and `improvement_message` is returned. The result is `{type:"evaluation", status:"not_sense", question}`. If it passes: `status:"success"`.
+- The respondent app **fails open**: if the evaluation fails or times out, the respondent moves on.
 
 ### 7.10 Dashboards
 
-- El LLM elige el tipo de dashboard y los gráficos **una sola vez**; se guarda para siempre.
-- **Limpieza de la selección del LLM:** se descartan gráficos no permitidos para el tipo, preguntas desconocidas o duplicadas, tipos de control incompatibles y conteos de preguntas fuera de rango.
-- `heatmap` y `stacked_bar` exigen que todas sus preguntas compartan la misma escala de respuesta.
-- Máximo **10** gráficos. Cada tipo aparece como máximo **2** veces; los excedentes se cambian por un tipo hermano de la misma familia.
-- Si no sobrevive ningún gráfico: `502 DASHBOARD_GENERATION_FAILED` y no se guarda nada.
-- Si no existe dashboard y el plan no tiene capacidad para `dashboards`: responder 200 con `locked: {feature: "dashboards", reason}` y sin gráficos.
-- Las fórmulas de visualización están en §10.9.
+- The LLM picks the dashboard type and the charts **only once**; the choice is stored permanently.
+- **Cleaning up the LLM's selection:** charts not allowed for the type, unknown or duplicate questions, incompatible control types, and out-of-range question counts are discarded.
+- `heatmap` and `stacked_bar` require all their questions to share the same answer scale.
+- At most **10** charts. Each type appears at most **2** times; the excess ones are switched to a sibling type of the same family.
+- If no chart survives: `502 DASHBOARD_GENERATION_FAILED` and nothing is stored.
+- If no dashboard exists and the plan has no capacity for `dashboards`: respond 200 with `locked: {feature: "dashboards", reason}` and no charts.
+- The visualization formulas are in §10.9.
 
-### 7.11 Asignaciones
+### 7.11 Assignations
 
-**Progreso:**
+**Progress:**
 
-- Default: `{completed: miembros de la audiencia con respuesta, total: tamaño de la audiencia, unit: "respondents"}`.
-- Follow-up: `{completed: preguntas respondibles contestadas o saltadas, total, unit: "questions"}`.
+- Default: `{completed: audience members with a response, total: audience size, unit: "respondents"}`.
+- Follow-up: `{completed: answerable questions answered or skipped, total, unit: "questions"}`.
 
-**Follow-up completo** cuando su sesión compartida tiene `ended_at`. A partir de ahí, crear sesiones y guardar devuelve `409 FOLLOW_UP_COMPLETED`.
+**Follow-up complete** when its shared session has `ended_at`. From then on, creating sessions and saving return `409 FOLLOW_UP_COMPLETED`.
 
-**`current_question`** = la primera pregunta respondible sin contestar ni saltar.
+**`current_question`** = the first answerable question that has not been answered or skipped.
 
-**Login del respondente** (`POST /assignations/{id}/sessions`), en este orden:
+**Respondent login** (`POST /assignations/{id}/sessions`), in this order:
 
-1. Gate de feature `assignations` sobre el plan del dueño.
-2. En follow-up, `409 FOLLOW_UP_COMPLETED` se comprueba antes de buscar al miembro.
-3. `400 MISSING_IDENTIFIER` si no hay ni teléfono ni email.
-4. Buscar al miembro **solo por teléfono y/o email, nunca por nombre**. Cada identificador enviado debe coincidir.
-5. Errores de búsqueda: `403 USER_NOT_FOUND` o `403 NOT_IN_AUDIENCE`.
-6. Gate de capacidad `responses`.
-7. Emitir un token de sesión de respondente que liga `assignations_id`, `organization_user_id` y `session_id`.
+1. `assignations` feature gate on the owner's plan.
+2. In follow-up, `409 FOLLOW_UP_COMPLETED` is checked before looking up the member.
+3. `400 MISSING_IDENTIFIER` if there is neither phone nor email.
+4. Look up the member **only by phone and/or email, never by name**. Every identifier sent must match.
+5. Lookup errors: `403 USER_NOT_FOUND` or `403 NOT_IN_AUDIENCE`.
+6. `responses` capacity gate.
+7. Issue a respondent session token that binds `assignations_id`, `organization_user_id`, and `session_id`.
 
-**Sesión compartida (follow-up):** todos los miembros escriben en la misma sesión.
+**Shared session (follow-up):** all members write to the same session.
 
-- Al guardar, un valor entrante vacío **no sobrescribe** uno existente (una respuesta gana a un skip).
-- Siempre se conservan las revisiones y los valores bloqueados.
+- On save, an empty incoming value **does not overwrite** an existing one (an answer wins over a skip).
+- Reviews and locked values are always preserved.
 
-**Estado de revisión** (`review_status`): `not_ready`, `in_review`, `changes_requested`, `approved`.
+**Review state** (`review_status`): `not_ready`, `in_review`, `changes_requested`, `approved`.
 
-- Una pregunta bloqueada cuenta como aprobada.
-- Una revisión solo cuenta para el intento en que se hizo.
+- A locked question counts as approved.
+- A review only counts for the attempt in which it was made.
 
-**Revisar** (`PUT /assignations/{id}/reviews/{question_id}`): solo en follow-up, solo si está completo, no sobre preguntas bloqueadas ni diapositivas de mensaje.
+**Review** (`PUT /assignations/{id}/reviews/{question_id}`): only in follow-up, only if it is complete, not on locked questions or message slides.
 
-**Reintento ("enviar a corrección"):**
+**Retry ("enviar a corrección" — send for correction):**
 
-1. Crear una sesión nueva (intento n+1).
-2. Copiar las respuestas aprobadas y **bloquearlas**; vaciar las rechazadas conservando su revisión.
-3. Añadir el intento a `attempts`, mover `shared_session_id` a la sesión nueva y borrar `last_reminder_sent_at`.
-4. Enviar un email a los destinatarios. Si falla el email, el intento ya existe (`502 RETRY_EMAIL_NOT_SENT`).
+1. Create a new session (attempt n+1).
+2. Copy the approved answers and **lock them**; clear the rejected ones while keeping their review.
+3. Append the attempt to `attempts`, move `shared_session_id` to the new session, and clear `last_reminder_sent_at`.
+4. Send an email to the recipients. If the email fails, the attempt already exists (`502 RETRY_EMAIL_NOT_SENT`).
 
-**Otras reglas:**
+**Other rules:**
 
-- `type` no se puede cambiar.
-- No se puede cambiar la organización si la asignación está en un proyecto (`ASSIGNATION_IN_PROJECT`).
-- Si se cambia la organización con audiencia `members`, hay que reiniciar la audiencia.
+- `type` cannot be changed.
+- The organization cannot be changed if the assignation is in a project (`ASSIGNATION_IN_PROJECT`).
+- If the organization is changed with a `members` audience, the audience must be reset.
 
-### 7.12 Proyectos
+### 7.12 Projects
 
-**Estado de una asignación dentro del proyecto** (primera regla que coincida):
+**State of an assignation within the project** (first matching rule):
 
-1. Completada → `review` si `in_review`, `correction` si `changes_requested`, si no `approved`.
-2. Vencida → `overdue`. "Hoy" se calcula en **UTC−12**, así que el propio día de vencimiento nunca cuenta como vencido en ninguna zona horaria.
-3. Cambios pedidos o intento > 1 → `correction`.
-4. Tiene algún progreso → `progress`.
-5. Si no → `pending`.
+1. Completed → `review` if `in_review`, `correction` if `changes_requested`, otherwise `approved`.
+2. Overdue → `overdue`. "Today" is computed in **UTC−12**, so the due date itself never counts as overdue in any time zone.
+3. Changes requested or attempt > 1 → `correction`.
+4. Has some progress → `progress`.
+5. Otherwise → `pending`.
 
-**Estado del proyecto:** el primero que se encuentre entre sus asignaciones, en este orden: `review`, `overdue`, `correction`, `progress`, `pending`, `approved`. Sin asignaciones → `empty`.
+**Project state:** the first one found among its assignations, in this order: `review`, `overdue`, `correction`, `progress`, `pending`, `approved`. No assignations → `empty`.
 
-**`progress_percent`:** promedio redondeado de completed/total de cada asignación (un follow-up completo cuenta 100 %).
+**`progress_percent`:** rounded average of completed/total of each assignation (a complete follow-up counts as 100%).
 
-**La respuesta también trae** `completed_assignations`, `approved_assignations` y `total_assignations`.
+**The response also includes** `completed_assignations`, `approved_assignations`, and `total_assignations`.
 
-**Reglas:**
+**Rules:**
 
-- Solo asignaciones **follow-up** de la **misma organización**.
-- Una asignación en un solo proyecto.
-- Borrar un proyecto desvincula sus asignaciones sin borrarlas.
+- Only **follow-up** assignations from the **same organization**.
+- An assignation belongs to only one project.
+- Deleting a project unlinks its assignations without deleting them.
 
-### 7.13 Recordatorios
+### 7.13 Reminders
 
-Se disparan todos los días a las **13:00 UTC** y también con un botón manual.
+They fire every day at **13:00 UTC** and also via a manual button.
 
-- **Qué asignaciones:** follow-ups activos, no completados, no recordados hoy (UTC).
-- **Respondentes:** emails de los miembros de la audiencia, deduplicados, con enlace a `/a/{id}`.
-- **Usuarios root de la cuenta:** email de estado con progreso, porcentaje, fecha límite, cuántos fueron recordados y enlace a `{ADMIN_URL}/assignations/{id}`. Un dueño que también es miembro solo recibe el recordatorio.
-- **Asunto** según los días restantes: sin fecha / vence hoy / vence en N días / N días de retraso.
-- **Idioma:** el de la cuenta, `en` o `es` (por defecto `es`).
-- El día se marca solo si **ambos** emails salen bien. Un fallo se registra y cuenta como omitido.
-- **Envío manual:**
+- **Which assignations:** active follow-ups, not completed, not reminded today (UTC).
+- **Respondents:** emails of the audience members, deduplicated, with a link to `/a/{id}`.
+- **Account root users:** status email with progress, percentage, due date, how many were reminded, and a link to `{ADMIN_URL}/assignations/{id}`. An owner who is also a member only receives the reminder.
+- **Subject** based on the remaining days: no date / due today / due in N days / N days overdue.
+- **Language:** the account's, `en` or `es` (default `es`).
+- The day is marked only if **both** emails are sent successfully. A failure is logged and counts as skipped.
+- **Manual send:**
 
-  | Condición | Error |
+  | Condition | Error |
   |---|---|
-  | La asignación no es follow-up | `400 NOT_A_FOLLOW_UP` |
-  | El follow-up ya está completo | `409 FOLLOW_UP_COMPLETED` |
-  | No hay destinatarios | `422 NO_RECIPIENTS` |
-  | El envío falla | `502 REMINDER_NOT_SENT` |
+  | The assignation is not a follow-up | `400 NOT_A_FOLLOW_UP` |
+  | The follow-up is already complete | `409 FOLLOW_UP_COMPLETED` |
+  | There are no recipients | `422 NO_RECIPIENTS` |
+  | Sending fails | `502 REMINDER_NOT_SENT` |
 
-  Si sale bien, devuelve `{recipients: n}`.
+  On success, returns `{recipients: n}`.
 
-### 7.14 Webhooks salientes
+### 7.14 Outgoing webhooks
 
-**Evento:** `questionnaire.completed` con este cuerpo:
+**Event:** `questionnaire.completed` with this body:
 
 ```
 { customer_id, event_type, questionnaire_id,
   data: { id, answers: [{title, value, min?, max?}] } }
 ```
 
-**Formato de `value` por tipo de control:**
+**`value` format by control type:**
 
-| Tipo | Valor |
+| Type | Value |
 |---|---|
-| audio | Lista de transcripciones |
-| text | String (las listas se unen con `", "`) |
-| file | Lista de claves de almacenamiento |
-| range | Número, con `min` y `max` |
-| Selección | Las etiquetas de opción cuando los valores son numéricos. Lista para checkbox y ranking |
+| audio | List of transcriptions |
+| text | String (lists are joined with `", "`) |
+| file | List of storage keys |
+| range | Number, with `min` and `max` |
+| Selection | The option labels when the values are numeric. A list for checkbox and ranking |
 
-Las diapositivas `message` se omiten.
+`message` slides are omitted.
 
-**Entrega:**
+**Delivery:**
 
-- Primero se comprueba la capacidad `webhook`. Si se rechaza, no se entrega.
-- `POST` a cada URL suscrita con los headers `X-Signature: sha256=<HMAC-SHA256 hex del cuerpo>` y `X-Event-Type`.
-- Timeouts: 3 s de conexión y 5 s de lectura. **Sin reintentos.**
+- The `webhook` capacity is checked first. If rejected, nothing is delivered.
+- `POST` to each subscribed URL with the headers `X-Signature: sha256=<hex HMAC-SHA256 of the body>` and `X-Event-Type`.
+- Timeouts: 3 s connect and 5 s read. **No retries.**
 
 ### 7.15 Onboarding
 
-- La consola marca el flag de forma explícita.
-- En cuentas antiguas con `onboarding_completed = null`, el valor se deriva de "¿tiene algún cuestionario?" y se guarda.
-- Llamantes sin fila de cuenta reciben `true`.
+- The console sets the flag explicitly.
+- For older accounts with `onboarding_completed = null`, the value is derived from "does it have any questionnaire?" and stored.
+- Callers without an account row receive `true`.
 
-### 7.16 Estilos de marca (job)
+### 7.16 Brand styles (job)
 
-- **Si cambió el sitio web:**
-  1. Un navegador headless extrae el CSS del sitio.
-  2. El LLM diseña un conjunto de estilos.
-  3. Se fuerza contraste de texto ≥ 3:1, con respaldo a blanco/negro o variantes atenuadas.
-  4. Se elige el logo entre los candidatos encontrados en la página.
-  5. Se ignoran los estilos parciales de la petición.
-- **Si no cambió:** los estilos parciales se fusionan en profundidad sobre los existentes (o los por defecto).
-- Etapas visibles del job: `reading_website` → `designing_styles` → `saving`.
+- **If the website changed:**
+  1. A headless browser extracts the site's CSS.
+  2. The LLM designs a set of styles.
+  3. Text contrast ≥ 3:1 is enforced, falling back to white/black or muted variants.
+  4. The logo is chosen from the candidates found on the page.
+  5. The partial styles in the request are ignored.
+- **If it did not change:** the partial styles are deep-merged over the existing ones (or the defaults).
+- Visible job stages: `reading_website` → `designing_styles` → `saving`.
 
-### 7.17 Scraping de productos y creación de quiz funnel
+### 7.17 Product scraping and quiz funnel creation
 
 **Scraping:**
 
-- 1–30 productos por ejecución. Falla si no encuentra ninguno.
-- No persiste nada por sí solo.
+- 1–30 products per run. Fails if none are found.
+- Persists nothing on its own.
 
-**Creación del quiz funnel:**
+**Quiz funnel creation:**
 
-1. La URL de la tienda se reduce a su origen. Si no se envía, se usa la tienda conectada de la plataforma de e-commerce.
-2. Se guardan los productos que el comerciante dejó en pantalla, reemplazando el catálogo guardado para ese origen.
-3. El LLM genera el cuestionario (tipo `ecommerce`) en el idioma de la cuenta. Variantes: `experience` o `profiling`.
-4. Se crea un flujo de 2 estados (`questionnaire` → `quiz_funnel`) con un slug aleatorio en minúsculas.
+1. The store URL is reduced to its origin. If none is sent, the connected store from the e-commerce platform is used.
+2. The products the merchant left on screen are stored, replacing the stored catalog for that origin.
+3. The LLM generates the questionnaire (type `ecommerce`) in the account's language. Variants: `experience` or `profiling`.
+4. A 2-state flow is created (`questionnaire` → `quiz_funnel`) with a random lowercase slug.
 
-**Sincronización con la plataforma de e-commerce:**
+**Sync with the e-commerce platform:**
 
-- Refresca el token si hay token de refresco.
-- **Reemplaza todos** los productos de la cuenta.
-- Solo se usa el precio de la primera variante.
+- Refreshes the token if there is a refresh token.
+- **Replaces all** of the account's products.
+- Only the first variant's price is used.
 
-### 7.18 Generación desde LinkedIn
+### 7.18 Generation from LinkedIn
 
-- Recibe una URL de perfil de LinkedIn e idioma.
-- Extrae el perfil y genera un cuestionario diagnóstico.
-- [CLIENTE] El cuestionario queda a nombre de una cuenta fija (`XhEFtqTt`).
+- Receives a LinkedIn profile URL and a language.
+- Extracts the profile and generates a diagnostic questionnaire.
+- [CLIENT-SPECIFIC] The questionnaire is owned by a fixed account (`XhEFtqTt`).
 
-### 7.19 Asistente de chat (IA)
+### 7.19 Chat assistant (AI)
 
-La conversación la guarda el **cliente**; el backend no guarda estado de chat.
+The conversation is stored by the **client**; the backend keeps no chat state.
 
-**Modo `create`.** Construye un cuestionario por fases: `basics` → `questions` → `ending` → `review`.
+**`create` mode.** Builds a questionnaire in phases: `basics` → `questions` → `ending` → `review`.
 
-- **Datos básicos obligatorios:** título, tipo (`regular` / `diagnostic` / `chain`), tema, landing, disclaimer y captura de datos. Solo se aceptan si salen de las palabras del usuario, y después necesitan confirmación explícita.
-- **Creación:** no se crea nada hasta que el usuario aprueba la revisión del borrador completo. Crear y editar usan la misma lógica de guardado de flujos.
-- **Límites:** hasta 100 preguntas; 8 rondas de herramientas por turno; 90 s por turno.
-- **Acciones sobre la cuenta:**
-  - Las lecturas se ejecutan de inmediato.
-  - Las escrituras se encolan (máximo 50) y solo se ejecutan cuando el usuario dice que sí.
-  - **Excluido a propósito:** crear API keys e invitar usuarios.
-- **Respuestas rápidas** (p. ej. "Sí"/"No", "Ver 5 más"). Las listas se muestran como tablas de 5 o 10 filas.
-- Un cuestionario con respuestas no se edita; el chat ofrece duplicarlo.
+- **Required basics:** title, type (`regular` / `diagnostic` / `chain`), topic, landing, disclaimer, and data capture. They are accepted only if they come from the user's own words, and then they need explicit confirmation.
+- **Creation:** nothing is created until the user approves the review of the complete draft. Creating and editing use the same flow-saving logic.
+- **Limits:** up to 100 questions; 8 tool rounds per turn; 90 s per turn.
+- **Actions on the account:**
+  - Reads run immediately.
+  - Writes are queued (maximum 50) and only run when the user says yes.
+  - **Deliberately excluded:** creating API keys and inviting users.
+- **Quick replies** (e.g., "Sí"/"No", "Ver 5 más" — "Yes"/"No", "See 5 more"). Lists are shown as tables of 5 or 10 rows.
+- A questionnaire with responses is not edited; the chat offers to duplicate it.
 
-**Modo `draft`.** Redacta un cuestionario simple (hasta 100 preguntas de origen) sin guardar nada. Termina como `chat-questionnaire-drafted` o `chat-questionnaire-approved`.
+**`draft` mode.** Drafts a simple questionnaire (up to 100 source questions) without saving anything. It ends as `chat-questionnaire-drafted` or `chat-questionnaire-approved`.
 
-**Herramientas de cuenta disponibles para el chat:**
+**Account tools available to the chat:**
 
-| Área | Herramientas |
+| Area | Tools |
 |---|---|
-| Cuestionarios | `list_questionnaires`, `get_questionnaire`, `list_questionnaire_answers`, `get_questionnaire_analytics`, `set_questionnaire_active`, `copy_questionnaire` |
-| Organizaciones | CRUD de organizaciones |
-| Asignaciones | CRUD de asignaciones, respondentes, `send_follow_up_reminder` |
-| Proyectos | CRUD de proyectos |
-| Plan y facturación | `get_plan_and_usage`, `list_plans`, `start_checkout`, `open_billing_portal`, `change_plan`, `revert_plan_change`, `cancel_subscription`, `resume_subscription` |
-| Cuenta | `get_profile`, `get_account_settings`, `update_account_language`, `update_account_settings`, `extract_brand_styles`, `list_team_users` |
-| Integraciones | `list_api_keys`, `revoke_api_key`, CRUD de webhooks, `get_shopify_connection` |
-| Documentación | `list_videos` |
+| Questionnaires | `list_questionnaires`, `get_questionnaire`, `list_questionnaire_answers`, `get_questionnaire_analytics`, `set_questionnaire_active`, `copy_questionnaire` |
+| Organizations | Organization CRUD |
+| Assignations | Assignation CRUD, respondents, `send_follow_up_reminder` |
+| Projects | Project CRUD |
+| Plan and billing | `get_plan_and_usage`, `list_plans`, `start_checkout`, `open_billing_portal`, `change_plan`, `revert_plan_change`, `cancel_subscription`, `resume_subscription` |
+| Account | `get_profile`, `get_account_settings`, `update_account_language`, `update_account_settings`, `extract_brand_styles`, `list_team_users` |
+| Integrations | `list_api_keys`, `revoke_api_key`, webhook CRUD, `get_shopify_connection` |
+| Documentation | `list_videos` |
 
-**Resultado del job:**
+**Job result:**
 
-- `type`: `chat`, `chat-questionnaire-created`, `chat-questionnaire-drafted` o `chat-questionnaire-approved`.
-- Campos opcionales: `draft`, `quick_replies`, `actions`. Una acción puede llevar un `job_id` de un job en segundo plano, como el de estilos.
+- `type`: `chat`, `chat-questionnaire-created`, `chat-questionnaire-drafted`, or `chat-questionnaire-approved`.
+- Optional fields: `draft`, `quick_replies`, `actions`. An action may carry a `job_id` of a background job, such as the styles job.
 
-### 7.20 System prompts editables
+### 7.20 Editable system prompts
 
-- 12 claves ([Anexo D](#anexo-d--claves-de-system-prompts)) guardadas como Markdown versionado.
-- Algunas claves exigen placeholders: `{admin_instructions}`, `{base_rules}`, `{dashboard_catalog}`. Si faltan: `400 INVALID_PLACEHOLDERS` con `details.missing`.
-- Caché de 5 minutos. Si falla el almacenamiento, se usa el texto por defecto de la plataforma.
+- 12 keys ([Appendix D](#appendix-d--system-prompt-keys)) stored as versioned Markdown.
+- Some keys require placeholders: `{admin_instructions}`, `{base_rules}`, `{dashboard_catalog}`. If missing: `400 INVALID_PLACEHOLDERS` with `details.missing`.
+- 5-minute cache. If storage fails, the platform's default text is used.
 
-### 7.21 Correos
+### 7.21 Emails
 
-| Correo | Disparador | Idioma |
+| Email | Trigger | Language |
 |---|---|---|
-| Recuperación de contraseña | Proveedor de identidad. Código + enlace `{ADMIN_URL}/reset-password?code=####` | — |
-| Recordatorio a respondentes | §7.13 | Cuenta |
-| Estado para el root | §7.13 | Cuenta |
-| Reintento / corrección | §7.11 | Cuenta |
-| Lead de ventas | `POST /contact`. Asunto `"[Ventas] {name} está interesado en el plan {plan}"`. [CLIENTE] 3 destinatarios fijos | es |
-| Bienvenida | Existen plantillas es/en con copia oculta a soporte, **pero nada las envía** | — |
+| Password recovery | Identity provider. Code + link `{ADMIN_URL}/reset-password?code=####` | — |
+| Reminder to respondents | §7.13 | Account |
+| Status for the root | §7.13 | Account |
+| Retry / correction | §7.11 | Account |
+| Sales lead | `POST /contact`. Subject `"[Ventas] {name} está interesado en el plan {plan}"` ("[Sales] {name} is interested in the {plan} plan"). [CLIENT-SPECIFIC] 3 fixed recipients | es |
+| Welcome | es/en templates exist with a BCC to support, **but nothing sends them** | — |
 
-Todos se envían desde `SUPPORT_EMAIL` con plantillas HTML en es y en.
+All are sent from `SUPPORT_EMAIL` with HTML templates in es and en.
 
 ---
 
-## 8. Contrato de la API
+## 8. API contract
 
-### 8.1 Convenciones
+### 8.1 Conventions
 
-- **Prefijo:** `/api/v1`. JSON UTF-8.
-- **Éxito:** `{"message": string, "data": ...}`. Algunas rutas antiguas devuelven JSON sin sobre ("bare"); se indican en cada caso.
+- **Prefix:** `/api/v1`. UTF-8 JSON.
+- **Success:** `{"message": string, "data": ...}`. Some older routes return JSON without an envelope ("bare"); this is noted in each case.
 - **Error:** `{"error": {"code", "message", "details?"}}`.
-- **204:** cuerpo vacío.
-- **Autenticación de usuario:** `Authorization: Bearer <id_token del proveedor de identidad>`. El token lleva `customer_id`, grupos, email, nombre y `root`.
-- **Errores comunes:**
+- **204:** empty body.
+- **User authentication:** `Authorization: Bearer <id_token from the identity provider>`. The token carries `customer_id`, groups, email, name, and `root`.
+- **Common errors:**
 
-  | Código | Caso |
+  | Code | Case |
   |---|---|
-  | `400 INVALID_JSON` | Cuerpo que no es JSON válido |
-  | `400 VALIDATION_ERROR` | Mensajes aplanados como `"campo: msg; ..."` |
-  | `400 INVALID_REQUEST` | Falta un parámetro de ruta |
-  | `400 INVALID_UUID` | Id con formato incorrecto |
-  | `401 UNAUTHORIZED` | Sin autenticación válida |
+  | `400 INVALID_JSON` | Body that is not valid JSON |
+  | `400 VALIDATION_ERROR` | Messages flattened as `"campo: msg; ..."` |
+  | `400 INVALID_REQUEST` | A path parameter is missing |
+  | `400 INVALID_UUID` | Malformed id |
+  | `401 UNAUTHORIZED` | No valid authentication |
   | `403 FORBIDDEN` | "Admin privileges are required." |
 
-- **Paginación**, tres estilos:
-  1. **Numerada** con objeto `{page, page_size, total_items, total_pages, has_next, has_previous}`.
-  2. **Listado de cuestionarios:** `{items, page, page_size, total, total_pages}`.
-  3. **Cursor opaco** (base64) con `next_cursor`: respuestas y respondentes.
-- **Búsqueda textual:** por palabras, sin distinguir mayúsculas ni acentos; todas las palabras deben aparecer.
-- **CORS:** abierto (`*`).
-- **Leyenda de accesos:** **P** = público · **A** = autenticado · **AG** = autenticado y en `ADMIN_GROUPS` · **Own** = el recurso debe ser de la cuenta del llamante (salvo `Admin`) · **Cap(x)** = gate de capacidad · **Feat(x)** = gate de feature.
+- **Pagination**, three styles:
+  1. **Numbered** with an object `{page, page_size, total_items, total_pages, has_next, has_previous}`.
+  2. **Questionnaire listing:** `{items, page, page_size, total, total_pages}`.
+  3. **Opaque cursor** (base64) with `next_cursor`: responses and respondents.
+- **Text search:** word-based, case- and accent-insensitive; all words must appear.
+- **CORS:** open (`*`).
+- **Access legend:** **P** = public · **A** = authenticated · **AG** = authenticated and in `ADMIN_GROUPS` · **Own** = the resource must belong to the caller's account (except `Admin`) · **Cap(x)** = capacity gate · **Feat(x)** = feature gate.
 
-### 8.2 Autenticación y cuenta
+### 8.2 Authentication and account
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `POST /register` | P | `email` (normalizado a minúsculas), `password` (≥ 8), `name` (1–50), `language` (default `es-CO`), `source` (default `default`) | `{customer_id, user:{email, name, root:true, role:"Customer-Admin"}}`. No devuelve tokens: el cliente luego inicia sesión en el proveedor de identidad. `409 EMAIL_ALREADY_EXISTS`. Evento `UserRootRegistered` |
-| `POST /login` | P | `{email, password}` | [DEUDA] Login antiguo contra un único usuario configurado. Devuelve `{token}` con expiración de 730 h. Con credenciales incorrectas da 500. Solo lo usa un acceso de QA |
-| `POST /password-recovery` | P | `email` | Siempre 200 ("If the account exists, a recovery code is on its way"), para no revelar qué cuentas existen. `429 TOO_MANY_ATTEMPTS` |
-| `POST /password-recovery/confirm` | P | `email`, `code` (1–64), `password` (≥ 8) | `400 INVALID_RESET_CODE` (también si el usuario no existe), `400 EXPIRED_RESET_CODE`, `400 INVALID_PASSWORD`, `429 TOO_MANY_ATTEMPTS` |
-| `POST /users` | AG, Cap(users) | `email`, `password` (≥ 8, queda como permanente), `name` (1–50), `role` ∈ asignables | `{email, name, root:false, role, customer_id}`. `400 INVALID_ROLE`, `409 EMAIL_ALREADY_EXISTS`. Evento `UserCreated` |
-| `GET /users` | A | — | `{users:[{email, name, root, role, customer_id}]}`. El root primero, luego por nombre |
+| `POST /register` | P | `email` (normalized to lowercase), `password` (≥ 8), `name` (1–50), `language` (default `es-CO`), `source` (default `default`) | `{customer_id, user:{email, name, root:true, role:"Customer-Admin"}}`. Returns no tokens: the client then signs in with the identity provider. `409 EMAIL_ALREADY_EXISTS`. `UserRootRegistered` event |
+| `POST /login` | P | `{email, password}` | [DEBT] Legacy login against a single configured user. Returns `{token}` with a 730 h expiration. Wrong credentials return 500. Only used by a QA access |
+| `POST /password-recovery` | P | `email` | Always 200 ("If the account exists, a recovery code is on its way"), so as not to reveal which accounts exist. `429 TOO_MANY_ATTEMPTS` |
+| `POST /password-recovery/confirm` | P | `email`, `code` (1–64), `password` (≥ 8) | `400 INVALID_RESET_CODE` (also if the user does not exist), `400 EXPIRED_RESET_CODE`, `400 INVALID_PASSWORD`, `429 TOO_MANY_ATTEMPTS` |
+| `POST /users` | AG, Cap(users) | `email`, `password` (≥ 8, set as permanent), `name` (1–50), `role` ∈ assignable roles | `{email, name, root:false, role, customer_id}`. `400 INVALID_ROLE`, `409 EMAIL_ALREADY_EXISTS`. `UserCreated` event |
+| `GET /users` | A | — | `{users:[{email, name, root, role, customer_id}]}`. Root first, then by name |
 | `GET /profile` | A | — | `{customer:{customer_id, name, email, language, logo_url, website, styles}}` |
-| `GET /customer/onboarding` | A | — | `{onboarding_completed}` (§7.15). Sin gate |
-| `PATCH /customer/onboarding` | A | `{completed: bool}` (no admite campos extra) | `404 CUSTOMER_NOT_FOUND` |
+| `GET /customer/onboarding` | A | — | `{onboarding_completed}` (§7.15). No gate |
+| `PATCH /customer/onboarding` | A | `{completed: bool}` (no extra fields allowed) | `404 CUSTOMER_NOT_FOUND` |
 
-No existen: invitación por email, edición de usuarios, borrado de usuarios, MFA.
+Not available: email invitation, user editing, user deletion, MFA.
 
-### 8.3 Settings, uso, planes y facturación
+### 8.3 Settings, usage, plans, and billing
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
 | `GET /customer/{customer_id}/settings` | P | — | `CustomerSettings` (`max_files` default 10). `404 CUSTOMER_NOT_FOUND` |
-| `PATCH /customer/{customer_id}/settings` | AG; si no es `Admin`, solo sobre su propia cuenta; Cap(profile) si cambia algo distinto de `language` | Al menos un campo; no admite campos extra. `language` nunca null. IDs de tracking: vacío o null los borra. `max_files`: entero estricto 1–20; null lo devuelve al valor por defecto | Evento `ProfileEdited` |
-| `GET /customer/usage` | A | — | `{customer_plan, plan (sin features), usage:{questionnaires_used, from_at, to_at} \| null, plan_active, features:{feature_id:{allowed, reason, limit, used}}}` (todas las features del catálogo) |
-| `GET /plans` | A | — | `{current_plan_id, current_billing_interval, active_until, scheduled_plan_id, scheduled_billing_interval, cancel_at_period_end, trial_eligible, trial_end, discount, plans[]}`. Cada plan: `{id, plan_name, plan_description, price_amount, currency, purchasable, yearly_price_amount, yearly_purchasable, max_questionnaires, max_responses, trial_days, features:[{feature_id, feature_name, limit}]}`. Primero los planes con precio (por precio), luego por nombre. Los campos de programación y cancelación se leen en vivo de la pasarela; si falla, se asume "nada pendiente" |
-| `POST /checkout/session` | A (sin gate) | `plan_id`, `billing_interval` (`month` default \| `year`) | `{checkout_url}`. `404 PLAN_NOT_FOUND`, `400 PLAN_NOT_PURCHASABLE`, `502 STRIPE_UNAVAILABLE` |
-| `POST /checkout/plan-change` | A | Igual | `{type:"changed", plan_id, billing_interval, change:"upgrade"\|"downgrade", effective_at}` o `{type:"checkout", plan_id, billing_interval, checkout_url}` si no hay suscripción. `400 SAME_PLAN`, `404`, `400 PLAN_NOT_PURCHASABLE`, `502` |
+| `PATCH /customer/{customer_id}/settings` | AG; if not `Admin`, only on their own account; Cap(profile) if anything other than `language` changes | At least one field; no extra fields allowed. `language` is never null. Tracking IDs: empty or null clears them. `max_files`: strict integer 1–20; null resets it to the default | `ProfileEdited` event |
+| `GET /customer/usage` | A | — | `{customer_plan, plan (without features), usage:{questionnaires_used, from_at, to_at} \| null, plan_active, features:{feature_id:{allowed, reason, limit, used}}}` (all features in the catalog) |
+| `GET /plans` | A | — | `{current_plan_id, current_billing_interval, active_until, scheduled_plan_id, scheduled_billing_interval, cancel_at_period_end, trial_eligible, trial_end, discount, plans[]}`. Each plan: `{id, plan_name, plan_description, price_amount, currency, purchasable, yearly_price_amount, yearly_purchasable, max_questionnaires, max_responses, trial_days, features:[{feature_id, feature_name, limit}]}`. Priced plans first (by price), then by name. The schedule and cancellation fields are read live from the gateway; if that fails, "nothing pending" is assumed |
+| `POST /checkout/session` | A (no gate) | `plan_id`, `billing_interval` (`month` default \| `year`) | `{checkout_url}`. `404 PLAN_NOT_FOUND`, `400 PLAN_NOT_PURCHASABLE`, `502 STRIPE_UNAVAILABLE` |
+| `POST /checkout/plan-change` | A | Same | `{type:"changed", plan_id, billing_interval, change:"upgrade"\|"downgrade", effective_at}` or `{type:"checkout", plan_id, billing_interval, checkout_url}` if there is no subscription. `400 SAME_PLAN`, `404`, `400 PLAN_NOT_PURCHASABLE`, `502` |
 | `POST /checkout/plan-change/revert` | A | — | `{subscription_id, plan_id, renews_at}`. `400 NO_SUBSCRIPTION`, `400 NO_SCHEDULED_CHANGE` |
 | `POST /checkout/cancel` | A | — | `{subscription_id, plan_id, active_until}`. `400 NO_SUBSCRIPTION` |
-| `POST /checkout/resume` | A | — | `{subscription_id, plan_id, renews_at}`. Idempotente. `400 NO_SUBSCRIPTION`; 502 si el periodo ya venció |
-| `POST /checkout/portal` | A | — | `{portal_url}` del portal de facturación de la pasarela, con retorno a `{ADMIN_URL}/profile/plans`. `400 NO_STRIPE_CUSTOMER` |
-| `POST /checkout/webhook` | P + firma | Evento de la pasarela | Texto plano: 401 si la firma es mala, 500 para forzar reintento, 200 OK |
-| `POST /contact` | A | `type` (`plan`), `plan_id` (requerido si type = plan), `email`, `phone` (1–50) | Envía el lead de ventas. `404 PLAN_NOT_FOUND`, `502 EMAIL_UNAVAILABLE` |
+| `POST /checkout/resume` | A | — | `{subscription_id, plan_id, renews_at}`. Idempotent. `400 NO_SUBSCRIPTION`; 502 if the period has already expired |
+| `POST /checkout/portal` | A | — | `{portal_url}` of the gateway's billing portal, returning to `{ADMIN_URL}/profile/plans`. `400 NO_STRIPE_CUSTOMER` |
+| `POST /checkout/webhook` | P + signature | Gateway event | Plain text: 401 if the signature is bad, 500 to force a retry, 200 OK |
+| `POST /contact` | A | `type` (`plan`), `plan_id` (required if type = plan), `email`, `phone` (1–50) | Sends the sales lead. `404 PLAN_NOT_FOUND`, `502 EMAIL_UNAVAILABLE` |
 
-### 8.4 Cuestionarios, flujos y sesiones
+### 8.4 Questionnaires, flows, and sessions
 
 **`GET /questionnaire`** · A
 
-Parámetros de consulta:
+Query parameters:
 
-| Parámetro | Valores | Error |
+| Parameter | Values | Error |
 |---|---|---|
 | `type` | `default`, `quiz_funnel`, `diagnostic`, `process_mapping` | `INVALID_TYPE` |
 | `sort_by` | `created_at`, `updated_at` | `INVALID_SORT` |
 | `order` | `asc`, `desc` (default `desc`) | `INVALID_ORDER` |
 | `is_active` | `true`, `false`, `1`, `0` | `INVALID_IS_ACTIVE` |
-| `parent` | `ROOT` (default) o un id | — |
+| `parent` | `ROOT` (default) or an id | — |
 | `page` | ≥ 1 (default 1) | — |
 | `page_size` | ≤ 100 (default 20) | — |
-| `search` | Texto, se recorta a 200 caracteres. Busca en el título | — |
+| `search` | Text, trimmed to 200 characters. Searches the title | — |
 
-- Respuesta: `{items, page, page_size, total, total_pages}`.
-- Cada ítem: `questionnaire_id, customer_id, parent, origin_session_id, title, description, created_at, updated_at, is_active, on_completed, status, landing_page, capture_user_data, question_count, is_chain, slug, type`.
-- `Admin` ve todas las cuentas.
+- Response: `{items, page, page_size, total, total_pages}`.
+- Each item: `questionnaire_id, customer_id, parent, origin_session_id, title, description, created_at, updated_at, is_active, on_completed, status, landing_page, capture_user_data, question_count, is_chain, slug, type`.
+- `Admin` sees all accounts.
 
-**Creación, edición y gestión:**
+**Creation, editing, and management:**
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `POST /questionnaire` | AG, Cap(según tipo: `regular` / `diagnostic` / `chain` / `quiz-funnel`) | Un **flujo**: `{slug, states[], cta, layout?, result_copy?}`. El estado `questionnaire` contiene el cuestionario completo | `{questionnaire_id}`. `409 SLUG_ALREADY_IN_USE`. Evento `QuestionnaireCreated` |
-| `PUT /questionnaire` | AG, Own | Igual, más `questionnaire_id` | `data:null`. `404`, `403`, `409 QUESTIONNAIRE_ALREADY_ANSWERED`, `409 SLUG_ALREADY_IN_USE` |
-| `GET /questionnaire/{id}` | A, Own | — | Cuestionario completo, con los tiers del diagnóstico fusionados en `on_completed`. `404 QUESTIONNAIRE_NOT_FOUND`, `403` |
-| `PATCH /questionnaire/{id}` | AG, Own | Exactamente `{is_active: bool estricto}` | La fila actualizada |
-| `POST /questionnaire/{id}/copy` | AG, Own, Cap(tipo del original) | — | El cuestionario nuevo (§7.5). Evento `QuestionnaireCreated` |
-| `GET /questionnaire/{id}/prompts` | AG, Own | — | `{prompts:[{..., text}]}` en orden, con el texto cargado |
+| `POST /questionnaire` | AG, Cap(by type: `regular` / `diagnostic` / `chain` / `quiz-funnel`) | A **flow**: `{slug, states[], cta, layout?, result_copy?}`. The `questionnaire` state contains the full questionnaire | `{questionnaire_id}`. `409 SLUG_ALREADY_IN_USE`. `QuestionnaireCreated` event |
+| `PUT /questionnaire` | AG, Own | Same, plus `questionnaire_id` | `data:null`. `404`, `403`, `409 QUESTIONNAIRE_ALREADY_ANSWERED`, `409 SLUG_ALREADY_IN_USE` |
+| `GET /questionnaire/{id}` | A, Own | — | Full questionnaire, with the diagnostic tiers merged into `on_completed`. `404 QUESTIONNAIRE_NOT_FOUND`, `403` |
+| `PATCH /questionnaire/{id}` | AG, Own | Exactly `{is_active: strict bool}` | The updated row |
+| `POST /questionnaire/{id}/copy` | AG, Own, Cap(type of the original) | — | The new questionnaire (§7.5). `QuestionnaireCreated` event |
+| `GET /questionnaire/{id}/prompts` | AG, Own | — | `{prompts:[{..., text}]}` in order, with the text loaded |
 
-**Respuestas y analítica:**
+**Responses and analytics:**
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `GET /questionnaire/{id}/answers` | A, Own | `status`: `completed` (default), `filling`, `filled_out`, `processing`, `all` (alias antiguos `in_progress`, `submitted`). `limit`: 20, 50 o 100 (default 100). `cursor`. `include_chain=true` | `{items: sesiones enriquecidas con datos del miembro, next_cursor}` |
-| `GET /questionnaire/{id}/analytics` | A, Own, Cap(analytics) | — | `{questionnaire_id, questions_analytics, total_sessions, sessions_completed}`. Evento `AnalyticsFetched` |
-| `GET /questionnaire/{id}/dashboard` | A, Own, Cap(analytics) | — | `{questionnaire_id, customer_id, type, charts[], created_at, questions:[{id, title, type, options:[{label, value}], min, max}], locked}`. `502 DASHBOARD_GENERATION_FAILED`. Evento `DashboardGenerated` |
-| `GET /questionnaire/{id}/dashboard/data` | A, Own, Cap(analytics) | — | Ver §10.9. `502 ANALYTICS_UNAVAILABLE` |
+| `GET /questionnaire/{id}/answers` | A, Own | `status`: `completed` (default), `filling`, `filled_out`, `processing`, `all` (legacy aliases `in_progress`, `submitted`). `limit`: 20, 50, or 100 (default 100). `cursor`. `include_chain=true` | `{items: sessions enriched with member data, next_cursor}` |
+| `GET /questionnaire/{id}/analytics` | A, Own, Cap(analytics) | — | `{questionnaire_id, questions_analytics, total_sessions, sessions_completed}`. `AnalyticsFetched` event |
+| `GET /questionnaire/{id}/dashboard` | A, Own, Cap(analytics) | — | `{questionnaire_id, customer_id, type, charts[], created_at, questions:[{id, title, type, options:[{label, value}], min, max}], locked}`. `502 DASHBOARD_GENERATION_FAILED`. `DashboardGenerated` event |
+| `GET /questionnaire/{id}/dashboard/data` | A, Own, Cap(analytics) | — | See §10.9. `502 ANALYTICS_UNAVAILABLE` |
 
-**Flujos y generación:**
+**Flows and generation:**
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `GET /questionnaire/find?url=` | P | URL de la página | Bare: `{questionnaire_url: {FRONTEND_URL}/f/{flowId}}`. Busca el flujo más reciente cuya URL de tienda coincida (normalizada), con respaldo al origen del sitio. 400 si falta `url`; 404 si no hay coincidencia. Lo usa el widget de la tienda |
-| `GET /flow/{identifier}` | P | id de flujo, slug o id de cuestionario | `{id, slug, detail, states, customer_id, questionnaire_id, source_url, cta, layout, result_copy, created_at, updated_at}`. `404 FLOW_NOT_FOUND` si el cuestionario está asignado a una organización y se buscó por slug o id de flujo |
-| `POST /questionnaire/quiz-funnel` | AG, Cap(quiz-funnel) | `type` (`experience` \| `profiling`), `source_url?`, `products?` | `202 {job}`. Resultado: `{type:"create_quiz_funnel", flow, questionnaire_url}` |
-| `POST /questionnaire/linkedin` | P | `linkedin_url` (`https?://([a-z]{2,3}\.)?(www\.)?linkedin.com/in/...`), `language` (`en`/`es`; cualquier otro valor pasa a `es`) | `202 {job}`. Resultado: `{type:"linkedin_questionnaire", questionnaire_id}` |
-| `POST /questionnaire/prompt` | P | `questionnaire_id` (el padre), `answers: [{question, answer}]`, `session_id?` | `202 {job}`. Resultado: `{type:"prompt_questionnaire", questionnaire_id}` |
+| `GET /questionnaire/find?url=` | P | Page URL | Bare: `{questionnaire_url: {FRONTEND_URL}/f/{flowId}}`. Finds the most recent flow whose store URL matches (normalized), falling back to the site's origin. 400 if `url` is missing; 404 if there is no match. Used by the store widget |
+| `GET /flow/{identifier}` | P | flow id, slug, or questionnaire id | `{id, slug, detail, states, customer_id, questionnaire_id, source_url, cta, layout, result_copy, created_at, updated_at}`. `404 FLOW_NOT_FOUND` if the questionnaire is assigned to an organization and was looked up by slug or flow id |
+| `POST /questionnaire/quiz-funnel` | AG, Cap(quiz-funnel) | `type` (`experience` \| `profiling`), `source_url?`, `products?` | `202 {job}`. Result: `{type:"create_quiz_funnel", flow, questionnaire_url}` |
+| `POST /questionnaire/linkedin` | P | `linkedin_url` (`https?://([a-z]{2,3}\.)?(www\.)?linkedin.com/in/...`), `language` (`en`/`es`; any other value becomes `es`) | `202 {job}`. Result: `{type:"linkedin_questionnaire", questionnaire_id}` |
+| `POST /questionnaire/prompt` | P | `questionnaire_id` (the parent), `answers: [{question, answer}]`, `session_id?` | `202 {job}`. Result: `{type:"prompt_questionnaire", questionnaire_id}` |
 
-**Sesiones del respondente:**
+**Respondent sessions:**
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `POST /questionnaire/{questionnaire_id}/session` | P (Bearer de respondente opcional). Cap(responses) solo en cuestionarios raíz | — | Bare: la sesión (copia del cuestionario con `session_id`, `started_at`, `flow_id`, `status:"filling"`). `on_completed` se reduce a `{type}` para no exponer la configuración de puntaje. 404 si está asignado a una organización, no existe o está inactivo. Evento `QuestionnaireSessionCreated` |
-| `PUT /questionnaire/session` | P (Bearer si es de asignación) | La sesión completa | Guarda el progreso. En follow-up fusiona según §7.11. `409 FOLLOW_UP_COMPLETED`. Evento `QuestionnaireSessionUpdated` |
-| `POST /questionnaire/session` | P; en asignaciones exige el Bearer de respondente | La sesión completa + `user_data?` | Ejecuta §7.7. Quiz funnel → `{job}`. Otros tipos → `{type, ...resultado, cta?, layout?, result_copy?}`. `409 FOLLOW_UP_COMPLETED`. [DEUDA] Con un token de asignación inválido responde 200 sin procesar nada |
+| `POST /questionnaire/{questionnaire_id}/session` | P (optional respondent Bearer). Cap(responses) only on root questionnaires | — | Bare: the session (copy of the questionnaire with `session_id`, `started_at`, `flow_id`, `status:"filling"`). `on_completed` is reduced to `{type}` so as not to expose the scoring configuration. 404 if it is assigned to an organization, does not exist, or is inactive. `QuestionnaireSessionCreated` event |
+| `PUT /questionnaire/session` | P (Bearer if it belongs to an assignation) | The full session | Saves progress. In follow-up, merges per §7.11. `409 FOLLOW_UP_COMPLETED`. `QuestionnaireSessionUpdated` event |
+| `POST /questionnaire/session` | P; for assignations the respondent Bearer is required | The full session + `user_data?` | Runs §7.7. Quiz funnel → `{job}`. Other types → `{type, ...result, cta?, layout?, result_copy?}`. `409 FOLLOW_UP_COMPLETED`. [DEBT] With an invalid assignation token it responds 200 without processing anything |
 | `GET /questionnaire/session/{session_id}/results` | P (UUIDv4) | — | `{session_id, customer_id, questionnaire_id, cta, layout, result_copy, products, ai_team_profile, diagnostic}`. `404 SESSION_RESULTS_NOT_FOUND` |
-| `GET /questionnaire/session/{session_id}/chain` | A, Own | — | `{stages:[...], total_stages}`: todas las etapas que recorrió el respondente. `404 SESSION_NOT_FOUND` |
-| `POST /questionnaire/session/{session_id}/answers/{question_id}/evaluate` | P | El objeto pregunta | `{job}` (§7.9) |
+| `GET /questionnaire/session/{session_id}/chain` | A, Own | — | `{stages:[...], total_stages}`: all the stages the respondent went through. `404 SESSION_NOT_FOUND` |
+| `POST /questionnaire/session/{session_id}/answers/{question_id}/evaluate` | P | The question object | `{job}` (§7.9) |
 
-**Archivos y transcripción:**
+**Files and transcription:**
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `GET /transcription/token` | P | — | `{token}`: secreto efímero (~1 min) para la transcripción en tiempo real. Uno por grabación |
-| `POST /signed-urls` | P | `filename`, `content_type` (`type/subtype`), `customer_id`, `upload_type` (`answer_media` default \| `prompt`), `session_id` y `question_id` (requeridos para `answer_media`) | `answer_media`: subida firmada tipo formulario `{url, fields, key, expires_in:900}`. Clave `{customer_id}/{session_id}/{question_id}/{md5}{ext}`. Tamaño de 1 byte a 500 MB. `prompt`: subida firmada directa `{url, key, expires_in}`. Clave `prompts/{customer_id}/{uuid}{ext\|.txt}` |
-| `POST /answers-media/download-urls` | A | `key` (exactamente 4 segmentos no vacíos separados por `/`, sin `..`, ≤ 1024), `disposition` (`inline` \| `attachment` default) | `{url, expires_in:900}`. 403 si el primer segmento de la clave no es el `customer_id` del llamante (salvo `Admin`) |
+| `GET /transcription/token` | P | — | `{token}`: ephemeral secret (~1 min) for real-time transcription. One per recording |
+| `POST /signed-urls` | P | `filename`, `content_type` (`type/subtype`), `customer_id`, `upload_type` (`answer_media` default \| `prompt`), `session_id` and `question_id` (required for `answer_media`) | `answer_media`: signed form-style upload `{url, fields, key, expires_in:900}`. Key `{customer_id}/{session_id}/{question_id}/{md5}{ext}`. Size from 1 byte to 500 MB. `prompt`: signed direct upload `{url, key, expires_in}`. Key `prompts/{customer_id}/{uuid}{ext\|.txt}` |
+| `POST /answers-media/download-urls` | A | `key` (exactly 4 non-empty segments separated by `/`, no `..`, ≤ 1024), `disposition` (`inline` \| `attachment` default) | `{url, expires_in:900}`. 403 if the key's first segment is not the caller's `customer_id` (except `Admin`) |
 
-### 8.5 Jobs y estilos
+### 8.5 Jobs and styles
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `GET /jobs/{job_id}` | P | — | `{job:{job_id, job_type, status, result, stage, created_at, updated_at}}`, nunca el payload. `404 JOB_NOT_FOUND`, `500 INVALID_JOB_DATA` |
-| `POST /styles` | AG, Cap(styles) | `website?` (vacío = ninguno), `styles?` (parcial, camelCase, validado) | `{job_id}` (§7.16) |
-| `GET /styles?customer_id=&questionnaire_id=` | P | Uno de los dos es obligatorio (400 si faltan ambos). Solo se usa `customer_id` | `{styles \| null}` |
+| `GET /jobs/{job_id}` | P | — | `{job:{job_id, job_type, status, result, stage, created_at, updated_at}}`, never the payload. `404 JOB_NOT_FOUND`, `500 INVALID_JOB_DATA` |
+| `POST /styles` | AG, Cap(styles) | `website?` (empty = none), `styles?` (partial, camelCase, validated) | `{job_id}` (§7.16) |
+| `GET /styles?customer_id=&questionnaire_id=` | P | One of the two is required (400 if both are missing). Only `customer_id` is used | `{styles \| null}` |
 
-### 8.6 Productos y plataforma de e-commerce
+### 8.6 Products and e-commerce platform
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
 | `GET /customer/{customer_id}/products` | P | — | Bare: `[{product_id, name, description, price, image_url, product_url}]` |
-| `GET/POST/PUT/DELETE /customer/{id}/products/{pid}` | A | — | CRUD de productos que usa la consola en la pantalla oculta `/products` |
-| `POST /scrapers/products` | A | `url`, `limit` (1–30, default 10) | `202 {job}`. Resultado: `{type:"scrape_products", products}`. No persiste nada |
-| `GET /auth/shopify?shop=` | A | `shop` que coincide con `[a-z0-9][a-z0-9-]*\.myshopify\.com` | `{url}` de OAuth con alcance de solo lectura de productos |
-| `GET /auth/shopify/callback?code&shop&state` | P | — | Intercambia el código por token + token de refresco y los guarda. Sincroniza productos en la primera conexión. Devuelve un HTML que se cierra solo. `400 INVALID_REQUEST`, `404 CUSTOMER_NOT_FOUND`, `400 TOKEN_EXCHANGE_FAILED` |
+| `GET/POST/PUT/DELETE /customer/{id}/products/{pid}` | A | — | Product CRUD used by the console on the hidden `/products` screen |
+| `POST /scrapers/products` | A | `url`, `limit` (1–30, default 10) | `202 {job}`. Result: `{type:"scrape_products", products}`. Persists nothing |
+| `GET /auth/shopify?shop=` | A | `shop` matching `[a-z0-9][a-z0-9-]*\.myshopify\.com` | OAuth `{url}` with a read-only products scope |
+| `GET /auth/shopify/callback?code&shop&state` | P | — | Exchanges the code for a token + refresh token and stores them. Syncs products on the first connection. Returns an HTML page that closes itself. `400 INVALID_REQUEST`, `404 CUSTOMER_NOT_FOUND`, `400 TOKEN_EXCHANGE_FAILED` |
 | `GET /shopify/connection` | A | — | `{shop \| null}` |
 | `GET /shopify/sync/products` | A | — | §7.17. `400 SHOPIFY_NOT_CONNECTED`, `400 SHOPIFY_TOKEN_EXPIRED` |
-| `POST /shopify/webhooks/customers/data_request`, `/customers/redact`, `/shop/redact` | P + HMAC | Cuerpo crudo | Verifican HMAC-SHA256 (base64) contra el secreto de la app. Solo registran y responden 200; 401 si la firma es mala |
+| `POST /shopify/webhooks/customers/data_request`, `/customers/redact`, `/shop/redact` | P + HMAC | Raw body | Verify HMAC-SHA256 (base64) against the app secret. They only log and respond 200; 401 if the signature is bad |
 
-### 8.7 Organizaciones
+### 8.7 Organizations
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `GET /organizations` | A | — | Bare: `{organizations:[{...org, organization_users:[...]}]}`. `Admin` ve todas |
-| `POST /organizations` | AG, Cap(organizations) | `name` (1–120, sin espacios de sobra, no vacío), `domain_email?` (con forma de dominio, minúsculas), `description?` (≤ 1000), `active` (default true), `organization_users[]`: `{organization_user_id? (UUIDv4), name (1–200), email?, phone? (≤ 50), role? (≤ 120), area? (≤ 120)}`. Cada miembro con email o teléfono; emails únicos en la lista. No admite campos extra | 201 con la organización y sus miembros. `409 DOMAIN_EMAIL_CONFLICT`. Evento `OrganizationCreated` |
-| `PUT /organizations/{id}` | A (+ **DEBERÍA** exigir Own; ver §15) | Parcial, al menos un campo. Si viene `organization_users`, se **reconcilia**: se empareja por id, luego por email, luego por nombre + teléfono; los miembros existentes que no coinciden se borran | `404 ORGANIZATION_NOT_FOUND` |
-| `DELETE /organizations/{id}` | A (+ **DEBERÍA** exigir Own) | — | 204. Evento `OrganizationDeleted`. [DEUDA] No borra los miembros |
+| `GET /organizations` | A | — | Bare: `{organizations:[{...org, organization_users:[...]}]}`. `Admin` sees all |
+| `POST /organizations` | AG, Cap(organizations) | `name` (1–120, no extra whitespace, not empty), `domain_email?` (domain-shaped, lowercase), `description?` (≤ 1000), `active` (default true), `organization_users[]`: `{organization_user_id? (UUIDv4), name (1–200), email?, phone? (≤ 50), role? (≤ 120), area? (≤ 120)}`. Each member with an email or phone; unique emails in the list. No extra fields allowed | 201 with the organization and its members. `409 DOMAIN_EMAIL_CONFLICT`. `OrganizationCreated` event |
+| `PUT /organizations/{id}` | A (+ **SHOULD** require Own; see §15) | Partial, at least one field. If `organization_users` is sent, it is **reconciled**: matched by id, then by email, then by name + phone; existing members that do not match are deleted | `404 ORGANIZATION_NOT_FOUND` |
+| `DELETE /organizations/{id}` | A (+ **SHOULD** require Own) | — | 204. `OrganizationDeleted` event. [DEBT] Does not delete the members |
 
-No hay `GET /organizations/{id}`: la consola filtra el listado del lado del cliente.
+There is no `GET /organizations/{id}`: the console filters the listing on the client side.
 
-### 8.8 Asignaciones
+### 8.8 Assignations
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `GET /assignations?page&page_size&type` | A | `page_size` default 20, máx. 100. `type`: `default` \| `follow_up` | `{assignations:[enriquecidas], pagination}`. Las más nuevas primero; `Admin` ve todas |
-| `POST /assignations` | AG, Cap(assignations) | `organization_id`, `questionnaire_id` (UUIDv4), `name` (1–200), `description?` (≤ 2000), `max_follow_ups` (≥ 0), `active` (default true), `type`, `due_date?` (solo follow-up), `audience` (default `{type:"all"}`), `questions` (≥ 1). No admite campos extra | `201 {questionnaire_url: {FRONTEND_URL}/a/{id}, assignation_id}`. `409 QUESTIONNAIRE_ALREADY_ASSIGNED`, `400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`. Evento `AssignationCreated` |
-| `GET /assignations/{id}` | P (la usa la página del respondente) | — | Asignación enriquecida con `attempts` detallados, `organization_name`, `questionnaire_name`, `questionnaire_url`, `completed`, `review_status`. Solo para llamantes anónimos: Feat(assignations) → 429 |
-| `PUT /assignations/{id}` | A, dueño o `Admin` | Parcial. `type` prohibido ("type cannot be changed"). `due_date:null` la borra | `404`, `400 ASSIGNATION_IN_PROJECT`, `400 VALIDATION_ERROR`, `400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION` |
-| `DELETE /assignations/{id}` | A, dueño o `Admin` | — | 204. Evento `AssignationDeleted` |
-| `POST /assignations/{id}/sessions` | P | `name` (requerido, 1–200), `email?`, `phone?`, `role?`, `area?`. No admite campos extra | Bare: `{token, questionnaire: sesión, flow}` (§7.11). `400 MISSING_IDENTIFIER`, `403 USER_NOT_FOUND`, `403 NOT_IN_AUDIENCE`, `404 ASSIGNATION_NOT_FOUND`, `404 QUESTIONNAIRE_NOT_FOUND`, 429, `409 FOLLOW_UP_COMPLETED` |
-| `GET /assignations/{id}/respondents?page_size\|limit&cursor` | A (quien no es dueño recibe una página vacía) | `page_size` default 10, máx. 100 | `{respondents:[{organization_user_id, organization_user_name, organization_user_email, status: pending\|in_progress\|completed, session_id, completed_stages, total_stages, attempts, attempts_detail[]}], next_cursor}`. `400 INVALID_PAGE_SIZE`, `400 INVALID_CURSOR` |
-| `POST /assignations/{id}/reminders` | A, dueño o `Admin` | — | `{recipients: n}` (§7.13) |
-| `PUT /assignations/{id}/reviews/{question_id}` | A, dueño o `Admin` (la de otra cuenta da 404) | `status` (`approved` \| `rejected`), `comment?` (≤ 1000; vacío pasa a null) | `{question_id, review, review_status}`. `400 NOT_A_FOLLOW_UP`, `409 FOLLOW_UP_NOT_COMPLETED`, `404 QUESTION_NOT_FOUND`, `400 QUESTION_LOCKED` |
-| `POST /assignations/{id}/retries` | A (+ **DEBERÍA** exigir dueño) | — | `201 {attempt, session_id, recipients}`. `409 REVIEW_INCOMPLETE`, `400 NOTHING_TO_RETRY`, `502 RETRY_EMAIL_NOT_SENT` |
+| `GET /assignations?page&page_size&type` | A | `page_size` default 20, max. 100. `type`: `default` \| `follow_up` | `{assignations:[enriched], pagination}`. Newest first; `Admin` sees all |
+| `POST /assignations` | AG, Cap(assignations) | `organization_id`, `questionnaire_id` (UUIDv4), `name` (1–200), `description?` (≤ 2000), `max_follow_ups` (≥ 0), `active` (default true), `type`, `due_date?` (follow-up only), `audience` (default `{type:"all"}`), `questions` (≥ 1). No extra fields allowed | `201 {questionnaire_url: {FRONTEND_URL}/a/{id}, assignation_id}`. `409 QUESTIONNAIRE_ALREADY_ASSIGNED`, `400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`. `AssignationCreated` event |
+| `GET /assignations/{id}` | P (used by the respondent page) | — | Enriched assignation with detailed `attempts`, `organization_name`, `questionnaire_name`, `questionnaire_url`, `completed`, `review_status`. For anonymous callers only: Feat(assignations) → 429 |
+| `PUT /assignations/{id}` | A, owner or `Admin` | Partial. `type` forbidden ("type cannot be changed"). `due_date:null` clears it | `404`, `400 ASSIGNATION_IN_PROJECT`, `400 VALIDATION_ERROR`, `400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION` |
+| `DELETE /assignations/{id}` | A, owner or `Admin` | — | 204. `AssignationDeleted` event |
+| `POST /assignations/{id}/sessions` | P | `name` (required, 1–200), `email?`, `phone?`, `role?`, `area?`. No extra fields allowed | Bare: `{token, questionnaire: session, flow}` (§7.11). `400 MISSING_IDENTIFIER`, `403 USER_NOT_FOUND`, `403 NOT_IN_AUDIENCE`, `404 ASSIGNATION_NOT_FOUND`, `404 QUESTIONNAIRE_NOT_FOUND`, 429, `409 FOLLOW_UP_COMPLETED` |
+| `GET /assignations/{id}/respondents?page_size\|limit&cursor` | A (a non-owner receives an empty page) | `page_size` default 10, max. 100 | `{respondents:[{organization_user_id, organization_user_name, organization_user_email, status: pending\|in_progress\|completed, session_id, completed_stages, total_stages, attempts, attempts_detail[]}], next_cursor}`. `400 INVALID_PAGE_SIZE`, `400 INVALID_CURSOR` |
+| `POST /assignations/{id}/reminders` | A, owner or `Admin` | — | `{recipients: n}` (§7.13) |
+| `PUT /assignations/{id}/reviews/{question_id}` | A, owner or `Admin` (another account's returns 404) | `status` (`approved` \| `rejected`), `comment?` (≤ 1000; empty becomes null) | `{question_id, review, review_status}`. `400 NOT_A_FOLLOW_UP`, `409 FOLLOW_UP_NOT_COMPLETED`, `404 QUESTION_NOT_FOUND`, `400 QUESTION_LOCKED` |
+| `POST /assignations/{id}/retries` | A (+ **SHOULD** require owner) | — | `201 {attempt, session_id, recipients}`. `409 REVIEW_INCOMPLETE`, `400 NOTHING_TO_RETRY`, `502 RETRY_EMAIL_NOT_SENT` |
 
-### 8.9 Proyectos
+### 8.9 Projects
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `GET /projects?page&page_size&status&q` | A | `page_size` default 10, máx. 100. `status` ∈ `review`, `progress` (incluye `pending`), `correction`, `overdue`, `approved`. `q` busca en nombre + organización | `{projects, pagination}`. `400 INVALID_PROJECT_STATUS` |
-| `GET /projects/{id}` | A | — | Proyecto enriquecido (§7.12). `404 PROJECT_NOT_FOUND` |
-| `POST /projects` | A, Feat(assignations) | `organization_id`, `name` (1–200), `description?` (≤ 2000), `due_date` (requerido), `assignation_ids[]` (deduplicados). No admite campos extra | 201. `404 ORGANIZATION_NOT_FOUND`, `404 ASSIGNATION_NOT_FOUND`, `400 ASSIGNATION_ORGANIZATION_MISMATCH`, `400 ASSIGNATION_NOT_FOLLOW_UP`, `409 ASSIGNATION_IN_OTHER_PROJECT` |
-| `PUT /projects/{id}` | A | `name`, `due_date` y `assignation_ids` no pueden ser null; `organization_id` no se puede cambiar (400). `assignation_ids` **reemplaza** el conjunto | — |
-| `DELETE /projects/{id}` | A | — | Desvincula las asignaciones y borra el proyecto. 204 |
+| `GET /projects?page&page_size&status&q` | A | `page_size` default 10, max. 100. `status` ∈ `review`, `progress` (includes `pending`), `correction`, `overdue`, `approved`. `q` searches name + organization | `{projects, pagination}`. `400 INVALID_PROJECT_STATUS` |
+| `GET /projects/{id}` | A | — | Enriched project (§7.12). `404 PROJECT_NOT_FOUND` |
+| `POST /projects` | A, Feat(assignations) | `organization_id`, `name` (1–200), `description?` (≤ 2000), `due_date` (required), `assignation_ids[]` (deduplicated). No extra fields allowed | 201. `404 ORGANIZATION_NOT_FOUND`, `404 ASSIGNATION_NOT_FOUND`, `400 ASSIGNATION_ORGANIZATION_MISMATCH`, `400 ASSIGNATION_NOT_FOLLOW_UP`, `409 ASSIGNATION_IN_OTHER_PROJECT` |
+| `PUT /projects/{id}` | A | `name`, `due_date`, and `assignation_ids` cannot be null; `organization_id` cannot be changed (400). `assignation_ids` **replaces** the set | — |
+| `DELETE /projects/{id}` | A | — | Unlinks the assignations and deletes the project. 204 |
 
 ### 8.10 Chat
 
 `POST /chat` · AG, Cap(chat).
 
-**Entrada:**
+**Input:**
 
-- `messages[]`: 1–40 elementos `{role: user|assistant, content 1–20000}`. El último debe ser `user`.
+- `messages[]`: 1–40 elements `{role: user|assistant, content 1–20000}`. The last one must be `user`.
 - `mode`: `create` (default) \| `draft`.
-- `draft?`: el borrador actual.
+- `draft?`: the current draft.
 - `item?`: `{kind: questionnaire|organization|assignation|project, id}`.
 
-**Salida:** `202 {job}` (§7.19).
+**Output:** `202 {job}` (§7.19).
 
-### 8.11 API keys, API externa y webhooks
+### 8.11 API keys, external API, and webhooks
 
-| Método y ruta | Acceso | Entrada | Salida / errores |
+| Method and route | Access | Input | Output / errors |
 |---|---|---|---|
-| `POST /api-keys` | A, Feat(api) | `name` (1–100), `expiration_days?` (1–3650) | `201 {api_key: "QAIRE-" + 64 hex}`. **Se muestra una sola vez** |
-| `GET /api-keys` | A | — | Solo las activas: `[{id, name, created_at, expires_at, last_used_at}]`, las más nuevas primero |
-| `DELETE /api-keys/{id}` | A, Own | — | Revoca. `404 API_KEY_NOT_FOUND` |
-| `GET /external/questionnaires?page&page_size` | `X-API-Key`, Cap(api) en cada llamada | `page_size` default 50, máx. 50 | `{questionnaires:[{id, flow_id, slug, title, description, is_active, type, created_at, updated_at}], pagination}`. `401 INVALID_API_KEY` (el mismo mensaje si falta, está revocada o vencida). Marca `last_used_at`. Evento `ApiUsage` |
-| `GET /external/questionnaires/{id}/answers?page&page_size` | `X-API-Key` | — | `{questionnaire_id, sessions:[{id, answers:[{title, value, min?, max?}]}], pagination}`, las más nuevas primero. 404 si es de otra cuenta |
-| `POST /webhooks` | A, Feat(webhook) | `url` (solo https), `event_type` (`questionnaire.completed`), `method` (`POST`) | 201 con el webhook |
-| `GET /webhooks` · `PUT /webhooks/{id}` (parcial) · `DELETE /webhooks/{id}` (204) | A, Own | — | `404 WEBHOOK_NOT_FOUND` si es de otra cuenta |
+| `POST /api-keys` | A, Feat(api) | `name` (1–100), `expiration_days?` (1–3650) | `201 {api_key: "QAIRE-" + 64 hex}`. **Shown only once** |
+| `GET /api-keys` | A | — | Active ones only: `[{id, name, created_at, expires_at, last_used_at}]`, newest first |
+| `DELETE /api-keys/{id}` | A, Own | — | Revokes. `404 API_KEY_NOT_FOUND` |
+| `GET /external/questionnaires?page&page_size` | `X-API-Key`, Cap(api) on every call | `page_size` default 50, max. 50 | `{questionnaires:[{id, flow_id, slug, title, description, is_active, type, created_at, updated_at}], pagination}`. `401 INVALID_API_KEY` (same message whether missing, revoked, or expired). Sets `last_used_at`. `ApiUsage` event |
+| `GET /external/questionnaires/{id}/answers?page&page_size` | `X-API-Key` | — | `{questionnaire_id, sessions:[{id, answers:[{title, value, min?, max?}]}], pagination}`, newest first. 404 if it belongs to another account |
+| `POST /webhooks` | A, Feat(webhook) | `url` (https only), `event_type` (`questionnaire.completed`), `method` (`POST`) | 201 with the webhook |
+| `GET /webhooks` · `PUT /webhooks/{id}` (partial) · `DELETE /webhooks/{id}` (204) | A, Own | — | `404 WEBHOOK_NOT_FOUND` if it belongs to another account |
 
-### 8.12 Videos de documentación
+### 8.12 Documentation videos
 
-`GET /videos?language=es|en` · A. Ordenados por `order` y luego por título. `400 INVALID_LANGUAGE`.
+`GET /videos?language=es|en` · A. Sorted by `order` and then by title. `400 INVALID_LANGUAGE`.
 
-### 8.13 Super-admin (`/admin/*`, solo `Admin`; `Customer-Admin` recibe 403)
+### 8.13 Super-admin (`/admin/*`, `Admin` only; `Customer-Admin` receives 403)
 
-**Cuentas:**
+**Accounts:**
 
-| Ruta | Descripción / errores |
+| Route | Description / errors |
 |---|---|
-| `GET /admin/customers?page&page_size&search` | `{customers:[{id, name, email}], pagination}`. `page_size` default 10, máx. 100. `search` busca por subcadena en id, nombre o email |
+| `GET /admin/customers?page&page_size&search` | `{customers:[{id, name, email}], pagination}`. `page_size` default 10, max. 100. `search` does a substring match on id, name, or email |
 | `GET /admin/customers/{id}/users` | `{users:[{id, name, email}], pagination}`. `404 CUSTOMER_NOT_FOUND` |
 | `GET /admin/customers/{id}/plan` | `{customer_plan \| null}`. `404 CUSTOMER_NOT_FOUND` |
 | `PUT /admin/customers/{id}/plan` | `{plan_id, from_at, to_at, billing_interval}`. `400 UNKNOWN_PLAN`, `400 INVALID_DATE_RANGE`, 404 |
-| `GET /admin/customers/{id}/usage` | `{customer_id, customer_plan, plan, plan_active, usage:{from_at, to_at, features} \| null, features}`. Nunca da 404 |
-| `PUT /admin/customers/{id}/usage` | `{features:{feature_id: int ≥ 0}}`. Se fusiona en los contadores del periodo abierto. `400 UNKNOWN_FEATURE`, `503 USAGE_UNAVAILABLE` |
+| `GET /admin/customers/{id}/usage` | `{customer_id, customer_plan, plan, plan_active, usage:{from_at, to_at, features} \| null, features}`. Never returns 404 |
+| `PUT /admin/customers/{id}/usage` | `{features:{feature_id: int ≥ 0}}`. Merged into the open period's counters. `400 UNKNOWN_FEATURE`, `503 USAGE_UNAVAILABLE` |
 
-**Catálogo de features:** `GET`, `POST /admin/features`, `PUT /admin/features/{id}` (reemplazo completo), `DELETE /admin/features/{id}`.
+**Feature catalog:** `GET`, `POST /admin/features`, `PUT /admin/features/{id}` (full replacement), `DELETE /admin/features/{id}`.
 
-- Cuerpo: `feature_name` (1–100), `feature_description` (≤ 1000). El id es el slug del nombre y no cambia.
-- Errores: `409 FEATURE_ALREADY_EXISTS`, `400 INVALID_NAME`, `404 FEATURE_NOT_FOUND`.
-- `POST` emite `FeatureCreated`.
+- Body: `feature_name` (1–100), `feature_description` (≤ 1000). The id is the slug of the name and does not change.
+- Errors: `409 FEATURE_ALREADY_EXISTS`, `400 INVALID_NAME`, `404 FEATURE_NOT_FOUND`.
+- `POST` emits `FeatureCreated`.
 
-**Catálogo de planes:** `GET`, `POST /admin/plans`, `PUT /admin/plans/{id}` (reemplazo completo), `DELETE /admin/plans/{id}`.
+**Plan catalog:** `GET`, `POST /admin/plans`, `PUT /admin/plans/{id}` (full replacement), `DELETE /admin/plans/{id}`.
 
-- Cuerpo: campos de §6.4.
-- Errores: `400 UNKNOWN_FEATURE`, `409 PLAN_ALREADY_EXISTS`, `404 PLAN_NOT_FOUND`, `400 INVALID_STRIPE_PRICE`. Este último cubre: el precio no existe, está archivado, tiene otro intervalo, o no coincide en monto o moneda.
+- Body: fields from §6.4.
+- Errors: `400 UNKNOWN_FEATURE`, `409 PLAN_ALREADY_EXISTS`, `404 PLAN_NOT_FOUND`, `400 INVALID_STRIPE_PRICE`. The latter covers: the price does not exist, is archived, has a different interval, or does not match in amount or currency.
 
-**Cupones** (solo en la pasarela): `GET`, `POST /admin/coupons`, `DELETE /admin/coupons/{promotion_code_id}` (desactiva el código).
+**Coupons** (in the gateway only): `GET`, `POST /admin/coupons`, `DELETE /admin/coupons/{promotion_code_id}` (deactivates the code).
 
-| Campo | Regla |
+| Field | Rule |
 |---|---|
-| `code` | Se pasa a mayúsculas; `^[A-Z0-9_-]{3,32}$` |
+| `code` | Uppercased; `^[A-Z0-9_-]{3,32}$` |
 | `type` | `percent` \| `amount` |
 | `percent_off` | 0 < x ≤ 100 |
-| `amount_off` | > 0, con `currency` (3 letras) |
+| `amount_off` | > 0, with `currency` (3 letters) |
 | `duration` | `once` \| `repeating` \| `forever` |
-| `duration_in_months` | ≥ 1, solo con `repeating` |
-| `plan_ids[]` | Vacío = todos los planes comprables |
-| `billing_intervals` | ≥ 1, sin repetir. `repeating` solo admite `["month"]` |
-| `expires_at` | Fecha no pasada; vale hasta las 23:59:59 UTC de ese día |
+| `duration_in_months` | ≥ 1, only with `repeating` |
+| `plan_ids[]` | Empty = all purchasable plans |
+| `billing_intervals` | ≥ 1, no repeats. `repeating` only allows `["month"]` |
+| `expires_at` | Date not in the past; valid until 23:59:59 UTC of that day |
 | `max_redemptions` | ≥ 1 |
 
-- Estado derivado: `active`, `expired`, `exhausted`, `inactive`. También `times_redeemed`.
-- Errores: `400 INVALID_COUPON`, `400 UNKNOWN_PLAN`, `400 PLAN_NOT_PURCHASABLE`, `400 COUPON_CURRENCY_MISMATCH`, `400 COUPON_INTERVAL_NEEDS_OWN_PRODUCT`, `409 COUPON_CODE_TAKEN`, `404 COUPON_NOT_FOUND`.
+- Derived state: `active`, `expired`, `exhausted`, `inactive`. Also `times_redeemed`.
+- Errors: `400 INVALID_COUPON`, `400 UNKNOWN_PLAN`, `400 PLAN_NOT_PURCHASABLE`, `400 COUPON_CURRENCY_MISMATCH`, `400 COUPON_INTERVAL_NEEDS_OWN_PRODUCT`, `409 COUPON_CODE_TAKEN`, `404 COUPON_NOT_FOUND`.
 
-**Videos:** CRUD de `/admin/videos` con los campos de §6.22.
+**Videos:** CRUD on `/admin/videos` with the fields from §6.22.
 
 **System prompts:**
 
-| Ruta | Descripción |
+| Route | Description |
 |---|---|
-| `GET /admin/system-prompts` | Resúmenes `{key, description, required_placeholders, source: s3\|default, updated_at, updated_by, version_id}` |
-| `GET /admin/system-prompts/{key}?version_id` | Añade `text` |
-| `PUT /admin/system-prompts/{key}` | `text` (1–65 536, no en blanco). `400 INVALID_PLACEHOLDERS` |
-| `GET /admin/system-prompts/{key}/versions` | Historial de versiones |
+| `GET /admin/system-prompts` | Summaries `{key, description, required_placeholders, source: s3\|default, updated_at, updated_by, version_id}` |
+| `GET /admin/system-prompts/{key}?version_id` | Adds `text` |
+| `PUT /admin/system-prompts/{key}` | `text` (1–65,536, not blank). `400 INVALID_PLACEHOLDERS` |
+| `GET /admin/system-prompts/{key}/versions` | Version history |
 
-Una clave desconocida da `404 UNKNOWN_PROMPT`.
+An unknown key returns `404 UNKNOWN_PROMPT`.
 
-### 8.14 Salud
+### 8.14 Health
 
-`GET /health` · P. Devuelve `data = checks`: 200 "ok" o 500 "error".
+`GET /health` · P. Returns `data = checks`: 200 "ok" or 500 "error".
 
 ---
 
-## 9. App del respondente
+## 9. Respondent app
 
-### 9.1 Principios
+### 9.1 Principles
 
-- Mobile-first, sin cuentas ni contraseñas. Solo las asignaciones tienen un login de identidad ligero.
-- **Local-first:** el progreso se guarda en el navegador y en el servidor en cada paso.
-- Toda la marca (colores, fuente, logo) viene de la cuenta dueña del cuestionario.
-- Bilingüe: es/en.
+- Mobile-first, with no accounts or passwords. Only assignations have a lightweight identity login.
+- **Local-first:** progress is saved in the browser and on the server at every step.
+- All branding (colors, font, logo) comes from the account that owns the questionnaire.
+- Bilingual: es/en.
 
-### 9.2 Mapa de rutas
+### 9.2 Route map
 
-| Ruta | Acceso | Descripción |
+| Route | Access | Description |
 |---|---|---|
-| `/` | P | Redirección (reemplazo) al sitio de marketing (`https://getmappi.com`) |
-| `/q/:id` | P | Cuestionario por id (antiguo pero vigente) |
-| `/f/:id` | P | Flujo por id de flujo, slug o id de cuestionario. La URL no cambia entre etapas |
-| `/f/:id/generating` | P | Generación de la siguiente etapa por IA |
-| `/a/:id` | Login de identidad | Asignación |
-| `/a/:id/generating` | Login de identidad | Generación dentro de una asignación |
-| `/session/:sessionId/results` | P (envía Bearer si hay token) | **Enlace canónico de resultados**; se puede recargar y compartir |
-| `/results`, `/q/:id/results` | P | Resultados antiguos (solo en memoria) |
-| `/privacy` | P | Política de privacidad |
-| `/tiktok` | P | Cambia el título, dispara un page_view y redirige a la consola |
-| `/:id` | P | Antiguo: redirige a `/q/:id` (si `id === 'results'`, muestra los resultados) |
-| `/internal/qa/*` | Interno | Herramientas de QA (transcripción local, transcripción en la nube, prueba de errores). **Opcional** en la migración |
+| `/` | P | Redirect (replace) to the marketing site (`https://getmappi.com`) |
+| `/q/:id` | P | Questionnaire by id (legacy but still active) |
+| `/f/:id` | P | Flow by flow id, slug or questionnaire id. The URL does not change between stages |
+| `/f/:id/generating` | P | AI generation of the next stage |
+| `/a/:id` | Identity login | Assignation |
+| `/a/:id/generating` | Identity login | Generation within an assignation |
+| `/session/:sessionId/results` | P (sends Bearer if there is a token) | **Canonical results link**; can be reloaded and shared |
+| `/results`, `/q/:id/results` | P | Legacy results (in memory only) |
+| `/privacy` | P | Privacy policy |
+| `/tiktok` | P | Changes the title, fires a page_view and redirects to the console |
+| `/:id` | P | Legacy: redirects to `/q/:id` (if `id === 'results'`, shows the results) |
+| `/internal/qa/*` | Internal | QA tools (local transcription, cloud transcription, error testing). **Optional** in the migration |
 
-**Global:** pantalla esqueleto de carga neutra (sin marca) hasta que se aplican los estilos. Un error no controlado muestra "Algo salió mal / Something went wrong" con un botón "Recargar / Reload".
+**Global:** neutral (unbranded) loading skeleton screen until the styles are applied. An unhandled error shows "Algo salió mal / Something went wrong" with a "Recargar / Reload" button.
 
-### 9.3 Pantalla del cuestionario (`/q/:id`)
+### 9.3 Questionnaire screen (`/q/:id`)
 
-**Título de la página:** `"<Marca> - {title}"`.
+**Page title:** `"<Marca> - {title}"`.
 
-**Prioridad de renderizado** (se muestra el primer caso que aplique):
+**Rendering priority** (the first applicable case is shown):
 
-1. **Límite alcanzado** (la creación de sesión devuelve 429): "The response limit has been reached."
-2. **No encontrado** (404 u otro error): "This questionnaire does not exist." con el botón "Want to create this questionnaire?" → URL de la consola.
-3. **Procesando** (evaluación por IA en curso): pantalla completa. Eyebrow "One moment", título "We're reviewing your answer", subtítulo "This only takes a few seconds. We're reviewing what you wrote to make sure we have everything we need."
-4. **Disclaimer rechazado:** "You can now close this tab."
-5. **Modal de disclaimer** (si `disclaimer` no está vacío y no hay consentimiento guardado):
-   - "Before you start", el texto del disclaimer (respeta saltos de línea, con scroll a 45vh máx.) y la insignia "Private".
-   - "Accept and continue" guarda el consentimiento 24 h.
-   - "Not now, thanks" intenta cerrar la pestaña; si no puede, pasa a la pantalla 4.
-6. **Tutorial de audio** (si alguna pregunta tiene control `audio` y el tutorial no se ha visto): §9.8.
-7. **Landing** (si `landing_page` y aún no hay progreso): eyebrow "Get started", título en serif, descripción, botón "Start questionnaire" y la nota "{count} questions".
-8. **Captura de datos** (si `capture_user_data`, al salir de la última pregunta): §9.6.
-9. **Vista de preguntas.**
+1. **Limit reached** (session creation returns 429): "The response limit has been reached."
+2. **Not found** (404 or another error): "This questionnaire does not exist." with the button "Want to create this questionnaire?" → console URL.
+3. **Processing** (AI evaluation in progress): full screen. Eyebrow "One moment", title "We're reviewing your answer", subtitle "This only takes a few seconds. We're reviewing what you wrote to make sure we have everything we need."
+4. **Disclaimer declined:** "You can now close this tab."
+5. **Disclaimer modal** (if `disclaimer` is not empty and there is no saved consent):
+   - "Before you start", the disclaimer text (preserves line breaks, scrolls at max 45vh) and the "Private" badge.
+   - "Accept and continue" saves consent for 24 h.
+   - "Not now, thanks" tries to close the tab; if it can't, it moves to screen 4.
+6. **Audio tutorial** (if any question has an `audio` control and the tutorial has not been seen): §9.8.
+7. **Landing** (if `landing_page` and there is no progress yet): eyebrow "Get started", serif title, description, "Start questionnaire" button and the note "{count} questions".
+8. **Data capture** (if `capture_user_data`, when leaving the last question): §9.6.
+9. **Questions view.**
 
-**Modal de reanudación** (sobre 7–9 cuando existe una sesión guardada con progreso):
+**Resume modal** (over 7–9 when a saved session with progress exists):
 
-- Insignia "Saved just now" / "Saved N minute(s)/hour(s)/day(s) ago" (en cubetas de minuto, hora y día).
-- "Pick up where you left off" y "You have an unfinished questionnaire. We saved your answers — you can continue from the same question."
-- Caja "Question {current} of {total}" con porcentaje y barra.
-- "Continue" y el enlace "Start over", con la advertencia "Your {count} saved answer(s) will be deleted".
+- Badge "Saved just now" / "Saved N minute(s)/hour(s)/day(s) ago" (in minute, hour and day buckets).
+- "Pick up where you left off" and "You have an unfinished questionnaire. We saved your answers — you can continue from the same question."
+- "Question {current} of {total}" box with percentage and bar.
+- "Continue" and the "Start over" link, with the warning "Your {count} saved answer(s) will be deleted".
 
-**Cabecera de preguntas:**
+**Questions header:**
 
-- Logo de la marca o monograma de respaldo.
-- Progreso: barra continua en móvil; un punto por pregunta en pantallas medianas en adelante.
-- "Step {n} of {total}" y "{pct}%" con `pct = round(step/total×100)`.
-- Insignia "Stage {current} of {total}" en flujos multi-etapa.
-- Selector de idioma.
+- Brand logo or fallback monogram.
+- Progress: continuous bar on mobile; one dot per question on medium screens and up.
+- "Step {n} of {total}" and "{pct}%" with `pct = round(step/total×100)`.
+- "Stage {current} of {total}" badge in multi-stage flows.
+- Language selector.
 
-**Cuerpo de la pregunta:**
+**Question body:**
 
-- Eyebrow con el número de orden+1 con cero a la izquierda ("01").
-- Título (serif), descripción y disclaimer en cursiva.
-- Insignia "{count} attempt(s) left" en un re-intento de follow-up por IA.
-- **Banners de revisión** (reintentos de asignación):
-  - "Approved / This answer was approved and can't be changed." (pregunta bloqueada).
-  - "Needs correction" con el comentario del revisor, o "Your reviewer asked you to answer this question again."
-- El control de respuesta.
+- Eyebrow with the order number+1, zero-padded ("01").
+- Title (serif), description and disclaimer in italics.
+- "{count} attempt(s) left" badge on an AI follow-up retry.
+- **Review banners** (assignation retries):
+  - "Approved / This answer was approved and can't be changed." (locked question).
+  - "Needs correction" with the reviewer's comment, or "Your reviewer asked you to answer this question again."
+- The answer control.
 
-**Pie de navegación:**
+**Navigation footer:**
 
-- "Back": deshabilitado en la primera pregunta.
-- "Skip": solo si `required === false` y la pregunta no está bloqueada.
-- "Next", o "Finish" en la última. Muestra "Saving…" mientras se guarda.
-- **Enter** fuera de un campo avanza si no hay bloqueo.
-- El pie se oculta en los temas que lo requieren.
+- "Back": disabled on the first question.
+- "Skip": only if `required === false` and the question is not locked.
+- "Next", or "Finish" on the last one. Shows "Saving…" while saving.
+- **Enter** outside a field advances if nothing is blocking.
+- The footer is hidden in the themes that require it.
 
-**Visibilidad por género:** una pregunta cuyo `visibility` no incluye el género actual se salta sola. Las opciones también se filtran. El género por defecto es `male` y lo fija el tema `gender`.
+**Visibility by gender:** a question whose `visibility` does not include the current gender is skipped automatically. Options are filtered as well. The default gender is `male` and it is set by the `gender` theme.
 
-**Hash de la URL:** refleja el id de la pregunta actual.
+**URL hash:** reflects the current question's id.
 
-### 9.4 Controles de respuesta
+### 9.4 Answer controls
 
-Cada pregunta usa **un solo control**: el primero que se pueda renderizar.
+Each question uses **a single control**: the first one that can be rendered.
 
 - **`radio`**
-  - Tarjetas con letra (A, B, C…).
-  - Se filtran las opciones por género y se eliminan valores duplicados. Si `value` es null, se usa `label`.
-  - Seleccionar desbloquea Next.
+  - Cards with a letter (A, B, C…).
+  - Options are filtered by gender and duplicate values are removed. If `value` is null, `label` is used.
+  - Selecting unlocks Next.
 - **`checkbox`**
-  - Selección múltiple; el valor es un array.
-  - Una opción cuyo valor contiene `none`, `n/a`, `not applicable` o `neither` es **exclusiva**: marcarla limpia las demás, y marcar otra la limpia a ella.
-  - Next bloqueado mientras no haya nada marcado.
-- **`select`**: lista desplegable con placeholder "Select an option". Vacío bloquea Next.
+  - Multiple selection; the value is an array.
+  - An option whose value contains `none`, `n/a`, `not applicable` or `neither` is **exclusive**: checking it clears the others, and checking another one clears it.
+  - Next is blocked while nothing is checked.
+- **`select`**: dropdown list with the placeholder "Select an option". Empty blocks Next.
 - **`range`**
-  - Slider. `min` y `max` salen de las validaciones; por defecto 0 y 10.
-  - El control parte en `default_value` si está dentro del rango, si no en `min`. **Esa posición no cuenta como respuesta:** hasta que el usuario lo mueva o toque, se muestra "Move or tap the slider to answer" y Next sigue bloqueado.
-  - Un valor fuera de rango muestra el `message` de la validación.
+  - Slider. `min` and `max` come from the validations; defaults are 0 and 10.
+  - The control starts at `default_value` if it is within range, otherwise at `min`. **That position does not count as an answer:** until the user moves or taps it, "Move or tap the slider to answer" is shown and Next stays blocked.
+  - An out-of-range value shows the validation's `message`.
 - **`text`**
-  - Área de texto de 3 filas con autofoco. Placeholder: `default_value`, luego un ejemplo del preset, luego "Type your answer here...".
-  - Vacío o solo espacios bloquea Next. **Enter envía**; no hay salto de línea.
-  - Validación `{type:'format', value}`:
+  - 3-row text area with autofocus. Placeholder: `default_value`, then an example from the preset, then "Type your answer here...".
+  - Empty or whitespace-only blocks Next. **Enter submits**; there is no line break.
+  - Validation `{type:'format', value}`:
 
-    | `value` | Regla | Mensaje |
+    | `value` | Rule | Message |
     |---|---|---|
-    | `letters` | Solo letras | "Only letters are allowed" |
-    | `numbers` | Solo números, sin espacios | "Only numbers are allowed, no spaces" |
-    | `symbols` | Solo símbolos | "Only symbols are allowed" |
-    | Combinaciones (`letters,numbers`, etc.) | Clases combinadas | "Only letters and numbers are allowed", etc. |
-    | `rfc` | `^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$` con una fecha real 19YY/20YY | "Enter a valid RFC: 3 or 4 letters, a YYMMDD date and the homoclave. E.g.: ABC680524P76" |
-    | `nit` | 9–10 dígitos | "Enter a valid NIT: 9 or 10 digits, with no dots or dash. E.g.: 9001234568" |
-    | `phone` | `+` inicial, luego dígitos, espacios, `()` o `-`, con 8–15 dígitos | "Enter a phone number with the country code. E.g.: +52 55 0000 0000" |
+    | `letters` | Letters only | "Only letters are allowed" |
+    | `numbers` | Numbers only, no spaces | "Only numbers are allowed, no spaces" |
+    | `symbols` | Symbols only | "Only symbols are allowed" |
+    | Combinations (`letters,numbers`, etc.) | Combined classes | "Only letters and numbers are allowed", etc. |
+    | `rfc` | `^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$` with a real 19YY/20YY date | "Enter a valid RFC: 3 or 4 letters, a YYMMDD date and the homoclave. E.g.: ABC680524P76" |
+    | `nit` | 9–10 digits | "Enter a valid NIT: 9 or 10 digits, with no dots or dash. E.g.: 9001234568" |
+    | `phone` | Leading `+`, then digits, spaces, `()` or `-`, with 8–15 digits | "Enter a phone number with the country code. E.g.: +52 55 0000 0000" |
 
-  - Los espacios internos se permiten salvo en "solo números".
-  - Cualquier validación con `pattern` (regex) también se aplica.
-  - Teclado móvil: numérico para `nit` y "solo números"; teléfono para `phone`.
+  - Internal spaces are allowed except in "numbers only".
+  - Any validation with a `pattern` (regex) is also applied.
+  - Mobile keyboard: numeric for `nit` and "numbers only"; phone for `phone`.
 - **`email` / `tel` / `phone`**
   - Email: `^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$`. Error "Enter a valid email address (e.g. name@example.com)."
-  - Teléfono: se normaliza a dígitos con `+` opcional y debe cumplir `^\+?\d{7,15}$`. Error "Enter a valid phone number: digits only, optional international prefix (e.g. +57)."
-  - El error se muestra al salir del campo.
+  - Phone: normalized to digits with an optional `+` and must match `^\+?\d{7,15}$`. Error "Enter a valid phone number: digits only, optional international prefix (e.g. +57)."
+  - The error is shown when leaving the field.
 - **`ranking`**
-  - Lista reordenable con ratón, táctil y teclado, numerada del 1 al n. Pista "Drag the options to put them in your preferred order".
-  - **El orden inicial ya es una respuesta válida** y se guarda de inmediato. El valor es el array de valores en orden.
+  - List reorderable with mouse, touch and keyboard, numbered 1 to n. Hint "Drag the options to put them in your preferred order".
+  - **The initial order is already a valid answer** and is saved immediately. The value is the array of values in order.
 - **`file`**: §9.9.
 - **`audio`**: §9.7.
-- **`message`** (o sin opciones): solo muestra contenido. Next habilitado. Se guarda el valor `"viewed"` con timestamp.
+- **`message`** (or no options): only displays content. Next enabled. The value `"viewed"` is saved with a timestamp.
 
-**Controles bloqueados** (reintentos): se muestran deshabilitados y nunca se escriben.
+**Locked controls** (retries): shown disabled and never written.
 
-### 9.5 Temas especiales (`theme_name`)
+### 9.5 Special themes (`theme_name`)
 
-| Tema | Comportamiento |
+| Theme | Behavior |
 |---|---|
-| `gender` | Dos tarjetas grandes con las opciones de `options[0].options`, valores `male` / `female`. Fija el género que filtra preguntas y opciones posteriores |
-| `quote` | Pantalla de transición que **avanza sola a los 2500 ms** (o termina si es la última pregunta), sin pie de navegación. Texto: "We're finding the perfect product for your needs." [CLIENTE] Con `livingood`: "Health Profile part of your plan" y "Calculating your Health Profile..." |
-| `celebration` | Pantalla de transición de 2500 ms con el título, la descripción y el disclaimer de la pregunta |
-| `weight` | Selector de unidad KG (default) o lbs, más un campo numérico. Válido: 20–635 kg o 44–1400 lbs |
-| `height` | Selector CM (default) o ft/in. Válido: 50–272 cm o 1.6–8.9 ft |
-| `weight-composite` | Tres campos: "Current weight" y "Goal weight" (misma unidad, lbs o kg) y "Current height" (ft/in o cm). Se emparejan por subcadenas de la etiqueta. Se guardan como `"{valor} {unidad}"`. Los tres son obligatorios |
-| `jeans-size` | Un selector de sistema (`us-sizes`, `inches`, `centimeters`) decide cuál de `options[1..3]` se muestra como radio |
-| `user-capture-data` | Captura de email dentro del flujo, sin pie. "You're Done!" / "Your Personalized Health Profile Is Ready". Campos "Your name (optional)" y email (requerido). Botón "See My Results" termina el flujo |
-| `organization-users-login` | Formulario de login de la asignación (§9.10) |
+| `gender` | Two large cards with the options from `options[0].options`, values `male` / `female`. Sets the gender that filters subsequent questions and options |
+| `quote` | Transition screen that **advances on its own after 2500 ms** (or finishes if it is the last question), with no navigation footer. Text: "We're finding the perfect product for your needs." [CLIENT-SPECIFIC] With `livingood`: "Health Profile part of your plan" and "Calculating your Health Profile..." |
+| `celebration` | 2500 ms transition screen with the question's title, description and disclaimer |
+| `weight` | Unit selector KG (default) or lbs, plus a numeric field. Valid: 20–635 kg or 44–1400 lbs |
+| `height` | Selector CM (default) or ft/in. Valid: 50–272 cm or 1.6–8.9 ft |
+| `weight-composite` | Three fields: "Current weight" and "Goal weight" (same unit, lbs or kg) and "Current height" (ft/in or cm). They are matched by substrings of the label. Saved as `"{valor} {unidad}"`. All three are required |
+| `jeans-size` | A system selector (`us-sizes`, `inches`, `centimeters`) decides which of `options[1..3]` is shown as a radio |
+| `user-capture-data` | In-flow email capture, with no footer. "You're Done!" / "Your Personalized Health Profile Is Ready". Fields "Your name (optional)" and email (required). The "See My Results" button ends the flow |
+| `organization-users-login` | Assignation login form (§9.10) |
 
-### 9.6 Fase de captura de datos (fin del cuestionario)
+### 9.6 Data capture phase (end of the questionnaire)
 
-- **Textos:**
+- **Copy:**
   - Eyebrow "One last step"
-  - Título "Where should we send your results?"
-  - Descripción "Share your contact details so we can deliver your personalized recommendations."
-  - Nota de privacidad "Your information is private and will only be used to deliver your results."
-- **Campos (todos obligatorios):**
+  - Title "Where should we send your results?"
+  - Description "Share your contact details so we can deliver your personalized recommendations."
+  - Privacy note "Your information is private and will only be used to deliver your results."
+- **Fields (all required):**
 
-  | Campo | Placeholder | Regla |
+  | Field | Placeholder | Rule |
   |---|---|---|
-  | Nombre | "Your full name" | No vacío |
-  | Email | "you@email.com" | Regex de email |
-  | Teléfono | "Your phone number" | Mientras se escribe solo acepta dígitos y `+` inicial; 7–15 dígitos |
+  | Name | "Your full name" | Not empty |
+  | Email | "you@email.com" | Email regex |
+  | Phone | "Your phone number" | While typing, only accepts digits and a leading `+`; 7–15 digits |
 
-- Los errores aparecen al enviar y se limpian al editar el campo.
-- Botón "See my results" con spinner; impide el doble envío.
-- Adjunta `user_data: {name, email, phone}` al envío.
+- Errors appear on submit and are cleared when editing the field.
+- "See my results" button with a spinner; prevents double submission.
+- Attaches `user_data: {name, email, phone}` to the submission.
 
-### 9.7 Pregunta de audio (respuesta por voz)
+### 9.7 Audio question (voice answer)
 
-| Estado | UI |
+| State | UI |
 |---|---|
-| Inactivo | Botón de micrófono grande: "Tap to record your answer" |
-| Conectando | Spinner: "Preparing microphone..." |
-| Grabando | Botón rojo de stop, 9 barras de onda según el nivel del micrófono, "Listening... mm:ss" y la **transcripción en vivo** |
+| Idle | Large microphone button: "Tap to record your answer" |
+| Connecting | Spinner: "Preparing microphone..." |
+| Recording | Red stop button, 9 wave bars following the microphone level, "Listening... mm:ss" and the **live transcription** |
 
-**Resultado de la grabación:**
+**Recording result:**
 
-- Cada grabación agrega un segmento de texto. El valor es un array de strings.
-- Cada segmento se puede borrar ("Remove recording") o regrabar (reemplaza ese segmento).
-- Otras acciones: "Add to my answer" y "Record again from scratch".
-- Una grabación sin texto muestra "No transcription available."
-- Next bloqueado si no hay grabaciones, mientras graba o conecta, o si un follow-up exige un cambio.
+- Each recording adds a text segment. The value is an array of strings.
+- Each segment can be deleted ("Remove recording") or re-recorded (replaces that segment).
+- Other actions: "Add to my answer" and "Record again from scratch".
+- A recording with no text shows "No transcription available."
+- Next is blocked if there are no recordings, while recording or connecting, or if a follow-up requires a change.
 
-**Errores:**
+**Errors:**
 
-| Caso | Mensaje |
+| Case | Message |
 |---|---|
-| Contexto no seguro | "Recording requires a secure (HTTPS) connection." |
-| Navegador sin soporte | "Your browser does not support audio recording." |
-| Sin micrófono | "No microphone was found on this device." |
-| Micrófono ocupado | "The microphone is already in use by another application." |
-| Otro error de acceso | "Unable to access the microphone." |
-| Conexión (el resto) | "We couldn't connect to start recording. Check your internet connection and try again." |
+| Insecure context | "Recording requires a secure (HTTPS) connection." |
+| Unsupported browser | "Your browser does not support audio recording." |
+| No microphone | "No microphone was found on this device." |
+| Microphone busy | "The microphone is already in use by another application." |
+| Other access error | "Unable to access the microphone." |
+| Connection (everything else) | "We couldn't connect to start recording. Check your internet connection and try again." |
 
-**Permiso denegado.** Se detecta antes de grabar o a partir del error. Abre un panel de ayuda:
+**Permission denied.** Detected before recording or from the error. Opens a help panel:
 
 - "Microphone access is blocked"
-- Explicación de que es un permiso del navegador y no un problema de la plataforma.
-- Paso: "Open the [candado] in the address bar → turn on **Microphone** → try again."
-- Botón "Try again"
-- Nota "We only use your microphone while you're recording."
+- Explanation that it is a browser permission and not a platform problem.
+- Step: "Open the [candado] in the address bar → turn on **Microphone** → try again."
+- "Try again" button
+- Note "We only use your microphone while you're recording."
 
-**Transcripción:**
+**Transcription:**
 
-- Idioma = idioma de la UI (`es`/`en`).
-- Se pide un token efímero por grabación (`GET /transcription/token`).
-- La cuenta puede definir `transcription_url` para usar un transporte alternativo.
+- Language = UI language (`es`/`en`).
+- An ephemeral token is requested per recording (`GET /transcription/token`).
+- The account can define `transcription_url` to use an alternative transport.
 
-### 9.8 Tutorial de audio (una vez, antes de preguntas con voz)
+### 9.8 Audio tutorial (once, before voice questions)
 
 1. **Intro:**
    - "Quick mic check" / "Let's test your microphone" / "Let's check your microphone. It only takes a few seconds."
    - "Read this out loud:" → "Hello, my microphone is working great."
-   - Indicación "Tap here ONCE and wait until it turns red — then start talking".
-2. **Prueba:** "Preparing your microphone..." y luego "Listening... read the sentence, then tap to stop".
-3. **Resultado:**
-   - Éxito: "Your microphone works!" / "We heard you loud and clear…" / "We heard" + transcripción. "Continue to the questionnaire" marca el tutorial como visto por 24 h.
-   - Sin texto: "We didn't catch anything. Tap the microphone and try again."
-   - Error: "We couldn't complete the mic check" con el detalle. Se reporta al seguimiento de errores.
+   - Prompt "Tap here ONCE and wait until it turns red — then start talking".
+2. **Test:** "Preparing your microphone..." and then "Listening... read the sentence, then tap to stop".
+3. **Result:**
+   - Success: "Your microphone works!" / "We heard you loud and clear…" / "We heard" + transcription. "Continue to the questionnaire" marks the tutorial as seen for 24 h.
+   - No text: "We didn't catch anything. Tap the microphone and try again."
+   - Error: "We couldn't complete the mic check" with the detail. Reported to error tracking.
 
-[DEUDA] No hay forma de saltar el tutorial: un respondente sin micrófono queda bloqueado.
+[DEBT] There is no way to skip the tutorial: a respondent without a microphone is stuck.
 
-### 9.9 Pregunta de archivo
+### 9.9 File question
 
-**Límites:**
+**Limits:**
 
-- Cualquier tipo de archivo, **hasta 500 MB** cada uno.
-- Máximo de archivos = `settings.max_files` de la cuenta (1–20, default 10).
+- Any file type, **up to 500 MB** each.
+- Maximum number of files = the account's `settings.max_files` (1–20, default 10).
 
-**Formas de agregar archivos:**
+**Ways to add files:**
 
-- "Choose files" (varios a la vez).
-- Arrastrar y soltar.
-- **Pegar con Ctrl+V** en cualquier parte de la página. Las capturas pegadas se renombran `screenshot-YYYYMMDD-HHmmss[-n].{ext}`.
+- "Choose files" (several at once).
+- Drag and drop.
+- **Paste with Ctrl+V** anywhere on the page. Pasted screenshots are renamed `screenshot-YYYYMMDD-HHmmss[-n].{ext}`.
 
-**Por archivo:** progreso "Uploading... {progress}%", "Try again" tras un error ("Could not upload your file. Please try again.") y "Remove {name}".
+**Per file:** progress "Uploading... {progress}%", "Try again" after an error ("Could not upload your file. Please try again.") and "Remove {name}".
 
-**Otros textos:**
+**Other copy:**
 
-| Situación | Texto |
+| Situation | Text |
 |---|---|
-| Ayuda | "Any file type, up to 500 MB each. Large files may take a while to upload on slow connections." |
-| Ayuda de pegado | "…or paste a screenshot with Ctrl+V" |
-| Contador | "{count} / {max} files" |
-| Límite alcanzado | "You've reached the limit of {max} files. Remove one to add another." |
-| Archivo grande | "That file is larger than 500 MB. Please choose a smaller one." |
-| Archivos descartados | "{count} file(s) was/were not added: you can attach up to {max} files." |
+| Help | "Any file type, up to 500 MB each. Large files may take a while to upload on slow connections." |
+| Paste help | "…or paste a screenshot with Ctrl+V" |
+| Counter | "{count} / {max} files" |
+| Limit reached | "You've reached the limit of {max} files. Remove one to add another." |
+| Large file | "That file is larger than 500 MB. Please choose a smaller one." |
+| Discarded files | "{count} file(s) was/were not added: you can attach up to {max} files." |
 
-**Subida:** `POST /signed-urls` y luego una subida directa al almacén de objetos con progreso. **El valor guardado es la clave del objeto**, no una URL.
+**Upload:** `POST /signed-urls` and then a direct upload to object storage with progress. **The saved value is the object key**, not a URL.
 
-Next bloqueado hasta que al menos un archivo esté subido y ninguno siga subiendo.
+Next is blocked until at least one file is uploaded and none is still uploading.
 
-### 9.10 Asignación (`/a/:id`)
+### 9.10 Assignation (`/a/:id`)
 
-**1. Carga:** `GET /assignations/{id}`. Se aplican la marca y el idioma de la cuenta. Con 429 se muestra la pantalla de límite; con cualquier otro error, "This questionnaire does not exist."
+**1. Load:** `GET /assignations/{id}`. The account's branding and language are applied. With 429 the limit screen is shown; with any other error, "This questionnaire does not exist."
 
-**2. Follow-up ya completado** (`completed: true`):
+**2. Follow-up already completed** (`completed: true`):
 
-| `review_status` | Mensaje | Pista |
+| `review_status` | Message | Hint |
 |---|---|---|
-| `in_review` / `changes_requested` | "Your answers are being reviewed" (reloj de arena ámbar) | "If something needs changes, you'll receive an email with the link to correct it." |
-| `approved` | "Your answers were approved" (check verde) | "Thank you for taking part. There is nothing else to do." |
+| `in_review` / `changes_requested` | "Your answers are being reviewed" (amber hourglass) | "If something needs changes, you'll receive an email with the link to correct it." |
+| `approved` | "Your answers were approved" (green check) | "Thank you for taking part. There is nothing else to do." |
 | null / `not_ready` | "This follow-up has already been completed." | "There is no need to answer it again." |
 
-**3. Reanudación automática sin login** cuando se cumplen las tres condiciones:
+**3. Automatic resume without login** when all three conditions are met:
 
-- el token guardado tiene `assignations_id` igual al de la URL;
-- su `session_id` es el del intento actual (el último de `attempts`), o la asignación no tiene intentos;
-- existe progreso local.
+- the saved token has an `assignations_id` equal to the one in the URL;
+- its `session_id` is that of the current attempt (the last one in `attempts`), or the assignation has no attempts;
+- local progress exists.
 
-**4. Login** (tema `organization-users-login`). Se construye a partir de `questions[0].options`.
+**4. Login** (`organization-users-login` theme). Built from `questions[0].options`.
 
-- Título "Sign in". Cada opción es un campo; es obligatorio si tiene la validación `required`. El botón se habilita cuando todos los obligatorios están llenos.
-- Los campos se reconocen por tipo o por palabra clave en la etiqueta (inglés o español):
+- Title "Sign in". Each option is a field; it is required if it has the `required` validation. The button is enabled when all required fields are filled.
+- Fields are recognized by type or by a keyword in the label (English or Spanish):
 
-  | Clave | Se reconoce por | Etiqueta / placeholder |
+  | Key | Recognized by | Label / placeholder |
   |---|---|---|
-  | `email` | tipo `email` o "email"/"correo" | "Email" / "you@email.com" |
-  | `phone` | tipo `tel`/`phone` o "phone"/"tel" | "Phone" / "Your phone number" |
+  | `email` | type `email` or "email"/"correo" | "Email" / "you@email.com" |
+  | `phone` | type `tel`/`phone` or "phone"/"tel" | "Phone" / "Your phone number" |
   | `role` | "role"/"cargo" | "Role" / "Your role" |
   | `area` | "area"/"área" | "Area" / "Your area" |
   | `name` | "name"/"nombre" | "Full name" / "Your full name" |
 
-- Los campos no reconocidos no se envían.
-- Se envían normalizados: nombre en minúsculas, sin acentos, con espacios colapsados; teléfono en dígitos con `+` opcional.
-- **Resultados del login:**
+- Unrecognized fields are not sent.
+- They are sent normalized: name lowercased, without accents, with collapsed spaces; phone as digits with an optional `+`.
+- **Login outcomes:**
 
-  | Respuesta | Resultado |
+  | Response | Outcome |
   |---|---|
-  | 409 | Pantalla de completado |
-  | 429 | Pantalla de límite |
+  | 409 | Completed screen |
+  | 429 | Limit screen |
   | `NOT_IN_AUDIENCE` | "This assessment isn't addressed to you. If you think this is a mistake, contact whoever sent it to you." |
   | `USER_NOT_FOUND` | "We can't find you in this organization. Check the name and email you were invited with." |
-  | Otro | "We could not sign you in. Please try again." |
+  | Other | "We could not sign you in. Please try again." |
 
-**5. Después del login:**
+**5. After login:**
 
-- Se guarda el token y se envía como `Authorization: Bearer` en las llamadas de sesión y de resultados.
-- Se fusionan las respuestas locales del **mismo intento**; nunca las de un intento anterior.
-- En follow-up sin respuestas locales pero con progreso compartido en el servidor, el respondente entra en la primera pregunta sin resolver.
-- **No hay modal de reanudación.**
-- En un reintento, el respondente entra en la primera pregunta rechazada.
-- "Start over" vacía las respuestas en su lugar y conserva la sesión y las respuestas bloqueadas.
-- Al terminar se borra el token, salvo que la cadena continúe.
+- The token is saved and sent as `Authorization: Bearer` on session and results calls.
+- Local answers from the **same attempt** are merged; never those from a previous attempt.
+- In a follow-up with no local answers but with shared progress on the server, the respondent lands on the first unresolved question.
+- **There is no resume modal.**
+- On a retry, the respondent lands on the first rejected question.
+- "Start over" clears the answers in place and keeps the session and the locked answers.
+- On finishing, the token is deleted, unless the chain continues.
 
-### 9.11 Flujo multi-etapa (`/f/:id` o un flujo detrás de `/a/`)
+### 9.11 Multi-stage flow (`/f/:id` or a flow behind `/a/`)
 
-1. Se resuelve el flujo con `GET /flow/{id|slug}` (o se reutiliza una ejecución guardada del mismo flujo) y se precarga la marca. Si el flujo no existe o viene mal formado: "This flow could not be found."
-2. El punto de entrada es el único estado `questionnaire`.
-3. Al terminar cada cuestionario, el siguiente estado decide:
-   - **Otro `questionnaire`:** se carga en el mismo lugar; la URL no cambia.
+1. The flow is resolved with `GET /flow/{id|slug}` (or a saved run of the same flow is reused) and the branding is preloaded. If the flow does not exist or is malformed: "This flow could not be found."
+2. The entry point is the single `questionnaire` state.
+3. When each questionnaire finishes, the next state decides:
+   - **Another `questionnaire`:** loaded in place; the URL does not change.
    - **`prompt`:**
-     1. Se aplanan las respuestas a `[{question: title, answer: valores unidos con ", "}]`, sin las no contestadas.
-     2. Se navega a `{base}/generating` y se llama `POST /questionnaire/prompt`.
-     3. Se hace polling del job hasta tener `questionnaire_id` y se carga esa etapa generada.
-   - **null o un estado de visualización** (`diagnostic`, `result`, `quiz_funnel`…): termina el flujo y se muestran los resultados.
-4. **Insignia de etapa:** "Stage n of total". Cuenta la entrada más cada `prompt` alcanzable siguiendo `next`, con un tope de 12.
-5. **Pantalla de generación:**
+     1. Answers are flattened to `[{question: title, answer: valores unidos con ", "}]` (answer: values joined with ", "), excluding unanswered ones.
+     2. Navigate to `{base}/generating` and call `POST /questionnaire/prompt`.
+     3. The job is polled until there is a `questionnaire_id`, and that generated stage is loaded.
+   - **null or a display state** (`diagnostic`, `result`, `quiz_funnel`…): the flow ends and the results are shown.
+4. **Stage badge:** "Stage n of total". Counts the entry plus each `prompt` reachable by following `next`, capped at 12.
+5. **Generation screen:**
    - "One moment" / "Preparing your next questions".
-   - 5 mensajes rotativos cada 3.5 s: "We're tailoring the next step from your answers." / "Reviewing what you've told us so far…" / "Picking the questions that matter most for you." / "Almost there — putting the finishing touches on it." / "Thanks for your patience, this only takes a moment."
-   - Error: "We couldn't prepare your next questions." con "Try again".
-   - **Se puede recargar:** el id del job se guarda y el polling se reanuda.
+   - 5 rotating messages every 3.5 s: "We're tailoring the next step from your answers." / "Reviewing what you've told us so far…" / "Picking the questions that matter most for you." / "Almost there — putting the finishing touches on it." / "Thanks for your patience, this only takes a moment."
+   - Error: "We couldn't prepare your next questions." with "Try again".
+   - **It can be reloaded:** the job id is saved and polling resumes.
 
-### 9.12 Envío y resultados
+### 9.12 Submission and results
 
-**Al terminar:**
+**On finishing:**
 
-1. Bloquear el envío para que no se envíe dos veces.
-2. Limpiar el snapshot local, volver internamente a la pregunta 0 y quitar el hash.
-3. `POST /questionnaire/session`. Si devuelve un job (quiz funnel), hacer polling.
-4. Si es un cuestionario suelto o la última etapa: navegar a `/session/{session_id}/results`. Si es una etapa intermedia: avanzar el flujo.
-5. **Si el envío falla:** volver al cuestionario, re-guardar la sesión para conservar las respuestas y posicionarse en la última pregunta.
-6. **Tras el éxito:**
-   - Disparar la conversión "Lead" en todos los píxeles configurados, solo si con esto se completó el flujo.
-   - Volver atrás desde resultados empieza una sesión nueva.
+1. Lock the submission so it is not sent twice.
+2. Clear the local snapshot, internally go back to question 0 and remove the hash.
+3. `POST /questionnaire/session`. If it returns a job (quiz funnel), poll it.
+4. If it is a standalone questionnaire or the last stage: navigate to `/session/{session_id}/results`. If it is an intermediate stage: advance the flow.
+5. **If the submission fails:** return to the questionnaire, re-save the session to keep the answers and position on the last question.
+6. **After success:**
+   - Fire the "Lead" conversion on all configured pixels, only if this completed the flow.
+   - Going back from results starts a new session.
 
-**Carga de resultados:**
+**Results loading:**
 
-- Si no hay resultado en memoria, se llama `GET /questionnaire/session/{id}/results` y se aplica la marca del `customer_id` devuelto. Si falla, se navega a `/`.
-- Pantalla de carga: "Processing" / "We're finishing documenting your answers".
-- El tipo se infiere de los datos: `ai_team_profile` → perfil; `diagnostic` → diagnóstico; `products` → ecommerce; si no, default.
+- If there is no result in memory, `GET /questionnaire/session/{id}/results` is called and the branding of the returned `customer_id` is applied. If it fails, navigate to `/`.
+- Loading screen: "Processing" / "We're finishing documenting your answers".
+- The type is inferred from the data: `ai_team_profile` → profile; `diagnostic` → diagnostic; `products` → ecommerce; otherwise, default.
 
-**Variantes:**
+**Variants:**
 
 - **ecommerce**
   - "Your Recommended Products" / "Based on your answers, we have curated these selections specifically for your needs."
-  - Cuadrícula de 1, 2 o 3 columnas.
-  - Cada tarjeta: imagen con carga diferida (ícono de respaldo), precio (se oculta si es "$0.00"; formato USD en-US), etiqueta "Top Match", nombre (2 líneas), descripción HTML (3 líneas, respaldo "No description available.") y "View in Store" que abre `product_url` en pestaña nueva.
-  - Vacío: "No products recommended at this time."
-  - **DEBE sanear el HTML de la descripción** (§15).
+  - Grid of 1, 2 or 3 columns.
+  - Each card: lazy-loaded image (fallback icon), price (hidden if "$0.00"; USD en-US format), "Top Match" label, name (2 lines), HTML description (3 lines, fallback "No description available.") and "View in Store", which opens `product_url` in a new tab.
+  - Empty: "No products recommended at this time."
+  - **MUST sanitize the description HTML** (§15).
 - **diagnostic**
-  - Selector de idioma.
-  - Hero: "Successfully completed" / "Thank you so much for your support" / "Here's how you scored across each area." [CLIENTE] El cliente `3zWj6Nrg` cambia el título a "This is the strategic diagnosis of your operation".
-  - **Nivel:** "Your level" con el nombre y la descripción del tier. Tier = banda con `min ≤ score ≤ max`; si se solapan, gana el de mayor `min`.
-  - **Puntaje global:** "Overall score" como valor/máximo con barra. `pct = clamp(round(score/max×100), 0..100)`.
-  - **Por categoría:** "Score by area" / "How you performed in each category.", con barra, % y puntaje/máximo.
-  - **Radar** (solo con ≥ 3 categorías; cada eje es el % de su propio máximo): "Your category profile", leyenda "Your score (%)".
-  - **"Recommendations"** (viñetas) y **"Action plan"** (numerado). Salen del tier alcanzado; si ese tier no tiene, del tier inferior más cercano que tenga. **Nunca de uno superior.**
-  - **Cierre:** "Full report in PDF" / "Includes the detail by category and the action plan." / "Download" ("Preparing your PDF…"). Archivo `YourResults.pdf`, con el color primario de la marca como acento. El CTA va en la misma tarjeta.
-  - **`layout`** limita qué elementos aparecen. Sin `layout`: si algún tier tiene `visible:false`, se ocultan puntaje, nivel y categorías.
-  - **`result_copy`** sobrescribe los 15 textos.
+  - Language selector.
+  - Hero: "Successfully completed" / "Thank you so much for your support" / "Here's how you scored across each area." [CLIENT-SPECIFIC] Customer `3zWj6Nrg` changes the title to "This is the strategic diagnosis of your operation".
+  - **Tier:** "Your level" with the tier's name and description. Tier = band with `min ≤ score ≤ max`; if they overlap, the one with the highest `min` wins.
+  - **Overall score:** "Overall score" as value/maximum with a bar. `pct = clamp(round(score/max×100), 0..100)`.
+  - **By category:** "Score by area" / "How you performed in each category.", with bar, % and score/maximum.
+  - **Radar** (only with ≥ 3 categories; each axis is the % of its own maximum): "Your category profile", legend "Your score (%)".
+  - **"Recommendations"** (bullets) and **"Action plan"** (numbered). They come from the tier reached; if that tier has none, from the nearest lower tier that has them. **Never from a higher one.**
+  - **Closing:** "Full report in PDF" / "Includes the detail by category and the action plan." / "Download" ("Preparing your PDF…"). File `YourResults.pdf`, with the brand's primary color as the accent. The CTA goes in the same card.
+  - **`layout`** limits which elements appear. Without `layout`: if any tier has `visible:false`, score, tier and categories are hidden.
+  - **`result_copy`** overrides the 15 texts.
 - **ai_team_profile**
-  - Hero "AI Growth · Maturity result": etapa, puntaje/máximo, barra y pista de etapas (hecho/actual/pendiente).
-  - "Potential" % y "Percentile", más una cita.
-  - "Your 5 dimensions" con barras de color por dimensión.
+  - Hero "AI Growth · Maturity result": stage, score/maximum, bar and stage track (done/current/pending).
+  - "Potential" % and "Percentile", plus a quote.
+  - "Your 5 dimensions" with colored bars per dimension.
   - Radar "You vs average vs top 10%".
-  - "Your strengths" (dimensiones ≥ 4/6), "Your biggest opportunity", "Your 90-day roadmap" ("Days {days}:").
+  - "Your strengths" (dimensions ≥ 4/6), "Your biggest opportunity", "Your 90-day roadmap" ("Days {days}:").
   - "Download my result (PDF)".
-  - Nota "All answers are anonymous · Results are analyzed only at group level".
-  - Sin reporte: "We couldn't generate your profile this time. Please try again later."
-- **samurai8** [CLIENTE]
-  - Textos en español fijos.
-  - Tiers Explorador…Maestro con percentiles 100 %, 55 %, 18 %, 10 %, 3 %, 1 %.
-  - Máximo 30; cada dimensión máx. 6: Contexto, Datos, Automatización, Calidad, Autonomía. Los puntajes por dimensión se estiman en el cliente.
-  - Roadmap de 30 días para Explorador y de 90 para el resto.
-  - Fechas en formato `dd.mm.yy`.
+  - Note "All answers are anonymous · Results are analyzed only at group level".
+  - No report: "We couldn't generate your profile this time. Please try again later."
+- **samurai8** [CLIENT-SPECIFIC]
+  - Fixed Spanish copy.
+  - Tiers Explorador…Maestro (Explorer…Master) with percentiles 100 %, 55 %, 18 %, 10 %, 3 %, 1 %.
+  - Maximum 30; each dimension max. 6: Contexto, Datos, Automatización, Calidad, Autonomía (Context, Data, Automation, Quality, Autonomy). Per-dimension scores are estimated on the client.
+  - 30-day roadmap for Explorador and 90-day for the rest.
+  - Dates in `dd.mm.yy` format.
 - **default**
   - "Your answers have been submitted successfully." / "Thank you for completing the questionnaire. Your answers have been saved and the team can now review them."
-  - `result_copy.title`/`subtitle` los sobrescriben.
+  - `result_copy.title`/`subtitle` override them.
 
-**CTA (todas las variantes):** `{title, description, button:{text, url}}`. Solo se muestra si hay URL y texto. Abre en pestaña nueva.
+**CTA (all variants):** `{title, description, button:{text, url}}`. Only shown if there is a URL and text. Opens in a new tab.
 
-**PDF:** se genera del lado del cliente o del servidor (a elección de la implementación) con el contenido del diagnóstico o del perfil.
+**PDF:** generated client-side or server-side (implementation's choice) with the diagnostic or profile content.
 
-### 9.13 Privacidad (`/privacy`)
+### 9.13 Privacy (`/privacy`)
 
-- Tema claro forzado, sin marca del cliente.
+- Forced light theme, without customer branding.
 - "Legal" / "Privacy Policy" / "Last updated April 20, 2026".
-- 9 secciones: Quiénes somos, Información que recolectamos, Cómo la usamos, Uso de IA, Terceros, Retención (90 días tras desinstalar), Derechos, Seguridad, Cambios.
-- Contacto por email y pie "© {year}. All rights reserved."
+- 9 sections: Who we are, Information we collect, How we use it, Use of AI, Third parties, Retention (90 days after uninstalling), Rights, Security, Changes.
+- Contact by email and footer "© {year}. All rights reserved."
 
-### 9.14 Persistencia local del respondente
+### 9.14 Respondent local persistence
 
-Todas las lecturas y escrituras son tolerantes a fallos. Expiración de 24 h.
+All reads and writes are fault-tolerant. 24 h expiration.
 
-| Clave lógica | Contenido |
+| Logical key | Content |
 |---|---|
-| `questionnaire_session:{qid}` (o `:{assignationId}:{qid}` en asignaciones) | `{questionnaireId, questionId, currentPosition, questionnaire, timestamp}` |
-| `questionnaire_disclaimer:{qid}` | Momento de aceptación |
-| `questionnaire_audio_tutorial:{qid}` | Momento en que se vio |
-| `organization-user-token` | Token del respondente; se borra al completar |
+| `questionnaire_session:{qid}` (or `:{assignationId}:{qid}` in assignations) | `{questionnaireId, questionId, currentPosition, questionnaire, timestamp}` |
+| `questionnaire_disclaimer:{qid}` | Time of acceptance |
+| `questionnaire_audio_tutorial:{qid}` | Time it was seen |
+| `organization-user-token` | Respondent token; deleted on completion |
 | `assignation_progress:{assignationId}` | `{assignationId, questionnaireId, flowId?, updatedAt}` |
-| `flowRun` | Flujo, estado activo, cuestionario activo, respuestas pendientes, job pendiente, sesión pendiente |
+| `flowRun` | Flow, active state, active questionnaire, pending answers, pending job, pending session |
 
-**Cuándo se guarda:** en cada cambio de respuesta o de paso (una vez que hay progreso), antes de cerrar la página y justo después de crear la sesión.
+**When it is saved:** on every answer or step change (once there is progress), before the page closes and right after the session is created.
 
-**Carga local-first:** si hay un snapshot con menos de 24 h y con `session_id`, se restaura **sin llamar a la red**. Si no, `POST /questionnaire/{id}/session`, que crea una sesión en cada llamada; las llamadas concurrentes se deduplican.
+**Local-first load:** if there is a snapshot less than 24 h old and with a `session_id`, it is restored **without calling the network**. Otherwise, `POST /questionnaire/{id}/session`, which creates a session on every call; concurrent calls are deduplicated.
 
-**Autoguardado:** cada Next o Skip hace `PUT /questionnaire/session` con la sesión completa. Skip marca todos los controles con `skipped:true`, valor vacío y timestamp.
+**Autosave:** every Next or Skip does `PUT /questionnaire/session` with the full session. Skip marks all controls with `skipped:true`, an empty value and a timestamp.
 
-**"Start over"** en el modal de reanudación: borra el snapshot y los flags de disclaimer y tutorial, y crea una sesión nueva.
+**"Start over"** in the resume modal: deletes the snapshot and the disclaimer and tutorial flags, and creates a new session.
 
-### 9.15 Aplicación de la marca
+### 9.15 Applying the branding
 
-- Sanitización:
-  - Colores hex de 3, 4, 6 u 8 dígitos.
-  - Longitudes en px, rem, em o %.
-  - Nombre de fuente `^[A-Za-z][A-Za-z0-9 _-]*$` de ≤ 60 caracteres.
-  - URL de fuente solo de un proveedor de fuentes permitido (hoy Google Fonts).
-- Mapeo:
+- Sanitization:
+  - Hex colors of 3, 4, 6 or 8 digits.
+  - Lengths in px, rem, em or %.
+  - Font name `^[A-Za-z][A-Za-z0-9 _-]*$` of ≤ 60 characters.
+  - Font URL only from an allowed font provider (currently Google Fonts).
+- Mapping:
 
-  | Campo de estilos | Token de tema |
+  | Styles field | Theme token |
   |---|---|
-  | `body.background` | Fondo |
-  | `body.color` | Texto |
-  | `button.primary.background` | Primario |
-  | `button.primary.color` | Texto sobre primario |
-  | `a.color` | Acento |
-  | `p.color` | Texto atenuado |
-  | `input.borderRadius` | Radio |
-  | `button.primary.borderRadius` | Radio de botón |
-  | `font.family` | Fuente de títulos |
+  | `body.background` | Background |
+  | `body.color` | Text |
+  | `button.primary.background` | Primary |
+  | `button.primary.color` | Text on primary |
+  | `a.color` | Accent |
+  | `p.color` | Muted text |
+  | `input.borderRadius` | Radius |
+  | `button.primary.borderRadius` | Button radius |
+  | `font.family` | Heading font |
 
-- Las tarjetas usan el fondo del input solo si su contraste con el color del texto es ≥ 2.5; si no, el fondo de la página.
-- Bordes y tonos atenuados = mezclas de texto y fondo al 20 % y al 10 %.
-- El favicon y la imagen OG no se sobrescriben.
+- Cards use the input background only if its contrast with the text color is ≥ 2.5; otherwise, the page background.
+- Borders and muted tones = mixes of text and background at 20 % and 10 %.
+- The favicon and the OG image are not overridden.
 
-**Idioma:**
+**Language:**
 
-- Idioma inicial: el del navegador, con respaldo `es`.
-- Se sobrescribe con el `language` de la cuenta, salvo que el usuario ya haya elegido uno a mano en esta visita.
-- `<html lang>` se mantiene sincronizado.
+- Initial language: the browser's, with `es` as fallback.
+- Overridden by the account's `language`, unless the user has already picked one manually during this visit.
+- `<html lang>` is kept in sync.
 
-### 9.16 Medición de marketing en la app del respondente
+### 9.16 Marketing measurement in the respondent app
 
-| Herramienta | Configuración | Eventos |
+| Tool | Configuration | Events |
 |---|---|---|
-| Analítica web de la plataforma | ID global | `page_view` en cada cambio de ruta o query (no de hash) |
-| Píxel de Meta | `pixel_id` de la cuenta; respaldo: ID global | `PageView` al iniciar y en cada ruta; `Lead` al completar. Solo al píxel resuelto |
-| LinkedIn Insight | `linkedin_partner_id` de la cuenta | Conversión `linkedin_conversion_id` al completar |
-| Google Ads | `google_ads_id` y etiqueta de la cuenta | `conversion` al completar |
-| Mapas de calor / grabación de sesiones | ID global | — |
-| Seguimiento de errores | DSN global | Trazas, repeticiones de sesión con error, logs |
+| Platform web analytics | Global ID | `page_view` on every route or query change (not hash) |
+| Meta Pixel | The account's `pixel_id`; fallback: global ID | `PageView` on start and on every route; `Lead` on completion. Only to the resolved pixel |
+| LinkedIn Insight | The account's `linkedin_partner_id` | `linkedin_conversion_id` conversion on completion |
+| Google Ads | The account's `google_ads_id` and label | `conversion` on completion |
+| Heatmaps / session recording | Global ID | — |
+| Error tracking | Global DSN | Traces, replays of sessions with errors, logs |
 
 ---
 
-## 10. Consola del operador
+## 10. Operator console
 
-### 10.1 Estructura general
+### 10.1 General structure
 
-- **Título de página:** "Mappi - {title}". 404: "404 / Oops! Page not found / Return to Home".
-- **Composición de rutas autenticadas:** gate de autenticación → gate de onboarding → layout (barra lateral + banner de cliente asumido + banner de uso + contenido).
-- **Barra lateral:**
+- **Page title:** "Mappi - {title}". 404: "404 / Oops! Page not found / Return to Home".
+- **Composition of authenticated routes:** authentication gate → onboarding gate → layout (sidebar + assumed-customer banner + usage banner + content).
+- **Sidebar:**
 
-  | Grupo | Entradas |
+  | Group | Entries |
   |---|---|
-  | Design | AI Experience (resaltado), Design Experience, Questionnaires, Customization |
+  | Design | AI Experience (highlighted), Design Experience, Questionnaires, Customization |
   | Send and track | Organizations, Assignations, Projects |
   | Settings | Users, Integrations, Profile, Documentation |
 
-  - Pie: selector de idioma; bloque de cuenta (iniciales, nombre derivado del email, insignia del plan y email) que enlaza a `/profile`; Logout.
-  - Eyebrow "Admin Console". El logo enlaza a `/ai-experience`.
-  - Todas las entradas son enlaces reales (clic medio y Ctrl+clic funcionan). Las sub-rutas resaltan su sección.
+  - Footer: language selector; account block (initials, name derived from the email, plan badge and email) that links to `/profile`; Logout.
+  - Eyebrow "Admin Console". The logo links to `/ai-experience`.
+  - All entries are real links (middle-click and Ctrl+click work). Sub-routes highlight their section.
 
-**Permisos en la UI:**
+**Permissions in the UI:**
 
-- Los usuarios de solo lectura ven los controles deshabilitados con tooltip: "Your read-only role can't create resources." / "Your read-only role can't make changes."
-- Toda ruta `/new` o `/:id/edit` redirige a quien no tiene permiso de escritura.
-- `RequireFeature` espera el veredicto del plan y redirige al listado si la feature no está permitida.
-- **Nunca se bloquean por plan:** `/profile/plans`, `/projects`, `/assignations`.
+- Read-only users see controls disabled with a tooltip: "Your read-only role can't create resources." / "Your read-only role can't make changes."
+- Every `/new` or `/:id/edit` route redirects anyone without write permission.
+- `RequireFeature` waits for the plan verdict and redirects to the listing if the feature is not allowed.
+- **Never blocked by plan:** `/profile/plans`, `/projects`, `/assignations`.
 
-**Sesión:**
+**Session:**
 
-- Antes de cada petición, si el token vence en menos de 2 min, se refresca. Las peticiones concurrentes comparten un único refresco.
-- Un 401, o un error de red con el token vencido, cierra la sesión y lleva a `/login`.
-- Las pestañas se sincronizan entre sí.
-- Tras el login se vuelve a la ruta que el usuario intentaba abrir.
+- Before each request, if the token expires in less than 2 min, it is refreshed. Concurrent requests share a single refresh.
+- A 401, or a network error with an expired token, ends the session and goes to `/login`.
+- Tabs are synchronized with each other.
+- After login, the user returns to the route they were trying to open.
 
-### 10.2 Autenticación (rutas públicas)
+### 10.2 Authentication (public routes)
 
-**`/login`** (pestañas "Sign in" / "Sign up"):
+**`/login`** (tabs "Sign in" / "Sign up"):
 
-- Insignia "14 days free · no card".
-- **"Continue with Google":** OAuth con PKCE contra el proveedor de identidad; dispara el evento de marketing `CompleteRegistration`.
-- **Validación:**
+- Badge "14 days free · no card".
+- **"Continue with Google":** OAuth with PKCE against the identity provider; fires the marketing event `CompleteRegistration`.
+- **Validation:**
 
-  | Campo | Regla | Mensaje |
+  | Field | Rule | Message |
   |---|---|---|
-  | Nombre (solo en sign-up) | Requerido | "Please enter your name." |
+  | Name (sign-up only) | Required | "Please enter your name." |
   | Email | `^[^\s@]+@[^\s@]+\.[^\s@]+$` | "Enter a valid email address." |
-  | Contraseña | ≥ 8 | "Password must be at least 8 characters." |
+  | Password | ≥ 8 | "Password must be at least 8 characters." |
 
-- **Medidor de fuerza** (sign-up): 1–4 barras (weak / fair / good / strong). Suma un punto por cada uno: ≥ 8 caracteres, ≥ 12, mayúsculas y minúsculas, dígito, símbolo. Se acota a 1–4. Siempre muestra la etiqueta además del color.
-- **Mapeo de errores:**
+- **Strength meter** (sign-up): 1–4 bars (weak / fair / good / strong). Adds one point for each of: ≥ 8 characters, ≥ 12, upper and lower case, digit, symbol. Clamped to 1–4. Always shows the label in addition to the color.
+- **Error mapping:**
 
-  | Código | Mensaje |
+  | Code | Message |
   |---|---|
-  | Credenciales inválidas / usuario inexistente | "Invalid email or password." |
+  | Invalid credentials / nonexistent user | "Invalid email or password." |
   | `EMAIL_ALREADY_EXISTS` | "An account with this email already exists. Try signing in instead." |
-  | Contraseña inválida | "Password must be at least 8 characters." |
-  | No confirmado | "Your account isn't confirmed yet. Please check your email." |
-  | Proveedor no configurado | "Sign-in is temporarily unavailable…" |
-  | Otro | "Something went wrong. Please try again." |
+  | Invalid password | "Password must be at least 8 characters." |
+  | Not confirmed | "Your account isn't confirmed yet. Please check your email." |
+  | Provider not configured | "Sign-in is temporarily unavailable…" |
+  | Other | "Something went wrong. Please try again." |
 
-- **Flujo de sign-up:** `POST /register` con el idioma normalizado (`es`→`es-CO`, `en`→`en-US`) y el email en minúsculas. Luego inicio de sesión. Toast "Account created. Welcome to Mappi!".
-- **Panel de marca:**
+- **Sign-up flow:** `POST /register` with the normalized language (`es`→`es-CO`, `en`→`en-US`) and the lowercased email. Then sign-in. Toast "Account created. Welcome to Mappi!".
+- **Brand panel:**
   - "Smart questionnaires that end in action."
-  - Estadísticas: 32 % "average conversion", 6.4× "more than unguided", "< 8 min" "first result".
-  - 3 testimonios que rotan cada 9 s.
-  - Enlaces Privacy / Terms / Support ([DEUDA] no llevan a ninguna parte).
+  - Stats: 32 % "average conversion", 6.4× "more than unguided", "< 8 min" "first result".
+  - 3 testimonials that rotate every 9 s.
+  - Privacy / Terms / Support links ([DEBT] they lead nowhere).
 
-**`/sign-in`** (retorno de OAuth):
+**`/sign-in`** (OAuth return):
 
-- Intercambia `?code` por tokens y muestra "Signing you in...".
-- Si el error contiene `EMAIL_LINKED_RETRY_LOGIN` (la cuenta de Google se acaba de vincular a una cuenta de contraseña existente), reintenta **una** vez de forma automática.
+- Exchanges `?code` for tokens and shows "Signing you in...".
+- If the error contains `EMAIL_LINKED_RETRY_LOGIN` (the Google account was just linked to an existing password account), it automatically retries **once**.
 
 **`/forgot-password`:**
 
-- Un campo de email → `POST /password-recovery` → `/reset-password`, recordando el email.
-- Errores: "Too many attempts. Please try again in a few minutes." / "We could not start the recovery. Please try again."
+- One email field → `POST /password-recovery` → `/reset-password`, remembering the email.
+- Errors: "Too many attempts. Please try again in a few minutes." / "We could not start the recovery. Please try again."
 
 **`/reset-password`:**
 
-- Campos: email, código (se precarga de `?code`), contraseña nueva y confirmación.
-- Validación en orden:
-  1. Email válido.
-  2. Código requerido: "Enter the code we sent you."
-  3. Contraseña ≥ 8.
-  4. Coinciden: "The two passwords do not match."
-- Errores:
+- Fields: email, code (prefilled from `?code`), new password and confirmation.
+- Validation in order:
+  1. Valid email.
+  2. Code required: "Enter the code we sent you."
+  3. Password ≥ 8.
+  4. They match: "The two passwords do not match."
+- Errors:
 
-  | Código | Mensaje |
+  | Code | Message |
   |---|---|
   | `INVALID_RESET_CODE` | "That code is not valid. Check it and try again." |
   | `EXPIRED_RESET_CODE` | "That code expired. Request a new one." |
   | `INVALID_PASSWORD` | "That password does not meet the requirements." |
 
-- Éxito: toast "Password updated. Sign in with your new password." y redirección a `/login`.
+- Success: toast "Password updated. Sign in with your new password." and redirect to `/login`.
 
-**`/logout`:** tarjeta de confirmación "Sign Out?".
+**`/logout`:** confirmation card "Sign Out?".
 
-**`/internal/qa-access`:** acceso de QA con el login antiguo. Opcional.
+**`/internal/qa-access`:** QA access with the old login. Optional.
 
 ### 10.3 Onboarding (`/onboarding`)
 
-**Cuándo aparece:** para una cuenta con `onboarding_completed:false`.
+**When it appears:** for an account with `onboarding_completed:false`.
 
-- **Falla abierta:** un super-admin, la ausencia de cuenta o un error de red cuentan como onboarding completado.
-- Cabecera "8–12 minutes" con el enlace "Explore on my own", que marca el flag y lleva a `/ai-experience`.
-- Barra de progreso de 7 pasos.
+- **Fails open:** a super-admin, a missing account or a network error count as onboarding completed.
+- Header "8–12 minutes" with the link "Explore on my own", which sets the flag and goes to `/ai-experience`.
+- 7-step progress bar.
 
-**Paso 1. Objetivo:** "What do you want to achieve with Mappi?". "Continue" deshabilitado hasta elegir uno.
+**Step 1. Goal:** "What do you want to achieve with Mappi?". "Continue" disabled until one is chosen.
 
-| Objetivo | Descripción | Etiqueta |
+| Goal | Description | Label |
 |---|---|---|
 | Diagnose | "Measure a situation and deliver a level, recommendations, and a plan." | "Scoring + levels" |
 | Qualify or recommend | "Direct each person to the right service or next step." | "Segments + CTA" |
 | Capture processes | "Understand how a team works through text, audio, and follow-ups." | "Evidence + follow-ups" |
 | Collect information | "Create a structured survey without mandatory scoring." | "Regular survey" |
 
-**Paso 2. Workspace:** nombre, idioma y sitio web. [DEUDA] Estos datos no se envían al backend.
+**Step 2. Workspace:** name, language and website. [DEBT] This data is not sent to the backend.
 
-**Paso 3. Plantilla:** recomendada según el objetivo.
+**Step 3. Template:** recommended according to the goal.
 
-| Objetivo | Plantilla |
+| Goal | Template |
 |---|---|
-| Diagnose | AI Maturity Diagnostic: 8 preguntas; categorías Estrategia, Datos, Procesos, Talento, Cultura, Tecnología |
-| Qualify | Service Qualification: 6 preguntas |
-| Capture processes | Process Discovery: 7 preguntas, sobre todo texto libre |
-| Collect information | Customer Discovery: 6 preguntas |
+| Diagnose | AI Maturity Diagnostic: 8 questions; categories Estrategia, Datos, Procesos, Talento, Cultura, Tecnología (Strategy, Data, Processes, Talent, Culture, Technology) |
+| Qualify | Service Qualification: 6 questions |
+| Capture processes | Process Discovery: 7 questions, mostly free text |
+| Collect information | Customer Discovery: 6 questions |
 
-- Las preguntas de las plantillas están en español.
-- "Use template" o "Start from scratch →" (este último completa el onboarding).
-- Slug = `slugify(title)-` + 4 caracteres hex aleatorios.
+- The template questions are in Spanish.
+- "Use template" or "Start from scratch →" (the latter completes onboarding).
+- Slug = `slugify(title)-` + 4 random hex characters.
 
-**Paso 4. Builder:**
+**Step 4. Builder:**
 
 - Checklist: "Confirm your questionnaire title", "Edit a question to fit your context", "Review what the person will receive at the end".
-- Se pueden editar en línea las 4 primeras preguntas.
-- "Save and publish" se habilita con el checklist completo; tras confirmar, crea el cuestionario.
+- The first 4 questions can be edited inline.
+- "Save and publish" is enabled once the checklist is complete; after confirming, it creates the questionnaire.
 
-**Paso 5. Publicar:** slug editable con el prefijo `{FRONTEND_URL}/f/`. "Publish and open test" activa el cuestionario.
+**Step 5. Publish:** editable slug with the prefix `{FRONTEND_URL}/f/`. "Publish and open test" activates the questionnaire.
 
-**Paso 6. Probar:**
+**Step 6. Test:**
 
-- Abre `{publicUrl}?test=1` en una pestaña nueva.
-- Hace polling de las respuestas (`limit=1`): primero a los 5 s y luego cada 4 s hasta que aparezca una.
-- Muestra "processing" 3 s y después "ready".
+- Opens `{publicUrl}?test=1` in a new tab.
+- Polls the answers (`limit=1`): first at 5 s and then every 4 s until one appears.
+- Shows "processing" for 3 s and then "ready".
 
-**Paso 7. Resultado:**
+**Step 7. Result:**
 
-- Share link (copia), Customize more → `/customization`, Invite team → `/users/new`, Go to dashboard → `/ai-experience`.
-- Toda salida marca antes `completed:true`. Si falla: "We couldn't finish your setup…".
+- Share link (copies), Customize more → `/customization`, Invite team → `/users/new`, Go to dashboard → `/ai-experience`.
+- Every exit first sets `completed:true`. If it fails: "We couldn't finish your setup…".
 
-### 10.4 Creación con IA (`/ai-experience`, página de inicio)
+### 10.4 AI creation (`/ai-experience`, home page)
 
-**Acceso:** permiso de escritura y feature `chat`. `/` redirige aquí.
+**Access:** write permission and the `chat` feature. `/` redirects here.
 
-**Interfaz:**
+**Interface:**
 
-- Chat a pantalla completa con vista previa en vivo. Botones: Back, "New chat" y mostrar/ocultar preview.
-- Encabezado "What do you want to create today?". Saludo "Hi! How can I help you today? ✨".
-- Compositor:
-  - Enter envía; Shift+Enter hace salto de línea.
-  - Máximo 20 000 caracteres; el contador aparece pasado el 90 %.
+- Full-screen chat with live preview. Buttons: Back, "New chat" and show/hide preview.
+- Heading "What do you want to create today?". Greeting "Hi! How can I help you today? ✨".
+- Composer:
+  - Enter sends; Shift+Enter inserts a line break.
+  - Maximum 20,000 characters; the counter appears past 90 %.
   - Placeholder "Type your message…".
-- Tope de **40 mensajes**: "This conversation reached its message limit. Refresh the page to start over."
+- Cap of **40 messages**: "This conversation reached its message limit. Refresh the page to start over."
 
-**Cada turno:**
+**Each turn:**
 
-1. `POST /chat` y polling del job cada 2 s, con un límite de 5 min.
-2. Según el resultado:
-   - **`chat-questionnaire-created`:** tarjeta "Questionnaire created" con "Edit questionnaire" y "View questionnaire".
-   - **`draft`:** alimenta la vista previa.
-   - **`quick_replies`:** botones de un clic.
-   - **`actions`:** se invalidan todas las cachés. Si cambió el idioma de la cuenta, la UI cambia de idioma.
-   - **Acción con `job_id`** (estilos): polling cada 2 s hasta 5 min. Pasos visibles: "Reading your website" → "Choosing colors and fonts" → "Saving your styles". Termina con la paleta, la fuente y "Open Customization".
-3. Un clic en un enlace de entidad envía "Show me the details of the {kind} {name}" junto con `item`.
-4. Si falla: "Something went wrong processing your message." con "Retry" (sin Retry cuando el error es de límite de plan).
+1. `POST /chat` and polling of the job every 2 s, with a 5 min limit.
+2. Depending on the result:
+   - **`chat-questionnaire-created`:** "Questionnaire created" card with "Edit questionnaire" and "View questionnaire".
+   - **`draft`:** feeds the preview.
+   - **`quick_replies`:** one-click buttons.
+   - **`actions`:** all caches are invalidated. If the account language changed, the UI switches language.
+   - **Action with `job_id`** (styles): polling every 2 s up to 5 min. Visible steps: "Reading your website" → "Choosing colors and fonts" → "Saving your styles". Ends with the palette, the font and "Open Customization".
+3. Clicking an entity link sends "Show me the details of the {kind} {name}" along with `item`.
+4. If it fails: "Something went wrong processing your message." with "Retry" (no Retry when the error is a plan limit).
 
-**Vista previa:** recorre disclaimer → landing → preguntas (se pueden responder) → final. Un final de diagnóstico se puntúa en vivo con las respuestas de la preview. "Watch again" la reinicia.
+**Preview:** walks through disclaimer → landing → questions (they can be answered) → ending. A diagnostic ending is scored live with the preview's answers. "Watch again" restarts it.
 
-### 10.5 Creación manual de cuestionarios
+### 10.5 Manual questionnaire creation
 
 **`/questionnaires/new`:** "What do you want to create?"
 
-| Tarjeta | Descripción | Etiqueta | Feature |
+| Card | Description | Label | Feature |
 |---|---|---|---|
 | Regular (Default) | "A classic questionnaire that ends with a custom thank-you message of your choice." | "Best for surveys" | `regular` |
 | Diagnostic | "Score each respondent and place them into tiers, each with its own result and action plan." | "Best for assessments" | `diagnostic` |
 | Quiz Funnel | "Turn store visitors into buyers with a guided quiz that recommends the right product at the end." | "Imports from your store" | `quiz-funnel` |
 | Chaining | "Add your questions plus a prompt; the answers and prompt are used to generate a tailored questionnaire." | "Best for AI generation" | `chain` |
 
-- Una tarjeta que el plan no permite queda deshabilitada con el texto de límite.
-- Redirecciones: `/design-experience` → `/questionnaires/new`; `/questionnaires/create/chat` → `/ai-experience`.
+- A card the plan does not allow is disabled with the limit text.
+- Redirects: `/design-experience` → `/questionnaires/new`; `/questionnaires/create/chat` → `/ai-experience`.
 
-**Contenedor de creación** (compartido por Regular, Diagnostic y Chaining):
+**Creation container** (shared by Regular, Diagnostic and Chaining):
 
-- Cabecera: breadcrumb; chip "Draft · saved when you create it" o "Editing · saved when you save changes"; stepper de 3 pasos; toggle de preview; Back; acción principal ("Continue" / "Create" / "Save changes").
-- Una acción deshabilitada muestra **por qué** en un tooltip.
-- Solo se puede ir a un paso si los anteriores son válidos; al editar, todos están disponibles.
-- **No hay autoguardado.**
-- Crear pide confirmación: "Create the questionnaire?" / "Nothing has been saved yet. Once you confirm, the questionnaire is created in your account." / "Yes, create". Editar guarda sin preguntar.
-- Preview en marco de móvil o escritorio. Por debajo de 1100 px se abre como panel lateral.
+- Header: breadcrumb; chip "Draft · saved when you create it" or "Editing · saved when you save changes"; 3-step stepper; preview toggle; Back; main action ("Continue" / "Create" / "Save changes").
+- A disabled action shows **why** in a tooltip.
+- A step can only be reached if the previous ones are valid; when editing, all are available.
+- **There is no autosave.**
+- Creating asks for confirmation: "Create the questionnaire?" / "Nothing has been saved yet. Once you confirm, the questionnaire is created in your account." / "Yes, create". Editing saves without asking.
+- Preview in a mobile or desktop frame. Below 1100 px it opens as a side panel.
 
-**Paso 1. Detalles:**
+**Step 1. Details:**
 
-| Campo | Regla |
+| Field | Rule |
 |---|---|
-| Título | Requerido. "Write a title to continue." |
-| Slug ("Custom link (slug)") | Pista "Lowercase letters, numbers and hyphens only. Leave empty to generate it from the title." Regla de §6.6. Conflicto: "That custom link (slug) is already in use by another questionnaire. Choose a different one." |
-| Descripción | Opcional |
-| Enable landing page | Interruptor; activado por defecto en cuestionarios nuevos |
-| Disclaimer | Interruptor + texto; si está activo, el texto es obligatorio: "Write the disclaimer text to continue." |
+| Title | Required. "Write a title to continue." |
+| Slug ("Custom link (slug)") | Hint "Lowercase letters, numbers and hyphens only. Leave empty to generate it from the title." Rule from §6.6. Conflict: "That custom link (slug) is already in use by another questionnaire. Choose a different one." |
+| Description | Optional |
+| Enable landing page | Toggle; on by default for new questionnaires |
+| Disclaimer | Toggle + text; if on, the text is mandatory: "Write the disclaimer text to continue." |
 
-**Paso 2. Preguntas:**
+**Step 2. Questions:**
 
-- Reordenar arrastrando. Soltar sobre otra categoría mueve la pregunta a esa categoría. Las preguntas se agrupan por categoría.
-- Agregar, duplicar y borrar.
-- **Campos por pregunta:**
-  - Título (requerido), descripción, disclaimer.
-  - Categoría: combobox que permite crear nuevas.
-  - Requerida: activada por defecto; fija en activada para los tipos puntuables de un diagnóstico.
-  - Tipo de entrada: `radio` "Single selection", `checkbox` "Multiple selection", `select`, `ranking`, `selection_with_score`, `single_selection_with_score`, `text`, `audio`, `range`, `message`, `file`.
-- **Campos extra por tipo:**
+- Reorder by dragging. Dropping onto another category moves the question to that category. Questions are grouped by category.
+- Add, duplicate and delete.
+- **Fields per question:**
+  - Title (required), description, disclaimer.
+  - Category: combobox that allows creating new ones.
+  - Required: on by default; locked on for the scorable types of a diagnostic.
+  - Input type: `radio` "Single selection", `checkbox` "Multiple selection", `select`, `ranking`, `selection_with_score`, `single_selection_with_score`, `text`, `audio`, `range`, `message`, `file`.
+- **Extra fields by type:**
 
-  | Tipo | Campos extra |
+  | Type | Extra fields |
   |---|---|
-  | `text` / `audio` | Follow-ups máximos 0–5. Si > 0: criterios de aceptación (hasta 10) |
-  | `text` | Tipo de dato: "Free (choose characters)" con casillas All / Letters / Numbers / Symbols (al menos una marcada), o preset RFC / NIT / "Phone / WhatsApp". Se guarda como `{type:'format', value, message:''}` |
-  | `range` | Mín. y máx., guardados como validaciones `min` y `max` |
-  | Tipos de opción | Opciones con etiqueta; los puntuables también llevan un puntaje numérico por opción |
+  | `text` / `audio` | Maximum follow-ups 0–5. If > 0: acceptance criteria (up to 10) |
+  | `text` | Data type: "Free (choose characters)" with All / Letters / Numbers / Symbols checkboxes (at least one checked), or preset RFC / NIT / "Phone / WhatsApp". Stored as `{type:'format', value, message:''}` |
+  | `range` | Min and max, stored as `min` and `max` validations |
+  | Option types | Labeled options; scorable ones also carry a numeric score per option |
 
-- **Mensajes de validación:**
+- **Validation messages:**
   - "Question {{n}} must have a title."
   - "…needs at least one answer choice."
   - "All answer choices in question "…" must have a label."
   - "…must have a numeric score."
   - "…must have a unique score value."
   - "…range input: both min and max are required and min must be lower than max."
-- **Codificación:**
-  - Opción no puntuable: `value = slug(label)`. Puntuable: `value = puntaje`.
-  - Los tipos puntuables viajan como `checkbox`/`radio`. Al cargar, un radio o checkbox con todos los valores numéricos se lee como puntuable.
+- **Encoding:**
+  - Non-scorable option: `value = slug(label)`. Scorable: `value = score`.
+  - Scorable types travel as `checkbox`/`radio`. On load, a radio or checkbox whose values are all numeric is read as scorable.
 
-**Paso 3 según el tipo:**
+**Step 3 by type:**
 
-- **Regular: "When it ends".** Bloques disponibles:
-  - Mensaje de agradecimiento: Title y Message ≤ 300 cada uno, enviados como `result_copy.title/subtitle`.
+- **Regular: "When it ends".** Available blocks:
+  - Thank-you message: Title and Message ≤ 300 each, sent as `result_copy.title/subtitle`.
   - Call to action.
-  - Capturar datos (`capture_user_data`).
+  - Capture data (`capture_user_data`).
 
-  Validación del CTA:
+  CTA validation:
 
-  | Campo | Regla | Mensaje |
+  | Field | Rule | Message |
   |---|---|---|
-  | Título | Requerido, ≤ 120 | "The call to action title is required." / "…too long." |
-  | Descripción | ≤ 200 | "The call to action description is too long." |
-  | Texto del botón | Requerido, ≤ 50 | "The button text is required." / "…too long." |
-  | URL | Empieza con `http(s)://` | "Enter a full URL starting with http:// or https://." |
+  | Title | Required, ≤ 120 | "The call to action title is required." / "…too long." |
+  | Description | ≤ 200 | "The call to action description is too long." |
+  | Button text | Required, ≤ 50 | "The button text is required." / "…too long." |
+  | URL | Starts with `http(s)://` | "Enter a full URL starting with http:// or https://." |
 
 - **Diagnostic.**
-  - Reglas de preguntas:
-    - Todas con categoría: "Every question needs a category — your tiers are built from these categories."
-    - Tipos permitidos: selección simple o múltiple (con o sin puntaje), ranking, range, text, audio y file.
-    - Al menos una puntuable (`selection_with_score`, `single_selection_with_score`, `ranking`, `range`).
-  - **Máximo:**
-    - Por pregunta: suma para checkbox, `selection_with_score` y ranking; máximo para el resto (incluye range).
-    - Categoría = suma de sus preguntas. Total = suma de todas.
-  - **Resultados:**
-    - Tiers semilla Beginner / Intermediate / Advanced repartidos de forma pareja en 0..max. Cada tier tiene nombre, desde, hasta y descripción.
-    - Reglas de tiers:
+  - Question rules:
+    - All with a category: "Every question needs a category — your tiers are built from these categories."
+    - Allowed types: single or multiple selection (with or without score), ranking, range, text, audio and file.
+    - At least one scorable (`selection_with_score`, `single_selection_with_score`, `ranking`, `range`).
+  - **Maximum:**
+    - Per question: sum for checkbox, `selection_with_score` and ranking; maximum for the rest (includes range).
+    - Category = sum of its questions. Total = sum of all.
+  - **Results:**
+    - Seed tiers Beginner / Intermediate / Advanced spread evenly over 0..max. Each tier has a name, from, to and description.
+    - Tier rules:
 
-      | Regla | Mensaje |
+      | Rule | Message |
       |---|---|
-      | Con nombre | "Give every tier a name." |
-      | Rango completo | "Fill in the score range (from and to) for every tier." |
+      | Named | "Give every tier a name." |
+      | Complete range | "Fill in the score range (from and to) for every tier." |
       | from ≤ to | "A tier's "from" score can't be greater than its "to" score." |
-      | El primero empieza en 0 | "Your first tier must start at 0." |
-      | El último llega al máximo | "Your tiers must reach the top score of {{max}}." |
-      | Contiguos | "Tiers can't leave gaps or overlap — each one must start right after the previous." |
+      | The first starts at 0 | "Your first tier must start at 0." |
+      | The last reaches the maximum | "Your tiers must reach the top score of {{max}}." |
+      | Contiguous | "Tiers can't leave gaps or overlap — each one must start right after the previous." |
 
-    - Bloques: Tier, Total score, Score by area, Recommendations (una por tier), Action plan (una por tier), PDF report, CTA, Capture data.
-    - Se guardan como flujo `layout` + `on_completed` de tipo `diagnostic` + `result_copy` (15 textos).
+    - Blocks: Tier, Total score, Score by area, Recommendations (one per tier), Action plan (one per tier), PDF report, CTA, Capture data.
+    - Saved as flow `layout` + `on_completed` of type `diagnostic` + `result_copy` (15 texts).
 
 - **Chaining: Prompts.**
-  - Línea de tiempo "Starting point" → Prompt N → Questionnaire N, hasta **10** prompts.
-  - Final: "Another questionnaire", "Finish" (→ `result`), "Diagnostic" (→ `diagnostic`) o "Quiz funnel" (→ `quiz_funnel`).
-  - Los prompts no pueden quedar vacíos.
-  - Al guardar:
-    1. Se revalida en vivo la feature `chain`.
-    2. El texto de cada prompt se sube al almacén de objetos (`POST /signed-urls` con `upload_type:'prompt'` + subida directa).
-    3. Se guarda el flujo con estados `prompt` que apuntan a esas claves.
+  - Timeline "Starting point" → Prompt N → Questionnaire N, up to **10** prompts.
+  - Ending: "Another questionnaire", "Finish" (→ `result`), "Diagnostic" (→ `diagnostic`) or "Quiz funnel" (→ `quiz_funnel`).
+  - Prompts cannot be left empty.
+  - On save:
+    1. The `chain` feature is revalidated live.
+    2. The text of each prompt is uploaded to object storage (`POST /signed-urls` with `upload_type:'prompt'` + direct upload).
+    3. The flow is saved with `prompt` states pointing to those keys.
 
-**Pantalla de éxito:**
+**Success screen:**
 
 - "Questionnaire created successfully!" / "Your diagnostic is ready." / "Changes saved".
-- Botones: Copy link, View questionnaire, Keep editing, Go to Questionnaires, Create another.
+- Buttons: Copy link, View questionnaire, Keep editing, Go to Questionnaires, Create another.
 
-**Quiz Funnel** (`/questionnaires/create/quizfunnel`, feature `quiz-funnel`). Pasos: Store → Products → Generate.
+**Quiz Funnel** (`/questionnaires/create/quizfunnel`, feature `quiz-funnel`). Steps: Store → Products → Generate.
 
-- **Vía plataforma de e-commerce:**
-  - La tienda nunca se escribe a mano: viene de `?shop=` (capturado al arrancar y validado) o de `GET /shopify/connection`.
-  - Authorize / Reconnect abre la URL de OAuth en una pestaña nueva. "Install" enlaza a la instalación de la app.
-  - "Load products": sincroniza y lista los productos.
-  - Tras crear: pasos para activar el embed en el tema de la tienda (abrir el editor de temas, guardar y visitar la tienda).
-- **Vía sitio web:**
-  - URL de la tienda: se agrega el esquema si falta; el host debe tener un punto.
-  - Cantidad de productos 5 / 10 / 20 / 30 (default 10).
-  - Scraping por job con polling cada 5 s hasta 5 min.
-  - Mensajes rotativos: "Analyzing the website...", "Analyzing the online store...", "Polishing your catalog...", "Fixing some details...", "Organizing all the information...".
-  - Se pueden quitar productos (confirmación "Are you sure you want to delete your product?").
-  - Cargar productos es opcional: Generate hace el scraping si hace falta.
+- **Via e-commerce platform:**
+  - The store is never typed by hand: it comes from `?shop=` (captured at startup and validated) or from `GET /shopify/connection`.
+  - Authorize / Reconnect opens the OAuth URL in a new tab. "Install" links to the app installation.
+  - "Load products": syncs and lists the products.
+  - After creating: steps to enable the embed in the store theme (open the theme editor, save and visit the store).
+- **Via website:**
+  - Store URL: the scheme is added if missing; the host must contain a dot.
+  - Number of products 5 / 10 / 20 / 30 (default 10).
+  - Scraping via job with polling every 5 s up to 5 min.
+  - Rotating messages: "Analyzing the website...", "Analyzing the online store...", "Polishing your catalog...", "Fixing some details...", "Organizing all the information...".
+  - Products can be removed (confirmation "Are you sure you want to delete your product?").
+  - Loading products is optional: Generate does the scraping if needed.
 - **Generate:**
-  - Tipo "Design Experience" (`experience`) o "Profiling" (`profiling`).
-  - Job con polling de hasta 5 min. Resultado `{questionnaire_url, flow:{id, slug, questionnaire_id}}`.
-- **Errores:**
+  - Type "Design Experience" (`experience`) or "Profiling" (`profiling`).
+  - Job with polling of up to 5 min. Result `{questionnaire_url, flow:{id, slug, questionnaire_id}}`.
+- **Errors:**
   - "Please enter a valid store URL"
   - "Could not access URL. Please ensure it is a public store."
   - "Generation failed. Please try again."
   - "We couldn't start the Shopify connection…"
-  - Mensajes propios para `SHOPIFY_NOT_CONNECTED` y `SHOPIFY_TOKEN_EXPIRED`.
+  - Dedicated messages for `SHOPIFY_NOT_CONNECTED` and `SHOPIFY_TOKEN_EXPIRED`.
 
-### 10.6 Listado de cuestionarios (`/questionnaires`)
+### 10.6 Questionnaire listing (`/questionnaires`)
 
-**Cabecera:** "Questionnaires", "{{count}} questionnaires" y el botón "New Questionnaire".
+**Header:** "Questionnaires", "{{count}} questionnaires" and the "New Questionnaire" button.
 
-**Barra de herramientas:**
+**Toolbar:**
 
-- Búsqueda (atajo ⌘/Ctrl+K). [DEUDA] Solo filtra las filas cargadas; el backend ya admite `search`.
-- Tipo: All types / Standard / Quiz funnel / Diagnostic / Process mapping.
-- Estado: All status / Active / Inactive.
-- Orden: "Sort: Created" / "Sort: Updated", Descending / Ascending.
-- Zona horaria Local / UTC (preferencia persistente).
+- Search (shortcut ⌘/Ctrl+K). [DEBT] It only filters the loaded rows; the backend already supports `search`.
+- Type: All types / Standard / Quiz funnel / Diagnostic / Process mapping.
+- State: All status / Active / Inactive.
+- Sort: "Sort: Created" / "Sort: Updated", Descending / Ascending.
+- Time zone Local / UTC (persistent preference).
 
-**Paginación:** 10 / 20 / 50 / 100 por página (default 10). Páginas numeradas con ventana de 5 y "{{start}}–{{end}} of {{total}}".
+**Pagination:** 10 / 20 / 50 / 100 per page (default 10). Numbered pages with a window of 5 and "{{start}}–{{end}} of {{total}}".
 
-**Columnas:**
+**Columns:**
 
-- Título: enlace a editar, o a la página pública para usuarios de solo lectura. Debajo, "{{count}} questions".
-- Tipo: Standard / Quiz funnel / Diagnostic / Process mapping / Chaining.
-- Estado con interruptor Active: optimista, se revierte si falla.
-- Fecha de creación o de actualización, según el orden.
-- Acciones: View (pestaña nueva), Copy link, Edit, Answers y "Analytics" (con insignia "New") que abre el dashboard.
+- Title: link to edit, or to the public page for read-only users. Below it, "{{count}} questions".
+- Type: Standard / Quiz funnel / Diagnostic / Process mapping / Chaining.
+- State with an Active toggle: optimistic, reverted if it fails.
+- Creation or update date, depending on the sort.
+- Actions: View (new tab), Copy link, Edit, Answers and "Analytics" (with a "New" badge) that opens the dashboard.
 
-**Vacíos:**
+**Empty states:**
 
 - "No questionnaires created yet" / "Create your first questionnaire to start collecting responses."
 - "No matches" + "Clear filters".
 - "Nothing matches "{{query}}"." + "Clear search".
 
-### 10.7 Edición (`/questionnaires/:id/edit`)
+### 10.7 Editing (`/questionnaires/:id/edit`)
 
-**Carga:** el cuestionario, el flujo (slug, estados, cta, layout, result_copy) y todas las respuestas, para saber si está bloqueado.
+**Load:** the questionnaire, the flow (slug, states, cta, layout, result_copy) and all answers, to know whether it is locked.
 
-**Sin respuestas**, redirige al editor específico:
+**Without answers**, it redirects to the specific editor:
 
-| Tipo | Ruta |
+| Type | Route |
 |---|---|
-| Diagnóstico | `/:id/edit/diagnostic` |
-| Cadena | `/:id/edit/prompt` |
+| Diagnostic | `/:id/edit/diagnostic` |
+| Chain | `/:id/edit/prompt` |
 | Regular | `/:id/edit/regular` |
 
-**Otros casos** (editor genérico): título, slug con vista previa `…/f/{slug}`, descripción, captura de datos, landing, disclaimer, CTA, preguntas y el botón "Update".
+**Other cases** (generic editor): title, slug with preview `…/f/{slug}`, description, data capture, landing, disclaimer, CTA, questions and the "Update" button.
 
-**Bloqueado** (tiene respuestas, o el guardado devuelve 409 sin código de slug):
+**Locked** (has answers, or saving returns 409 without a slug code):
 
-- Insignia "Locked" y el texto "Locked to preserve answers".
-- "Create a copy" → confirmación "Create a copy?" / "A new questionnaire is created in your account, with no answers, ready to edit." / "Yes, create copy" → copiar.
+- "Locked" badge and the text "Locked to preserve answers".
+- "Create a copy" → confirmation "Create a copy?" / "A new questionnaire is created in your account, with no answers, ready to edit." / "Yes, create copy" → copy.
 
-### 10.8 Respuestas
+### 10.8 Answers
 
 **`/questionnaires/:id/answers`:**
 
-- Cabecera: "Questionnaire Answers: {title}". Clic en el título copia el enlace público.
+- Header: "Questionnaire Answers: {title}". Clicking the title copies the public link.
 - **Export to Google Sheets** (§13.9).
-- Leyenda de estados: Filling / Filled out / Processing / Completed.
-- **Filtros:** estado (default Completed, o All statuses), zona horaria, tamaño de página 100 / 50 / 20 (default 100).
-- **Paginación:** por cursor (Previous / Next, "Page N"). El total se obtiene recorriendo todos los cursores.
-- **Columnas:**
+- State legend: Filling / Filled out / Processing / Completed.
+- **Filters:** state (default Completed, or All statuses), time zone, page size 100 / 50 / 20 (default 100).
+- **Pagination:** cursor-based (Previous / Next, "Page N"). The total is obtained by walking all cursors.
+- **Columns:**
   - Started At.
-  - Name ("Anonymous" si no hay).
-  - Email ("N/A" si no hay).
-  - Phone (solo si alguna fila tiene).
-  - Progreso: contestadas/total, sin contar los temas meta.
-  - Estado: barra de 4 segmentos, o "Stage X of N" en cadenas.
+  - Name ("Anonymous" if none).
+  - Email ("N/A" if none).
+  - Phone (only if some row has one).
+  - Progress: answered/total, not counting meta topics.
+  - State: 4-segment bar, or "Stage X of N" for chains.
   - "View".
-- **Cadenas:** pista "The status filter applies to the first stage; the chain may still be in progress."
-- Las etapas hijas generadas antiguas aparecen en la tarjeta "Generated questionnaires".
+- **Chains:** hint "The status filter applies to the first stage; the chain may still be in progress."
+- Old generated child stages appear in the "Generated questionnaires" card.
 
 **`/questionnaires/:id/answers/:sessionId`:**
 
 - "Response Details - {{name}}".
-- **Resumen:** Email, Name, Phone, Total Time (segundos, o "Uncompleted") y Started At.
-- **Cadena de la sesión:** si responde 403 o 404, se usa la sesión suelta y sus resultados.
-- **Por etapa:** tabla Question / Answer / Time Spent (diferencia entre timestamps de respuestas). Valores especiales: "Not answered", "Skipped" o "Viewed".
-- **Archivos:** una celda por clave. "View" abre un modal de vista previa y "Download" descarga; ambos piden una URL firmada al hacer clic.
+- **Summary:** Email, Name, Phone, Total Time (seconds, or "Uncompleted") and Started At.
+- **Session chain:** if it responds 403 or 404, the standalone session and its results are used.
+- **Per stage:** Question / Answer / Time Spent table (difference between answer timestamps). Special values: "Not answered", "Skipped" or "Viewed".
+- **Files:** one cell per key. "View" opens a preview modal and "Download" downloads; both request a signed URL on click.
 
-  | Tipo | Extensiones | Comportamiento |
+  | Type | Extensions | Behavior |
   |---|---|---|
-  | Imagen | png, jpg, jpeg, gif, webp | Vista previa |
-  | PDF | pdf | Vista previa |
-  | Audio | mp3, wav, m4a, ogg, aac | Vista previa |
-  | Video | mp4, mov, webm | Vista previa |
-  | Otros | — | "No preview"; solo descarga |
+  | Image | png, jpg, jpeg, gif, webp | Preview |
+  | PDF | pdf | Preview |
+  | Audio | mp3, wav, m4a, ogg, aac | Preview |
+  | Video | mp4, mov, webm | Preview |
+  | Other | — | "No preview"; download only |
 
-- **Tarjeta de resultado:**
-  - Productos: nombre, enlace y precio.
-  - Diagnóstico: puntaje/máximo, tier, barras por categoría, y recomendaciones y plan del tier.
-  - Perfil de IA.
-  - Si no hay: "No result was generated for this session".
-- El enlace de volver regresa a la asignación si se llegó desde ella.
+- **Result card:**
+  - Products: name, link and price.
+  - Diagnostic: score/maximum, tier, bars per category, and the tier's recommendations and plan.
+  - AI profile.
+  - If none: "No result was generated for this session".
+- The back link returns to the assignation if it was reached from there.
 
 ### 10.9 Dashboard (`/questionnaires/:id/dashboard`, feature `analytics`)
 
-**Datos:** `GET .../dashboard` (layout) y `GET .../dashboard/data`:
+**Data:** `GET .../dashboard` (layout) and `GET .../dashboard/data`:
 
 ```
 sessions: { total, completed, completion_rate (0..1),
@@ -2092,772 +2092,772 @@ questions: [{ question_id, answers_count,
               numeric: {count, avg, min, q1, median, q3, max} }]
 ```
 
-**Resumen** (gratis en todos los planes):
+**Summary** (free on all plans):
 
-- Completion rate = `round(completion_rate×100)` %, con "X of N sessions completed".
+- Completion rate = `round(completion_rate×100)` %, with "X of N sessions completed".
 - Sessions = total.
-- Average time = `round(avg)` en formato "M min S s".
-- Biggest drop-off = la pregunta Qn con la mayor caída respecto al paso anterior; porcentaje = `round(caída/anterior×100)`.
+- Average time = `round(avg)` formatted as "M min S s".
+- Biggest drop-off = the question Qn with the largest drop relative to the previous step; percentage = `round(drop/previous×100)`.
 
-**Embudo:** Started → cada pregunta en orden → Completed.
+**Funnel:** Started → each question in order → Completed.
 
-- Alcance de una pregunta = `max(respuestas de esa pregunta o de cualquier posterior, completed)`, acotado a total. Así el embudo nunca sube.
+- Reach of a question = `max(answers to that question or any later one, completed)`, capped at total. This way the funnel never goes up.
 - `pct = round(count/total×100)`.
-- Con más de 6 preguntas, los tramos sin caída se agrupan en "Qa–Qb · no drop-off", con "Show all N questions".
-- Mensaje: "Biggest drop at Qn" o "…at the end".
+- With more than 6 questions, stretches with no drop are grouped into "Qa–Qb · no drop-off", with "Show all N questions".
+- Message: "Biggest drop at Qn" or "…at the end".
 
-**Gráficos** (13 tipos):
+**Charts** (13 types):
 
-- Las distribuciones se ordenan por conteo y agrupan la cola en "Other": 6 porciones por defecto, 8 en bar, 12 en horizontal bar.
-- El histograma rellena cada entero de la escala si el rango es ≤ 30.
-- Gauge: fracción = `(avg − min)/(max − min)`.
-- Heatmap y stacked bar: columnas por etiqueta de opción.
-- **NPS** (escalas 0–10 o 1–10): detractores ≤ 6, pasivos 7–8, promotores 9–10; `NPS = round((promotores − detractores)/total×100)`. Otras escalas se dividen en tercios: bajo, medio, alto.
+- Distributions are sorted by count and group the tail into "Other": 6 slices by default, 8 in bar, 12 in horizontal bar.
+- The histogram fills every integer of the scale if the range is ≤ 30.
+- Gauge: fraction = `(avg − min)/(max − min)`.
+- Heatmap and stacked bar: columns per option label.
+- **NPS** (0–10 or 1–10 scales): detractors ≤ 6, passives 7–8, promoters 9–10; `NPS = round((promoters − detractors)/total×100)`. Other scales are split into thirds: low, medium, high.
 
-**Bloqueado** (sin `dashboards`): un tablero de ejemplo desenfocado con el texto del plan y "Get your dashboards" → `/profile/plans`.
+**Locked** (without `dashboards`): a blurred sample dashboard with the plan text and "Get your dashboards" → `/profile/plans`.
 
-**Estados:**
+**States:**
 
-- Carga: mensaje rotativo cada 4.5 s ("Gathering the information…", "Analyzing the data…", "Generating the report…", "Finishing up…"). La primera generación tarda entre 10 y 25 s.
-- Vacío: "No answers yet" / "Charts appear here as soon as people start answering this questionnaire."
-- Errores: los 4xx no se reintentan; los fallos de generación o de analítica muestran "Try again".
+- Loading: rotating message every 4.5 s ("Gathering the information…", "Analyzing the data…", "Generating the report…", "Finishing up…"). The first generation takes between 10 and 25 s.
+- Empty: "No answers yet" / "Charts appear here as soon as people start answering this questionnaire."
+- Errors: 4xx are not retried; generation or analytics failures show "Try again".
 
-**Insignia de tipo:** Satisfaction / Knowledge / Profiling / Recommendations / Eligibility / Opinion.
+**Type badge:** Satisfaction / Knowledge / Profiling / Recommendations / Eligibility / Opinion.
 
-### 10.10 Organizaciones
+### 10.10 Organizations
 
-**`/organizations`:** cuadrícula de tarjetas.
+**`/organizations`:** card grid.
 
-- Cada tarjeta: inicial con color derivado de un hash, nombre (truncado a 16), Active/Inactive, dominio, número de miembros. Botones View, Edit y Delete.
-- Borrar: "Delete organization?" / "This will permanently delete "{{name}}" and cannot be undone."
-- "New Organization" requiere escritura y la feature `organizations`.
-- Vacío: "No organizations yet. Create your first one."
+- Each card: initial with a color derived from a hash, name (truncated to 16), Active/Inactive, domain, number of members. View, Edit and Delete buttons.
+- Delete: "Delete organization?" / "This will permanently delete "{{name}}" and cannot be undone."
+- "New Organization" requires write permission and the `organizations` feature.
+- Empty: "No organizations yet. Create your first one."
 
-**`/organizations/new` y `/:id/edit`:**
+**`/organizations/new` and `/:id/edit`:**
 
-- **Campos:** Name (requerido: "Name is required"), Email domain (placeholder "ejemplo.com"), Description, Active (default sí) y la lista de miembros.
-- **Miembro:** nombre requerido; email o teléfono ("Each member needs at least an email or a phone"); rol y área opcionales. El email debe ser válido.
-  - Duplicados por email o teléfono normalizados: "This member is already in the list".
-  - Se editan en línea y se pueden quitar.
-- **Normalización:** nombre sin acentos, en minúsculas y con espacios colapsados; email recortado y en minúsculas; teléfono en dígitos con `+`.
-- **Aviso de dominio** (no bloquea): "{{count}} member(s) use a domain other than {{domain}}. They will be saved anyway."
-- **Importar CSV:**
-  - Se quita el BOM UTF-8.
-  - Delimitador `,` o `;`: el que más aparezca en la cabecera.
-  - Admite campos entre comillas.
-  - Alias de cabecera: name/nombre; email/correo; phone/telefono/teléfono; role/rol/cargo; area/área.
-  - Faltantes: "The CSV must include a 'name' column" / "…at least an 'email' or 'phone' column".
-  - Filas omitidas: "Row {{line}} — {{name}}: {{reason}}". Razones: nombre vacío, email inválido, sin email ni teléfono, ya está en la lista.
-  - Éxito: "Imported {{count}} members".
-- **Plantilla CSV:** `organization_members_template.csv` con columnas `name,email,phone,role,area`.
-- **Guardar:**
-  - Crear y luego ir al detalle.
-  - Actualizar enviando la lista completa de miembros (los existentes conservan su id).
-  - Los errores señalan la fila: "Member {{position}} ({{name}}): {{detail}}".
+- **Fields:** Name (required: "Name is required"), Email domain (placeholder "ejemplo.com"), Description, Active (default yes) and the member list.
+- **Member:** name required; email or phone ("Each member needs at least an email or a phone"); role and area optional. The email must be valid.
+  - Duplicates by normalized email or phone: "This member is already in the list".
+  - They are edited inline and can be removed.
+- **Normalization:** name without accents, lowercased and with collapsed spaces; email trimmed and lowercased; phone as digits with `+`.
+- **Domain warning** (non-blocking): "{{count}} member(s) use a domain other than {{domain}}. They will be saved anyway."
+- **CSV import:**
+  - The UTF-8 BOM is stripped.
+  - Delimiter `,` or `;`: whichever appears most in the header.
+  - Supports quoted fields.
+  - Header aliases: name/nombre; email/correo; phone/telefono/teléfono; role/rol/cargo; area/área.
+  - Missing: "The CSV must include a 'name' column" / "…at least an 'email' or 'phone' column".
+  - Skipped rows: "Row {{line}} — {{name}}: {{reason}}". Reasons: empty name, invalid email, no email or phone, already in the list.
+  - Success: "Imported {{count}} members".
+- **CSV template:** `organization_members_template.csv` with columns `name,email,phone,role,area`.
+- **Save:**
+  - Create and then go to the detail.
+  - Update by sending the full member list (existing ones keep their id).
+  - Errors point to the row: "Member {{position}} ({{name}}): {{detail}}".
 
-**`/organizations/:id/view`:** detalle (descripción, dominio, creada, actualizada), tabla de miembros (Name, Email, Phone) y el botón Edit.
+**`/organizations/:id/view`:** detail (description, domain, created, updated), members table (Name, Email, Phone) and the Edit button.
 
-### 10.11 Asignaciones
+### 10.11 Assignations
 
 **`/assignations`:**
 
-- **Filtro de tipo:** All / Default / Follow-up.
-- **Paginación:** fija de 10 por página, numerada.
-- **Columnas:**
-  - Nombre, con la línea de organización (enlace) y la de cuestionario (enlace a editar si hay permiso).
-  - Chip de audiencia: "Everybody", "2 people", "Area: Sales +1".
-  - Chip "Attempt N" cuando un follow-up tiene más de un intento.
-  - Tipo (solo en All).
-  - Progreso: "{{completed}} of {{total}} people/questions" con barra, o "Completed".
-  - Vencimiento (solo en Follow-up): fecha y etiqueta de urgencia.
-  - Creada.
-  - Interruptor Active.
-  - Acciones: View, Edit, Copy link, Delete y "Send reminder" (solo follow-up; deshabilitado si está completo).
-- **Borrar:** "Delete assignation?".
-- **Recordatorio:** "Send the reminder now?" / "An email with the link to "{{name}}" will be sent to the people who answer it." → toast "Reminder sent to {{count}} recipient(s)".
-- **Urgencia del vencimiento** (días calendario enteros):
+- **Type filter:** All / Default / Follow-up.
+- **Pagination:** fixed at 10 per page, numbered.
+- **Columns:**
+  - Name, with the organization line (link) and the questionnaire line (link to edit if permitted).
+  - Audience chip: "Everybody", "2 people", "Area: Sales +1".
+  - "Attempt N" chip when a follow-up has more than one attempt.
+  - Type (only in All).
+  - Progress: "{{completed}} of {{total}} people/questions" with a bar, or "Completed".
+  - Due (only in Follow-up): date and urgency label.
+  - Created.
+  - Active toggle.
+  - Actions: View, Edit, Copy link, Delete and "Send reminder" (follow-up only; disabled if complete).
+- **Delete:** "Delete assignation?".
+- **Reminder:** "Send the reminder now?" / "An email with the link to "{{name}}" will be sent to the people who answer it." → toast "Reminder sent to {{count}} recipient(s)".
+- **Due date urgency** (whole calendar days):
 
-  | Nivel | Días restantes | Etiqueta |
+  | Level | Days remaining | Label |
   |---|---|---|
   | later | > 14 | "in N days" |
   | soon | 8–14 | "in N days" |
   | near | 3–7 | "in N days" |
-  | urgent | 0–2 | "due today" (0) o "in N days" |
+  | urgent | 0–2 | "due today" (0) or "in N days" |
   | overdue | < 0 | "overdue by N days" |
-  | done | Completado | "completed" |
+  | done | Completed | "completed" |
 
-**`/assignations/new` y `/:id/edit`** (crear requiere la feature `assignations`). Asistente Basic → Registration → Save.
+**`/assignations/new` and `/:id/edit`** (creating requires the `assignations` feature). Wizard Basic → Registration → Save.
 
 - **Basic:**
-  - **Tipo** (solo al crear):
+  - **Type** (only when creating):
     - Default: "The members you pick answer, each with their own session".
     - Follow-up: "The members you pick share one session and receive a daily reminder until it is completed".
-  - **Fecha límite** (solo follow-up, opcional, puede estar en el pasado). Pista: "The day this follow-up should be completed. Reminders keep arriving until it is."
-  - **Organización\***: búsqueda del lado del cliente por todas las palabras, sin mayúsculas ni acentos.
-  - **"Who responds?"** (deshabilitado sin organización):
-    - Everybody; People (casillas con búsqueda por nombre, email, área o rol); Area; Role.
-    - Área y rol listan los valores distintos con conteo de personas.
-    - Contador en vivo: "N people will respond".
-    - Cambiar la organización reinicia la audiencia a Everybody.
-  - **Cuestionario\***: búsqueda en el servidor con debounce de 300 ms y scroll infinito de 20 en 20; solo se conserva la última respuesta.
-  - **Nombre\***.
-  - **Descripción:** "An internal note about this assignation. Respondents never see it."
-  - **Validaciones:** "Organization is required", "Check at least one person, area or role, or choose Everybody", "Questionnaire is required", "Name is required", "Enter a valid due date".
-  - **Conflicto:** si el cuestionario ya está asignado a otra organización: "This questionnaire is already assigned to "{{organization}}". A copy of the questionnaire will be created and the copy will be assigned instead." Al crear se copia primero.
-- **Registration:** configura la diapositiva de login.
+  - **Due date** (follow-up only, optional, may be in the past). Hint: "The day this follow-up should be completed. Reminders keep arriving until it is."
+  - **Organization\***: client-side search across all words, case- and accent-insensitive.
+  - **"Who responds?"** (disabled without an organization):
+    - Everybody; People (checkboxes with search by name, email, area or role); Area; Role.
+    - Area and role list the distinct values with a count of people.
+    - Live counter: "N people will respond".
+    - Changing the organization resets the audience to Everybody.
+  - **Questionnaire\***: server-side search with a 300 ms debounce and infinite scroll in batches of 20; only the latest response is kept.
+  - **Name\***.
+  - **Description:** "An internal note about this assignation. Respondents never see it."
+  - **Validations:** "Organization is required", "Check at least one person, area or role, or choose Everybody", "Questionnaire is required", "Name is required", "Enter a valid due date".
+  - **Conflict:** if the questionnaire is already assigned to another organization: "This questionnaire is already assigned to "{{organization}}". A copy of the questionnaire will be created and the copy will be assigned instead." On create, the copy is made first.
+- **Registration:** configures the login slide.
 
-  | Campo | Visible por defecto | Requerido por defecto |
+  | Field | Visible by default | Required by default |
   |---|---|---|
-  | Full name | Sí (fijo) | Sí (fijo) |
-  | Email | Sí | Sí |
+  | Full name | Yes (fixed) | Yes (fixed) |
+  | Email | Yes | Yes |
   | Phone | No | No |
   | Role | No | No |
   | Area | No | No |
 
-  - Email o teléfono debe ser visible y requerido: "At least one of email or phone must be required".
-  - Se construye como pregunta con tema `user-capture-data`.
+  - Email or phone must be visible and required: "At least one of email or phone must be required".
+  - It is built as a question with the `user-capture-data` topic.
 - **Save:**
-  - Envía `max_follow_ups: 2`. `due_date` solo en follow-up (null la borra al editar). `type` nunca se envía al editar.
-  - Carrera detectada con `409 QUESTIONNAIRE_ALREADY_ASSIGNED`: "This questionnaire was just assigned to another organization. Please review and try again."
-  - Final: "Assignation created!" / "Assignation updated!", enlace para compartir con Copy y "Go to Assignations".
+  - Sends `max_follow_ups: 2`. `due_date` only for follow-up (null clears it when editing). `type` is never sent when editing.
+  - Race detected with `409 QUESTIONNAIRE_ALREADY_ASSIGNED`: "This questionnaire was just assigned to another organization. Please review and try again."
+  - Final: "Assignation created!" / "Assignation updated!", share link with Copy and "Go to Assignations".
 
-**`/assignations/:id` — tipo default:**
+**`/assignations/:id` — default type:**
 
-- **Cabecera:** nombre; "org · X of N people · N completed · N pending" (con "+" mientras falten páginas por cargar); insignia; audiencia; Copy link; Export CSV; Export to Google Sheets.
-- **Respondentes:** scroll infinito de 20 en 20 con "Load more".
-- **Búsqueda** por nombre o email sobre lo cargado. Pista: "Search only covers the respondents loaded so far. Load more to search the rest."
-- **Secciones:** Completed y Pending.
-- **Columnas:** Name, Email, Attempts, Status (pill de cadena) y "View answers". El historial de intentos se expande por miembro.
-- **CSV:** columnas Name, Email, Attempts, Status. Carga todas las páginas antes. Archivo `{nombre}.csv`.
-- **Sheets:** las sesiones del cuestionario filtradas por la asignación.
+- **Header:** name; "org · X of N people · N completed · N pending" (with "+" while pages remain to be loaded); badge; audience; Copy link; Export CSV; Export to Google Sheets.
+- **Respondents:** infinite scroll in batches of 20 with "Load more".
+- **Search** by name or email over what is loaded. Hint: "Search only covers the respondents loaded so far. Load more to search the rest."
+- **Sections:** Completed and Pending.
+- **Columns:** Name, Email, Attempts, Status (chain pill) and "View answers". The attempt history expands per member.
+- **CSV:** columns Name, Email, Attempts, Status. Loads all pages first. File `{name}.csv`.
+- **Sheets:** the questionnaire's sessions filtered by the assignation.
 
-**`/assignations/:id` — tipo follow-up:**
+**`/assignations/:id` — follow-up type:**
 
-- **Cabecera:** insignia Follow-up, audiencia, estado de revisión (In review / Changes requested / Approved), vencimiento y Copy link.
-- **Acción principal:** "Send reminder" mientras no esté completo; "Send for correction" cuando está completo y hay estado de revisión.
-- **Pregunta actual:** "On question {{n}} of {{total}}" / "Nobody has opened the follow-up yet" / "Every question is answered".
-- **Tabla de la sesión compartida:** #, Question, Answer, Answered, Review, con "View answer".
-- **Diálogo de revisión:**
-  - Muestra la respuesta, un comentario (≤ 1000, opcional), Reject / Approve y flechas anterior/siguiente.
-  - Tras decidir, salta a la siguiente sin revisar. Al acabar: "Every answer of this attempt is reviewed".
-  - Solo se puede revisar el intento actual, cuando está completo y con permiso de escritura.
-- **Estados por respuesta:** Not reviewed / Approved / Rejected / "Approved before" (bloqueada en un intento anterior).
+- **Header:** Follow-up badge, audience, review state (In review / Changes requested / Approved), due date and Copy link.
+- **Main action:** "Send reminder" while not complete; "Send for correction" when it is complete and there is a review state.
+- **Current question:** "On question {{n}} of {{total}}" / "Nobody has opened the follow-up yet" / "Every question is answered".
+- **Shared session table:** #, Question, Answer, Answered, Review, with "View answer".
+- **Review dialog:**
+  - Shows the answer, a comment (≤ 1000, optional), Reject / Approve and previous/next arrows.
+  - After deciding, it jumps to the next unreviewed one. When finished: "Every answer of this attempt is reviewed".
+  - Only the current attempt can be reviewed, when it is complete and with write permission.
+- **States per answer:** Not reviewed / Approved / Rejected / "Approved before" (locked in a previous attempt).
 - **Send for correction:**
-  - Solo con `review_status = changes_requested`.
-  - El diálogo lista las respuestas rechazadas con sus comentarios.
-  - Toast "Attempt N sent to M recipients". Con `502 RETRY_EMAIL_NOT_SENT` se recarga igual, porque el intento ya existe.
-- **Selector de intento** en la URL (`?attempt=N`). Los intentos anteriores son de solo lectura.
-- **Avisos de siguiente paso:**
+  - Only with `review_status = changes_requested`.
+  - The dialog lists the rejected answers with their comments.
+  - Toast "Attempt N sent to M recipients". With `502 RETRY_EMAIL_NOT_SENT` it reloads anyway, because the attempt already exists.
+- **Attempt selector** in the URL (`?attempt=N`). Previous attempts are read-only.
+- **Next-step notices:**
   - "You rejected N answers — …can't correct them until you click Send for correction"
   - "Review every answer … · N left"
-- **Tarjeta de miembros:** "Who can carry it on (N)".
+- **Members card:** "Who can carry it on (N)".
 
-### 10.12 Proyectos
+### 10.12 Projects
 
 **`/projects`:**
 
-- **Pestañas:** All, To review, In progress, In correction, Overdue, Completed.
-- **Búsqueda** con debounce de 300 ms. 10 por página, los más nuevos primero.
-- **Columnas:**
-  - Proyecto: chevron, iniciales de la organización, nombre, organización y "created {{date}}".
-  - Estado: Not started / In progress / Needs your review / In correction / Completed / Overdue / No assignations.
-  - Asignaciones: "{{approved}} of {{total}} approved" con barra.
-  - Deadline con los niveles de urgencia.
-  - Siguiente paso: Review answers / Open overdue / See correction / See progress / See results / Add assignations.
-  - Menú ⋯: Edit, Delete.
-- **Fila expandida:** Assignation, Answers ("Question 4 of 8" / "X of N questions"), Review ("R of T reviewed", "N sent back to the client"), Status y Review/Open.
-- **Leyenda** de estados.
-- **Borrar:** "Delete this project?" / "…Its assignations and their answers are kept; they just stop belonging to a project."
-- **Editar (diálogo):**
-  - Nombre requerido ≤ 200.
-  - Organización de solo lectura.
-  - Descripción ≤ 2000.
-  - Deadline requerido; se puede mover pero no borrar ("Choose a deadline for the project" / "Enter a valid deadline").
-  - Asignaciones disponibles = follow-ups de la organización que no están en otro proyecto.
-- "New project" requiere la feature `assignations` incluida en el plan.
+- **Tabs:** All, To review, In progress, In correction, Overdue, Completed.
+- **Search** with a 300 ms debounce. 10 per page, newest first.
+- **Columns:**
+  - Project: chevron, organization initials, name, organization and "created {{date}}".
+  - State: Not started / In progress / Needs your review / In correction / Completed / Overdue / No assignations.
+  - Assignations: "{{approved}} of {{total}} approved" with a bar.
+  - Deadline with the urgency levels.
+  - Next step: Review answers / Open overdue / See correction / See progress / See results / Add assignations.
+  - ⋯ menu: Edit, Delete.
+- **Expanded row:** Assignation, Answers ("Question 4 of 8" / "X of N questions"), Review ("R of T reviewed", "N sent back to the client"), Status and Review/Open.
+- State **legend**.
+- **Delete:** "Delete this project?" / "…Its assignations and their answers are kept; they just stop belonging to a project."
+- **Edit (dialog):**
+  - Name required ≤ 200.
+  - Organization read-only.
+  - Description ≤ 2000.
+  - Deadline required; it can be moved but not cleared ("Choose a deadline for the project" / "Enter a valid deadline").
+  - Available assignations = the organization's follow-ups that are not in another project.
+- "New project" requires the `assignations` feature included in the plan.
 
-**`/projects/new`:** asistente de 3 pasos; no se guarda nada hasta "Create".
+**`/projects/new`:** 3-step wizard; nothing is saved until "Create".
 
-1. **Preguntas:** chat en modo `draft` (aprobar el borrador guarda el cuestionario) o elegir un cuestionario existente.
-2. **Organización:** elegir o crear una (diálogo). Audiencia. El nombre de la asignación por defecto es "{org}: {title}".
-3. **Proyecto:** elegir uno de la organización o crear uno (nombre por defecto = título del cuestionario; deadline requerido).
+1. **Questions:** chat in `draft` mode (approving the draft saves the questionnaire) or pick an existing questionnaire.
+2. **Organization:** pick or create one (dialog). Audience. The default assignation name is "{org}: {title}".
+3. **Project:** pick one of the organization's or create one (default name = questionnaire title; deadline required).
 
-- Panel de resumen: "What we're going to create".
-- **Al crear, en orden**, recordando cada id para que un reintento no duplique nada:
-  1. Organización nueva, si aplica.
-  2. Cuestionario (slug = `slugify(title)` + 6 hex, ≤ 100). Se copia si ya está asignado a otra organización.
-  3. Asignación follow-up con `max_follow_ups: 2` y el registro por defecto.
-  4. Crear el proyecto, o actualizarlo con sus asignaciones + la nueva.
+- Summary panel: "What we're going to create".
+- **On create, in order**, remembering each id so that a retry duplicates nothing:
+  1. New organization, if applicable.
+  2. Questionnaire (slug = `slugify(title)` + 6 hex, ≤ 100). Copied if already assigned to another organization.
+  3. Follow-up assignation with `max_follow_ups: 2` and the default registration.
+  4. Create the project, or update it with its assignations + the new one.
 - Toast "Done: questionnaire, assignation and project created".
 
-### 10.13 Personalización (`/customization`, guardar requiere la feature `styles`)
+### 10.13 Customization (`/customization`, saving requires the `styles` feature)
 
-**Campos:**
+**Fields:**
 
-- Website URL. Pista: "Don't worry — we'll fetch the styles from your website automatically…".
-- Logo URL con vista previa.
-- Fuente, una de 6: Inter, Roboto, Poppins, Montserrat, Playfair Display, Lora.
-- Color de marca (`#RRGGBB`). De él se derivan:
-  - fondo del botón primario;
-  - hover 12 % más oscuro;
-  - texto legible: `#0F172A` si la luminancia es > 0.6, si no blanco;
-  - color de enlace;
-  - borde de foco de los inputs.
+- Website URL. Hint: "Don't worry — we'll fetch the styles from your website automatically…".
+- Logo URL with preview.
+- Font, one of 6: Inter, Roboto, Poppins, Montserrat, Playfair Display, Lora.
+- Brand color (`#RRGGBB`). From it are derived:
+  - primary button background;
+  - hover 12 % darker;
+  - readable text: `#0F172A` if the luminance is > 0.6, otherwise white;
+  - link color;
+  - input focus border.
 
-**Comportamiento:**
+**Behavior:**
 
-- Vista previa en vivo de lo que ve el respondente.
-- **Reset:** solo restaura los valores por defecto en local. Toast "Reset to default values".
-- **Guardar:** job de estilos con polling cada 5 s hasta 2 min.
-  - Si cambió el sitio web, solo se envía `{website}`.
-  - Si no, `{website, styles}`.
-  - Luego se recarga el perfil. Toast "Styles updated successfully".
+- Live preview of what the respondent sees.
+- **Reset:** only restores the default values locally. Toast "Reset to default values".
+- **Save:** styles job with polling every 5 s up to 2 min.
+  - If the website changed, only `{website}` is sent.
+  - Otherwise, `{website, styles}`.
+  - Then the profile is reloaded. Toast "Styles updated successfully".
 
-### 10.14 Perfil (`/profile`)
+### 10.14 Profile (`/profile`)
 
-**Pestaña "Plan & usage":**
+**"Plan & usage" tab:**
 
-- Nombre del plan y Active/Expired.
-- Barras de uso: "Questionnaires (all types)", "Responses" y una por feature. Límite negativo = "Unlimited". Ámbar desde el 75 % y rojo desde el 90 %.
+- Plan name and Active/Expired.
+- Usage bars: "Questionnaires (all types)", "Responses" and one per feature. Negative limit = "Unlimited". Amber from 75 % and red from 90 %.
 - "Change plan" / "Choose a plan" → `/profile/plans`.
-- "Manage billing" (solo si hay suscripción) → portal de la pasarela en la misma pestaña.
+- "Manage billing" (only if there is a subscription) → gateway portal in the same tab.
 
-**Pestaña "Settings"** (requiere la feature `profile` y escritura):
+**"Settings" tab** (requires the `profile` feature and write permission):
 
-- Idioma de la cuenta (`es-CO` / `en-US`). Afecta correos y pantallas del respondente, **no** la UI de la consola.
-- "Maximum files per question": entero 1–20, default 10. Error "Enter a whole number from 1 to 20."; Save deshabilitado mientras sea inválido.
-- Tracking (cada uno ≤ 64): Meta Pixel ID; LinkedIn Partner ID y Conversion ID; Google Ads Conversion ID (AW-…) y etiqueta.
-- **Envío:** solo los campos de tracking modificados (vacío → null), `max_files` solo si cambió y `language` siempre.
+- Account language (`es-CO` / `en-US`). Affects emails and respondent screens, **not** the console UI.
+- "Maximum files per question": integer 1–20, default 10. Error "Enter a whole number from 1 to 20."; Save disabled while invalid.
+- Tracking (each ≤ 64): Meta Pixel ID; LinkedIn Partner ID and Conversion ID; Google Ads Conversion ID (AW-…) and label.
+- **Submission:** only the modified tracking fields (empty → null), `max_files` only if it changed, and `language` always.
 
-### 10.15 Planes (`/profile/plans`, nunca bloqueada)
+### 10.15 Plans (`/profile/plans`, never blocked)
 
-**Tarjeta de plan:**
+**Plan card:**
 
-- Precio desde unidades menores con formato de moneda local. Sin precio: "Price on request".
-- Límites: "Experiences" (`max_questionnaires`), "Responses" y cada feature.
-- Botón: "Subscribe", "Upgrade" o "Switch to this plan" (precio ≤ actual). Un plan no comprable muestra "Get in touch", que abre el formulario de contacto.
-- "Buy yearly" / "Switch to yearly" con "Save {{percent}}%", donde `percent = round((1 − anual/(mensual×12))×100)`.
-- **Insignias:** "{{count}} days free" (si tiene derecho a prueba y `trial_days > 0`), "Current plan · Monthly/Yearly", "Next plan" con "Starts on …".
-- **Notas en la tarjeta actual:** "Renews on …", "N days left · until …", "Ends on …", "Free trial until …", "{{value}} off until/forever".
+- Price from minor units with local currency formatting. No price: "Price on request".
+- Limits: "Experiences" (`max_questionnaires`), "Responses" and each feature.
+- Button: "Subscribe", "Upgrade" or "Switch to this plan" (price ≤ current). A non-purchasable plan shows "Get in touch", which opens the contact form.
+- "Buy yearly" / "Switch to yearly" with "Save {{percent}}%", where `percent = round((1 − yearly/(monthly×12))×100)`.
+- **Badges:** "{{count}} days free" (if trial-eligible and `trial_days > 0`), "Current plan · Monthly/Yearly", "Next plan" with "Starts on …".
+- **Notes on the current card:** "Renews on …", "N days left · until …", "Ends on …", "Free trial until …", "{{value}} off until/forever".
 
 **Checkout:**
 
-- Sin plan: iniciar checkout y redirigir en la misma pestaña.
-- Con plan: cambio de plan. Si la respuesta es `checkout`, redirigir; si es `changed`, mostrar el resultado.
+- Without a plan: start checkout and redirect in the same tab.
+- With a plan: plan change. If the response is `checkout`, redirect; if it is `changed`, show the result.
 
-**Confirmaciones:**
+**Confirmations:**
 
-- Downgrade o volver de anual a mensual: "Switch to a smaller plan?" / "Go back to monthly billing?".
-- Cancelar: "Cancel your subscription?" con "Keep my plan".
+- Downgrade or going back from yearly to monthly: "Switch to a smaller plan?" / "Go back to monthly billing?".
+- Cancel: "Cancel your subscription?" with "Keep my plan".
 
-**Sin confirmación:** "Resume subscription" y "Keep my current plan" (revertir).
+**Without confirmation:** "Resume subscription" and "Keep my current plan" (revert).
 
-**Otros:**
+**Other:**
 
-- Retorno de la pasarela con `?checkout=success|cancel`: aviso, refresco de plan y uso, y se quita el parámetro.
-- Pista: "Have a promo code? Apply it at checkout."
-- **Contacto:** email válido y teléfono requerido. Éxito: "Request received / You'll be contacted soon."
+- Return from the gateway with `?checkout=success|cancel`: notice, plan and usage refresh, and the parameter is removed.
+- Hint: "Have a promo code? Apply it at checkout."
+- **Contact:** valid email and phone required. Success: "Request received / You'll be contacted soon."
 
-### 10.16 Usuarios
+### 10.16 Users
 
 **`/users`:**
 
-- Columnas: User (iniciales y nombre), Email, Role (Admin / Read only) y Type (Owner = root, si no Member).
-- Vacío: "No users yet. Invite your first team member."
-- "New user" requiere escritura y la feature `users`.
+- Columns: User (initials and name), Email, Role (Admin / Read only) and Type (Owner = root, otherwise Member).
+- Empty: "No users yet. Invite your first team member."
+- "New user" requires write permission and the `users` feature.
 
 **`/users/new`:**
 
-- Campos: Full name\*, Email\*, Password\* (≥ 8, con medidor) y rol en tarjetas:
+- Fields: Full name\*, Email\*, Password\* (≥ 8, with meter) and role as cards:
   - Admin: "Full access, including creating other users."
-  - Read only: "Can view resources but cannot make changes." (por defecto)
-- Se muestra la matriz de permisos de §4.2.
-- Errores: `EMAIL_ALREADY_EXISTS`, `INVALID_ROLE`, `FORBIDDEN`, `VALIDATION_ERROR` y uno genérico.
-- Toast "User {{name}} created" y vuelta a `/users`.
-- Sin permiso: "Admins only".
+  - Read only: "Can view resources but cannot make changes." (default)
+- The permission matrix from §4.2 is shown.
+- Errors: `EMAIL_ALREADY_EXISTS`, `INVALID_ROLE`, `FORBIDDEN`, `VALIDATION_ERROR` and a generic one.
+- Toast "User {{name}} created" and back to `/users`.
+- Without permission: "Admins only".
 
-### 10.17 Integraciones (`/integrations`, 3 pestañas)
+### 10.17 Integrations (`/integrations`, 3 tabs)
 
-**API keys** (requieren escritura y la feature `api` incluida; una cuota agotada no bloquea la gestión de claves):
+**API keys** (require write permission and the `api` feature included; an exhausted quota does not block key management):
 
-- Filas: Name, Created, Expires ("Never"), Last used ("Never") y Revoke ("Revoke API key?").
-- Crear: nombre (requerido, ≤ 100) y expiración 7 / 30 / 60 / 90 días o Never (default 7).
-- La clave en claro se muestra **una sola vez**, con botón Copy.
+- Rows: Name, Created, Expires ("Never"), Last used ("Never") and Revoke ("Revoke API key?").
+- Create: name (required, ≤ 100) and expiration 7 / 30 / 60 / 90 days or Never (default 7).
+- The plaintext key is shown **only once**, with a Copy button.
 
-**Webhooks** (feature `webhook` incluida):
+**Webhooks** (`webhook` feature included):
 
-- Filas: URL, evento ("Response completed"), método `POST`, Edit y Delete.
-- La URL debe empezar con `https://`.
-- Referencia de entrega con los headers y el payload de ejemplo (§7.14).
+- Rows: URL, event ("Response completed"), method `POST`, Edit and Delete.
+- The URL must start with `https://`.
+- Delivery reference with the headers and the sample payload (§7.14).
 
-**API reference:** documentación estática de la API externa (§8.11) con ejemplos `curl` copiables.
+**API reference:** static documentation of the external API (§8.11) with copyable `curl` examples.
 
-### 10.18 Documentación (`/documentation`)
+### 10.18 Documentation (`/documentation`)
 
 **Guides:**
 
-- 15 guías bilingües estáticas en 7 temas: getting-started, questionnaires, organizations, projects, analytics, brand-integrations, account.
-- Búsqueda sin mayúsculas ni acentos y filtro por tema.
-- Tiempo de lectura a 200 palabras/min.
-- Cada guía (`/documentation/guides/:guideId`) tiene anterior/siguiente, índice y capturas por idioma.
+- 15 static bilingual guides across 7 topics: getting-started, questionnaires, organizations, projects, analytics, brand-integrations, account.
+- Case- and accent-insensitive search and filter by topic.
+- Reading time at 200 words/min.
+- Each guide (`/documentation/guides/:guideId`) has previous/next, a table of contents and per-language screenshots.
 
-**Videos:** lista de `GET /videos?language=`, incrustados en modo de privacidad reforzada.
+**Videos:** list from `GET /videos?language=`, embedded in privacy-enhanced mode.
 
-### 10.19 Rutas ocultas
+### 10.19 Hidden routes
 
-`/products` (sin entrada en la barra lateral):
+`/products` (no sidebar entry):
 
-- Lista y CRUD del catálogo de productos.
-- Tarjeta de la plataforma de e-commerce (Authorize, Install, "Sync Products Now").
-- "Create Experience" crea un quiz funnel.
+- Listing and CRUD of the product catalog.
+- E-commerce platform card (Authorize, Install, "Sync Products Now").
+- "Create Experience" creates a quiz funnel.
 
-### 10.20 Asumir cliente (solo super-admin)
+### 10.20 Assume customer (super-admin only)
 
-- **Selector** en la parte superior de la barra lateral:
-  - Búsqueda con debounce de 300 ms y "Load more" (20 por página).
-  - Muestra nombre y email.
-  - La selección es explícita: clic, o Enter tras moverse con flechas.
-- La elección se guarda en el navegador.
-- **Mientras está activa:**
-  - Todo request salvo `/admin/*` envía `X-Assume-Customer-Id`.
-  - El usuario efectivo pasa a ser `Customer-Admin` + root.
-  - Banner "Viewing as {{name}} ({{email}})" con "Stop assuming".
-  - Se vacía toda la caché y el contenido se vuelve a montar en `/ai-experience`.
-- Si la API responde `ASSUME_NOT_ALLOWED`, `CUSTOMER_NOT_FOUND` o `ASSUMED_CUSTOMER_NOT_FOUND`, se deja de asumir automáticamente.
+- **Selector** at the top of the sidebar:
+  - Search with a 300 ms debounce and "Load more" (20 per page).
+  - Shows name and email.
+  - Selection is explicit: click, or Enter after moving with the arrow keys.
+- The choice is stored in the browser.
+- **While active:**
+  - Every request except `/admin/*` sends `X-Assume-Customer-Id`.
+  - The effective user becomes `Customer-Admin` + root.
+  - Banner "Viewing as {{name}} ({{email}})" with "Stop assuming".
+  - The entire cache is cleared and the content is remounted at `/ai-experience`.
+- If the API responds `ASSUME_NOT_ALLOWED`, `CUSTOMER_NOT_FOUND` or `ASSUMED_CUSTOMER_NOT_FOUND`, assuming stops automatically.
 
-### 10.21 Alertas de plan en la consola
+### 10.21 Plan alerts in the console
 
-- El uso (`GET /customer/usage`) se carga una vez por cuenta.
-- **429 `PLAN_LIMIT_REACHED`:** toast ámbar con el texto de la razón y refresco del uso.
-- **Banner de uso:**
-  - Aparece cuando alguna fila llega al 50 % (`used/limit`, acotado a 100; límite 0 = 100 %).
-  - Niveles 50 / 75 / 90 / 100; rojo desde 90.
-  - Cerrarlo lo silencia hasta el siguiente nivel. No se persiste.
-  - Texto: "You're using {{percent}}% of your plan." con "See all (N)" y "Upgrade".
-- **Notificaciones:** los fallos de petición usan un único componente: ámbar para límites de plan, rojo para el resto, con el texto del código del backend primero ([Anexo B](#anexo-b--catálogo-de-códigos-de-error)). Las validaciones del lado del cliente usan toasts destructivos.
+- Usage (`GET /customer/usage`) is loaded once per account.
+- **429 `PLAN_LIMIT_REACHED`:** amber toast with the reason text and a usage refresh.
+- **Usage banner:**
+  - Appears when some row reaches 50 % (`used/limit`, capped at 100; limit 0 = 100 %).
+  - Tiers 50 / 75 / 90 / 100; red from 90.
+  - Dismissing it silences it until the next tier. Not persisted.
+  - Text: "You're using {{percent}}% of your plan." with "See all (N)" and "Upgrade".
+- **Notifications:** request failures use a single component: amber for plan limits, red for the rest, with the backend code's text first ([Appendix B](#appendix-b--error-code-catalog)). Client-side validations use destructive toasts.
 
-### 10.22 Fechas
+### 10.22 Dates
 
-- Un timestamp del backend sin zona se interpreta como UTC.
-- Las fechas de calendario (`YYYY-MM-DD`) se interpretan como medianoche local.
-- La preferencia Local/UTC se aplica a los listados.
+- A backend timestamp without a zone is interpreted as UTC.
+- Calendar dates (`YYYY-MM-DD`) are interpreted as local midnight.
+- The Local/UTC preference applies to the listings.
 
 ---
 
-## 11. Trabajos asíncronos y tareas programadas
+## 11. Asynchronous jobs and scheduled tasks
 
-| Worker / tarea | Disparador | Límite de tiempo | Notas |
+| Worker / task | Trigger | Time limit | Notes |
 |---|---|---|---|
-| Worker genérico de jobs | Cola | 10 min | Evaluación, prompts, quiz funnel, scraping, LinkedIn, sesiones de ecommerce, chat |
-| Worker de estilos | Cola | 5 min, sin reintentos | Necesita un navegador headless (~2 GB de RAM) |
-| Worker de eventos de analítica | Cola | — | Envía eventos al servicio de uso/analítica |
-| Despachador de webhooks | Bus de eventos (pub/sub) | 3 s de conexión, 5 s de lectura | Sin reintentos |
-| Recordatorios | Diario a las 13:00 UTC | — | §7.13 |
-| Triggers del proveedor de identidad | Antes del registro y antes de emitir el token | — | Vinculación de Google, alta automática en el primer login con Google, evento `UserSignedIn` y marca de última sesión (excluye clientes máquina) |
+| Generic job worker | Queue | 10 min | Evaluation, prompts, quiz funnel, scraping, LinkedIn, e-commerce sessions, chat |
+| Styles worker | Queue | 5 min, no retries | Needs a headless browser (~2 GB of RAM) |
+| Analytics events worker | Queue | — | Sends events to the usage/analytics service |
+| Webhook dispatcher | Event bus (pub/sub) | 3 s connect, 5 s read | No retries |
+| Reminders | Daily at 13:00 UTC | — | §7.13 |
+| Identity provider triggers | Before sign-up and before token issuance | — | Google linking, automatic account creation on first Google login, `UserSignedIn` event and last-session timestamp (excludes machine clients) |
 
-**Polling en los clientes:**
+**Client-side polling:**
 
-| Job | Intervalo | Límite |
+| Job | Interval | Limit |
 |---|---|---|
-| Turno de chat / job de chat en segundo plano | 2 s | 5 min |
+| Chat turn / background chat job | 2 s | 5 min |
 | Quiz funnel, scraper | 5 s | 5 min |
-| Estilos | 5 s | 2 min |
-| Evaluación, prompt, finalización (respondente) | 5 s | 120 intentos (~10 min) |
-| Prueba de onboarding | 5 s y luego 4 s | Sin límite |
+| Styles | 5 s | 2 min |
+| Evaluation, prompt, completion (respondent) | 5 s | 120 attempts (~10 min) |
+| Onboarding test | 5 s, then 4 s | No limit |
 
-Un job termina cuando su estado sale de `PENDING`/`PROCESSING`: `COMPLETED` es éxito; `FAILED` y `CANCELLED` son fallo. En la app del respondente, la **evaluación falla abierta**; prompt y finalización lanzan error.
+A job ends when its state leaves `PENDING`/`PROCESSING`: `COMPLETED` is success; `FAILED` and `CANCELLED` are failure. In the respondent app, **evaluation fails open**; prompt and completion throw an error.
 
 ---
 
-## 12. Eventos de dominio
+## 12. Domain events
 
-Se emiten al servicio de uso/analítica. Algunos llevan `tags.feature` para contabilizar el uso (§7.2):
+Emitted to the usage/analytics service. Some carry `tags.feature` to count usage (§7.2):
 
 `UserRootRegistered`, `UserCreated`, `UserSignedIn`, `ProfileEdited`, `QuestionnaireCreated`, `QuestionnaireSessionCreated`, `QuestionnaireSessionUpdated`, `QuestionnaireSessionCompleted`, `AnalyticsFetched`, `DashboardGenerated`, `OrganizationCreated`, `OrganizationDeleted`, `AssignationCreated`, `AssignationDeleted`, `ApiUsage`, `FeatureCreated`, `SubscriptionCreated`, `SubscriptionRenewed`, `SubscriptionCancelled`, `PlanChanged`, `TrialWillEnd`, `PaymentFailed`.
 
-Además, el uso de estilos y de webhooks se contabiliza al completarse.
+In addition, styles and webhook usage is counted on completion.
 
 ---
 
-## 13. Integraciones externas (por capacidad)
+## 13. External integrations (by capability)
 
-### 13.1 Proveedor de identidad
+### 13.1 Identity provider
 
-- Usuario = email, verificado automáticamente.
-- Política de contraseña: **mínimo 8 caracteres, sin exigir tipos de carácter**.
-- Contraseña temporal válida 7 días. Recuperación solo por email verificado, con límite de intentos.
-- Tokens: id y access de **24 h**; refresh de **30 días**.
-- Login con email + contraseña y **federado con Google** (OAuth code + PKCE, alcances openid, email y profile).
-- Atributos propios: `customer_id`, `root`. Grupos = roles.
-- **Primer login con Google:**
-  - Confirma al usuario automáticamente y crea la cuenta (`customer_id` nuevo, root, `Customer-Admin`, plan `starter`, `onboarding_completed=false`).
-  - Idioma = el de Google, o `es-CO`.
-  - Si ya existe una cuenta de contraseña con ese email, la vincula y pide reintentar el login (`EMAIL_LINKED_RETRY_LOGIN`).
-- Existe un cliente de máquina para procesos internos; sus inicios de sesión no cuentan como sesiones de cliente.
-- **Token de respondente de asignación:** firmado por la API con un secreto propio. Contiene `assignations_id`, `organization_user_id` y `session_id`. [DEUDA] No expira.
+- Username = email, automatically verified.
+- Password policy: **minimum 8 characters, no character-type requirements**.
+- Temporary password valid for 7 days. Recovery only via verified email, with an attempt limit.
+- Tokens: id and access tokens last **24 h**; refresh token lasts **30 days**.
+- Login with email + password and **federated with Google** (OAuth code + PKCE, scopes openid, email and profile).
+- Custom attributes: `customer_id`, `root`. Groups = roles.
+- **First Google login:**
+  - Automatically confirms the user and creates the account (new `customer_id`, root, `Customer-Admin`, plan `starter`, `onboarding_completed=false`).
+  - Language = Google's language, or `es-CO`.
+  - If a password account with that email already exists, it links them and asks the user to retry the login (`EMAIL_LINKED_RETRY_LOGIN`).
+- There is a machine client for internal processes; its sign-ins do not count as customer sessions.
+- **Assignation respondent token:** signed by the API with its own secret. Contains `assignations_id`, `organization_user_id` and `session_id`. [DEBT] It does not expire.
 
-### 13.2 Pasarela de pagos
+### 13.2 Payment gateway
 
-Suscripciones mensuales y anuales, checkout alojado, portal de facturación, programación de cambios (para downgrades), cupones y códigos promocionales, pruebas gratuitas y webhooks firmados. Reglas en §7.4.
+Monthly and annual subscriptions, hosted checkout, billing portal, scheduled changes (for downgrades), coupons and promotion codes, free trials and signed webhooks. Rules in §7.4.
 
-### 13.3 Modelo de lenguaje (LLM)
+### 13.3 Language model (LLM)
 
-Debe soportar **salida estructurada** (JSON con esquema). Usos:
+Must support **structured output** (JSON with schema). Uses:
 
-| Uso | Modelo |
+| Use | Model |
 |---|---|
-| Generar cuestionarios (quiz funnel, chain, LinkedIn, chat) | Configurable por `AppSetting` (el más capaz) |
-| Recomendar productos, evaluar respuestas | Modelo rápido y económico |
-| Elegir el dashboard, diseñar estilos, chat con herramientas | — |
+| Generate questionnaires (quiz funnel, chain, LinkedIn, chat) | Configurable via `AppSetting` (the most capable one) |
+| Recommend products, evaluate answers | Fast, low-cost model |
+| Choose the dashboard, design styles, chat with tools | — |
 
-Las instrucciones de sistema se leen de los system prompts editables (§7.20).
+System instructions are read from the editable system prompts (§7.20).
 
-### 13.4 Transcripción de voz en tiempo real
+### 13.4 Real-time speech transcription
 
-- Transcripción en streaming desde el navegador con un token efímero (~1 min) emitido por la API.
-- Transporte primario de baja latencia y transporte alternativo por URL configurable por cuenta (`transcription_url`); hoy el audio va en PCM16 a 24 kHz.
-- Eventos de texto parcial y final.
-- Idioma es o en.
+- Streaming transcription from the browser with an ephemeral token (~1 min) issued by the API.
+- Low-latency primary transport and an alternative transport via a per-account configurable URL (`transcription_url`); today audio is sent as PCM16 at 24 kHz.
+- Partial and final text events.
+- Language es or en.
 
-### 13.5 Almacén de objetos
+### 13.5 Object storage
 
-| Contenedor | Acceso | Uso |
+| Container | Access | Use |
 |---|---|---|
-| Archivos de respuestas | Privado. Subida y descarga firmadas (15 min). CORS para PUT/POST | Clave `{customer_id}/{session_id}/{question_id}/{md5}{ext}`; hasta 500 MB |
-| Archivos de prompts / medios | Lectura pública | Textos de prompts de las cadenas |
-| System prompts | Privado y versionado | §7.20 |
+| Answer files | Private. Signed upload and download (15 min). CORS for PUT/POST | Key `{customer_id}/{session_id}/{question_id}/{md5}{ext}`; up to 500 MB |
+| Prompt / media files | Public read | Prompt texts for the chains |
+| System prompts | Private and versioned | §7.20 |
 
-### 13.6 Correo transaccional
+### 13.6 Transactional email
 
-Remitente `SUPPORT_EMAIL`; plantillas HTML en es y en (§7.21).
+Sender `SUPPORT_EMAIL`; HTML templates in es and en (§7.21).
 
 ### 13.7 Scraping
 
-- Catálogos de tiendas web (1–30 productos por ejecución).
-- Perfiles de LinkedIn.
-- Navegador headless para extraer el CSS de la marca.
+- Web store catalogs (1–30 products per run).
+- LinkedIn profiles.
+- Headless browser to extract the brand's CSS.
 
-### 13.8 Servicio de uso/analítica (interno, dependencia)
+### 13.8 Usage/analytics service (internal, dependency)
 
-Autenticado con API key. **Contrato mínimo:**
+Authenticated with an API key. **Minimum contract:**
 
-| Endpoint | Propósito |
+| Endpoint | Purpose |
 |---|---|
-| `POST /events` | Recibir eventos de dominio con `tags.feature` |
-| `POST /payments` | Registrar pagos |
-| `GET /customers/{id}/usage` | Contadores del periodo |
-| `PUT /customers/{id}/usage` | Ajustar contadores (fusión) |
-| `GET /analytics/{qid}/general` | Analítica general del cuestionario |
-| `GET /questionnaire/{qid}/data` | Datos agregados del dashboard (forma en §10.9) |
+| `POST /events` | Receive domain events with `tags.feature` |
+| `POST /payments` | Record payments |
+| `GET /customers/{id}/usage` | Counters for the period |
+| `PUT /customers/{id}/usage` | Adjust counters (merge) |
+| `GET /analytics/{qid}/general` | General questionnaire analytics |
+| `GET /questionnaire/{qid}/data` | Aggregated dashboard data (shape in §10.9) |
 
-- Staging y producción comparten base de datos y se distinguen por `source`.
-- La migración PUEDE absorber este servicio dentro de la API si mantiene la misma semántica de contadores por periodo.
+- Staging and production share a database and are distinguished by `source`.
+- The migration MAY absorb this service into the API if it keeps the same per-period counter semantics.
 
-### 13.9 Exportación a hojas de cálculo (Google Sheets, desde la consola)
+### 13.9 Spreadsheet export (Google Sheets, from the console)
 
-- OAuth en el navegador con el alcance mínimo para crear y editar archivos propios.
-- Se busca una hoja existente marcada con la propiedad `skylineExportKey = questionnaireId|assignationId`. Si existe, se limpia y reescribe; si no, se crea.
-- Título "Answers - {title}".
-- Columnas: Started At, User, Email, Phone (si hay), luego una por pregunta en orden.
-- Valores: "Skipped", "File uploaded" / "N files uploaded", etiquetas de opción, vacío.
-- Se abre en una pestaña nueva.
+- OAuth in the browser with the minimum scope to create and edit the app's own files.
+- It looks for an existing sheet tagged with the property `skylineExportKey = questionnaireId|assignationId`. If it exists, it is cleared and rewritten; otherwise, it is created.
+- Title "Answers - {title}".
+- Columns: Started At, User, Email, Phone (if present), then one per question in order.
+- Values: "Skipped", "File uploaded" / "N files uploaded", option labels, empty.
+- It opens in a new tab.
 
-### 13.10 Plataforma de e-commerce (Shopify)
+### 13.10 E-commerce platform (Shopify)
 
-- OAuth con alcance de solo lectura de productos. Tokens que expiran con refresh.
-- Sincronización de productos (precio de la primera variante).
-- Webhooks de cumplimiento GDPR con HMAC.
-- App embebida en el tema de la tienda: usa `GET /questionnaire/find?url=` para resolver qué cuestionario mostrar.
+- OAuth with read-only product scope. Expiring tokens with refresh.
+- Product sync (price of the first variant).
+- GDPR compliance webhooks with HMAC.
+- App embedded in the store theme: uses `GET /questionnaire/find?url=` to resolve which questionnaire to show.
 
-### 13.11 Otros
+### 13.11 Others
 
-| Integración | Uso |
+| Integration | Use |
 |---|---|
-| Seguimiento de errores | Backend y ambos frontends (incluye PII en el backend) |
-| Analítica web, mapas de calor, píxel de TikTok (consola), píxeles de cliente (respondente) | Marketing y medición |
-| YouTube | Videos de documentación |
-| Proveedor de fuentes web | Tipografías de marca |
+| Error tracking | Backend and both frontends (includes PII in the backend) |
+| Web analytics, heatmaps, TikTok pixel (console), customer pixels (respondent) | Marketing and measurement |
+| YouTube | Documentation videos |
+| Web font provider | Brand typefaces |
 
 ---
 
-## 14. Requisitos no funcionales
+## 14. Non-functional requirements
 
-### 14.1 Rendimiento y límites
+### 14.1 Performance and limits
 
-- Peticiones síncronas ≤ 29 s. Funciones normales ≤ 45 s; enviar, crear y editar cuestionarios hasta 120 s. Todo lo lento se hace con jobs.
-- Timeout de cliente de 30 s en la app del respondente (el timeout se reporta como `status 0, code TIMEOUT`).
-- **DEBERÍA** paginarse en la base de datos. Hoy muchos listados se cargan completos y se paginan en memoria ([DEUDA] de escalabilidad).
+- Synchronous requests ≤ 29 s. Regular functions ≤ 45 s; submitting, creating and editing questionnaires up to 120 s. Everything slow is done with jobs.
+- 30 s client timeout in the respondent app (the timeout is reported as `status 0, code TIMEOUT`).
+- Pagination **SHOULD** happen in the database. Today many listings are loaded in full and paginated in memory (scalability [DEBT]).
 
-### 14.2 Seguridad
+### 14.2 Security
 
-- Aislamiento por tenant en **todas** las lecturas y escrituras (ver las excepciones [DEUDA] en §15).
-- Las API keys se guardan solo como hash SHA-256.
-- Webhooks salientes firmados con HMAC-SHA256.
-- Webhooks entrantes verificados: firma de la pasarela y HMAC de la plataforma de e-commerce.
-- URLs firmadas de corta duración (15 min).
-- No revelar existencia de cuentas en la recuperación de contraseña.
-- El prompt del cliente en las cadenas se trata como dato no confiable (defensa contra inyección de prompts).
-- Nunca devolver `payload` de jobs ni la configuración de puntaje al respondente.
-- Sanitizar todo CSS y HTML proveniente de estilos, productos o LLM.
-- CORS abierto hoy. **DEBERÍA** restringirse a los orígenes de las apps, el widget de tienda y los integradores.
-- Sin límite de tasa propio hoy (solo cuotas de plan y el throttling del proveedor de identidad). **DEBERÍA** añadirse en los endpoints públicos (§15).
+- Tenant isolation on **all** reads and writes (see the [DEBT] exceptions in §15).
+- API keys are stored only as a SHA-256 hash.
+- Outgoing webhooks signed with HMAC-SHA256.
+- Incoming webhooks verified: the gateway's signature and the e-commerce platform's HMAC.
+- Short-lived signed URLs (15 min).
+- Do not reveal whether accounts exist during password recovery.
+- The customer's prompt in chains is treated as untrusted data (defense against prompt injection).
+- Never return job `payload` or the scoring configuration to the respondent.
+- Sanitize all CSS and HTML coming from styles, products or the LLM.
+- CORS is open today. It **SHOULD** be restricted to the origins of the apps, the store widget and integrators.
+- No rate limiting of its own today (only plan quotas and the identity provider's throttling). It **SHOULD** be added on public endpoints (§15).
 
-### 14.3 Disponibilidad y datos
+### 14.3 Availability and data
 
-- Persistencia con respaldo continuo (recuperación a un punto en el tiempo) y protección contra borrado en las tablas principales.
-- Idempotencia en los webhooks de pagos y en la creación compuesta de proyectos del lado del cliente.
+- Persistence with continuous backup (point-in-time recovery) and deletion protection on the main tables.
+- Idempotency in payment webhooks and in the client-side composite creation of projects.
 
-### 14.4 Internacionalización
+### 14.4 Internationalization
 
-- UI en **es** y **en**; respaldo `es`. Todo texto externalizado; nunca fijo en el código.
-- Idioma de la cuenta (`es-CO` / `en-US`) separado del idioma de la UI de la consola. Controla correos, contenido generado y el idioma inicial del respondente.
-- Tolerar textos en español más largos.
-- Desactivar la traducción automática del navegador en ambas apps.
+- UI in **es** and **en**; fallback `es`. All text externalized; never hardcoded.
+- Account language (`es-CO` / `en-US`) separate from the console UI language. It controls emails, generated content and the respondent's initial language.
+- Tolerate longer Spanish texts.
+- Disable the browser's automatic translation in both apps.
 
-### 14.5 Accesibilidad
+### 14.5 Accessibility
 
 - **WCAG 2.1 AA.**
-- Contraste AA (el violeta sobre blanco tiene 5.3:1).
-- Operable por teclado con foco visible. Todos los controles etiquetados.
-- Diálogos modales accesibles. Barras de progreso con valores. Errores anunciados; paneles de estado con región viva.
-- Respetar `prefers-reduced-motion`.
-- **El color nunca es la única señal:** fuerza de contraseña con etiqueta; niveles con nombre; errores con texto.
-- `<html lang>` sincronizado con el idioma.
+- AA contrast (violet on white is 5.3:1).
+- Keyboard-operable with visible focus. All controls labeled.
+- Accessible modal dialogs. Progress bars with values. Errors announced; status panels with a live region.
+- Respect `prefers-reduced-motion`.
+- **Color is never the only cue:** password strength with a label; named tiers; errors with text.
+- `<html lang>` synchronized with the language.
 
 ### 14.6 Responsive
 
-- App del respondente mobile-first:
-  - Variantes para pantallas bajas (≤ 740 px de alto).
-  - El contenido se reajusta al abrir el teclado móvil y el campo activo queda a la vista.
-  - Arrastre táctil completo en ranking.
-- Consola: la preview de creación pasa a panel lateral por debajo de 1100 px.
+- Mobile-first respondent app:
+  - Variants for short screens (≤ 740 px tall).
+  - Content readjusts when the mobile keyboard opens and the active field stays in view.
+  - Full touch drag in ranking.
+- Console: the creation preview becomes a side panel below 1100 px.
 
-### 14.7 Observabilidad
+### 14.7 Observability
 
-- Logs estructurados con nivel configurable.
-- Seguimiento de errores en las tres piezas, con trazas y repetición de sesión en los frontends (10 % de sesiones y 100 % con error).
-- `GET /health` con chequeos.
+- Structured logs with a configurable level.
+- Error tracking in all three pieces, with traces and session replay in the frontends (10 % of sessions and 100 % of sessions with errors).
+- `GET /health` with checks.
 
-### 14.8 SEO (app del respondente)
+### 14.8 SEO (respondent app)
 
-- Meta description y keywords, robots "index, follow", Open Graph y tarjeta grande de Twitter.
-- Título base configurable.
+- Meta description and keywords, robots "index, follow", Open Graph and Twitter large card.
+- Configurable base title.
 
-### 14.9 Entornos
+### 14.9 Environments
 
-| Entorno | API | App del respondente | Consola |
+| Environment | API | Respondent app | Console |
 |---|---|---|---|
 | dev | api.rev-ops.ai | rev-ops.ai | app.rev-ops.ai |
 | staging | api.qa-questionaire.com | qa-questionaire.com | app.qa-questionaire.com |
 | prod | api.questionaire.shop | q.getmappi.com | app.getmappi.com |
 
-Despliegue continuo por rama (`ai-develop`, `staging`, `master`). Pruebas automáticas en cada pull request.
+Continuous deployment per branch (`ai-develop`, `staging`, `master`). Automated tests on every pull request.
 
 ---
 
-## 15. Deuda técnica y decisiones pendientes
+## 15. Technical debt and pending decisions
 
-Paridad 1:1 significa que la migración conoce todos estos puntos. Para cada uno, se DEBE decidir **replicar** o **corregir**.
+1:1 parity means the migration is aware of all these points. For each one, it MUST be decided whether to **replicate** or **fix** it.
 
-| # | Tema | Situación actual | Recomendación |
+| # | Topic | Current situation | Recommendation |
 |---|---|---|---|
-| D1 | `PUT` y `DELETE /organizations/{id}` | No comprueban que la organización sea de la cuenta | **Corregir:** exigir Own |
-| D2 | Borrar una organización | Deja miembros huérfanos | **Corregir:** borrado en cascada o bloqueo si tiene asignaciones |
-| D3 | `POST /assignations/{id}/retries` | La propiedad no está verificada explícitamente | **Corregir:** exigir dueño o `Admin` |
-| D4 | Endpoints públicos sensibles | `GET /customer/{id}/products`, `/settings`, `/styles`, `/jobs/{id}`, `/signed-urls` (acepta cualquier `customer_id`), generación por LinkedIn y por prompt | Mantener públicos los que el respondente necesita, pero limitar `/signed-urls` a sesiones válidas y añadir límite de tasa |
-| D5 | OAuth de la plataforma de e-commerce | `state = customer_id`, sin nonce anti-falsificación | **Corregir:** nonce firmado |
-| D6 | Token de respondente de asignación | No expira | **Corregir:** expiración razonable (p. ej. 30 días) + renovación |
-| D7 | Envío con token de asignación inválido | Responde 200 sin procesar | **Corregir:** 401 |
-| D8 | Lógica específica de clientes | `livingood`, Samurai8 (`mateo` / id fijo), dueño de LinkedIn `XhEFtqTt`, título de `3zWj6Nrg`, destinatarios del email de ventas, id de cuestionario por defecto | **Convertir en configuración** (tipos de resultado configurables y ajustes globales) |
-| D9 | Login antiguo `/login` | Credenciales fijas; 500 con credenciales incorrectas | Eliminar o dejar solo en entornos no productivos |
-| D10 | `POST /profile/customization` y trigger de migración de usuarios | Declarados en la infraestructura, sin código | No migrar |
-| D11 | HTML de productos | Se renderiza sin sanear | **Corregir:** sanear |
-| D12 | Tutorial de audio | Sin opción para saltarlo | **Corregir:** permitir continuar sin audio (o escribir) |
-| D13 | Validación de email | Regex distintas entre login de asignación, captura y contacto | **Unificar** |
-| D14 | IDs de analítica y píxel | Fijos en el HTML | Mover a configuración |
-| D15 | Onboarding paso 2 | El workspace no se guarda | Guardar (nombre, idioma, sitio) o quitar el paso |
-| D16 | Búsqueda del listado de cuestionarios | Solo del lado del cliente | Usar el `search` del servidor |
-| D17 | Paginación en memoria | Listados completos en memoria | Paginar en la base de datos |
-| D18 | Suplantación | Sin auditoría | Registrar las acciones hechas asumiendo |
-| D19 | Webhooks salientes | Sin reintentos | Reintentos con backoff y registro de entregas |
-| D20 | Correo de bienvenida | Plantillas sin uso | Enviar al registrarse o eliminar |
-| D21 | Enlaces Privacy / Terms / Support en el login | No llevan a nada | Enlazar |
-| D22 | Código muerto | Páginas antiguas de landing/home y servicios sin uso en la app del respondente | No migrar |
-| D23 | Textos fijos en español | Prefijos de copia, email de ventas, contenido Samurai8, plantillas de onboarding | Externalizar a i18n |
-| D24 | CORS `*` y ausencia de límite de tasa | — | Restringir y limitar |
-| D25 | `VITE_RESULT_LAYOUT_V2` | Flag de la consola para ordenar libremente los bloques de resultado; el backend no lo soporta aún | Fuera de alcance, o diseñarlo en la migración |
+| D1 | `PUT` and `DELETE /organizations/{id}` | They do not check that the organization belongs to the account | **Fix:** require Own |
+| D2 | Deleting an organization | Leaves orphaned members | **Fix:** cascade delete, or block if it has assignations |
+| D3 | `POST /assignations/{id}/retries` | Ownership is not explicitly verified | **Fix:** require owner or `Admin` |
+| D4 | Sensitive public endpoints | `GET /customer/{id}/products`, `/settings`, `/styles`, `/jobs/{id}`, `/signed-urls` (accepts any `customer_id`), generation via LinkedIn and via prompt | Keep public those the respondent needs, but limit `/signed-urls` to valid sessions and add rate limiting |
+| D5 | E-commerce platform OAuth | `state = customer_id`, no anti-forgery nonce | **Fix:** signed nonce |
+| D6 | Assignation respondent token | Does not expire | **Fix:** reasonable expiration (e.g. 30 days) + renewal |
+| D7 | Submission with an invalid assignation token | Responds 200 without processing | **Fix:** 401 |
+| D8 | Customer-specific logic | `livingood`, Samurai8 (`mateo` / hardcoded id), LinkedIn owner `XhEFtqTt`, title of `3zWj6Nrg`, sales email recipients, default questionnaire id | **Turn into configuration** (configurable result types and global settings) |
+| D9 | Legacy `/login` | Hardcoded credentials; 500 on wrong credentials | Remove, or keep only in non-production environments |
+| D10 | `POST /profile/customization` and user migration trigger | Declared in the infrastructure, no code | Do not migrate |
+| D11 | Product HTML | Rendered without sanitizing | **Fix:** sanitize |
+| D12 | Audio tutorial | No option to skip it | **Fix:** allow continuing without audio (or typing) |
+| D13 | Email validation | Different regexes across assignation login, capture and contact | **Unify** |
+| D14 | Analytics and pixel IDs | Hardcoded in the HTML | Move to configuration |
+| D15 | Onboarding step 2 | The workspace is not saved | Save it (name, language, site) or remove the step |
+| D16 | Questionnaire list search | Client-side only | Use the server's `search` |
+| D17 | In-memory pagination | Full listings in memory | Paginate in the database |
+| D18 | Impersonation | No audit trail | Log actions taken while impersonating |
+| D19 | Outgoing webhooks | No retries | Retries with backoff and a delivery log |
+| D20 | Welcome email | Unused templates | Send on sign-up or remove |
+| D21 | Privacy / Terms / Support links on the login | Lead nowhere | Link them |
+| D22 | Dead code | Old landing/home pages and unused services in the respondent app | Do not migrate |
+| D23 | Hardcoded Spanish texts | Copy prefixes, sales email, Samurai8 content, onboarding templates | Externalize to i18n |
+| D24 | CORS `*` and lack of rate limiting | — | Restrict and limit |
+| D25 | `VITE_RESULT_LAYOUT_V2` | Console flag to freely reorder result blocks; the backend does not support it yet | Out of scope, or design it during the migration |
 
 ---
 
-## 16. Plan de migración y criterios de aceptación
+## 16. Migration plan and acceptance criteria
 
-### 16.1 Compatibilidad hacia atrás (DEBE)
+### 16.1 Backward compatibility (MUST)
 
-1. Las URLs públicas `/q/{id}`, `/f/{id|slug}`, `/a/{id}`, `/session/{id}/results`, `/:id` (antigua) y `/privacy` siguen funcionando.
-2. La API externa `/external/*` mantiene rutas, `X-API-Key`, formato de clave `QAIRE-…` y forma de respuesta. Las claves existentes siguen siendo válidas (se migra el hash).
-3. Los webhooks salientes mantienen el cuerpo, los headers y el algoritmo de firma. El secreto de firma se conserva o se rota con aviso.
-4. El widget de tienda sigue resolviendo `GET /questionnaire/find?url=`.
-5. Los slugs y los ids de flujos, cuestionarios, sesiones y asignaciones se conservan.
-6. Las claves de archivos de respuestas se conservan (o se migra el almacén conservando la estructura de claves).
-7. Los usuarios pueden entrar con su contraseña actual. Si cambia el proveedor de identidad, hace falta una migración perezosa (validar contra el proveedor anterior en el primer login) o un restablecimiento forzado comunicado.
-8. Las suscripciones en la pasarela de pagos siguen asociadas a su cuenta (`stripe_customer_id` y `stripe_subscription_id`).
-9. La conexión con la plataforma de e-commerce se conserva (tokens migrados).
+1. The public URLs `/q/{id}`, `/f/{id|slug}`, `/a/{id}`, `/session/{id}/results`, `/:id` (legacy) and `/privacy` keep working.
+2. The external API `/external/*` keeps its routes, `X-API-Key`, the `QAIRE-…` key format and response shape. Existing keys remain valid (the hash is migrated).
+3. Outgoing webhooks keep the body, headers and signing algorithm. The signing secret is preserved or rotated with notice.
+4. The store widget keeps resolving `GET /questionnaire/find?url=`.
+5. Slugs and the ids of flows, questionnaires, sessions and assignations are preserved.
+6. Answer file keys are preserved (or the storage is migrated keeping the key structure).
+7. Users can sign in with their current password. If the identity provider changes, a lazy migration (validating against the previous provider on first login) or a communicated forced reset is required.
+8. Subscriptions in the payment gateway remain associated with their account (`stripe_customer_id` and `stripe_subscription_id`).
+9. The connection to the e-commerce platform is preserved (tokens migrated).
 
-### 16.2 Migración de datos
+### 16.2 Data migration
 
-Por entidad de §6: extraer, transformar (si cambia el esquema), cargar y verificar conteos y sumas de control.
+For each entity in §6: extract, transform (if the schema changes), load, and verify counts and checksums.
 
-**Orden sugerido:**
+**Suggested order:**
 
-1. Catálogo: features, plans, videos, app settings, system prompts con historial.
-2. Cuentas y usuarios.
-3. Estilos.
-4. Productos.
-5. Cuestionarios, flujos, diagnósticos y prompts.
-6. Organizaciones y miembros.
-7. Asignaciones, respuestas de asignación y proyectos.
-8. Sesiones y resultados de sesión.
+1. Catalog: features, plans, videos, app settings, system prompts with history.
+2. Accounts and users.
+3. Styles.
+4. Products.
+5. Questionnaires, flows, diagnostics and prompts.
+6. Organizations and members.
+7. Assignations, assignation answers and projects.
+8. Sessions and session results.
 9. Dashboards.
-10. API keys y webhooks.
-11. Jobs: opcional; solo los recientes.
-12. Archivos del almacén de objetos.
+10. API keys and webhooks.
+11. Jobs: optional; only recent ones.
+12. Object storage files.
 
-### 16.3 Criterios de aceptación de paridad
+### 16.3 Parity acceptance criteria
 
-Una prueba automatizada o manual documentada por cada punto:
+One automated test or documented manual test per item:
 
-1. **Registro:** con email y con Google (incluida la vinculación con una cuenta existente) → cuenta con plan `starter` de 1 mes y onboarding pendiente.
-2. **Onboarding completo** de 7 pasos → cuestionario publicado y respuesta de prueba detectada.
-3. **Crear cada tipo** (Regular, Diagnostic, Chaining, Quiz Funnel por web y por e-commerce, chat) → aparece en el listado y su enlace público funciona.
-4. **Diagnóstico:** el puntaje de una sesión coincide exactamente con §7.7 (casos con checkbox, ranking, range, categorías, tiers límite y recomendaciones heredadas del tier inferior).
-5. **Cadena de 3 etapas** con diagnóstico final generado → puntaje combinado de todas las etapas.
-6. **Respondente:**
-   - reanudar tras recargar;
+1. **Sign-up:** with email and with Google (including linking to an existing account) → account with a 1-month `starter` plan and pending onboarding.
+2. **Full 7-step onboarding** → published questionnaire and test response detected.
+3. **Create each type** (Regular, Diagnostic, Chaining, Quiz Funnel via website and via e-commerce, chat) → it appears in the listing and its public link works.
+4. **Diagnostic:** a session's score matches §7.7 exactly (cases with checkbox, ranking, range, categories, boundary tiers and recommendations inherited from the lower tier).
+5. **3-stage chain** with a generated final diagnostic → combined score across all stages.
+6. **Respondent:**
+   - resume after reload;
    - disclaimer;
    - landing;
-   - validaciones de cada control;
-   - checkbox exclusivo;
-   - slider que no cuenta hasta tocarlo;
-   - Skip solo en opcionales;
-   - archivos (límite, pegar, reintento);
-   - audio con transcripción;
-   - evaluación por IA con reintentos y falla abierta;
-   - captura de datos;
-   - resultados recargables por URL;
+   - validations for each control;
+   - exclusive checkbox;
+   - slider that does not count until touched;
+   - Skip only on optional questions;
+   - files (limit, paste, retry);
+   - audio with transcription;
+   - AI evaluation with retries and fail-open;
+   - data capture;
+   - results reloadable via URL;
    - PDF.
-7. **Asignación default:** login por email/teléfono, errores `USER_NOT_FOUND` y `NOT_IN_AUDIENCE`, progreso por respondente, exportaciones CSV y Sheets.
-8. **Asignación follow-up:**
-   - sesión compartida entre dos miembros (fusión sin sobrescribir con vacíos);
-   - completar;
-   - revisar (aprobar y rechazar);
-   - enviar a corrección → intento 2 con respuestas bloqueadas y rechazadas vacías;
-   - pantallas de completado por `review_status`.
-9. **Recordatorios:** job diario y botón manual; asuntos según los días restantes; sin duplicados en el mismo día UTC.
-10. **Proyectos:** estados y porcentajes según §7.12, incluido el cálculo de vencido en UTC−12.
-11. **Gate de plan:** cada razón de rechazo produce su 429 y su texto en la UI; `Admin` pasa; los contadores suman según §7.2; el banner de uso aparece en los umbrales.
-12. **Facturación:** checkout, upgrade inmediato con prorrateo, downgrade programado y su reversión, cancelar y reanudar, portal, cupones, prueba una sola vez por cuenta, reinicio de contadores al subir de plan.
-13. **Dashboard:** generación única, bloqueo sin `dashboards`, fórmulas de embudo y NPS.
-14. **API externa y webhooks:** firma verificable por un receptor de prueba; clave revocada → 401.
-15. **Suplantación:** header respetado, 403 para quien no es `Admin`, banner y salida automática ante los errores.
-16. **Super-admin:** CRUD de features, plans, coupons, videos y system prompts (con validación de placeholders y versiones); ajuste de plan y uso de una cuenta.
-17. **i18n:** todas las pantallas en es y en; los correos en el idioma de la cuenta.
-18. **Accesibilidad:** auditoría AA automatizada sin errores críticos en las pantallas principales.
+7. **Default assignation:** login by email/phone, `USER_NOT_FOUND` and `NOT_IN_AUDIENCE` errors, per-respondent progress, CSV and Sheets exports.
+8. **Follow-up assignation:**
+   - session shared between two members (merge without overwriting with empty values);
+   - complete;
+   - review (approve and reject);
+   - send for correction → attempt 2 with locked answers and rejected ones empty;
+   - completion screens by `review_status`.
+9. **Reminders:** daily job and manual button; subjects according to the days remaining; no duplicates on the same UTC day.
+10. **Projects:** states and percentages according to §7.12, including the overdue calculation in UTC−12.
+11. **Plan gate:** each rejection reason produces its 429 and its UI text; `Admin` passes; counters add up according to §7.2; the usage banner appears at the thresholds.
+12. **Billing:** checkout, immediate upgrade with proration, scheduled downgrade and its reversal, cancel and resume, portal, coupons, trial only once per account, counter reset on upgrade.
+13. **Dashboard:** one-time generation, blocked without `dashboards`, funnel and NPS formulas.
+14. **External API and webhooks:** signature verifiable by a test receiver; revoked key → 401.
+15. **Impersonation:** header honored, 403 for non-`Admin` users, banner and automatic exit on errors.
+16. **Super-admin:** CRUD of features, plans, coupons, videos and system prompts (with placeholder and version validation); adjusting an account's plan and usage.
+17. **i18n:** all screens in es and en; emails in the account's language.
+18. **Accessibility:** automated AA audit with no critical errors on the main screens.
 
 ---
 
-## Anexo A — Marca y diseño
+## Appendix A — Branding and design
 
-### A.1 Consola (Mappi)
+### A.1 Console (Mappi)
 
-**Personalidad:** segura, clara y amable. Tono sencillo y tranquilizador, nunca exagerado: dice el resultado y se aparta.
+**Personality:** confident, clear and friendly. Simple, reassuring tone, never exaggerated: it states the result and steps aside.
 
-**Paleta:**
+**Palette:**
 
-| Token | Valor |
+| Token | Value |
 |---|---|
-| Primario (acento único) | `#8249df` (HSL 263 70% 58%) |
+| Primary (single accent) | `#8249df` (HSL 263 70% 58%) |
 | Hover | `#6c3aed` |
-| Tinte suave | `#f0e8fc` |
-| Barra lateral | `#13111d` (casi negro) |
-| Resaltado "AI Experience" | `#06b6d4` (cian) |
-| Neutros | Fríos y claros |
+| Soft tint | `#f0e8fc` |
+| Sidebar | `#13111d` (near black) |
+| "AI Experience" highlight | `#06b6d4` (cyan) |
+| Neutrals | Cool and light |
 
-**Tipografía:** Inter para la interfaz; Fraunces (serif) solo en los títulos grandes (selector de tipo, pantalla de éxito).
+**Typography:** Inter for the interface; Fraunces (serif) only for large headings (type selector, success screen).
 
-**Componentes:** botones en píldora de 40 px de alto; tarjetas blancas con radio de 14 px y borde fino.
+**Components:** 40 px tall pill buttons; white cards with a 14 px radius and a thin border.
 
-**Tema:** solo claro. Existe CSS de modo oscuro pero no se activa.
+**Theme:** light only. Dark-mode CSS exists but is not enabled.
 
-**Referencia visual:** las pantallas de creación. Un solo contenedor para todos los tipos, editor centrado a 880 px y vista previa en vivo de lo que ve el respondente.
+**Visual reference:** the creation screens. A single container for all types, an editor centered at 880 px and a live preview of what the respondent sees.
 
-**Principios:**
+**Principles:**
 
-1. **Claridad antes que decoración:** una tarea principal por pantalla.
-2. **Confianza tranquila:** un solo acento violeta, espacio generoso.
-3. **Mostrar el resultado, no la maquinaria.**
-4. **La calidez es una función:** texto humano, serif en los momentos grandes y la vista previa en vivo.
-5. **Velocidad y confianza:** buenos valores por defecto, formularios tolerantes, estados vacíos y de error honestos.
+1. **Clarity over decoration:** one main task per screen.
+2. **Calm confidence:** a single violet accent, generous whitespace.
+3. **Show the result, not the machinery.**
+4. **Warmth is a feature:** human copy, serif in the big moments and the live preview.
+5. **Speed and trust:** good defaults, forgiving forms, honest empty and error states.
 
-El acento se usa solo en lo que importa: el botón principal, el paso actual y la tarjeta seleccionada. Toda acción deshabilitada dice por qué.
+The accent is used only on what matters: the main button, the current step and the selected card. Every disabled action says why.
 
-**Anti-referencias:**
+**Anti-references:**
 
-- Admin genérico estilo Material/Bootstrap.
-- Estética SaaS de gradientes: gradientes, texto con gradiente, tarjetas de métricas enormes.
-- Cristal oscuro con neón.
-- Enterprise saturado (barras de herramientas densas, texto diminuto).
+- Generic Material/Bootstrap-style admin.
+- Gradient SaaS aesthetic: gradients, gradient text, huge metric cards.
+- Dark glass with neon.
+- Cluttered enterprise (dense toolbars, tiny text).
 
-### A.2 App del respondente (tema por defecto, sin marca del cliente)
+### A.2 Respondent app (default theme, without customer branding)
 
-| Token | Valor |
+| Token | Value |
 |---|---|
-| Fondo | Blanco roto cálido (HSL 40 30% 96%) |
-| Texto | zinc-900 |
-| Tarjetas | Blanco |
-| Primario | Casi negro (zinc-900) |
-| Acento | Terracota `#C45A3D` |
-| Éxito | HSL 142 76% 36% |
-| Advertencia | HSL 38 92% 50% |
-| Radios | 0.5rem; botones en píldora; tarjetas de 1rem |
-| Fuentes | Montserrat para texto; serif para títulos |
+| Background | Warm off-white (HSL 40 30% 96%) |
+| Text | zinc-900 |
+| Cards | White |
+| Primary | Near black (zinc-900) |
+| Accent | Terracotta `#C45A3D` |
+| Success | HSL 142 76% 36% |
+| Warning | HSL 38 92% 50% |
+| Radii | 0.5rem; pill buttons; 1rem cards |
+| Fonts | Montserrat for body text; serif for headings |
 
-- Logos y favicon propios.
-- **La marca del cliente sobrescribe estos tokens** (§9.15).
+- Its own logos and favicon.
+- **The customer's branding overrides these tokens** (§9.15).
 
-### A.3 Nombres históricos
+### A.3 Historical names
 
-"QuestionAIre" (monograma "Q", lema "make the shopping experience a total breeze"), dominios `questionaire.shop` y `getmappi.com`, contacto `info@questionaire.shop`.
+"QuestionAIre" ("Q" monogram, tagline "make the shopping experience a total breeze"), domains `questionaire.shop` and `getmappi.com`, contact `info@questionaire.shop`.
 
-El producto nuevo se presenta como **Mappi**. Se DEBE decidir si la app del respondente pasa a mostrar "Mappi" en lugar de "QuestionAIre".
+The new product is presented as **Mappi**. It MUST be decided whether the respondent app switches to showing "Mappi" instead of "QuestionAIre".
 
 ---
 
-## Anexo B — Catálogo de códigos de error
+## Appendix B — Error code catalog
 
-| Código | HTTP | Contexto |
+| Code | HTTP | Context |
 |---|---|---|
-| `INVALID_JSON` | 400 | Cuerpo que no es JSON |
-| `VALIDATION_ERROR` | 400 | Validación de campos |
-| `INVALID_REQUEST` | 400 | Falta un parámetro |
-| `INVALID_UUID` | 400 | Id mal formado |
-| `UNAUTHORIZED` | 401 | Sin autenticación válida |
-| `FORBIDDEN` | 403 | Sin privilegios o propiedad |
-| `ASSUME_NOT_ALLOWED` | 403 | Suplantación sin ser `Admin` |
-| `ASSUMED_CUSTOMER_NOT_FOUND` | 404 | Suplantación de una cuenta inexistente |
-| `PLAN_LIMIT_REACHED` | 429 | Con `details.reason` ∈ `NO_PLAN`, `PLAN_INACTIVE`, `PLAN_NOT_FOUND`, `FEATURE_NOT_IN_PLAN`, `FEATURE_LIMIT_REACHED`, `RESPONSE_LIMIT_REACHED`, `QUESTIONNAIRE_LIMIT_REACHED` |
-| `USAGE_UNAVAILABLE` | 503 | Falla el servicio de uso |
-| `EMAIL_ALREADY_EXISTS` | 409 | Registro o alta de usuario |
-| `INVALID_ROLE` | 400 | Alta de usuario |
-| `TOO_MANY_ATTEMPTS` | 429 | Recuperación de contraseña |
-| `INVALID_RESET_CODE`, `EXPIRED_RESET_CODE`, `INVALID_PASSWORD` | 400 | Recuperación de contraseña |
-| `CUSTOMER_NOT_FOUND` | 404 | Cuenta |
+| `INVALID_JSON` | 400 | Body that is not JSON |
+| `VALIDATION_ERROR` | 400 | Field validation |
+| `INVALID_REQUEST` | 400 | Missing parameter |
+| `INVALID_UUID` | 400 | Malformed id |
+| `UNAUTHORIZED` | 401 | No valid authentication |
+| `FORBIDDEN` | 403 | No privileges or ownership |
+| `ASSUME_NOT_ALLOWED` | 403 | Impersonation without being `Admin` |
+| `ASSUMED_CUSTOMER_NOT_FOUND` | 404 | Impersonation of a non-existent account |
+| `PLAN_LIMIT_REACHED` | 429 | With `details.reason` ∈ `NO_PLAN`, `PLAN_INACTIVE`, `PLAN_NOT_FOUND`, `FEATURE_NOT_IN_PLAN`, `FEATURE_LIMIT_REACHED`, `RESPONSE_LIMIT_REACHED`, `QUESTIONNAIRE_LIMIT_REACHED` |
+| `USAGE_UNAVAILABLE` | 503 | Usage service fails |
+| `EMAIL_ALREADY_EXISTS` | 409 | Sign-up or user creation |
+| `INVALID_ROLE` | 400 | User creation |
+| `TOO_MANY_ATTEMPTS` | 429 | Password recovery |
+| `INVALID_RESET_CODE`, `EXPIRED_RESET_CODE`, `INVALID_PASSWORD` | 400 | Password recovery |
+| `CUSTOMER_NOT_FOUND` | 404 | Account |
 | `PLAN_NOT_FOUND` | 404 | Plan |
-| `PLAN_NOT_PURCHASABLE`, `SAME_PLAN`, `NO_SUBSCRIPTION`, `NO_SCHEDULED_CHANGE`, `NO_STRIPE_CUSTOMER` | 400 | Facturación |
-| `STRIPE_UNAVAILABLE` | 502 | Falla la pasarela |
-| `EMAIL_UNAVAILABLE` | 502 | Falla el correo de contacto |
-| `INVALID_TYPE`, `INVALID_SORT`, `INVALID_ORDER`, `INVALID_IS_ACTIVE` | 400 | Listado de cuestionarios |
+| `PLAN_NOT_PURCHASABLE`, `SAME_PLAN`, `NO_SUBSCRIPTION`, `NO_SCHEDULED_CHANGE`, `NO_STRIPE_CUSTOMER` | 400 | Billing |
+| `STRIPE_UNAVAILABLE` | 502 | Gateway fails |
+| `EMAIL_UNAVAILABLE` | 502 | Contact email fails |
+| `INVALID_TYPE`, `INVALID_SORT`, `INVALID_ORDER`, `INVALID_IS_ACTIVE` | 400 | Questionnaire listing |
 | `QUESTIONNAIRE_NOT_FOUND` | 404 | |
-| `QUESTIONNAIRE_ALREADY_ANSWERED` | 409 | Edición bloqueada |
+| `QUESTIONNAIRE_ALREADY_ANSWERED` | 409 | Editing blocked |
 | `SLUG_ALREADY_IN_USE` | 409 | |
 | `FLOW_NOT_FOUND` | 404 | |
 | `SESSION_NOT_FOUND`, `SESSION_RESULTS_NOT_FOUND` | 404 | |
@@ -2865,31 +2865,31 @@ El producto nuevo se presenta como **Mappi**. Se DEBE decidir si la app del resp
 | `JOB_NOT_FOUND` | 404 | |
 | `INVALID_JOB_DATA` | 500 | |
 | `SHOPIFY_NOT_CONNECTED`, `SHOPIFY_TOKEN_EXPIRED`, `TOKEN_EXCHANGE_FAILED` | 400 | E-commerce |
-| `DOMAIN_EMAIL_CONFLICT` | 409 | Organización |
+| `DOMAIN_EMAIL_CONFLICT` | 409 | Organization |
 | `ORGANIZATION_NOT_FOUND` | 404 | |
 | `INTERNAL_ERROR` | 500 | |
-| `QUESTIONNAIRE_ALREADY_ASSIGNED` | 409 | Asignación |
-| `AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`, `ASSIGNATION_IN_PROJECT` | 400 | Asignación |
+| `QUESTIONNAIRE_ALREADY_ASSIGNED` | 409 | Assignation |
+| `AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`, `ASSIGNATION_IN_PROJECT` | 400 | Assignation |
 | `ASSIGNATION_NOT_FOUND` | 404 | |
-| `MISSING_IDENTIFIER` | 400 | Login de respondente |
-| `USER_NOT_FOUND`, `NOT_IN_AUDIENCE` | 403 | Login de respondente |
-| `FOLLOW_UP_COMPLETED` | 409 | Follow-up cerrado |
+| `MISSING_IDENTIFIER` | 400 | Respondent login |
+| `USER_NOT_FOUND`, `NOT_IN_AUDIENCE` | 403 | Respondent login |
+| `FOLLOW_UP_COMPLETED` | 409 | Follow-up closed |
 | `NOT_A_FOLLOW_UP` | 400 | |
-| `NO_RECIPIENTS` | 422 | Recordatorio |
-| `REMINDER_NOT_SENT` | 502 | Recordatorio |
-| `FOLLOW_UP_NOT_COMPLETED` | 409 | Revisión |
-| `QUESTION_NOT_FOUND` | 404 | Revisión |
-| `QUESTION_LOCKED` | 400 | Revisión |
-| `REVIEW_INCOMPLETE` | 409 | Reintento |
-| `NOTHING_TO_RETRY` | 400 | Reintento |
-| `RETRY_EMAIL_NOT_SENT` | 502 | Reintento (el intento ya se creó) |
-| `INVALID_PAGE_SIZE`, `INVALID_CURSOR` | 400 | Respondentes |
+| `NO_RECIPIENTS` | 422 | Reminder |
+| `REMINDER_NOT_SENT` | 502 | Reminder |
+| `FOLLOW_UP_NOT_COMPLETED` | 409 | Review |
+| `QUESTION_NOT_FOUND` | 404 | Review |
+| `QUESTION_LOCKED` | 400 | Review |
+| `REVIEW_INCOMPLETE` | 409 | Retry |
+| `NOTHING_TO_RETRY` | 400 | Retry |
+| `RETRY_EMAIL_NOT_SENT` | 502 | Retry (the attempt was already created) |
+| `INVALID_PAGE_SIZE`, `INVALID_CURSOR` | 400 | Respondents |
 | `INVALID_PROJECT_STATUS` | 400 | |
 | `PROJECT_NOT_FOUND` | 404 | |
-| `ASSIGNATION_ORGANIZATION_MISMATCH`, `ASSIGNATION_NOT_FOLLOW_UP` | 400 | Proyecto |
-| `ASSIGNATION_IN_OTHER_PROJECT` | 409 | Proyecto |
+| `ASSIGNATION_ORGANIZATION_MISMATCH`, `ASSIGNATION_NOT_FOLLOW_UP` | 400 | Project |
+| `ASSIGNATION_IN_OTHER_PROJECT` | 409 | Project |
 | `API_KEY_NOT_FOUND`, `WEBHOOK_NOT_FOUND` | 404 | |
-| `INVALID_API_KEY` | 401 | API externa |
+| `INVALID_API_KEY` | 401 | External API |
 | `INVALID_LANGUAGE` | 400 | Videos |
 | `UNKNOWN_PLAN`, `INVALID_DATE_RANGE`, `UNKNOWN_FEATURE` | 400 | Admin |
 | `FEATURE_ALREADY_EXISTS`, `PLAN_ALREADY_EXISTS`, `COUPON_CODE_TAKEN` | 409 | Admin |
@@ -2897,34 +2897,34 @@ El producto nuevo se presenta como **Mappi**. Se DEBE decidir si la app del resp
 | `FEATURE_NOT_FOUND`, `COUPON_NOT_FOUND`, `UNKNOWN_PROMPT` | 404 | Admin |
 | `INVALID_PLACEHOLDERS` | 400 | System prompts |
 
-**Códigos con texto propio en la consola:** `SLUG_ALREADY_IN_USE`, `SHOPIFY_NOT_CONNECTED`, `SHOPIFY_TOKEN_EXPIRED`, `FOLLOW_UP_COMPLETED`, `NO_RECIPIENTS`, `ASSUME_NOT_ALLOWED`, `ASSUMED_CUSTOMER_NOT_FOUND`, `ASSIGNATION_IN_OTHER_PROJECT`, `ASSIGNATION_ORGANIZATION_MISMATCH`, `ASSIGNATION_NOT_FOLLOW_UP`, `PROJECT_NOT_FOUND`, `ASSIGNATION_IN_PROJECT`, `AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`, `FOLLOW_UP_NOT_COMPLETED`, `REVIEW_INCOMPLETE`, `NOTHING_TO_RETRY`, `QUESTION_LOCKED`, `RETRY_EMAIL_NOT_SENT`, `QUESTION_NOT_FOUND`, más las siete razones de límite de plan.
+**Codes with their own text in the console:** `SLUG_ALREADY_IN_USE`, `SHOPIFY_NOT_CONNECTED`, `SHOPIFY_TOKEN_EXPIRED`, `FOLLOW_UP_COMPLETED`, `NO_RECIPIENTS`, `ASSUME_NOT_ALLOWED`, `ASSUMED_CUSTOMER_NOT_FOUND`, `ASSIGNATION_IN_OTHER_PROJECT`, `ASSIGNATION_ORGANIZATION_MISMATCH`, `ASSIGNATION_NOT_FOLLOW_UP`, `PROJECT_NOT_FOUND`, `ASSIGNATION_IN_PROJECT`, `AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`, `FOLLOW_UP_NOT_COMPLETED`, `REVIEW_INCOMPLETE`, `NOTHING_TO_RETRY`, `QUESTION_LOCKED`, `RETRY_EMAIL_NOT_SENT`, `QUESTION_NOT_FOUND`, plus the seven plan-limit reasons.
 
 ---
 
-## Anexo C — Variables de configuración (por propósito)
+## Appendix C — Configuration variables (by purpose)
 
-Los nombres son orientativos. Lo que se exige es la **capacidad** de configurar cada cosa por entorno. Los secretos van en un gestor de secretos, nunca en el código.
+Names are indicative. What is required is the **ability** to configure each item per environment. Secrets go in a secrets manager, never in the code.
 
 **API:**
 
-| Grupo | Variables |
+| Group | Variables |
 |---|---|
-| URLs | API pública, app del respondente (`FRONTEND_URL`), consola (`ADMIN_FRONTEND_URL`) |
-| Persistencia | Conexión o nombres de colecciones de cada entidad de §6 |
-| Almacén de objetos | Contenedores de archivos de respuestas, prompts/medios y system prompts |
-| Colas y bus | Cola de jobs, cola de estilos, cola de eventos de analítica, tópico de webhooks |
-| Secretos | Firma de webhooks salientes; firma de tokens de respondente; API del LLM; cliente OAuth de Google; app de e-commerce (key + secret); pasarela de pagos (clave + secreto de webhook); scraper (token + URL base); servicio de uso/analítica (URL + API key); proveedor de identidad (pool/cliente); seguimiento de errores (DSN) |
-| Otros | Modelo de LLM por defecto; remitente de correo (`SUPPORT_EMAIL`); nivel de log |
+| URLs | Public API, respondent app (`FRONTEND_URL`), console (`ADMIN_FRONTEND_URL`) |
+| Persistence | Connection or collection names for each entity in §6 |
+| Object storage | Containers for answer files, prompts/media and system prompts |
+| Queues and bus | Job queue, styles queue, analytics events queue, webhooks topic |
+| Secrets | Outgoing webhook signing; respondent token signing; LLM API; Google OAuth client; e-commerce app (key + secret); payment gateway (key + webhook secret); scraper (token + base URL); usage/analytics service (URL + API key); identity provider (pool/client); error tracking (DSN) |
+| Others | Default LLM model; email sender (`SUPPORT_EMAIL`); log level |
 
-**App del respondente:** URL de la API; URL pública de la propia app; título base; ID de píxel de Meta por defecto; ID de analítica web; ID de mapas de calor; DSN de errores.
+**Respondent app:** API URL; the app's own public URL; base title; default Meta pixel ID; web analytics ID; heatmaps ID; error DSN.
 
-**Consola:** URL de la API; URL de la app del respondente; configuración del proveedor de identidad (pool, cliente, dominio de login federado); cliente OAuth para exportar a hojas de cálculo; DSN de errores; ID de mapas de calor; URL de instalación de la app de e-commerce; modo de login simulado para desarrollo; flag `RESULT_LAYOUT_V2`.
+**Console:** API URL; respondent app URL; identity provider configuration (pool, client, federated login domain); OAuth client for spreadsheet export; error DSN; heatmaps ID; e-commerce app install URL; mock login mode for development; `RESULT_LAYOUT_V2` flag.
 
 ---
 
-## Anexo D — Claves de system prompts
+## Appendix D — System prompt keys
 
-| Clave | Placeholders requeridos |
+| Key | Required placeholders |
 |---|---|
 | `shared--basic-rules-to-create-a-questionnaire` | — |
 | `quiz-funnel--rules-to-create-profiling-questionnaires` | — |
@@ -2939,30 +2939,30 @@ Los nombres son orientativos. Lo que se exige es la **capacidad** de configurar 
 | `styles--rules-to-extract-brand-styles` | — |
 | `dashboards--select-dashboard-type` | `{dashboard_catalog}` |
 
-El texto actual de cada clave (incluido el texto por defecto de la plataforma) DEBE exportarse del sistema actual y migrarse con su historial.
+The current text of each key (including the platform's default text) MUST be exported from the current system and migrated with its history.
 
 ---
 
-## Anexo E — Referencia de la implementación actual
+## Appendix E — Reference of the current implementation
 
-**Solo informativo. No es un requisito.** Sirve para identificar qué hay que reemplazar si se cambia de proveedor.
+**Informational only. Not a requirement.** It serves to identify what needs replacing if providers change.
 
-| Capacidad | Implementación actual |
+| Capability | Current implementation |
 |---|---|
-| API | Funciones serverless detrás de un API gateway (Python 3.10), en una región us-east-1 |
-| Persistencia | Base de datos NoSQL clave-valor gestionada (DynamoDB), facturación bajo demanda, PITR |
-| Colas / bus | Invocación asíncrona de funciones; tópico pub/sub para webhooks |
-| Tarea programada | Cron gestionado `0 13 * * ? *` |
-| Almacén de objetos | S3 |
-| Identidad | AWS Cognito + Google federado (Hosted UI) |
-| Correo | AWS SES con plantillas HTML |
-| Pagos | Stripe (Checkout, Billing Portal, Subscription Schedules, Coupons/Promotion Codes) |
-| LLM | OpenAI (modelos "gpt-5.5" para generación y "gpt-5-mini" para recomendar y evaluar) |
-| Transcripción | OpenAI Realtime (`gpt-realtime-whisper`) por WebRTC o WebSocket con token efímero |
-| Scraping | Apify (catálogo e-commerce y LinkedIn); Playwright/Chromium para estilos |
+| API | Serverless functions behind an API gateway (Python 3.10), in the us-east-1 region |
+| Persistence | Managed key-value NoSQL database (DynamoDB), on-demand billing, PITR |
+| Queues / bus | Asynchronous function invocation; pub/sub topic for webhooks |
+| Scheduled task | Managed cron `0 13 * * ? *` |
+| Object storage | S3 |
+| Identity | AWS Cognito + federated Google (Hosted UI) |
+| Email | AWS SES with HTML templates |
+| Payments | Stripe (Checkout, Billing Portal, Subscription Schedules, Coupons/Promotion Codes) |
+| LLM | OpenAI ("gpt-5.5" models for generation and "gpt-5-mini" for recommending and evaluating) |
+| Transcription | OpenAI Realtime (`gpt-realtime-whisper`) over WebRTC or WebSocket with an ephemeral token |
+| Scraping | Apify (e-commerce catalog and LinkedIn); Playwright/Chromium for styles |
 | E-commerce | Shopify Admin API |
-| Hojas de cálculo | Google Drive + Sheets desde el navegador |
-| Frontends | SPA React + TypeScript, alojadas en AWS Amplify |
-| Errores | Sentry |
-| Medición | Google Analytics, Meta Pixel, LinkedIn Insight, Google Ads, TikTok Pixel, Microsoft Clarity |
-| Infraestructura como código | SAM + Terraform; CI por rama |
+| Spreadsheets | Google Drive + Sheets from the browser |
+| Frontends | React + TypeScript SPAs, hosted on AWS Amplify |
+| Errors | Sentry |
+| Measurement | Google Analytics, Meta Pixel, LinkedIn Insight, Google Ads, TikTok Pixel, Microsoft Clarity |
+| Infrastructure as code | SAM + Terraform; CI per branch |
