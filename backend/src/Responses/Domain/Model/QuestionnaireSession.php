@@ -104,16 +104,54 @@ class QuestionnaireSession
         $this->updatedAt = $at;
     }
 
+    /**
+     * The result is computed by a job (quiz funnel recommendations). The job id stays in the document: a repeated
+     * submission answers with that job, even once it is done.
+     */
     public function markProcessing(\DateTimeImmutable $at): void
     {
         $this->status = self::PROCESSING;
         $this->updatedAt = $at;
     }
 
+    public function trackProcessingJob(string $jobId): void
+    {
+        $this->document['processing_job_id'] = $jobId;
+    }
+
     public function complete(\DateTimeImmutable $at): void
     {
         $this->status = self::COMPLETED;
         $this->updatedAt = $at;
+    }
+
+    /**
+     * The questions with the respondent's latest values (SessionAnswers decides what the respondent may change).
+     *
+     * @param list<array<string, mixed>> $questions
+     */
+    public function answer(array $questions, \DateTimeImmutable $at): void
+    {
+        $this->document['questions'] = array_values($questions);
+        $this->updatedAt = $at;
+    }
+
+    /** A follow-up's shared session (PRD §7.11): every member writes to it, and it closes once it has ended_at. */
+    public function isFollowUp(): bool
+    {
+        return 'follow_up' === $this->assignationType;
+    }
+
+    public function isEnded(): bool
+    {
+        return null !== $this->endedAt;
+    }
+
+    public function processingJobId(): ?string
+    {
+        $jobId = $this->document['processing_job_id'] ?? null;
+
+        return \is_string($jobId) ? $jobId : null;
     }
 
     public function sessionId(): string

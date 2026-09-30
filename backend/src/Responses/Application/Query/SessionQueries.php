@@ -2,6 +2,9 @@
 
 namespace App\Responses\Application\Query;
 
+use App\Questionnaires\Application\Query\QuestionnaireQueries;
+use App\Responses\Application\ChainStages;
+use App\Responses\Domain\AnswerValues;
 use App\Responses\Domain\Model\QuestionnaireSession;
 use App\Responses\Domain\Repository\SessionRepository;
 use App\Responses\Domain\Repository\SessionResultsRepository;
@@ -14,7 +17,44 @@ final class SessionQueries
     public function __construct(
         private readonly SessionRepository $sessions,
         private readonly SessionResultsRepository $results,
+        private readonly ChainStages $chain,
+        private readonly QuestionnaireQueries $questionnaires,
     ) {
+    }
+
+    /**
+     * The answers of a session as webhooks and the external API send them (PRD §7.14): [{title, value, min?, max?}],
+     * message slides omitted. Null when the session does not exist.
+     *
+     * @return list<array{title: string, value: mixed, min?: int|float, max?: int|float}>|null
+     */
+    public function answersOf(string $sessionId): ?array
+    {
+        $session = $this->sessions->find($sessionId);
+
+        return null === $session ? null : AnswerValues::of($session->questions());
+    }
+
+    /**
+     * Every stage of the prompt chain a session belongs to, in order (PRD §8.4 GET …/chain), and how many stages
+     * the flow has (at least the ones the respondent went through). Null when the session does not exist.
+     *
+     * @return array{stages: list<SessionView>, total_stages: int}|null
+     */
+    public function chainOf(string $sessionId): ?array
+    {
+        $session = $this->sessions->find($sessionId);
+        if (null === $session) {
+            return null;
+        }
+        $stages = $this->chain->all($session);
+        $root = $this->questionnaires->find($stages[0]->questionnaireId());
+        $flow = null === $root ? null : $this->questionnaires->flowOf($root->id());
+
+        return [
+            'stages' => array_map(static fn (QuestionnaireSession $s): SessionView => new SessionView(self::sessionData($s)), $stages),
+            'total_stages' => max(\count($stages), ChainStages::stageCount($flow)),
+        ];
     }
 
     public function find(string $sessionId): ?SessionView

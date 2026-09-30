@@ -1,0 +1,6 @@
+# Responses (respondent sessions): the transcription provider (PRD §13.4). The client-specific result types (D8)
+# read their environment variables in Responses\Infrastructure\Config\EnvResultTypeSettings.
+services:
+    App\Responses\Application\Port\TranscriptionTokens:
+        factory: ['@App\Responses\Infrastructure\Transcription\TranscriptionTokensFactory', 'create']
+        arguments: ['%env(TRANSCRIPTION_PROVIDER)%', '%env(OPENAI_API_KEY)%']

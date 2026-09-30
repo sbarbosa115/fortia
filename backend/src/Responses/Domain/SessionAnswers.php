@@ -105,6 +105,33 @@ final class SessionAnswers
         return array_values($questions);
     }
 
+    /**
+     * The outcome of an answer's AI evaluation (§7.9): not passing costs one follow-up (never below 0) and keeps the
+     * improvement message and the answer that was flagged; passing clears them.
+     *
+     * @param list<array<string, mixed>> $questions
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function evaluated(array $questions, string $questionId, bool $passed, ?string $improvementMessage, mixed $flaggedAnswer): array
+    {
+        foreach ($questions as $i => $question) {
+            if ((string) ($question['id'] ?? '') !== $questionId) {
+                continue;
+            }
+            if ($passed) {
+                $questions[$i]['improvement_message'] = null;
+                $questions[$i]['flagged_answer'] = null;
+            } else {
+                $questions[$i]['max_followups'] = max(0, (int) ($question['max_followups'] ?? 0) - 1);
+                $questions[$i]['improvement_message'] = $improvementMessage;
+                $questions[$i]['flagged_answer'] = $flaggedAnswer;
+            }
+        }
+
+        return array_values($questions);
+    }
+
     /** @param array<string, mixed> $question */
     public static function isLocked(array $question): bool
     {
