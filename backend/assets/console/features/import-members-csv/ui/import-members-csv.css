@@ -1,0 +1,27 @@
+/* Organizations (item 8): CSV import of members. */
+.csv-import {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.csv-import__report {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  background: var(--color-hover);
+  font-size: 14px;
+}
+.csv-import__report p {
+  margin: 0 0 4px;
+}
+.csv-import__report--error {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  background: #fef2f2;
+}
+.csv-import__skipped {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-text-muted);
+}

@@ -1,0 +1,6 @@
+# Wiring of the Organizations context (everything else is autowired by config/services.yaml).
+when@test:
+    services:
+        # Counts SQL statements so OrganizationApiTest can prove the listing has no N+1.
+        App\Tests\Functional\Api\Organizations\QueryCounter:
+            tags: ['doctrine.middleware']

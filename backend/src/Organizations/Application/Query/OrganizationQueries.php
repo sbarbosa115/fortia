@@ -29,6 +29,22 @@ final class OrganizationQueries
         return null === $organization ? null : self::organizationData($organization, $this->members->listByOrganization($organizationId));
     }
 
+    /**
+     * The organizations of an account with their members, newest first, in two queries whatever their number
+     * (GET /organizations, PRD §8.7).
+     *
+     * @param string|null $customerId null = every account (Admin, PRD §4.3)
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function listFor(?string $customerId): array
+    {
+        $organizations = $this->organizations->listFor($customerId);
+        $members = $this->members->listByOrganizations(array_map(static fn (Organization $o): string => $o->organizationId(), $organizations));
+
+        return array_map(static fn (Organization $o): array => self::organizationData($o, $members[$o->organizationId()] ?? []), $organizations);
+    }
+
     /** @return array<string, mixed>|null */
     public function member(string $organizationUserId): ?array
     {
