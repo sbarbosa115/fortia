@@ -151,6 +151,330 @@
                 }
             }
         },
+        "/api/v1/questionnaire/session/{sessionId}/answers/{questionId}/evaluate": {
+            "post": {
+                "tags": [
+                    "Respondent sessions"
+                ],
+                "operationId": "post_api_session_evaluate",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "questionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "The evaluation job",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID, VALIDATION_ERROR"
+                    },
+                    "404": {
+                        "description": "SESSION_NOT_FOUND, QUESTION_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/transcription/token": {
+            "get": {
+                "tags": [
+                    "Files and transcription"
+                ],
+                "summary": "An ephemeral secret for one recording (~1 min, \u00a713.4). P, rate limited.",
+                "operationId": "get_api_transcription_token",
+                "responses": {
+                    "200": {
+                        "description": "The token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TranscriptionTokenOutput"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "INTERNAL_ERROR (the provider did not issue one)"
+                    }
+                }
+            }
+        },
+        "/api/v1/signed-urls": {
+            "post": {
+                "tags": [
+                    "Files and transcription"
+                ],
+                "summary": "A signed upload. answer_media (P): only for a session still being filled, of that account, with that question\n(D4). prompt: the account's own users only (a chain prompt is written in the console).",
+                "operationId": "post_api_signed_urls",
+                "responses": {
+                    "200": {
+                        "description": "The signed upload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignedUploadOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED (a prompt upload without a console user)"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (a prompt upload for another account)"
+                    },
+                    "404": {
+                        "description": "SESSION_NOT_FOUND, QUESTION_NOT_FOUND, CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/answers-media/download-urls": {
+            "post": {
+                "tags": [
+                    "Files and transcription"
+                ],
+                "summary": "A signed download of an answer's file, for the account it belongs to (the key's first segment).",
+                "operationId": "post_api_answers_media_download",
+                "responses": {
+                    "200": {
+                        "description": "The signed URL",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DownloadUrlOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (another account's file)"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/session": {
+            "put": {
+                "tags": [
+                    "Respondent sessions"
+                ],
+                "summary": "Saves progress. In a follow-up's shared session the members' answers merge (\u00a77.11).",
+                "operationId": "put_api_session_save",
+                "responses": {
+                    "200": {
+                        "description": "The session as saved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "404": {
+                        "description": "SESSION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "FOLLOW_UP_COMPLETED"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Respondent sessions"
+                ],
+                "summary": "Submits the session and runs PRD \u00a77.7. A quiz funnel answers 202 {job} (its result has the products); every\nother type answers {type, \u2026result, cta?, layout?, result_copy?}.",
+                "operationId": "post_api_session_submit",
+                "responses": {
+                    "200": {
+                        "description": "The result",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionSubmissionOutput"
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "The job computing the result (quiz funnel)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "404": {
+                        "description": "SESSION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "FOLLOW_UP_COMPLETED"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/session/{sessionId}/results": {
+            "get": {
+                "tags": [
+                    "Respondent sessions"
+                ],
+                "summary": "The results the respondent app shows at /session/{id}/results, with the flow's cta, layout and texts.",
+                "operationId": "get_api_session_results",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The results",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionResultsOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "404": {
+                        "description": "SESSION_RESULTS_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/session/{sessionId}/chain": {
+            "get": {
+                "tags": [
+                    "Respondent sessions"
+                ],
+                "summary": "Every stage of the chain the respondent went through, for the account's answer detail.",
+                "operationId": "get_api_session_chain",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The stages",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionChainOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "404": {
+                        "description": "SESSION_NOT_FOUND (also another account's session)"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{questionnaireId}/session": {
+            "post": {
+                "tags": [
+                    "Respondent sessions"
+                ],
+                "operationId": "post_api_session_start",
+                "parameters": [
+                    {
+                        "name": "questionnaireId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The new session (bare, without the envelope)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED (an invalid respondent token)"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (responses), TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
         "/api/v1/health": {
             "get": {
                 "tags": [
@@ -1440,6 +1764,142 @@
                     }
                 },
                 "type": "object"
+            },
+            "TranscriptionTokenOutput": {
+                "required": [
+                    "token",
+                    "provider",
+                    "expires_in"
+                ],
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "provider": {
+                        "type": "string",
+                        "enum": [
+                            "browser",
+                            "openai"
+                        ]
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "SignedUploadOutput": {
+                "required": [
+                    "url",
+                    "key",
+                    "expires_in"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    },
+                    "fields": {
+                        "type": "object",
+                        "nullable": true,
+                        "default": null,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "DownloadUrlOutput": {
+                "required": [
+                    "url",
+                    "expires_in"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "SessionSubmissionOutput": {
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "diagnostic",
+                            "ai_team_profile",
+                            "samurai8",
+                            "livingood"
+                        ]
+                    },
+                    "cta": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/CtaOutput"
+                            }
+                        ],
+                        "default": null
+                    },
+                    "layout": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "score",
+                                "tier",
+                                "categories",
+                                "recommendations",
+                                "action_plan",
+                                "pdf",
+                                "cta"
+                            ]
+                        },
+                        "nullable": true,
+                        "default": null
+                    },
+                    "result_copy": {
+                        "type": "object",
+                        "nullable": true,
+                        "default": null,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object",
+                "additionalProperties": true
+            },
+            "SessionChainOutput": {
+                "required": [
+                    "stages",
+                    "total_stages"
+                ],
+                "properties": {
+                    "stages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SessionOutput"
+                        }
+                    },
+                    "total_stages": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -1467,6 +1927,12 @@
         },
         {
             "name": "Jobs"
+        },
+        {
+            "name": "Respondent sessions"
+        },
+        {
+            "name": "Files and transcription"
         },
         {
             "name": "Health"

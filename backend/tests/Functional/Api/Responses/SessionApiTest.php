@@ -96,7 +96,7 @@ final class SessionApiTest extends ApiTestCase
         $this->flow('ACME0001', $questionnaireId, [self::state('a', 'questionnaire')], $cta, ['cta'], ['title' => 'Thanks!']);
         $session = $this->startSession($questionnaireId);
 
-        $result = $this->data($this->api('POST', '/api/v1/questionnaire/session', self::answered($session, ['q1' => 'Hello']) + ['user_data' => ['name' => 'Ana', 'email' => 'ana@acme.test', 'phone' => '+57 300']]));
+        $result = $this->data($this->api('POST', '/api/v1/questionnaire/session', array_merge(self::answered($session, ['q1' => 'Hello']), ['user_data' => ['name' => 'Ana', 'email' => 'ana@acme.test', 'phone' => '+57 300']])));
 
         self::assertSame('default', $result['type']);
         self::assertSame('Talk to us', $result['cta']['title'], '§7.7 step 4: the response includes the flow\'s cta, layout and result_copy');

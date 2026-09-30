@@ -55,6 +55,45 @@ Open `/`. **Expected:** the browser goes to the marketing site URL, and Back doe
 
 <!-- RSP-01 – 45: respondent-app. SES-01 – 05: sessions. -->
 
+The SES cases check the sessions API the respondent app runs on. Until the respondent screens exist (RSP) they are
+run with `curl` against `http://localhost:8080/api/v1`; afterwards the same checks happen through `/q/{id}` and the
+browser's network tab. `{Q}` is the id of an active questionnaire of `owner@acme.test` (create one in the console,
+QST cases), `{D}` of a diagnostic one with tiers.
+
+**SES-01 · A respondent starts, saves and submits a questionnaire**
+`POST /questionnaire/{Q}/session`, then `PUT /questionnaire/session` with the returned body and a value in the
+first question, then `POST /questionnaire/session` with the same body. **Expected:** the start answers the session
+itself (no `{message, data}` envelope), `status` `filling` and `on_completed` only `{type}`; the save answers the
+value back with `status` still `filling`; the submit answers `{type:"default"}` plus the flow's `cta`/`layout`/
+`result_copy` if it has them. Submitting again answers the same, and the console's usage shows one more response.
+
+**SES-02 · A diagnostic's results can be reloaded**
+Submit a session of `{D}` with values in its scored questions, then open
+`GET /questionnaire/session/{session_id}/results` twice. **Expected:** the submit answers `type` `diagnostic` with
+`score {value, max}`, the categories and the reached tier's recommendations (or the lower tier's when it has none);
+the results route answers the same diagnostic, the session's `customer_id` and the flow's texts. An unsubmitted
+session's results are 404 `SESSION_RESULTS_NOT_FOUND`.
+
+**SES-03 · A file answer gets a signed upload only for a live session**
+`POST /signed-urls` with `{filename:"a.pdf", content_type:"application/pdf", customer_id:"<acme id>", session_id,
+question_id}` of a session being filled. **Expected:** `{url, fields, key, expires_in:900}` with a key
+`{customer_id}/{session_id}/{question_id}/{md5}.pdf`; posting the file with the fields to `url` stores it. The same
+call with another `customer_id`, an unknown session or a submitted session is 404 `SESSION_NOT_FOUND`. Signed in as
+`owner@acme.test`, `POST /answers-media/download-urls {key}` gives a download link; as `owner@globex.test` it is 403.
+
+**SES-04 · An answer that misses its criteria costs a follow-up**
+On a text question with `max_followups` 2 and acceptance criteria, `POST
+/questionnaire/session/{id}/answers/{question_id}/evaluate` with the answer "Fine", then poll `GET /jobs/{job_id}`.
+**Expected:** the job completes with `status` `not_sense`, an `improvement_message` and `max_followups` 1; a
+five-word answer completes with `success` (dev runs on the fake model). `GET /transcription/token` answers a new
+`token` each time, with `provider` `browser`.
+
+**SES-05 · A quiz funnel recommends products from the catalog**
+Submit a session of a quiz funnel questionnaire whose account has products. **Expected:** the submit answers 202
+`{job}` of type `process_completed_session`; polling it ends `COMPLETED` with up to three products of that
+catalog, and `GET /questionnaire/session/{id}/results` lists them in `products`. With no products in the catalog the
+job completes with `products: []`.
+
 ## 2. Authentication — AUTH (item accounts)
 
 **AUTH-00 · Sign in and out as the owner (item 0)**
