@@ -1,0 +1,126 @@
+/* pages/assignation-detail (item assignations): the detail's own layout; everything else is the house kit. */
+.asg-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.asg-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  width: fit-content;
+}
+.asg-detail__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: calc(-1 * var(--space-2));
+}
+.asg-detail__badges .assignation-due {
+  flex-direction: row;
+  align-items: center;
+}
+.asg-detail__hint {
+  font-size: 13px;
+}
+.asg-detail__none {
+  padding: var(--space-4) var(--space-5);
+  margin: 0;
+}
+.asg-detail__more {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3);
+}
+.asg-detail__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.asg-detail__attempts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.asg-detail__history > td {
+  background: var(--color-bg);
+}
+.asg-detail__history ul,
+.asg-detail__members,
+.asg-detail__rejected {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.asg-detail__history li,
+.asg-detail__members li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+}
+.asg-detail__members {
+  padding: var(--space-3) var(--space-5) var(--space-4);
+}
+.asg-detail__rejected li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.asg-detail__notice {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--color-primary-soft);
+  font-size: 14px;
+}
+.asg-detail__attempts-select {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+.asg-detail__attempts-select .field {
+  min-width: 220px;
+}
+.asg-detail__answer {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 360px;
+}
+.asg-detail__nowrap {
+  white-space: nowrap;
+}
+.asg-detail__review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.asg-detail__review .field {
+  width: 100%;
+}
+.asg-detail__question {
+  margin: 0;
+  font-size: 16px;
+}
+.asg-detail__answer-box {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--color-bg);
+  white-space: pre-wrap;
+}
+.asg-detail__comment {
+  margin: 0;
+  font-style: italic;
+}
