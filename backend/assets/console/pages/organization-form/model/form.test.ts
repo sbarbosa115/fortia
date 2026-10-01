@@ -121,11 +121,10 @@ describe('organization form model (PRD §10.10)', () => {
     const form = addMember(formFromOrganization(STORED));
     const key = form.members[1]!.key;
     const payload = toOrganizationPayload(
-      changeMember(
-        {...form, name: '  Acme   Retail ', description: ' '},
-        key,
-        {name: 'Bruno', phone: '+57 300'},
-      ),
+      changeMember({...form, name: '  Acme   Retail ', description: ' '}, key, {
+        name: 'Bruno',
+        phone: '+57 300',
+      }),
     );
 
     expect(payload).toEqual({

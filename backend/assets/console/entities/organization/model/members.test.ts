@@ -25,7 +25,10 @@ describe('organization members (PRD §6.13, §10.10)', () => {
   it('requires a name and an email or a phone', () => {
     const errors = memberErrors([{...emptyMember(), name: ' '}]);
 
-    expect(errors[0]).toEqual({name: 'nameRequired', contact: 'contactRequired'});
+    expect(errors[0]).toEqual({
+      name: 'nameRequired',
+      contact: 'contactRequired',
+    });
   });
 
   it('refuses an invalid email', () => {

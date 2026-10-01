@@ -5,12 +5,12 @@ import {TEMPLATE_CSV} from './template';
 
 describe('CSV reading', () => {
   it('splits rows and handles quoted fields with delimiters, quotes and line breaks', () => {
-    expect(parseCsv('a,"b, c","say ""hi""","two\nlines"\n1,2,3,4', ',')).toEqual(
-      [
-        {line: 1, cells: ['a', 'b, c', 'say "hi"', 'two\nlines']},
-        {line: 3, cells: ['1', '2', '3', '4']},
-      ],
-    );
+    expect(
+      parseCsv('a,"b, c","say ""hi""","two\nlines"\n1,2,3,4', ','),
+    ).toEqual([
+      {line: 1, cells: ['a', 'b, c', 'say "hi"', 'two\nlines']},
+      {line: 3, cells: ['1', '2', '3', '4']},
+    ]);
   });
 
   it('accepts Windows line endings', () => {
@@ -71,9 +71,7 @@ describe('member import (PRD §10.10)', () => {
   });
 
   it('refuses a file with neither an email nor a phone column', () => {
-    expect(parseMembersCsv('name,role\nAna,Lead').error).toBe(
-      'missingContact',
-    );
+    expect(parseMembersCsv('name,role\nAna,Lead').error).toBe('missingContact');
   });
 
   it('skips bad rows and says which line and why', () => {

@@ -55,12 +55,18 @@ function renderAt(path: string) {
         <ToastProvider>
           <MemoryRouter initialEntries={[path]}>
             <Routes>
-              <Route path="/organizations/new" element={<OrganizationFormPage />} />
+              <Route
+                path="/organizations/new"
+                element={<OrganizationFormPage />}
+              />
               <Route
                 path="/organizations/:id/edit"
                 element={<OrganizationFormPage />}
               />
-              <Route path="/organizations/:id/view" element={<p>view page</p>} />
+              <Route
+                path="/organizations/:id/view"
+                element={<p>view page</p>}
+              />
             </Routes>
           </MemoryRouter>
         </ToastProvider>
@@ -105,7 +111,13 @@ describe('OrganizationFormPage (PRD §10.10)', () => {
       description: null,
       active: true,
       organization_users: [
-        {name: 'jose perez', email: null, phone: '+573001', role: null, area: null},
+        {
+          name: 'jose perez',
+          email: null,
+          phone: '+573001',
+          role: null,
+          area: null,
+        },
       ],
     });
   });
@@ -119,7 +131,9 @@ describe('OrganizationFormPage (PRD §10.10)', () => {
     await user.type(screen.getByLabelText('Email of member 1'), 'ana@x.test');
     await user.type(screen.getByLabelText('Email of member 2'), 'ANA@x.test');
 
-    expect(await screen.findByText('This member is already in the list')).toBeInTheDocument();
+    expect(
+      await screen.findByText('This member is already in the list'),
+    ).toBeInTheDocument();
 
     await user.clear(screen.getByLabelText('Email of member 2'));
     await user.click(screen.getByRole('button', {name: 'Create organization'}));
@@ -151,7 +165,10 @@ describe('OrganizationFormPage (PRD §10.10)', () => {
     expect(await screen.findByDisplayValue('Acme Retail')).toBeInTheDocument();
     await user.click(screen.getByRole('button', {name: 'Add member'}));
     await user.type(screen.getByLabelText('Name of member 2'), 'Bruno');
-    await user.type(screen.getByLabelText('Email of member 2'), 'bruno@acme.test');
+    await user.type(
+      screen.getByLabelText('Email of member 2'),
+      'bruno@acme.test',
+    );
     await user.click(screen.getByRole('button', {name: 'Save changes'}));
 
     await waitFor(() => expect(mocks.put).toHaveBeenCalled());
@@ -166,7 +183,13 @@ describe('OrganizationFormPage (PRD §10.10)', () => {
         role: null,
         area: null,
       },
-      {name: 'bruno', email: 'bruno@acme.test', phone: null, role: null, area: null},
+      {
+        name: 'bruno',
+        email: 'bruno@acme.test',
+        phone: null,
+        role: null,
+        area: null,
+      },
     ]);
   });
 
@@ -174,7 +197,9 @@ describe('OrganizationFormPage (PRD §10.10)', () => {
     const user = userEvent.setup();
     renderAt('/organizations/org-1/edit');
 
-    await user.click(await screen.findByRole('button', {name: 'Remove member 1'}));
+    await user.click(
+      await screen.findByRole('button', {name: 'Remove member 1'}),
+    );
 
     expect(screen.queryByLabelText('Name of member 1')).not.toBeInTheDocument();
     expect(screen.getByText('No members yet')).toBeInTheDocument();
@@ -185,7 +210,10 @@ describe('OrganizationFormPage (PRD §10.10)', () => {
     mocks.put.mockRejectedValue(
       new ApiError(400, 'VALIDATION_ERROR', 'x', {
         violations: [
-          {field: 'organization_users[0].email', message: 'This value is not a valid email address.'},
+          {
+            field: 'organization_users[0].email',
+            message: 'This value is not a valid email address.',
+          },
         ],
       }),
     );

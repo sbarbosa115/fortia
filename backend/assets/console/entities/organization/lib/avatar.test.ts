@@ -16,8 +16,6 @@ describe('organization card (PRD §10.10)', () => {
 
   it('truncates names longer than 16 characters with an ellipsis', () => {
     expect(truncate('Acme Retail', 16)).toBe('Acme Retail');
-    expect(truncate('Acme Retail International', 16)).toBe(
-      'Acme Retail Inte…',
-    );
+    expect(truncate('Acme Retail International', 16)).toBe('Acme Retail Inte…');
   });
 });

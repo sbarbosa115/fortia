@@ -77,7 +77,9 @@ export function OrganizationsPage() {
         ? tShared(`planLimit.${feature.verdict.reason}`)
         : t('notInPlan')
       : null;
-  const createReason = viewer.canWrite ? planReason : tShared('readOnly.create');
+  const createReason = viewer.canWrite
+    ? planReason
+    : tShared('readOnly.create');
   const changeReason = viewer.canWrite ? null : tShared('readOnly.change');
   const newButton = (
     <Button
@@ -113,7 +115,11 @@ export function OrganizationsPage() {
   } else if (organizations.length === 0) {
     content = (
       <Card>
-        <EmptyState title={t('empty')} body={t('emptyBody')} action={newButton} />
+        <EmptyState
+          title={t('empty')}
+          body={t('emptyBody')}
+          action={newButton}
+        />
       </Card>
     );
   } else {

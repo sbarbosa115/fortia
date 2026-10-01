@@ -34,7 +34,9 @@ export function emptyForm(): OrganizationForm {
 }
 
 /** A stored organization as the form (its members keep their ids, so the update reconciles them by id). */
-export function formFromOrganization(organization: Organization): OrganizationForm {
+export function formFromOrganization(
+  organization: Organization,
+): OrganizationForm {
   return {
     name: organization.name,
     domain: organization.domain_email ?? '',
@@ -65,7 +67,9 @@ export function domainWarningCount(form: OrganizationForm): number {
  * The body of POST and PUT /organizations (PRD §8.7): the name with single spaces, the domain lowercase (empty =
  * none), the description (empty = none), and the full member list normalized, stored members with their id.
  */
-export function toOrganizationPayload(form: OrganizationForm): OrganizationPayload {
+export function toOrganizationPayload(
+  form: OrganizationForm,
+): OrganizationPayload {
   const domain = form.domain.trim().toLowerCase();
   const description = form.description.trim();
   return {
@@ -97,7 +101,10 @@ export function changeMember(
 }
 
 /** Normalizes the member row with that key (on leaving one of its fields, PRD §10.10 "Normalization"). */
-export function normalizeMemberRow(form: OrganizationForm, key: string): OrganizationForm {
+export function normalizeMemberRow(
+  form: OrganizationForm,
+  key: string,
+): OrganizationForm {
   return {
     ...form,
     members: form.members.map((member) =>
@@ -106,12 +113,21 @@ export function normalizeMemberRow(form: OrganizationForm, key: string): Organiz
   };
 }
 
-export function removeMember(form: OrganizationForm, key: string): OrganizationForm {
-  return {...form, members: form.members.filter((member) => member.key !== key)};
+export function removeMember(
+  form: OrganizationForm,
+  key: string,
+): OrganizationForm {
+  return {
+    ...form,
+    members: form.members.filter((member) => member.key !== key),
+  };
 }
 
 /** Appends the members of a CSV import. */
-export function appendMembers(form: OrganizationForm, members: MemberDraft[]): OrganizationForm {
+export function appendMembers(
+  form: OrganizationForm,
+  members: MemberDraft[],
+): OrganizationForm {
   return {...form, members: [...form.members, ...members]};
 }
 
@@ -121,7 +137,10 @@ const MEMBER_FIELD = /^organization_users\[(\d+)\]/;
  * The member rows a 400 VALIDATION_ERROR points at (PRD §10.10 "errors point to the row"): each violation whose
  * field is `organization_users[i]…` becomes {position: i + 1, name, detail}. Other violations are not member rows.
  */
-export function memberApiErrors(error: unknown, members: MemberDraft[]): MemberApiError[] {
+export function memberApiErrors(
+  error: unknown,
+  members: MemberDraft[],
+): MemberApiError[] {
   if (!(error instanceof ApiError) || error.code !== 'VALIDATION_ERROR') {
     return [];
   }
@@ -130,7 +149,10 @@ export function memberApiErrors(error: unknown, members: MemberDraft[]): MemberA
     return [];
   }
   const rows: MemberApiError[] = [];
-  for (const violation of violations as Array<{field?: unknown; message?: unknown}>) {
+  for (const violation of violations as Array<{
+    field?: unknown;
+    message?: unknown;
+  }>) {
     const match = MEMBER_FIELD.exec(String(violation.field ?? ''));
     if (!match) {
       continue;

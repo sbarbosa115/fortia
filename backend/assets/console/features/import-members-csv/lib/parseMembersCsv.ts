@@ -8,7 +8,8 @@ import {fold, isEmail} from '@shared/lib';
 
 export type CsvRow = {line: number; cells: string[]};
 
-export type SkipReason = 'emptyName' | 'invalidEmail' | 'noContact' | 'duplicate';
+export type SkipReason =
+  'emptyName' | 'invalidEmail' | 'noContact' | 'duplicate';
 
 export type SkippedRow = {line: number; name: string; reason: SkipReason};
 
@@ -115,9 +116,7 @@ export function parseMembersCsv(
   if (!header) {
     return {error: 'empty', members: [], skipped: []};
   }
-  const columns = header.cells.map(
-    (cell) => ALIASES[fold(cell)] ?? null,
-  );
+  const columns = header.cells.map((cell) => ALIASES[fold(cell)] ?? null);
   if (!columns.includes('name')) {
     return {error: 'missingName', members: [], skipped: []};
   }

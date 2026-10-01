@@ -30,7 +30,8 @@ export function OrganizationViewPage() {
   const {id} = useParams();
   const navigate = useNavigate();
   const viewer = useViewer();
-  const {organization, isPending, isError, error, refetch} = useOrganization(id);
+  const {organization, isPending, isError, error, refetch} =
+    useOrganization(id);
   useDocumentTitle(`Mappi - ${organization?.name ?? t('title')}`);
 
   if (isPending) {
@@ -87,7 +88,9 @@ export function OrganizationViewPage() {
             variant="primary"
             icon={<Icon name="edit" size={16} />}
             disabledReason={viewer.canWrite ? null : tShared('readOnly.change')}
-            onClick={() => navigate(`/organizations/${organization.organization_id}/edit`)}
+            onClick={() =>
+              navigate(`/organizations/${organization.organization_id}/edit`)
+            }
           >
             {tShared('actions.edit')}
           </Button>
@@ -114,11 +117,15 @@ export function OrganizationViewPage() {
               </div>
               <div>
                 <dt>{t('created')}</dt>
-                <dd>{formatDateTime(organization.created_at, i18n.language)}</dd>
+                <dd>
+                  {formatDateTime(organization.created_at, i18n.language)}
+                </dd>
               </div>
               <div>
                 <dt>{t('updated')}</dt>
-                <dd>{formatDateTime(organization.updated_at, i18n.language)}</dd>
+                <dd>
+                  {formatDateTime(organization.updated_at, i18n.language)}
+                </dd>
               </div>
               <div className="org-view__description">
                 <dt>{t('description')}</dt>
@@ -129,10 +136,15 @@ export function OrganizationViewPage() {
         </Card>
         <Card>
           <CardHeader
-            title={t('members.title', {count: organization.organization_users.length})}
+            title={t('members.title', {
+              count: organization.organization_users.length,
+            })}
           />
           {organization.organization_users.length === 0 ? (
-            <EmptyState title={t('members.empty')} body={t('members.emptyBody')} />
+            <EmptyState
+              title={t('members.empty')}
+              body={t('members.emptyBody')}
+            />
           ) : (
             <Table
               columns={columns}

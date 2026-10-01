@@ -50,7 +50,10 @@ function renderAt(id: string) {
         <ToastProvider>
           <MemoryRouter initialEntries={[`/organizations/${id}/view`]}>
             <Routes>
-              <Route path="/organizations/:id/view" element={<OrganizationViewPage />} />
+              <Route
+                path="/organizations/:id/view"
+                element={<OrganizationViewPage />}
+              />
             </Routes>
           </MemoryRouter>
         </ToastProvider>
@@ -69,7 +72,9 @@ describe('OrganizationViewPage (PRD §10.10)', () => {
   it('shows the details and the members table', async () => {
     renderAt('org-1');
 
-    expect(await screen.findByRole('heading', {name: /Acme Retail/})).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', {name: /Acme Retail/}),
+    ).toBeInTheDocument();
     expect(screen.getByText('Stores and e-commerce')).toBeInTheDocument();
     expect(screen.getByText('acme.test')).toBeInTheDocument();
     expect(screen.getByText('Inactive')).toBeInTheDocument();
@@ -94,6 +99,8 @@ describe('OrganizationViewPage (PRD §10.10)', () => {
   it('says so when the organization is not in the listing', async () => {
     renderAt('nope');
 
-    expect(await screen.findByText('This organization does not exist.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('This organization does not exist.'),
+    ).toBeInTheDocument();
   });
 });

@@ -17,9 +17,8 @@ export type OrganizationPayload = {
 export const ORGANIZATIONS_QUERY_KEY = ['organizations'] as const;
 
 export async function fetchOrganizations(): Promise<Organization[]> {
-  const body = await api.get<Schema<'OrganizationListOutput'>>(
-    '/organizations',
-  );
+  const body =
+    await api.get<Schema<'OrganizationListOutput'>>('/organizations');
   return body.organizations;
 }
 

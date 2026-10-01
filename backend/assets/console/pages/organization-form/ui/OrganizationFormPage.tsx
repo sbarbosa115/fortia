@@ -92,12 +92,18 @@ export function OrganizationFormPage() {
               <Field
                 label={t('name')}
                 required
-                error={state.showErrors && errors.name ? t(`errors.${errors.name}`) : null}
+                error={
+                  state.showErrors && errors.name
+                    ? t(`errors.${errors.name}`)
+                    : null
+                }
               >
                 <TextInput
                   value={form.name}
                   maxLength={120}
-                  onChange={(event) => state.setField({name: event.target.value})}
+                  onChange={(event) =>
+                    state.setField({name: event.target.value})
+                  }
                 />
               </Field>
               <div className="grid-2">
@@ -107,7 +113,9 @@ export function OrganizationFormPage() {
                     placeholder={t('domainPlaceholder')}
                     spellCheck={false}
                     autoCapitalize="none"
-                    onChange={(event) => state.setField({domain: event.target.value})}
+                    onChange={(event) =>
+                      state.setField({domain: event.target.value})
+                    }
                   />
                 </Field>
                 <div className="org-form__active">
@@ -122,7 +130,9 @@ export function OrganizationFormPage() {
                 <TextArea
                   value={form.description}
                   maxLength={1000}
-                  onChange={(event) => state.setField({description: event.target.value})}
+                  onChange={(event) =>
+                    state.setField({description: event.target.value})
+                  }
                 />
               </Field>
             </div>
@@ -144,7 +154,10 @@ export function OrganizationFormPage() {
           />
           <CardBody>
             <div className="stack">
-              <ImportMembersCsv existing={form.members} onImport={state.importMembers} />
+              <ImportMembersCsv
+                existing={form.members}
+                onImport={state.importMembers}
+              />
               {state.domainWarning > 0 ? (
                 <p className="org-form__warning" role="status">
                   <Icon name="alert" size={16} />

@@ -43,7 +43,9 @@ export function MemberRows({
   const {t} = useTranslation('pages.organization-form');
   const {t: tEntity} = useTranslation('entities.organization');
   if (members.length === 0) {
-    return <EmptyState title={t('members.empty')} body={t('members.emptyBody')} />;
+    return (
+      <EmptyState title={t('members.empty')} body={t('members.emptyBody')} />
+    );
   }
   return (
     <div className="org-members">
@@ -51,7 +53,9 @@ export function MemberRows({
         {COLUMNS.map((column) => (
           <span key={column}>
             {t(`members.${column}`)}
-            {column === 'name' ? <span className="field__required">*</span> : null}
+            {column === 'name' ? (
+              <span className="field__required">*</span>
+            ) : null}
           </span>
         ))}
         <span />
@@ -80,7 +84,8 @@ export function MemberRows({
                       position,
                     })}
                     aria-invalid={
-                      visible.length > 0 && invalidColumn(member, rowErrors, column, showErrors)
+                      visible.length > 0 &&
+                      invalidColumn(member, rowErrors, column, showErrors)
                         ? true
                         : undefined
                     }
@@ -88,7 +93,9 @@ export function MemberRows({
                     required={column === 'name'}
                     autoComplete="off"
                     placeholder={t(`members.${column}Placeholder`)}
-                    onChange={(event) => onChange(member.key, {[column]: event.target.value})}
+                    onChange={(event) =>
+                      onChange(member.key, {[column]: event.target.value})
+                    }
                     onBlur={() => onBlur(member.key)}
                   />
                 ))}
@@ -123,7 +130,10 @@ function invalidColumn(
   if (!errors) {
     return false;
   }
-  if (errors.duplicate && column === (member.email.trim() ? 'email' : 'phone')) {
+  if (
+    errors.duplicate &&
+    column === (member.email.trim() ? 'email' : 'phone')
+  ) {
     return true;
   }
   if (!showErrors) {

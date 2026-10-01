@@ -8,7 +8,7 @@ import {
 import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {useToast} from '@shared/ui';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
-import {useEffect, useMemo, useState} from 'react';
+import {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router';
 import {
@@ -46,12 +46,15 @@ export function useOrganizationForm(id: string | undefined) {
   const [attempted, setAttempted] = useState(false);
   const [apiRows, setApiRows] = useState<MemberApiError[]>([]);
 
-  useEffect(() => {
-    if (editing && stored.organization && loadedId !== stored.organization.organization_id) {
-      setForm(formFromOrganization(stored.organization));
-      setLoadedId(stored.organization.organization_id);
-    }
-  }, [editing, stored.organization, loadedId]);
+  // Load the stored organization into the form once it arrives (state adjusted while rendering, not in an effect).
+  if (
+    editing &&
+    stored.organization &&
+    loadedId !== stored.organization.organization_id
+  ) {
+    setForm(formFromOrganization(stored.organization));
+    setLoadedId(stored.organization.organization_id);
+  }
 
   const errors = useMemo(() => validateForm(form), [form]);
 
@@ -90,7 +93,8 @@ export function useOrganizationForm(id: string | undefined) {
     editing,
     loading: editing && stored.isPending,
     loadError: editing && stored.isError ? stored.error : null,
-    notFound: editing && !stored.isPending && !stored.isError && !stored.organization,
+    notFound:
+      editing && !stored.isPending && !stored.isError && !stored.organization,
     retry: () => void stored.refetch(),
     form,
     errors,
@@ -103,9 +107,12 @@ export function useOrganizationForm(id: string | undefined) {
     addMember: () => edit(addMember),
     changeMember: (key: string, change: MemberChange) =>
       edit((current) => changeMember(current, key, change)),
-    normalizeMember: (key: string) => setForm((current) => normalizeMemberRow(current, key)),
-    removeMember: (key: string) => edit((current) => removeMember(current, key)),
-    importMembers: (members: MemberDraft[]) => edit((current) => appendMembers(current, members)),
+    normalizeMember: (key: string) =>
+      setForm((current) => normalizeMemberRow(current, key)),
+    removeMember: (key: string) =>
+      edit((current) => removeMember(current, key)),
+    importMembers: (members: MemberDraft[]) =>
+      edit((current) => appendMembers(current, members)),
     submit: () => {
       setAttempted(true);
       if (!isValid(errors)) {
@@ -114,7 +121,8 @@ export function useOrganizationForm(id: string | undefined) {
       }
       save.mutate();
     },
-    cancel: () => navigate(editing ? `/organizations/${id}/view` : '/organizations'),
+    cancel: () =>
+      navigate(editing ? `/organizations/${id}/view` : '/organizations'),
   };
 }
 
