@@ -1,3 +1,57 @@
 {
-  "title": "Respuestas del cuestionario"
+  "title": "Respuestas del cuestionario:",
+  "documentTitle": "Mappi - Respuestas: {{title}}",
+  "copyLinkHint": "Copiar el enlace público",
+  "copyLinkOf": "{{title}} — copiar el enlace público",
+  "linkCopied": "Enlace público copiado.",
+  "copyFailed": "No pudimos copiar el enlace.",
+  "dashboard": "Tablero",
+  "caption": "Respuestas del cuestionario",
+  "states": {
+    "filling": "Respondiendo",
+    "filled_out": "Enviada",
+    "processing": "Procesando",
+    "completed": "Completada"
+  },
+  "stateOf": "{{state}}: paso {{step}} de {{total}}",
+  "filters": {
+    "status": "Estado",
+    "statuses": {
+      "completed": "Completadas",
+      "filling": "Respondiendo",
+      "filled_out": "Enviadas",
+      "processing": "Procesando",
+      "all": "Todos los estados"
+    },
+    "timeZone": "Zona horaria",
+    "local": "Hora local",
+    "utc": "UTC",
+    "pageSize": "Por página"
+  },
+  "columns": {
+    "startedAt": "Iniciada",
+    "name": "Nombre",
+    "email": "Correo",
+    "phone": "Teléfono",
+    "progress": "Progreso",
+    "state": "Estado",
+    "actions": "Acciones"
+  },
+  "anonymous": "Anónimo",
+  "notAvailable": "N/D",
+  "progress": "{{answered}}/{{total}}",
+  "stage": "Etapa {{stage}} de {{total}}",
+  "view": "Ver",
+  "viewOf": "Ver las respuestas de {{name}}",
+  "chainHint": "El filtro de estado se aplica a la primera etapa; la cadena puede seguir en curso.",
+  "total_one": "{{count}} respuesta",
+  "total_other": "{{count}} respuestas",
+  "empty": {
+    "title": "Aún no hay respuestas",
+    "body": "Comparte el enlace del cuestionario: cada respuesta aparecerá aquí."
+  },
+  "generated": {
+    "title": "Cuestionarios generados",
+    "body": "Etapas generadas para quienes respondieron esta cadena."
+  }
 }

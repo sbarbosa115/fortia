@@ -1,0 +1,18 @@
+{
+  "label": "Export to Google Sheets",
+  "notConfigured": "Google Sheets export is not configured on this server.",
+  "sheetTitle": "Answers - {{title}}",
+  "done": "The answers were exported to Google Sheets.",
+  "failed": "We couldn't export to Google Sheets. Please try again.",
+  "columns": {
+    "startedAt": "Started At",
+    "user": "User",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "values": {
+    "skipped": "Skipped",
+    "filesUploaded_one": "File uploaded",
+    "filesUploaded_other": "{{count}} files uploaded"
+  }
+}

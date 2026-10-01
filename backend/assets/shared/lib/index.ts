@@ -21,3 +21,12 @@ export type {TimeZoneMode, UrgencyLevel} from './dates';
 export {formatMoney, percent, joinClasses} from './format';
 export {decodeJwt} from './jwt';
 export {useDebouncedValue, useDocumentTitle} from './hooks';
+export {
+  buildSheetRows,
+  sheetCell,
+  exportKey,
+  exportToSheets,
+  SHEETS_SCOPE,
+  EXPORT_KEY_PROPERTY,
+} from './sheets';
+export type {SheetQuestion, SheetSession, SheetLabels} from './sheets';

@@ -1,3 +1,102 @@
 {
-  "title": "Dashboard"
+  "title": "Dashboard",
+  "documentTitle": "Mappi - Dashboard {{title}}",
+  "subtitle": "How people answer this questionnaire.",
+  "answers": "Answers",
+  "types": {
+    "satisfaction": "Satisfaction",
+    "knowledge": "Knowledge",
+    "profiling": "Profiling",
+    "recommendations": "Recommendations",
+    "eligibility": "Eligibility",
+    "opinion": "Opinion"
+  },
+  "loading": {
+    "gathering": "Gathering the information…",
+    "analyzing": "Analyzing the data…",
+    "generating": "Generating the report…",
+    "finishing": "Finishing up…"
+  },
+  "empty": {
+    "title": "No answers yet",
+    "body": "Charts appear here as soon as people start answering this questionnaire."
+  },
+  "summary": {
+    "completion": "Completion rate",
+    "completedOf": "{{completed}} of {{total}} sessions completed",
+    "sessions": "Sessions",
+    "avgTime": "Average time",
+    "biggestDrop": "Biggest drop-off",
+    "atEnd": "At the end",
+    "dropPct": "{{value}}% left at this step"
+  },
+  "percent": "{{value}}%",
+  "duration": "{{minutes}} min {{seconds}} s",
+  "none": "—",
+  "questionShort": "Q{{n}}",
+  "funnel": {
+    "title": "Funnel",
+    "started": "Started",
+    "completed": "Completed",
+    "group": "Q{{from}}–Q{{to}} · no drop-off",
+    "showAll": "Show all {{count}} questions",
+    "showLess": "Group the steps without drop-off",
+    "dropAt": "Biggest drop at Q{{n}}",
+    "dropAtEnd": "Biggest drop at the end",
+    "noDrop": "Nobody dropped off.",
+    "value": "{{count}} · {{pct}}%"
+  },
+  "chartTypes": {
+    "kpi": "Key figure",
+    "gauge": "Average score",
+    "line": "Responses over time",
+    "donut": "Answer share",
+    "bar": "Answers",
+    "horizontal_bar": "Answers",
+    "stacked_bar": "Answers compared",
+    "treemap": "Answer share",
+    "histogram": "Score distribution",
+    "boxplot": "Score spread",
+    "ranking_avg": "Average by question",
+    "heatmap": "Answers compared",
+    "tier_distribution": "Tier distribution"
+  },
+  "other": "Other",
+  "countPct": "{{count}} · {{pct}}%",
+  "average": "{{value}}",
+  "outOf": "out of {{max}}",
+  "chart": {
+    "noData": "No answers to chart yet.",
+    "responses": "Responses",
+    "answers_one": "{{count}} answer",
+    "answers_other": "{{count}} answers",
+    "topAnswer": "chose “{{label}}”",
+    "gaugeLabel": "Average {{value}} on a scale from {{min}} to {{max}}",
+    "boxplotLabel": "Minimum {{min}}, first quartile {{q1}}, median {{median}}, third quartile {{q3}}, maximum {{max}}",
+    "average": "Average",
+    "question": "Question",
+    "started": "Started",
+    "completed": "Completed"
+  },
+  "stats": {
+    "min": "Min",
+    "q1": "Q1",
+    "median": "Median",
+    "q3": "Q3",
+    "max": "Max"
+  },
+  "nps": {
+    "score": "NPS {{value}}",
+    "detractors": "Detractors {{count}} ({{pct}}%)",
+    "passives": "Passives {{count}} ({{pct}}%)",
+    "promoters": "Promoters {{count}} ({{pct}}%)",
+    "low": "Low {{count}} ({{pct}}%)",
+    "medium": "Medium {{count}} ({{pct}}%)",
+    "high": "High {{count}} ({{pct}}%)"
+  },
+  "locked": {
+    "title": "AI dashboards are not in your plan",
+    "body": "Upgrade to get a dashboard designed for each questionnaire.",
+    "cta": "Get your dashboards"
+  }
 }

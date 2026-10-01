@@ -1,3 +1,57 @@
 {
-  "title": "Questionnaire Answers"
+  "title": "Questionnaire Answers:",
+  "documentTitle": "Mappi - Answers: {{title}}",
+  "copyLinkHint": "Copy the public link",
+  "copyLinkOf": "{{title}} — copy the public link",
+  "linkCopied": "Public link copied.",
+  "copyFailed": "We couldn't copy the link.",
+  "dashboard": "Dashboard",
+  "caption": "Answers of the questionnaire",
+  "states": {
+    "filling": "Filling",
+    "filled_out": "Filled out",
+    "processing": "Processing",
+    "completed": "Completed"
+  },
+  "stateOf": "{{state}}: step {{step}} of {{total}}",
+  "filters": {
+    "status": "State",
+    "statuses": {
+      "completed": "Completed",
+      "filling": "Filling",
+      "filled_out": "Filled out",
+      "processing": "Processing",
+      "all": "All statuses"
+    },
+    "timeZone": "Time zone",
+    "local": "Local time",
+    "utc": "UTC",
+    "pageSize": "Per page"
+  },
+  "columns": {
+    "startedAt": "Started At",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "progress": "Progress",
+    "state": "State",
+    "actions": "Actions"
+  },
+  "anonymous": "Anonymous",
+  "notAvailable": "N/A",
+  "progress": "{{answered}}/{{total}}",
+  "stage": "Stage {{stage}} of {{total}}",
+  "view": "View",
+  "viewOf": "View the answers of {{name}}",
+  "chainHint": "The status filter applies to the first stage; the chain may still be in progress.",
+  "total_one": "{{count}} response",
+  "total_other": "{{count}} responses",
+  "empty": {
+    "title": "No answers yet",
+    "body": "Share the questionnaire's link: every response will appear here."
+  },
+  "generated": {
+    "title": "Generated questionnaires",
+    "body": "Stages generated for respondents of this chain."
+  }
 }

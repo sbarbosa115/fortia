@@ -1,3 +1,45 @@
 {
-  "title": "Detalle de la respuesta"
+  "title": "Detalle de la respuesta - {{name}}",
+  "documentTitle": "Mappi - Respuesta de {{name}}",
+  "anonymous": "Anónimo",
+  "notAvailable": "N/D",
+  "backToAnswers": "Volver a las respuestas",
+  "backToAssignation": "Volver a la asignación",
+  "summary": {
+    "email": "Correo",
+    "name": "Nombre",
+    "phone": "Teléfono",
+    "totalTime": "Tiempo total",
+    "startedAt": "Iniciada"
+  },
+  "uncompleted": "Sin completar",
+  "seconds_one": "{{count}} segundo",
+  "seconds_other": "{{count}} segundos",
+  "stageHeading": "Etapa {{stage}}: {{title}}",
+  "columns": {
+    "question": "Pregunta",
+    "answer": "Respuesta",
+    "timeSpent": "Tiempo"
+  },
+  "values": {
+    "notAnswered": "Sin responder",
+    "skipped": "Omitida",
+    "viewed": "Vista"
+  },
+  "files": {
+    "view": "Ver",
+    "download": "Descargar",
+    "noPreview": "Sin vista previa"
+  },
+  "result": {
+    "title": "Resultado",
+    "none": "No se generó ningún resultado para esta sesión",
+    "products": "Productos recomendados",
+    "diagnostic": "Diagnóstico",
+    "score": "Puntaje {{value}} / {{max}}",
+    "category": "{{name}}: {{score}} / {{max}}",
+    "recommendations": "Recomendaciones",
+    "actionPlan": "Plan de acción",
+    "profile": "Perfil de IA"
+  }
 }

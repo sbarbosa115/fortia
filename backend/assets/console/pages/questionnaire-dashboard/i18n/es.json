@@ -1,3 +1,102 @@
 {
-  "title": "Tablero"
+  "title": "Tablero",
+  "documentTitle": "Mappi - Tablero {{title}}",
+  "subtitle": "Cómo responde la gente este cuestionario.",
+  "answers": "Respuestas",
+  "types": {
+    "satisfaction": "Satisfacción",
+    "knowledge": "Conocimiento",
+    "profiling": "Perfilamiento",
+    "recommendations": "Recomendaciones",
+    "eligibility": "Elegibilidad",
+    "opinion": "Opinión"
+  },
+  "loading": {
+    "gathering": "Reuniendo la información…",
+    "analyzing": "Analizando los datos…",
+    "generating": "Generando el informe…",
+    "finishing": "Terminando…"
+  },
+  "empty": {
+    "title": "Aún no hay respuestas",
+    "body": "Los gráficos aparecen aquí en cuanto la gente empiece a responder este cuestionario."
+  },
+  "summary": {
+    "completion": "Tasa de finalización",
+    "completedOf": "{{completed}} de {{total}} sesiones completadas",
+    "sessions": "Sesiones",
+    "avgTime": "Tiempo promedio",
+    "biggestDrop": "Mayor abandono",
+    "atEnd": "Al final",
+    "dropPct": "{{value}}% se fue en este paso"
+  },
+  "percent": "{{value}}%",
+  "duration": "{{minutes}} min {{seconds}} s",
+  "none": "—",
+  "questionShort": "P{{n}}",
+  "funnel": {
+    "title": "Embudo",
+    "started": "Iniciaron",
+    "completed": "Completaron",
+    "group": "P{{from}}–P{{to}} · sin abandono",
+    "showAll": "Mostrar las {{count}} preguntas",
+    "showLess": "Agrupar los pasos sin abandono",
+    "dropAt": "Mayor abandono en P{{n}}",
+    "dropAtEnd": "Mayor abandono al final",
+    "noDrop": "Nadie abandonó.",
+    "value": "{{count}} · {{pct}}%"
+  },
+  "chartTypes": {
+    "kpi": "Cifra clave",
+    "gauge": "Puntaje promedio",
+    "line": "Respuestas en el tiempo",
+    "donut": "Distribución de respuestas",
+    "bar": "Respuestas",
+    "horizontal_bar": "Respuestas",
+    "stacked_bar": "Respuestas comparadas",
+    "treemap": "Distribución de respuestas",
+    "histogram": "Distribución del puntaje",
+    "boxplot": "Dispersión del puntaje",
+    "ranking_avg": "Promedio por pregunta",
+    "heatmap": "Respuestas comparadas",
+    "tier_distribution": "Distribución por nivel"
+  },
+  "other": "Otras",
+  "countPct": "{{count}} · {{pct}}%",
+  "average": "{{value}}",
+  "outOf": "de {{max}}",
+  "chart": {
+    "noData": "Aún no hay respuestas para graficar.",
+    "responses": "Respuestas",
+    "answers_one": "{{count}} respuesta",
+    "answers_other": "{{count}} respuestas",
+    "topAnswer": "eligió «{{label}}»",
+    "gaugeLabel": "Promedio {{value}} en una escala de {{min}} a {{max}}",
+    "boxplotLabel": "Mínimo {{min}}, primer cuartil {{q1}}, mediana {{median}}, tercer cuartil {{q3}}, máximo {{max}}",
+    "average": "Promedio",
+    "question": "Pregunta",
+    "started": "Iniciadas",
+    "completed": "Completadas"
+  },
+  "stats": {
+    "min": "Mín.",
+    "q1": "Q1",
+    "median": "Mediana",
+    "q3": "Q3",
+    "max": "Máx."
+  },
+  "nps": {
+    "score": "NPS {{value}}",
+    "detractors": "Detractores {{count}} ({{pct}}%)",
+    "passives": "Pasivos {{count}} ({{pct}}%)",
+    "promoters": "Promotores {{count}} ({{pct}}%)",
+    "low": "Bajo {{count}} ({{pct}}%)",
+    "medium": "Medio {{count}} ({{pct}}%)",
+    "high": "Alto {{count}} ({{pct}}%)"
+  },
+  "locked": {
+    "title": "Los tableros con IA no están en tu plan",
+    "body": "Mejora tu plan para tener un tablero diseñado para cada cuestionario.",
+    "cta": "Obtén tus tableros"
+  }
 }

@@ -1,3 +1,45 @@
 {
-  "title": "Response Details"
+  "title": "Response Details - {{name}}",
+  "documentTitle": "Mappi - Response of {{name}}",
+  "anonymous": "Anonymous",
+  "notAvailable": "N/A",
+  "backToAnswers": "Back to the answers",
+  "backToAssignation": "Back to the assignation",
+  "summary": {
+    "email": "Email",
+    "name": "Name",
+    "phone": "Phone",
+    "totalTime": "Total Time",
+    "startedAt": "Started At"
+  },
+  "uncompleted": "Uncompleted",
+  "seconds_one": "{{count}} second",
+  "seconds_other": "{{count}} seconds",
+  "stageHeading": "Stage {{stage}}: {{title}}",
+  "columns": {
+    "question": "Question",
+    "answer": "Answer",
+    "timeSpent": "Time Spent"
+  },
+  "values": {
+    "notAnswered": "Not answered",
+    "skipped": "Skipped",
+    "viewed": "Viewed"
+  },
+  "files": {
+    "view": "View",
+    "download": "Download",
+    "noPreview": "No preview"
+  },
+  "result": {
+    "title": "Result",
+    "none": "No result was generated for this session",
+    "products": "Recommended products",
+    "diagnostic": "Diagnostic",
+    "score": "Score {{value}} / {{max}}",
+    "category": "{{name}}: {{score}} / {{max}}",
+    "recommendations": "Recommendations",
+    "actionPlan": "Action plan",
+    "profile": "AI profile"
+  }
 }

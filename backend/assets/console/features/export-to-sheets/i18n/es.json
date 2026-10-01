@@ -1,0 +1,18 @@
+{
+  "label": "Exportar a Google Sheets",
+  "notConfigured": "La exportación a Google Sheets no está configurada en este servidor.",
+  "sheetTitle": "Respuestas - {{title}}",
+  "done": "Las respuestas se exportaron a Google Sheets.",
+  "failed": "No pudimos exportar a Google Sheets. Inténtalo de nuevo.",
+  "columns": {
+    "startedAt": "Iniciado",
+    "user": "Usuario",
+    "email": "Correo",
+    "phone": "Teléfono"
+  },
+  "values": {
+    "skipped": "Omitida",
+    "filesUploaded_one": "Archivo subido",
+    "filesUploaded_other": "{{count}} archivos subidos"
+  }
+}
