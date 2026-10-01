@@ -52,6 +52,22 @@ const PATHS = {
   'file': 'M14 3H6v18h12V7zM14 3v4h4',
   'hourglass': 'M6 2h12M6 22h12M7 2v4l5 6-5 6v4M17 2v4l-5 6 5 6v4',
   'menu': 'M3 6h18M3 12h18M3 18h18',
+  'arrow-left': 'M19 12H5M12 19l-7-7 7-7',
+  'arrow-right': 'M5 12h14M12 5l7 7-7 7',
+  'arrow-up': 'M12 19V5M5 12l7-7 7 7',
+  'eye-off':
+    'M10.7 5.1A10 10 0 0112 5c6 0 10 7 10 7a17 17 0 01-2.2 3M6.6 6.6A17 17 0 002 12s4 7 10 7a9.7 9.7 0 005.4-1.6M9.9 9.9a3 3 0 004.2 4.2M2 2l20 20',
+  'messages':
+    'M14 9a2 2 0 01-2 2H6l-4 4V4a2 2 0 012-2h8a2 2 0 012 2zM18 9h2a2 2 0 012 2v11l-4-4h-6a2 2 0 01-2-2v-1',
+  'smartphone':
+    'M7 2h10a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2zM12 18h.01',
+  'monitor':
+    'M4 3h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2zM8 21h8M12 17v4',
+  'rotate-ccw': 'M3 12a9 9 0 109-9 9.8 9.8 0 00-6.7 2.7L3 8M3 3v5h5',
+  'check-circle': 'M22 11.1V12a10 10 0 11-5.9-9.1M22 4L12 14l-3-3',
+  'lightbulb':
+    'M15 14c.2-1 .7-1.7 1.5-2.5A5.5 5.5 0 0018 8 6 6 0 006 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5M9 18h6M10 22h4',
+  'list-checks': 'M3 17l2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8',
 } as const;
 
 export type IconName = keyof typeof PATHS;

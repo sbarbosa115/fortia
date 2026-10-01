@@ -9,5 +9,9 @@ export type {
   ChatDraftQuestion,
   ChatMessage,
   ChatMode,
+  ChatAction,
+  ChatPendingWrite,
+  ChatItem,
+  ChatItemKind,
   ChatTurnRequest,
 } from './api/chat';
