@@ -67,6 +67,7 @@ services:
         arguments:
             $clientConfig:
                 marketingSiteUrl: '%env(MARKETING_SITE_URL)%'
+                homeRedirectUrl: '%env(HOME_REDIRECT_URL)%'
                 googleSignInClientId: '%env(GOOGLE_OAUTH_CLIENT_ID)%'
                 googleSheetsClientId: '%env(GOOGLE_SHEETS_CLIENT_ID)%'
                 shopifyAppInstallUrl: '%env(SHOPIFY_APP_INSTALL_URL)%'

@@ -6,6 +6,8 @@ export type AppConfig = {
   frontendUrl: string;
   consoleUrl: string;
   marketingSiteUrl: string;
+  /** Where "/" goes; empty = the marketing site (production). Dev sends it to the console. */
+  homeRedirectUrl: string;
   googleSignInEnabled: boolean;
   googleSheetsClientId: string;
   shopifyAppInstallUrl: string;
@@ -29,6 +31,7 @@ const DEFAULTS: AppConfig = {
   frontendUrl: '',
   consoleUrl: '/console',
   marketingSiteUrl: 'https://getmappi.com',
+  homeRedirectUrl: '',
   googleSignInEnabled: false,
   googleSheetsClientId: '',
   shopifyAppInstallUrl: '',

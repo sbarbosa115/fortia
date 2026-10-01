@@ -24,10 +24,11 @@ function page<M extends Record<string, unknown>>(
   );
 }
 
-/** "/" goes to the marketing site (PRD §9.2), replacing the history entry. */
+/** "/" goes to the marketing site (PRD §9.2), replacing the history entry; in dev, HOME_REDIRECT_URL (the console). */
 function MarketingRedirect() {
   useEffect(() => {
-    window.location.replace(appConfig().marketingSiteUrl);
+    const config = appConfig();
+    window.location.replace(config.homeRedirectUrl || config.marketingSiteUrl);
   }, []);
   return <LoadingState />;
 }
