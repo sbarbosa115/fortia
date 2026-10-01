@@ -1,7 +1,7 @@
-import {pickedLanguage} from '@respondent/entities/account';
 import {
   browserLanguage,
   createI18n,
+  pickedLanguage,
   resourcesFromFiles,
   syncHtmlLang,
 } from '@shared/i18n';
