@@ -27,6 +27,7 @@
   --radius-button: 999px;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-heading: 'Fraunces', Georgia, serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
 }
 
 .serif-heading {

@@ -47,5 +47,7 @@
     "title": "Something went wrong",
     "reload": "Reload"
   },
-  "loading": "Loading…"
+  "loading": "Loading…",
+  "workspace": "Workspace",
+  "back": "Back"
 }

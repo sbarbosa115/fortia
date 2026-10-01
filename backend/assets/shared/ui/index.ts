@@ -2,7 +2,14 @@ import './kit.css';
 
 export {Button, IconButton} from './Button';
 export type {ButtonProps, IconButtonProps} from './Button';
-export {Card, CardHeader, CardBody, PageHeader} from './Card';
+export {
+  Card,
+  CardHeader,
+  CardBody,
+  PageHeader,
+  PageCrumbsProvider,
+} from './Card';
+export type {CrumbLink} from './Card';
 export {Field, TextInput, TextArea, Select, Checkbox, Toggle} from './Field';
 export type {SelectOption} from './Field';
 export {Modal, ConfirmDialog} from './Modal';

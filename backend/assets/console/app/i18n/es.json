@@ -47,5 +47,7 @@
     "title": "Algo salió mal",
     "reload": "Recargar"
   },
-  "loading": "Cargando…"
+  "loading": "Cargando…",
+  "workspace": "Workspace",
+  "back": "Atrás"
 }
