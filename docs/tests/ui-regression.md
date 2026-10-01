@@ -837,6 +837,67 @@ translation keys.
 
 <!-- BRD-01 – 10: branding. INT-01 – 12: integrations. DOC-01 – 08: docs. -->
 
+### Integrations — INT (item integrations)
+
+**INT-01 · Three tabs**
+As `owner@acme.test` open Integrations. **Expected:** the title, "API keys" selected, then "Webhooks" and "API
+reference"; the arrow keys move between tabs. With no keys: "No API keys yet" with "Create API key".
+
+**INT-02 · Create a key: required name and default expiration**
+Press "Create API key", then "Create key" with nothing typed. **Expected:** "Name is required" under Name, nothing is
+sent. Expiration shows "7 days" by default (options 7 / 30 / 60 / 90 days and Never).
+
+**INT-03 · The key is shown once**
+Name `CRM sync`, expiration "Never", "Create key". **Expected:** "API key created.", a dialog "Your new API key" with a
+`QAIRE-` + 64 hex value, the warning that it can't be seen again, and "Copy" ("Copied to the clipboard."). Press "Done":
+the row "CRM sync" shows Created = today, Expires "Never", Last used "Never"; the key itself is nowhere on the page.
+
+**INT-04 · Use the key from outside**
+Copy the curl of "List questionnaires" from "API reference", put the key in it and run it in a terminal. **Expected:**
+`{"message":"OK","data":{"questionnaires":[…],"pagination":{…}}}` with Acme's questionnaires only (never Globex's).
+Reload Integrations: "Last used" now shows the date and time. Plans: the API usage went up by one.
+
+**INT-05 · Answers of a questionnaire, and another account's**
+Run the "answers" curl with an Acme questionnaire that has responses: `sessions` newest first, each with
+`answers: [{title, value, min?, max?}]`. With a Globex questionnaire id: `404 QUESTIONNAIRE_NOT_FOUND`.
+
+**INT-06 · Revoke**
+Press the bin icon of "CRM sync" → "Revoke API key?" → "Revoke". **Expected:** "API key revoked.", the row disappears;
+the curl of INT-04 now answers `401 INVALID_API_KEY` (the same message as with no key at all).
+
+**INT-07 · Read-only and plan gates**
+As `reader@acme.test`: the keys and webhooks are listed, but "Create API key", "Add webhook", Revoke, Edit and Delete are
+disabled with "Your read-only role can't create resources." / "…can't make changes." on hover. As `owner@globex.test`
+(Starter plan, no API or webhooks): "Create API key" says "Your plan doesn't include the external API." and "Add
+webhook" "Your plan doesn't include webhooks."
+
+**INT-08 · Add a webhook: https only**
+Webhooks tab → "Add webhook", type `http://example.com/hook`, "Add webhook". **Expected:** "The URL must start with
+https://" under the field, nothing is sent. Event "Response completed" and method POST are fixed. Type
+`https://webhook.site/<your id>` (or any https receiver you control) → "Webhook added." and the row with the URL,
+"Response completed" and POST.
+
+**INT-09 · A completed response is delivered, signed**
+Answer and submit an Acme questionnaire in the respondent app. **Expected:** the receiver gets a POST with
+`X-Signature: sha256=…`, `X-Event-Type: questionnaire.completed`, `X-Delivery-Id`, and the body
+`{customer_id, event_type, questionnaire_id, data:{id, answers}}`. In Integrations, the list icon of the webhook opens
+"Deliveries" with the row "Delivered", 1 attempt, "HTTP 200".
+
+**INT-10 · A failing receiver is retried**
+Edit the webhook to `https://httpstat.us/500` (or a receiver answering 500), submit another response. **Expected:**
+"Deliveries" shows "Retrying", "HTTP 500" and the next retry about a minute later; after the minute
+(`docker compose exec php php bin/console app:webhooks:retry`) attempts goes to 2 and the next retry is 5 minutes
+later. After six failed attempts it shows "Failed".
+
+**INT-11 · Edit and delete a webhook**
+Edit → change the URL → "Save changes": "Webhook saved." and the new URL. Bin icon → "Delete webhook?" → "Delete":
+"Webhook deleted." and "No webhooks yet" with "Add webhook".
+
+**INT-12 · API reference and Spanish**
+API reference shows the base URL of this deployment, both endpoints with GET, the X-API-Key header and the
+pagination/errors notes; each block has "Copy". Switch the sidebar to Español: "Integraciones", "Claves de API",
+"Referencia de la API", "¿Revocar la clave de API?", "Debe empezar por https://" — no raw translation keys.
+
 ## Emails
 
 **MAIL-01 · Every email is readable and links to a real screen**

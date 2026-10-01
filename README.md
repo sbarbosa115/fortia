@@ -101,6 +101,13 @@ below is added by the item that builds the endpoint.
 | `/api/v1/projects/{id}` | PUT, DELETE | write permission, owner or Admin | PUT partial: `name`, `due_date`, `assignation_ids` not null, `assignation_ids` replaces the set (left-out ones are unlinked), `organization_id` only unchanged (400 `VALIDATION_ERROR`); 200 the enriched project. DELETE 204, unlinks its assignations. 404 `PROJECT_NOT_FOUND`, 403 `FORBIDDEN` |
 | `/api/v1/customer/{customer_id}/settings` | GET | public, rate limited | the account's CustomerSettings `{language, transcription_url, pixel_id, linkedin_partner_id, linkedin_conversion_id, google_ads_id, google_ads_conversion_label, max_files}` (max_files 10 by default) for the respondent app. 404 `CUSTOMER_NOT_FOUND`. Read only here: the accounts item adds the PATCH (its `SettingsController` replaces `CustomerSettingsController`) |
 | `/api/v1/styles` | GET | public, rate limited | `?customer_id=` (and/or `questionnaire_id=`, ignored) → `{styles \| null}` (camelCase §6.18) that the respondent app maps onto its theme (§9.15). 400 `INVALID_REQUEST` without either. Read only here: the branding item adds `POST /styles` |
+| `/api/v1/api-keys` | GET, POST | signed in; POST write permission + Feat(`api`) | GET: the active keys, newest first, `[{id, name, created_at, expires_at, last_used_at}]` (never the key). POST `{name (1–100), expiration_days? (1–3650)}` → 201 `{api_key: "QAIRE-" + 64 hex}`, shown only once (stored as its SHA-256). 400 `VALIDATION_ERROR`, 403 `FORBIDDEN`, 429 plan (feature gate: an exhausted quota does not block it) |
+| `/api/v1/api-keys/{id}` | DELETE | write permission, owner or Admin | revokes (204, the row stays `revoked`). 404 `API_KEY_NOT_FOUND` (also another account's or an already revoked key) |
+| `/api/v1/external/questionnaires` | GET | `X-API-Key`, Cap(`api`), rate limited | `{questionnaires:[{id, flow_id, slug, title, description, is_active, type, created_at, updated_at}], pagination}` (numbered, `page_size` default 50, ≤ 50), root questionnaires newest first. 401 `INVALID_API_KEY` (missing, unknown, revoked or expired: same message), 429. Sets `last_used_at`; `ApiUsage` counts `api` |
+| `/api/v1/external/questionnaires/{id}/answers` | GET | `X-API-Key`, Cap(`api`), rate limited | `{questionnaire_id, sessions:[{id, answers:[{title, value, min?, max?}]}], pagination}`, every session of that questionnaire newest first (§7.14 value format). 400 `INVALID_UUID`, 401, 404 `QUESTIONNAIRE_NOT_FOUND` (also another account's) |
+| `/api/v1/webhooks` | GET, POST | signed in; POST write permission + Feat(`webhook`) | `{url (https only), event_type? (questionnaire.completed), method? (POST)}` → 201 the webhook `{id, customer_id, url, event_type, method, created_at, updated_at}`. 400 `VALIDATION_ERROR`, 403, 429 |
+| `/api/v1/webhooks/{id}` | PUT, DELETE | write permission, owner or Admin | PUT partial (≥ 1 field) → the webhook; DELETE 204 (its delivery log too). 400 `INVALID_UUID`, 404 `WEBHOOK_NOT_FOUND` (also another account's) |
+| `/api/v1/webhooks/{id}/deliveries` | GET | signed in, owner or Admin | extension (D19): the latest 20 deliveries `[{id, status: pending\|delivered\|failed, attempts, last_status_code, last_error, next_attempt_at, …}]`. 404 `WEBHOOK_NOT_FOUND` |
 
 Every endpoint answers `{message, data}` or `{error: {code, message, details?}}` (PRD §8.1); `X-Assume-Customer-Id`
 lets a platform Admin act as an account's root user (logged in `impersonation_log`).
@@ -129,6 +136,18 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
   overdue once that date is before "today" in UTC−12 (§7.12). Writing a project needs the console's write permission
   (a read-only role gets 403), like D1 for organizations. A review counts only for the attempt it was made in, and a
   locked answer counts as approved (`Assignations\Domain\FollowUpProgress`).
+- **Outgoing webhooks (D19).** `questionnaire.completed` fires on every `QuestionnaireSessionCompleted` (every stage, as
+  §7.7 step 3 says "in all cases"). The `webhook` capacity is checked once per event, first: rejected, nothing is sent
+  or logged. Each subscribed URL gets a row in `webhook_delivery` and its first attempt at once (3 s connect, 5 s read,
+  no redirects, private and loopback addresses refused); a non-2xx answer or a network error is retried after 1 min,
+  5 min, 30 min, 2 h and 6 h (6 attempts, then `failed`) by a task the worker runs every minute
+  (`bin/console app:webhooks:retry` runs it by hand). Each successful delivery counts one `webhook`. The body is
+  rebuilt in the PRD's key order on every attempt and signed with `WEBHOOK_SIGNING_SECRET`; an extra `X-Delivery-Id`
+  header (the same on retries) lets receivers drop duplicates.
+- **API keys and the external API.** Creating and revoking keys and writing webhooks need the console's write
+  permission (read-only is 403), as the Integrations screen shows. Every external call (both endpoints) passes
+  Cap(`api`) and counts one `api`; a call refused by the plan or answered 404 does not count. The answers endpoint
+  lists every session of the questionnaire (in progress too), newest first, as the PRD's shape has no status.
 
 ## Known gaps
 
