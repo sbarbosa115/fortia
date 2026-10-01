@@ -786,6 +786,8 @@
                 "tags": [
                     "Styles"
                 ],
+                "summary": "P. One of customer_id or questionnaire_id is required (400 if both are missing); only customer_id is used.",
+                "description": "`website` is only filled in for a console user of that account (the Customization screen reads it back); an\nanonymous caller always gets null.",
                 "operationId": "get_api_styles_get",
                 "parameters": [
                     {
@@ -821,6 +823,277 @@
                     },
                     "429": {
                         "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Styles"
+                ],
+                "summary": "AG, Cap(styles). 202 {job} (job_type \"styles\", stages reading_website \u2192 designing_styles \u2192 saving). The job\ncounts one \"styles\" when it completes; a failed job counts nothing (\u00a77.2).",
+                "operationId": "post_api_styles_update",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StylesInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "The styles job",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/videos": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Every video (or one language), by order and then title.",
+                "operationId": "get_api_admin_videos_list",
+                "parameters": [
+                    {
+                        "name": "language",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "es",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{videos}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_LANGUAGE"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "operationId": "post_api_admin_videos_create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VideoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The video",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/videos/{id}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "operationId": "get_api_admin_videos_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The video",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "VIDEO_NOT_FOUND"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Full replacement: the same body as POST.",
+                "operationId": "put_api_admin_videos_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VideoInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The video",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "VIDEO_NOT_FOUND"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "operationId": "delete_api_admin_videos_delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "VIDEO_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/videos": {
+            "get": {
+                "tags": [
+                    "Documentation"
+                ],
+                "summary": "Sorted by order and then by title. Without ?language, both languages.",
+                "operationId": "get_api_videos_list",
+                "parameters": [
+                    {
+                        "name": "language",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "es",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{videos}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VideoListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_LANGUAGE"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
                     }
                 }
             }
@@ -948,6 +1221,404 @@
                     },
                     "404": {
                         "description": "CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/api-keys": {
+            "get": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A. The account's active keys, newest first, without their secret.",
+                "operationId": "get_api_api_keys_list",
+                "responses": {
+                    "200": {
+                        "description": "Active keys",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ApiKeyOutput"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A, write permission, Feat(api). The plaintext key is in this response only.",
+                "operationId": "post_api_api_keys_create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApiKeyInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The new key, shown only once",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyCreatedOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only role)"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (the plan does not include api)"
+                    }
+                }
+            }
+        },
+        "/api/v1/api-keys/{id}": {
+            "delete": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A, write permission, Own. Revokes (204); the key stops working at once.",
+                "operationId": "delete_api_api_keys_revoke",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Revoked"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only role)"
+                    },
+                    "404": {
+                        "description": "API_KEY_NOT_FOUND (also another account's or an already revoked key)"
+                    }
+                }
+            }
+        },
+        "/api/v1/external/questionnaires": {
+            "get": {
+                "tags": [
+                    "External API"
+                ],
+                "summary": "X-API-Key, Cap(api). The account's questionnaires, newest first; page_size default 50, at most 50.",
+                "operationId": "get_api_external_questionnaires",
+                "parameters": [
+                    {
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Questionnaires",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalQuestionnaireListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "INVALID_API_KEY"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED, TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/external/questionnaires/{id}/answers": {
+            "get": {
+                "tags": [
+                    "External API"
+                ],
+                "summary": "X-API-Key, Cap(api). A questionnaire's sessions with their answers (\u00a77.14 format), newest first.",
+                "operationId": "get_api_external_answers",
+                "parameters": [
+                    {
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sessions and their answers",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalAnswersOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "401": {
+                        "description": "INVALID_API_KEY"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND (also another account's)"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED, TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks": {
+            "get": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A. The account's webhooks, oldest first.",
+                "operationId": "get_api_webhooks_list",
+                "responses": {
+                    "200": {
+                        "description": "Webhooks",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WebhookOutput"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A, write permission, Feat(webhook). event_type and method default to questionnaire.completed and POST.",
+                "operationId": "post_api_webhooks_create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WebhookInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The webhook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebhookOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR (url not https, unknown event_type or method)"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only role)"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (the plan does not include webhook)"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{id}": {
+            "put": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A, write permission, Own. Partial: only the fields sent change.",
+                "operationId": "put_api_webhooks_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WebhookInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The webhook",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebhookOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only role)"
+                    },
+                    "404": {
+                        "description": "WEBHOOK_NOT_FOUND (also another account's)"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A, write permission, Own. 204; its delivery log goes too.",
+                "operationId": "delete_api_webhooks_delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only role)"
+                    },
+                    "404": {
+                        "description": "WEBHOOK_NOT_FOUND (also another account's)"
+                    }
+                }
+            }
+        },
+        "/api/v1/webhooks/{id}/deliveries": {
+            "get": {
+                "tags": [
+                    "Integrations"
+                ],
+                "summary": "A, Own. The latest 20 deliveries, newest first (D19: the delivery log).",
+                "operationId": "get_api_webhooks_deliveries",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deliveries",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/WebhookDeliveryOutput"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "404": {
+                        "description": "WEBHOOK_NOT_FOUND (also another account's)"
                     }
                 }
             }
@@ -4027,6 +4698,136 @@
                         "type": "object",
                         "nullable": true,
                         "additionalProperties": true
+                    },
+                    "website": {
+                        "description": "The website the styles were read from: only for a console user of that account, else null",
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "StylesInput": {
+                "properties": {
+                    "website": {
+                        "description": "The website to read the brand from; empty or null = none",
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2048
+                    },
+                    "styles": {
+                        "description": "Partial styles (PRD \u00a76.18), deep-merged over the stored ones when the website did not change",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "VideoOutput": {
+                "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "url",
+                    "language",
+                    "category",
+                    "order",
+                    "duration_minutes"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "order": {
+                        "type": "integer"
+                    },
+                    "duration_minutes": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "VideoListOutput": {
+                "required": [
+                    "videos"
+                ],
+                "properties": {
+                    "videos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/VideoOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "VideoInput": {
+                "required": [
+                    "title",
+                    "url",
+                    "language"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2000
+                    },
+                    "url": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "minLength": 1
+                    },
+                    "language": {
+                        "type": "string",
+                        "enum": [
+                            "es",
+                            "en"
+                        ]
+                    },
+                    "category": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "order": {
+                        "type": "integer",
+                        "nullable": true,
+                        "minimum": 0
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "nullable": true,
+                        "minimum": 0
                     }
                 },
                 "type": "object"
@@ -4102,6 +4903,330 @@
                 "properties": {
                     "onboarding_completed": {
                         "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "ApiKeyOutput": {
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "last_used_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ApiKeyInput": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "expiration_days": {
+                        "type": "integer",
+                        "nullable": true,
+                        "maximum": 3650,
+                        "minimum": 1
+                    }
+                },
+                "type": "object"
+            },
+            "ApiKeyCreatedOutput": {
+                "required": [
+                    "api_key"
+                ],
+                "properties": {
+                    "api_key": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ExternalQuestionnaireOutput": {
+                "required": [
+                    "id",
+                    "title",
+                    "is_active",
+                    "type"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "flow_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ExternalPaginationOutput": {
+                "required": [
+                    "page",
+                    "page_size",
+                    "total_items",
+                    "total_pages",
+                    "has_next",
+                    "has_previous"
+                ],
+                "properties": {
+                    "page": {
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "type": "integer"
+                    },
+                    "total_items": {
+                        "type": "integer"
+                    },
+                    "total_pages": {
+                        "type": "integer"
+                    },
+                    "has_next": {
+                        "type": "boolean"
+                    },
+                    "has_previous": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "ExternalQuestionnaireListOutput": {
+                "required": [
+                    "questionnaires",
+                    "pagination"
+                ],
+                "properties": {
+                    "questionnaires": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ExternalQuestionnaireOutput"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/ExternalPaginationOutput"
+                    }
+                },
+                "type": "object"
+            },
+            "ExternalSessionOutput": {
+                "required": [
+                    "id",
+                    "answers"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "answers": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "title",
+                                "value"
+                            ],
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "description": "A string, a number or a list, by control type (PRD \u00a77.14)"
+                                },
+                                "min": {
+                                    "type": "number"
+                                },
+                                "max": {
+                                    "type": "number"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ExternalAnswersOutput": {
+                "required": [
+                    "questionnaire_id",
+                    "sessions",
+                    "pagination"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "sessions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ExternalSessionOutput"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/ExternalPaginationOutput"
+                    }
+                },
+                "type": "object"
+            },
+            "WebhookOutput": {
+                "required": [
+                    "id",
+                    "customer_id",
+                    "url",
+                    "event_type",
+                    "method"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "event_type": {
+                        "type": "string",
+                        "enum": [
+                            "questionnaire.completed"
+                        ]
+                    },
+                    "method": {
+                        "type": "string",
+                        "enum": [
+                            "POST"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "WebhookInput": {
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2048
+                    },
+                    "event_type": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "questionnaire.completed"
+                        ]
+                    },
+                    "method": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "POST"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "WebhookDeliveryOutput": {
+                "required": [
+                    "id",
+                    "webhook_id",
+                    "event_type",
+                    "status",
+                    "attempts"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "webhook_id": {
+                        "type": "string"
+                    },
+                    "event_type": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "delivered",
+                            "failed"
+                        ]
+                    },
+                    "attempts": {
+                        "type": "integer"
+                    },
+                    "last_status_code": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "last_error": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "next_attempt_at": {
+                        "title": "When the next retry is due (pending only).",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -4728,10 +5853,22 @@
             "name": "Styles"
         },
         {
+            "name": "Admin"
+        },
+        {
+            "name": "Documentation"
+        },
+        {
             "name": "Auth"
         },
         {
             "name": "Account"
+        },
+        {
+            "name": "Integrations"
+        },
+        {
+            "name": "External API"
         },
         {
             "name": "Jobs"

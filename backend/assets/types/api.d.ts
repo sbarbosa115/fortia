@@ -205,7 +205,67 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * P. One of customer_id or questionnaire_id is required (400 if both are missing); only customer_id is used.
+         * @description `website` is only filled in for a console user of that account (the Customization screen reads it back); an
+         *     anonymous caller always gets null.
+         */
         get: operations["get_api_styles_get"];
+        put?: never;
+        /**
+         * AG, Cap(styles). 202 {job} (job_type "styles", stages reading_website → designing_styles → saving). The job
+         *     counts one "styles" when it completes; a failed job counts nothing (§7.2).
+         */
+        post: operations["post_api_styles_update"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/videos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Every video (or one language), by order and then title. */
+        get: operations["get_api_admin_videos_list"];
+        put?: never;
+        post: operations["post_api_admin_videos_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/videos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_admin_videos_get"];
+        /** Full replacement: the same body as POST. */
+        put: operations["put_api_admin_videos_update"];
+        post?: never;
+        delete: operations["delete_api_admin_videos_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/videos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sorted by order and then by title. Without ?language, both languages. */
+        get: operations["get_api_videos_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -276,6 +336,128 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["patch_api_onboarding_set"];
+        trace?: never;
+    };
+    "/api/v1/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A. The account's active keys, newest first, without their secret. */
+        get: operations["get_api_api_keys_list"];
+        put?: never;
+        /** A, write permission, Feat(api). The plaintext key is in this response only. */
+        post: operations["post_api_api_keys_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/api-keys/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** A, write permission, Own. Revokes (204); the key stops working at once. */
+        delete: operations["delete_api_api_keys_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/external/questionnaires": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** X-API-Key, Cap(api). The account's questionnaires, newest first; page_size default 50, at most 50. */
+        get: operations["get_api_external_questionnaires"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/external/questionnaires/{id}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** X-API-Key, Cap(api). A questionnaire's sessions with their answers (§7.14 format), newest first. */
+        get: operations["get_api_external_answers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A. The account's webhooks, oldest first. */
+        get: operations["get_api_webhooks_list"];
+        put?: never;
+        /** A, write permission, Feat(webhook). event_type and method default to questionnaire.completed and POST. */
+        post: operations["post_api_webhooks_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/webhooks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** A, write permission, Own. Partial: only the fields sent change. */
+        put: operations["put_api_webhooks_update"];
+        post?: never;
+        /** A, write permission, Own. 204; its delivery log goes too. */
+        delete: operations["delete_api_webhooks_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/webhooks/{id}/deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A, Own. The latest 20 deliveries, newest first (D19: the delivery log). */
+        get: operations["get_api_webhooks_deliveries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/jobs/{jobId}": {
@@ -1110,6 +1292,44 @@ export interface components {
             styles?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * @description The website the styles were read from: only for a console user of that account, else null
+             * @default null
+             */
+            website: string | null;
+        };
+        StylesInput: {
+            /** @description The website to read the brand from; empty or null = none */
+            website?: string | null;
+            /** @description Partial styles (PRD §6.18), deep-merged over the stored ones when the website did not change */
+            styles?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        VideoOutput: {
+            id: string;
+            title: string;
+            description: string;
+            url: string;
+            language: string;
+            category: string;
+            order: number;
+            duration_minutes: number;
+            created_at?: string | null;
+            updated_at?: string | null;
+        };
+        VideoListOutput: {
+            videos: components["schemas"]["VideoOutput"][];
+        };
+        VideoInput: {
+            title: string;
+            description?: string | null;
+            url: string;
+            /** @enum {string} */
+            language: "es" | "en";
+            category?: string | null;
+            order?: number | null;
+            duration_minutes?: number | null;
         };
         TokenOutput: {
             id_token: string;
@@ -1129,6 +1349,90 @@ export interface components {
         };
         OnboardingOutput: {
             onboarding_completed: boolean;
+        };
+        ApiKeyOutput: {
+            id: string;
+            name: string;
+            created_at?: string | null;
+            expires_at?: string | null;
+            last_used_at?: string | null;
+        };
+        ApiKeyInput: {
+            name: string;
+            expiration_days?: number | null;
+        };
+        ApiKeyCreatedOutput: {
+            api_key: string;
+        };
+        ExternalQuestionnaireOutput: {
+            id: string;
+            flow_id?: string | null;
+            slug?: string | null;
+            title: string;
+            description?: string | null;
+            is_active: boolean;
+            type: string;
+            created_at?: string | null;
+            updated_at?: string | null;
+        };
+        ExternalPaginationOutput: {
+            page: number;
+            page_size: number;
+            total_items: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
+        ExternalQuestionnaireListOutput: {
+            questionnaires: components["schemas"]["ExternalQuestionnaireOutput"][];
+            pagination: components["schemas"]["ExternalPaginationOutput"];
+        };
+        ExternalSessionOutput: {
+            id: string;
+            answers: {
+                title: string;
+                /** @description A string, a number or a list, by control type (PRD §7.14) */
+                value: unknown;
+                min?: number;
+                max?: number;
+            }[];
+        };
+        ExternalAnswersOutput: {
+            questionnaire_id: string;
+            sessions: components["schemas"]["ExternalSessionOutput"][];
+            pagination: components["schemas"]["ExternalPaginationOutput"];
+        };
+        WebhookOutput: {
+            id: string;
+            customer_id: string;
+            url: string;
+            /** @enum {string} */
+            event_type: "questionnaire.completed";
+            /** @enum {string} */
+            method: "POST";
+            created_at?: string | null;
+            updated_at?: string | null;
+        };
+        WebhookInput: {
+            url?: string | null;
+            /** @enum {string|null} */
+            event_type?: "questionnaire.completed" | null;
+            /** @enum {string|null} */
+            method?: "POST" | null;
+        };
+        WebhookDeliveryOutput: {
+            id: string;
+            webhook_id: string;
+            event_type: string;
+            /** @enum {string} */
+            status: "pending" | "delivered" | "failed";
+            attempts: number;
+            last_status_code?: number | null;
+            last_error?: string | null;
+            /** When the next retry is due (pending only). */
+            next_attempt_at?: string | null;
+            created_at?: string | null;
+            updated_at?: string | null;
         };
         JobEnvelopeOutput: {
             job: components["schemas"]["JobOutput"];
@@ -2114,6 +2418,299 @@ export interface operations {
             };
         };
     };
+    post_api_styles_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["StylesInput"];
+            };
+        };
+        responses: {
+            /** @description The styles job */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobEnvelopeOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_admin_videos_list: {
+        parameters: {
+            query?: {
+                language?: "es" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description {videos} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoListOutput"];
+                };
+            };
+            /** @description INVALID_LANGUAGE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_admin_videos_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["VideoInput"];
+            };
+        };
+        responses: {
+            /** @description The video */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_admin_videos_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The video */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoOutput"];
+                };
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description VIDEO_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_admin_videos_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["VideoInput"];
+            };
+        };
+        responses: {
+            /** @description The video */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description VIDEO_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_admin_videos_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description VIDEO_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_videos_list: {
+        parameters: {
+            query?: {
+                language?: "es" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description {videos} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VideoListOutput"];
+                };
+            };
+            /** @description INVALID_LANGUAGE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_api_auth_token: {
         parameters: {
             query?: never;
@@ -2250,6 +2847,388 @@ export interface operations {
                 };
             };
             /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_api_keys_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Active keys */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyOutput"][];
+                };
+            };
+        };
+    };
+    post_api_api_keys_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ApiKeyInput"];
+            };
+        };
+        responses: {
+            /** @description The new key, shown only once */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyCreatedOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only role) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED (the plan does not include api) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_api_keys_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only role) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description API_KEY_NOT_FOUND (also another account's or an already revoked key) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_external_questionnaires: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header: {
+                "X-API-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Questionnaires */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalQuestionnaireListOutput"];
+                };
+            };
+            /** @description INVALID_API_KEY */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED, TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_external_answers: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header: {
+                "X-API-Key": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sessions and their answers */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalAnswersOutput"];
+                };
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_API_KEY */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND (also another account's) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED, TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_webhooks_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Webhooks */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookOutput"][];
+                };
+            };
+        };
+    };
+    post_api_webhooks_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["WebhookInput"];
+            };
+        };
+        responses: {
+            /** @description The webhook */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR (url not https, unknown event_type or method) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only role) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED (the plan does not include webhook) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_webhooks_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["WebhookInput"];
+            };
+        };
+        responses: {
+            /** @description The webhook */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only role) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description WEBHOOK_NOT_FOUND (also another account's) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_webhooks_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only role) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description WEBHOOK_NOT_FOUND (also another account's) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_webhooks_deliveries: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deliveries */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDeliveryOutput"][];
+                };
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description WEBHOOK_NOT_FOUND (also another account's) */
             404: {
                 headers: {
                     [name: string]: unknown;
