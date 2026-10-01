@@ -235,7 +235,7 @@ final class QuizFunnelJobTest extends ApiTestCase
         $this->em()->clear();
         $products = $this->em()->getRepository(Product::class)->findBy(['customerId' => $customerId], ['name' => 'ASC']);
 
-        return array_values($products);
+        return $products;
     }
 
     private function scraper(): FakeCatalogScraper

@@ -25,7 +25,7 @@ final class QuizFunnelInput
     #[Assert\Length(max: 2048)]
     public ?string $source_url = null;
 
-    /** @var list<array<string, mixed>>|null */
+    /** @var array<mixed>|null as sent (the callback reads it before it is validated); products() returns it checked */
     #[OA\Property(type: 'array', nullable: true, items: new OA\Items(type: 'object', properties: [
         new OA\Property(property: 'name', type: 'string'),
         new OA\Property(property: 'description', type: 'string', nullable: true),

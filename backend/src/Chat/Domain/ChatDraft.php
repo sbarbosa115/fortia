@@ -320,7 +320,7 @@ final class ChatDraft
         $all = $this->questions;
         array_splice($all, $at, 0, $added);
 
-        return $this->changedContent(['questions' => array_values($all)]);
+        return $this->changedContent(['questions' => $all]);
     }
 
     /**
@@ -344,7 +344,7 @@ final class ChatDraft
         $all = $this->questions;
         array_splice($all, $index, 1);
 
-        return $this->changedContent(['questions' => array_values($all)]);
+        return $this->changedContent(['questions' => $all]);
     }
 
     /**

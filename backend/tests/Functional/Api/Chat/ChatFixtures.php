@@ -48,7 +48,7 @@ trait ChatFixtures
     private static function conversation(array $messages): array
     {
         $out = [];
-        foreach (array_values($messages) as $i => $message) {
+        foreach ($messages as $i => $message) {
             $out[] = \is_array($message) ? $message : ['role' => 0 === $i % 2 ? 'user' : 'assistant', 'content' => $message];
         }
 
