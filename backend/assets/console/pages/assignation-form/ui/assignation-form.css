@@ -56,6 +56,11 @@
   gap: var(--space-2);
   min-width: 0;
 }
+/* The kit's .search grows along a row (flex: 1 1 240px); in these columns it grew 240 px tall, the icon far below. */
+.asg-form__fieldset > .search,
+.asg-form__panel > .search {
+  flex: 0 0 auto;
+}
 .asg-form__options {
   display: flex;
   flex-direction: column;
