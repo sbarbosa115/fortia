@@ -268,8 +268,7 @@ radar of the three areas (each as % of its maximum) and the legend "Your score (
 **RSP-40 · A chain shows its stage and generates the next one**
 Open `{C}` and finish its first question. **Expected:** "Stage 1 of 2" in the header, then `/f/acme-discovery-chain/
 generating` with "One moment / Preparing your next questions" and messages rotating every 3.5 s; on success the
-generated questions load at `/f/acme-discovery-chain` with "Stage 2 of 2". Until the generation item ships
-`POST /questionnaire/prompt`: "We couldn't prepare your next questions." with "Try again".
+generated questions load at `/f/acme-discovery-chain` with "Stage 2 of 2" (the generation itself: GEN-01 – 04).
 
 **RSP-41 · Unknown links say so**
 Open `/q/00000000-0000-4000-8000-000000000000` and `/f/no-such-flow`. **Expected:** "This questionnaire does not
@@ -303,9 +302,142 @@ Sign out returns to `/console/login`, and Back does not show the console again.
 
 <!-- AUTH-01 – 20: accounts. -->
 
+The AUTH cases create accounts with fresh emails: use `qa+<date><n>@mappi.test` (any unused address). Emails land in
+Mailpit. Google sign-in has no offline fake in dev: without `GOOGLE_OAUTH_CLIENT_ID`/`_SECRET` it answers "Sign-in is
+temporarily unavailable" (AUTH-12); the Google flow itself is covered by `GoogleSignInTest`.
+
+**AUTH-01 · The login screen**
+Open `/console/login` signed out. **Expected:** the "14 days free · no card" badge, the tabs "Sign in" (selected) and
+"Sign up", "Continue with Google", the email and password fields, "Forgot your password?", and on wide screens the
+brand panel: "Smart questionnaires that end in action.", the stats 32 % / 6.4× / < 8 min and a testimonial. At phone
+width the brand panel is hidden and nothing scrolls sideways.
+
+**AUTH-02 · Testimonials rotate every 9 s and can be picked**
+Wait on the login 10 s. **Expected:** the testimonial changes; the three dots under it each show their testimonial
+when pressed; while the pointer is on the panel it does not rotate.
+
+**AUTH-03 · Privacy, Terms and Support lead somewhere (D21)**
+**Expected:** "Privacy" opens the respondent app's `/privacy` in a new tab, "Terms" the marketing site's `/terms`,
+"Support" opens a mail to `support@mappi.test`.
+
+**AUTH-04 · Sign-in field checks happen before any request**
+Press Sign in with both fields empty, then with `owner@acme` and `1234`. **Expected:** "Enter a valid email address."
+and "Password must be at least 8 characters." under the fields; no request in the network tab.
+
+**AUTH-05 · Wrong credentials**
+Sign in as `owner@acme.test` / `wrongpass1`, then as `nobody@acme.test` / `password123`. **Expected:** both say
+"Invalid email or password." (the same text: the screen never says which accounts exist).
+
+**AUTH-06 · Sign-in returns to the page you were opening**
+Signed out, open `/console/organizations`. **Expected:** the login opens; after signing in as the owner you land on
+Organizations, not AI Experience.
+
+**AUTH-07 · The sign-up tab and its checks**
+Press "Sign up". **Expected:** the URL gets `?mode=signup`, the title "Create your account", a Name field; pressing
+Create account empty shows "Please enter your name.", "Enter a valid email address." and the password message.
+
+**AUTH-08 · The strength meter**
+In Sign up type `abcdefgh`, then `abcdefghijkl`, then `Abcdefghijk1`, then `Abcdefghij1!`. **Expected:** 1 bar "Weak",
+2 bars "Fair", 4 bars "Strong", 4 bars "Strong"; the level is always written next to the bars, not just coloured.
+
+**AUTH-09 · Signing up opens a new account**
+Sign up with name "QA Owner", a fresh email typed with capitals (e.g. `QA+1@Mappi.test`) and `password123`.
+**Expected:** toast "Account created. Welcome to Mappi!", you are signed in and sent to Onboarding (onboarding is
+pending). Profile → Plan & usage shows the Starter plan, active until the same day next month.
+
+**AUTH-10 · The welcome email (D20)**
+In Mailpit, the email to the address of AUTH-09 (in lowercase). **Expected:** "Welcome to Mappi" or "Bienvenido a
+Mappi" (the console language at sign-up), a BCC to `support@mappi.test`, an "Open Mappi" button that opens the login.
+
+**AUTH-11 · An email in use cannot sign up again**
+Sign out; Sign up with the AUTH-09 email in lowercase. **Expected:** "An account with this email already exists. Try
+signing in instead." with a "Sign in" link that switches tabs; nothing else changes. Same with `owner@acme.test`.
+
+**AUTH-12 · Google without a configured client**
+Press "Continue with Google" (dev without Google keys). **Expected:** "Sign-in is temporarily unavailable. Please try
+again later or use your email and password." under the button; the page stays usable.
+
+**AUTH-13 · The Google return without a code**
+Open `/console/sign-in?error=access_denied`, then `/console/sign-in?code=x&state=y`. **Expected:** "Signing you in"
+with "Google sign-in was cancelled." / "Something went wrong. Please try again." and "Back to sign in".
+
+**AUTH-14 · Forgot password**
+From the login press "Forgot your password?", type `admin@acme.test`, press Send code. **Expected:** you land on
+`/console/reset-password` with the email already filled. In Mailpit, in the account's language (Acme: Spanish) "Tu
+código para recuperar la contraseña de Mappi" with a six-digit code, "Elegir una contraseña nueva" linking to
+`/console/reset-password?code=…` and "vence en 60 minutos".
+
+**AUTH-15 · An unknown email gets the same answer**
+Forgot password with `nobody@acme.test`. **Expected:** the same move to Reset password; no email arrives.
+
+**AUTH-16 · Reset password checks, in order**
+On Reset password press Update with everything empty, then fill one field at a time. **Expected:** first "Enter a
+valid email address.", then "Enter the code we sent you.", then the 8-character message, then (with a different
+confirmation) "The two passwords do not match."
+
+**AUTH-17 · Wrong code**
+Email `admin@acme.test`, code `000000`, `newpassword1` twice. **Expected:** "That code is not valid. Check it and try
+again."
+
+**AUTH-18 · Resetting the password**
+Open the link of the AUTH-14 email (the code is prefilled), type `admin@acme.test`, `password123` twice (keep the demo
+password), Update. **Expected:** toast "Password updated. Sign in with your new password." and the login; signing in
+as `admin@acme.test` / `password123` works. Using the same code again says it is not valid.
+
+**AUTH-19 · Too many attempts**
+Ask for a recovery code for the same email 6 times in a row. **Expected:** the 6th says "Too many attempts. Please try
+again in a few minutes." (wait 15 minutes, or run the rest of the suite, before using recovery for that email again).
+
+**AUTH-20 · Signed-in visitors skip the login**
+Signed in as the owner, open `/console/login`. **Expected:** you go straight to AI Experience.
+
 ## 3. Users and profile — USR (accounts), BIL (billing)
 
 <!-- USR-01 – 10: accounts. BIL-01 – 20: billing. -->
+
+**USR-01 · The users of an account**
+Sign in as `owner@acme.test`, open Users. **Expected:** columns User (initials and name), Email, Role, Type; the
+owner first with "Admin" and "Owner", then the others by name: `admin@acme.test` Admin / Member, `reader@acme.test`
+Read only / Member. No Globex user appears.
+
+**USR-02 · Read-only members cannot add users**
+Sign in as `reader@acme.test`, open Users. **Expected:** the same list; "New user" is disabled and says why
+(read-only). Opening `/console/users/new` directly brings you back to Users (the route needs write permission).
+
+**USR-03 · The new-user form**
+As the owner press "New user". **Expected:** Full name, Email, Password (with the strength meter), the role as two
+cards — Admin "Full access, including creating other users." and Read only "Can view resources but cannot make
+changes." (selected) — and the permission table of the seven actions, with ✓ / – and text for screen readers.
+
+**USR-04 · Field checks**
+Press Create user empty. **Expected:** the name, email and 8-character messages; no request is sent.
+
+**USR-05 · Creating a read-only member**
+Name "QA Reader", email `qa.reader+<n>@acme.test`, password `password123`, Read only, Create user. **Expected:** toast
+"User QA Reader created", back on Users with the new row (Read only, Member). Profile → Plan & usage: "users" went up
+by one. Signing in with that email and password works and the console is read-only.
+
+**USR-06 · Creating an admin**
+Same with "QA Admin" and the Admin card. **Expected:** the row shows Admin / Member; that user can open New user.
+
+**USR-07 · An email already in use**
+Create a user with `owner@globex.test` (another account's email). **Expected:** "A user with this email already
+exists." and the form keeps what you typed.
+
+**USR-08 · The plan's user quota**
+Sign in as `owner@globex.test` (Starter: 2 users a month) and create two users. **Expected:** the third try shows the
+plan-limit message ("Feature limit reached"-style text of the plan alerts) and creates nothing; on Users, "New user" is
+disabled with the plan reason.
+
+**USR-09 · Account settings**
+As the owner, Profile → Settings. **Expected:** Account language, "Maximum files per question" (10 by default) and the
+five tracking ids. Type `0`, then `21`, then `2.5`: "Enter a whole number from 1 to 20." and Save disabled. Set 5,
+Meta Pixel ID `1234567890`, Save: "Settings saved"; reload keeps them; "profile" went up by one in Plan & usage.
+Clear the pixel id and Save: it is gone after a reload. Changing only the language does not count "profile".
+
+**USR-10 · Settings for read-only members and plans without "profile"**
+As `reader@acme.test`, Profile → Settings. **Expected:** every control is disabled and the read-only reason shows; Save
+is disabled with the same reason.
 
 ## 4. Super-admin — ADM (admin)
 
@@ -488,12 +620,172 @@ Open `/questionnaires/create/nope`. **Expected:** the type picker.
 Switch to Español in the editor. **Expected:** every label, step, button, message and the success screen are Spanish
 ("Detalles", "Continuar", "¡Cuestionario creado con éxito!", "Bloqueado para conservar las respuestas").
 
+### Generation — GEN (item generation)
+
+Prompt chains and LinkedIn (PRD §7.8, §7.18). Dev runs on the fake language model and the fake LinkedIn reader
+(`LLM_PROVIDER=fake`, `LINKEDIN_PROVIDER=fake`), so the generated texts are always the same. `{C}` is
+`/f/acme-discovery-chain`, answered in a private window.
+
+**GEN-01 · A chain generates its next stage from the answers**
+Open `{C}`, answer "What do you want to improve this quarter?" and finish. **Expected:** "Stage 1 of 2", then
+`/f/acme-discovery-chain/generating` ("One moment / Preparing your next questions"), then the generated stage at
+`/f/acme-discovery-chain` with "Stage 2 of 2": "Going deeper" with three questions (People / Process / Tools) that quote
+your answer, and "What is the biggest obstacle right now?". Network: `POST /api/v1/questionnaire/prompt` → 202
+`{job}` with `job_type: prompt_questionnaire`, then `GET /api/v1/jobs/{id}` until `COMPLETED` with
+`result.questionnaire_id`.
+
+**GEN-02 · The last stage ends the chain**
+Answer the generated stage and finish. **Expected:** the results page of the flow (`/session/{id}/results`), not a third
+generation. `GET /api/v1/questionnaire/session/{session_id}/chain` (as `owner@acme.test`) lists both stages.
+
+**GEN-03 · Reloading while it generates resumes, and does not create a second stage**
+Start `{C}` again, finish stage 1 and reload `/f/acme-discovery-chain/generating` at once. **Expected:** the same
+generating screen, then the generated stage. Network: no second `POST /questionnaire/prompt` after the reload (the job
+id is resumed). Asking again for the same session returns the stage already generated.
+
+**GEN-04 · A failed generation offers "Try again"**
+(Stop the worker: `docker compose stop worker`.) Finish stage 1 of `{C}` and wait out the polling, or set the job to
+`FAILED` in the database. **Expected:** "We couldn't prepare your next questions." with "Try again"; after
+`docker compose start worker`, "Try again" generates the stage.
+
+**GEN-05 · A diagnostic from a LinkedIn profile**
+`curl -s -X POST localhost:8080/api/v1/questionnaire/linkedin -H 'Content-Type: application/json' -d
+'{"linkedin_url":"https://www.linkedin.com/in/ana-perez","language":"en"}'`, then `GET /api/v1/jobs/{job_id}`.
+**Expected:** 202 `{job}` → `COMPLETED` with `{type: "linkedin_questionnaire", questionnaire_id}`. The questionnaire
+belongs to the account in `LINKEDIN_OWNER_CUSTOMER_ID`, is a diagnostic "Leadership diagnostic for Ana Perez" (8
+questions, 3 tiers 0–7 / 8–15 / 16–24), and its link `/q/{questionnaire_id}` works. `"language": "fr"` gives the
+Spanish one; `https://www.linkedin.com/company/acme` → 400 `VALIDATION_ERROR`; `…/in/unavailable` → the job `FAILED`
+with `LINKEDIN_PROFILE_UNAVAILABLE`.
+
 <!-- QST-01 – 15: authoring. EDT-01 – 25: editor. QF-01 – 15: commerce. GEN-01 – 05: generation.
      CHAT-01 – 15: chat. ONB-01 – 10: onboarding. -->
 
 ## 6. Answers and dashboards — ANS, DSH (analytics)
 
 <!-- ANS-01 – 15, DSH-01 – 10: analytics. -->
+
+The ANS and DSH cases use Acme's "Customer service survey" (two completed answers and one in progress in the seed).
+Run them after the RSP and ASG cases, which add answers. Dashboards are chosen by the offline fake LLM
+(`LLM_PROVIDER=fake`): the same questions always give the same layout.
+
+### Answers — ANS
+
+**ANS-01 · The answers of a questionnaire, completed first**
+Sign in as `owner@acme.test`, Cuestionarios › row "Customer service survey" › Respuestas. **Expected:** header
+"Respuestas del cuestionario: Customer service survey", the legend Respondiendo / Enviada / Procesando / Completada,
+filters Estado = Completadas, Zona horaria = Hora local, Por página = 100; a table with Iniciada, Nombre, Correo,
+Progreso, Estado and "Ver", newest first; "Anónimo" and "N/D" where nothing was captured; under it "N respuestas" and
+the page number.
+
+**ANS-02 · Clicking the title copies the public link**
+Click the title "Customer service survey" in the header. **Expected:** toast "Enlace público copiado."; pasting gives
+`http://localhost:8080/f/<slug>`.
+
+**ANS-03 · The status filter, with every status**
+Estado › "Todos los estados". **Expected:** the in-progress session appears too, its bar with one segment of four and
+the text "Respondiendo"; completed ones have four segments and "Completada".
+
+**ANS-04 · Filtered to nothing**
+Estado › "Procesando". **Expected:** the shared "filtered to nothing" empty state with "Limpiar filtros"; pressing it
+returns to Completadas and the rows come back.
+
+**ANS-05 · Page size and the cursor**
+On a questionnaire with more than 20 answers (answer its `/f/<slug>` repeatedly), Por página › 20. **Expected:** 20
+rows on page 1, Siguiente enabled, Anterior disabled; Siguiente shows the next rows on page 2; Anterior returns to the
+first rows. Changing the page size goes back to page 1.
+
+**ANS-06 · The time zone switch**
+Zona horaria › UTC. **Expected:** every Iniciada moves by the browser's UTC offset; Hora local brings them back.
+
+**ANS-07 · Progress does not count message slides or the data capture**
+Answer `/f/acme-respondent-showcase` halfway and leave. Open its Respuestas with "Todos los estados". **Expected:** the
+row's Progreso is answered/total of real questions only (no welcome or contact slide in the total).
+
+**ANS-08 · A chain shows the stage and its generated questionnaires**
+Open Respuestas of "Discovery chain". **Expected:** the hint "El filtro de estado se aplica a la primera etapa; la
+cadena puede seguir en curso.", Estado shows "Etapa X de N" instead of the bar, and when stages were generated a card
+"Cuestionarios generados" lists them with links to their own answers.
+
+**ANS-09 · An empty questionnaire**
+Open Respuestas of "Onboarding feedback" (no answers). **Expected:** "Aún no hay respuestas" with "Comparte el enlace del
+cuestionario…" and a "Copiar enlace" button that copies the public link.
+
+**ANS-10 · The response detail**
+Back on "Customer service survey", press "Ver" on a completed row. **Expected:** "Volver a las respuestas", the title
+"Detalle de la respuesta - {nombre o Anónimo}", a summary with Correo, Nombre, Teléfono, Tiempo total (seconds) and
+Iniciada, then a table Pregunta / Respuesta / Tiempo empleado with option labels as answers, and "No respondida",
+"Omitida" or "Vista" (message slides) where they apply.
+
+**ANS-11 · The result card**
+Open a completed response of "AI maturity diagnostic". **Expected:** a "Resultado" card with the score, the tier name,
+one bar per category and the tier's recommendations and action plan. A response without a result says "No se generó
+ningún resultado para esta sesión".
+
+**ANS-12 · File answers: preview and download**
+Open the response of `/f/acme-respondent-showcase` where a file was uploaded (RSP cases). **Expected:** the file answer
+lists the file with "Ver" and "Descargar"; "Ver" opens a dialog previewing an image or PDF; "Descargar" downloads it.
+A file of another type shows "Sin vista previa" and only "Descargar".
+
+**ANS-13 · Coming from an assignation goes back to it**
+Asignaciones › a default assignation with a completed respondent › "Ver respuestas". **Expected:** the detail's back
+link reads "Volver a la asignación" and returns to that assignation.
+
+**ANS-14 · Export to Google Sheets is disabled without its client id**
+On Respuestas, and on a default assignation's detail, hover "Exportar a Google Sheets". **Expected:** without
+`GOOGLE_SHEETS_CLIENT_ID` the button is disabled with "La exportación a Google Sheets no está configurada en este
+servidor."; with it, Google's consent window opens and a new tab shows the sheet "Respuestas - {título}" with Iniciado,
+Usuario, Correo, (Teléfono), then one column per question (the assignation's: only its respondents' sessions).
+
+**ANS-15 · Another account's answers are not found; a reader can see them**
+As `owner@globex.test`, open `/console/questionnaires/87b75bed-547a-4b43-b59f-d264f5a5fa04/answers`. **Expected:** the
+error state "not found", no rows. As `reader@acme.test` the same URL lists the answers.
+
+### Dashboards — DSH
+
+**DSH-01 · The first visit generates the dashboard**
+As `owner@acme.test`, Respuestas of "Customer service survey" › Tablero. **Expected:** a rotating message ("Reuniendo
+la información…", then "Analizando los datos…" every 4.5 s) and then the dashboard: the title with a type badge
+(e.g. "Satisfacción"), four tiles, the funnel and the charts. The plan usage shows one more dashboard used.
+
+**DSH-02 · The summary tiles**
+**Expected:** "Tasa de finalización" = round(completed / sessions × 100) % with "X de N sesiones completadas",
+"Sesiones" = N, "Tiempo promedio" as "M min S s", "Mayor abandono" = Pn (or "Al final") with "N% se fue en este paso".
+
+**DSH-03 · The funnel never goes up**
+**Expected:** Iniciaron (100%) → P1 … Pn → Completaron, each bar at most as long as the one above, and the line "Mayor
+abandono en Pn" (or "…al final"). With more than 6 questions, steps without drop group into "Pa–Pb · sin abandono"
+and "Mostrar las N preguntas" expands them.
+
+**DSH-04 · The dashboard is chosen only once**
+Reload the page. **Expected:** the same type and the same charts in the same order; the dashboards used did not grow.
+
+**DSH-05 · Charts read the answers**
+**Expected:** each chart has a title; distributions use option labels sorted by count, with "Otras" for the tail; a
+0–10 scale shows NPS with Detractores / Pasivos / Promotores (count and %); the gauge reads "Promedio X en una escala de
+A a B"; every chart states its numbers in text, not only by colour.
+
+**DSH-06 · A questionnaire without answers**
+Open `/console/questionnaires/14c8aed7-09de-4848-ba3b-e7bece41ba1e/dashboard` ("Onboarding feedback"). **Expected:**
+"Aún no hay respuestas" / "Los gráficos aparecen aquí en cuanto la gente empiece a responder este cuestionario." and a
+"Respuestas" button; no dashboard is spent.
+
+**DSH-07 · Without dashboards left the dashboard is locked**
+As `owner@globex.test` (Starter: one dashboard), answer `/f/globex-product-feedback` once and open its Tablero (it
+spends the one dashboard). Copy the questionnaire, answer the copy once and open the copy's Tablero. **Expected:** the
+tiles and funnel show, and below them a blurred sample with "Los tableros con IA no están en tu plan", the plan text
+and "Obtén tus tableros" → `/console/profile/plans`. The first questionnaire's dashboard still shows.
+
+**DSH-08 · A diagnostic shows its tiers**
+As `owner@acme.test`, Tablero of "AI maturity diagnostic". **Expected:** type badge "Conocimiento" and a "Distribución
+por nivel" chart with the tiers of its answers.
+
+**DSH-09 · Another account's dashboard is not found**
+As `owner@globex.test`, open `/console/questionnaires/87b75bed-547a-4b43-b59f-d264f5a5fa04/dashboard`. **Expected:** the
+error state "not found"; nothing is generated.
+
+**DSH-10 · The page in Español and English**
+Switch the sidebar language. **Expected:** the tiles, funnel, chart types, loading messages and the locked card are
+translated; no raw keys.
 
 ## 7. Organizations, assignations and projects — ORG, ASG, ARS, PRJ
 
