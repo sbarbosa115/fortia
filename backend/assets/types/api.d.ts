@@ -198,6 +198,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/styles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_styles_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/token": {
         parameters: {
             query?: never;
@@ -224,6 +240,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["post_api_auth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/{customer_id}/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_settings_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1073,10 +1105,27 @@ export interface components {
                 [key: string]: components["schemas"]["FeatureVerdictOutput"];
             };
         };
+        StylesOutput: {
+            /** @description logoUrl, font, body, h1–h3, p, label, a, button.primary/secondary, input (PRD §6.18) */
+            styles?: {
+                [key: string]: unknown;
+            } | null;
+        };
         TokenOutput: {
             id_token: string;
             refresh_token: string;
             expires_in: number;
+        };
+        CustomerSettingsOutput: {
+            /** @enum {string} */
+            language: "es-CO" | "en-US";
+            transcription_url?: string | null;
+            pixel_id?: string | null;
+            linkedin_partner_id?: string | null;
+            linkedin_conversion_id?: string | null;
+            google_ads_id?: string | null;
+            google_ads_conversion_label?: string | null;
+            max_files: number;
         };
         OnboardingOutput: {
             onboarding_completed: boolean;
@@ -2028,6 +2077,43 @@ export interface operations {
             };
         };
     };
+    get_api_styles_get: {
+        parameters: {
+            query?: {
+                customer_id?: string;
+                questionnaire_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The styles, or null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StylesOutput"];
+                };
+            };
+            /** @description INVALID_REQUEST (neither customer_id nor questionnaire_id) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_api_auth_token: {
         parameters: {
             query?: never;
@@ -2082,6 +2168,42 @@ export interface operations {
             };
             /** @description UNAUTHORIZED */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CustomerSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSettingsOutput"];
+                };
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

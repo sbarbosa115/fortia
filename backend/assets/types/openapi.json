@@ -781,6 +781,50 @@
                 }
             }
         },
+        "/api/v1/styles": {
+            "get": {
+                "tags": [
+                    "Styles"
+                ],
+                "operationId": "get_api_styles_get",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "questionnaire_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The styles, or null",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StylesOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_REQUEST (neither customer_id nor questionnaire_id)"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
         "/api/v1/auth/token": {
             "post": {
                 "tags": [
@@ -826,6 +870,43 @@
                     },
                     "401": {
                         "description": "UNAUTHORIZED"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/{customer_id}/settings": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "get_api_settings_get",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[A-Za-z0-9]{1,16}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomerSettings",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerSettingsOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
                     }
                 }
             }
@@ -3939,6 +4020,17 @@
                 },
                 "type": "object"
             },
+            "StylesOutput": {
+                "properties": {
+                    "styles": {
+                        "description": "logoUrl, font, body, h1\u2013h3, p, label, a, button.primary/secondary, input (PRD \u00a76.18)",
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
             "TokenOutput": {
                 "required": [
                     "id_token",
@@ -3954,6 +4046,51 @@
                     },
                     "expires_in": {
                         "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerSettingsOutput": {
+                "required": [
+                    "language",
+                    "max_files"
+                ],
+                "properties": {
+                    "language": {
+                        "type": "string",
+                        "enum": [
+                            "es-CO",
+                            "en-US"
+                        ]
+                    },
+                    "transcription_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "pixel_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "linkedin_partner_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "linkedin_conversion_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "google_ads_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "google_ads_conversion_label": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "max_files": {
+                        "type": "integer",
+                        "maximum": 20,
+                        "minimum": 1
                     }
                 },
                 "type": "object"
@@ -4586,6 +4723,9 @@
         },
         {
             "name": "Billing"
+        },
+        {
+            "name": "Styles"
         },
         {
             "name": "Auth"
