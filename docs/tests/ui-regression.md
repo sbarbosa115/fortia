@@ -371,6 +371,139 @@ organización", "Editar organización", "Miembros (4)", "Añadir miembro", "Impo
 "Guardar cambios", the domain warning and the delete dialog, all in Spanish (member error texts from the API stay as the
 API writes them).
 
+**ASG-01 · The list**
+As `owner@acme.test` (English) open Assignations. **Expected:** "8 assignations", newest first, 10 per page, never a
+Globex row. Each row: the name, "Acme Retail" (link to the organization) and the questionnaire (link to its editor), the
+audience chip ("Everybody", "Area: Sales"), Type, progress ("2 of 4 people" with a bar for Customer service survey,
+"4 of 4 questions" or "Completed"), Created, the Active switch and View / Edit / Copy link / Send reminder / Delete.
+
+**ASG-02 · Type tabs**
+Default: only Customer service survey, without the Type column. Follow-up: the follow-ups with a Due column ("Monthly
+store report": its date and "in 5 days"; "Safety audit": "overdue by 3 days" in red). A type with no rows: "No
+assignations of this type" with "Clear filters", which brings All back.
+
+**ASG-03 · Copy link and Active**
+Copy link: toast "Link copied" and the clipboard holds `http://localhost:8080/a/{id}`. Switch Active off on a row:
+toast ""{name}" is inactive"; reload: it stays off. Switch it back on.
+
+**ASG-04 · Send reminder from the list**
+On Monthly store report press the bell: "Send the reminder now?" / "An email with the link to "Monthly store report"
+will be sent to the people who answer it." → "Send reminder": toast "Reminder sent to 2 recipients". Mailpit: one
+email each to maria@ and juan@acme-retail.test ("«Monthly store report» vence en 5 días", Spanish: the account's
+language) and the status email to owner@acme.test. The bell of a completed follow-up is disabled with "It is complete:
+there is nothing to remind"; a default assignation has no bell.
+
+**ASG-05 · Delete**
+Create a throwaway assignation (ASG-08), then Delete it: "Delete assignation?" / ""X" will be deleted and its link will
+stop working. The answers already given are kept." → Delete: toast ""X" was deleted" and the row is gone.
+
+**ASG-06 · Read-only**
+As `reader@acme.test`: "New assignation", Edit, Delete, the bell and the Active switch are disabled with "Your read-only
+role can't make changes." (create: "…can't create resources."); View and Copy link work; `/assignations/new` and
+`/:id/edit` redirect to the list; the questionnaire line is plain text.
+
+**ASG-07 · Basic step validations**
+"New assignation" → Next with nothing chosen. **Expected:** "Organization is required", "Questionnaire is required",
+"Name is required" and the toast "Check the highlighted fields before continuing."; "Who responds?" is disabled with
+"Choose an organization first.".
+
+**ASG-08 · Create a default assignation**
+Type Default; organization: type `retail` in its search (only Acme Retail), pick it ("3 people will respond"… the live
+counter shows the audience size); questionnaire: type in the search (results update ~300 ms after typing) and pick one
+not yet assigned; Name `Q4 store survey`; Next → Registration (Full name fixed, Email visible and required) → "Create
+assignation". **Expected:** "Assignation created!", the link with Copy, and "Go to Assignations"; the list shows it.
+
+**ASG-09 · Who responds**
+In the form: People lists the members with checkboxes and a search by name, email, area or role; Area lists "Sales (2
+people)", "Operations (1 person)", "Logistics (1 person)"; Role likewise. Checking values updates "N people will
+respond". Choosing People with nothing checked and Next: "Check at least one person, area or role, or choose
+Everybody". Changing the organization resets the audience to Everybody.
+
+**ASG-10 · Follow-up and due date**
+Type Follow-up: the due date field appears with its hint ("The day this follow-up should be completed…"). A date in
+the past is accepted. Saving a follow-up without a date works (no due date).
+
+**ASG-11 · Registration step**
+Uncheck "Email is required": "At least one of email or phone must be required" (and pressing Create shows it as a
+toast). Checking "Phone is required" also makes Phone visible and clears the error. Unchecking a field's Visible
+unchecks its Required.
+
+**ASG-12 · A questionnaire of another organization**
+In the form choose Acme Logistics and the questionnaire of "Customer service survey" (assigned to Acme Retail).
+**Expected:** "This questionnaire is already assigned to "Acme Retail". A copy of the questionnaire will be created and
+the copy will be assigned instead." Create: the new assignation points to a copy ("(copia) …") in Questionnaires.
+
+**ASG-13 · Edit**
+Edit Customer service survey: the type is not offered; the fields come filled (organization, audience, questionnaire,
+name, registration). Change the name → Save changes: "Assignation updated!" and the list shows the new name. Editing a
+follow-up and clearing its due date removes it.
+
+**ASG-14 · Organization of an assignation in a project**
+Edit "Store opening checklist" (in the project Store opening Q4) and choose another organization → Save: toast "This
+assignation belongs to a project, so its organization can't change."
+
+**ASG-15 · Plan gate**
+On an account whose plan lacks assignations (or used them all) "New assignation" is disabled with "Your plan doesn't
+include assignations." and `/assignations/new` redirects to the list.
+
+**ASG-16 · Default detail**
+View Customer service survey. **Expected:** "← Assignations", the name, "Acme Retail · 4 of 4 people · 2 completed · 2
+pending", Default badge and the audience chip, Copy link, Edit, Export CSV; "Completed (2)" (María, Juan) and "Pending
+(2)" (Lucía In progress, Pedro Pending), columns Name, Email, Attempts, Status and "View answers" (to
+/console/questionnaires/{id}/answers/{session}). The chevron next to Attempts opens the attempt history.
+
+**ASG-17 · Search and CSV**
+Type `juan`: only Juan, "Completed (1)" and "Pending (0)"; `zzz`: "No respondent matches" with "Clear search". Export
+CSV downloads `Customer service survey.csv` with Name, Email, Attempts, Status and one row per member.
+
+**ASG-18 · Follow-up in review**
+View Inventory count. **Expected:** Follow-up badge, "Everybody", "In review", "No due date"; subtitle "Acme Retail ·
+Every question is answered"; the notice "Review every answer … · 4 left"; the table #, Question, Answer, Answered,
+Review ("Not reviewed") and "View answer"; "Who can carry it on (4)" with the members; "Send for correction" disabled
+with "Reject at least one answer, and review them all, to send it for correction."
+
+**ASG-19 · Reviewing**
+"View answer" on question 1: dialog "Question 1 of 4" with the answer, Comment, Reject / Approve and the arrows.
+Approve: toast "Review saved" and the dialog jumps to question 2. Reject question 2 with a comment, approve the rest:
+"Every answer of this attempt is reviewed". The page shows "Changes requested", "You rejected 1 answer — …" and "Send
+for correction" enabled.
+
+**ASG-20 · Send for correction**
+On Safety audit press "Send for correction": the dialog lists "2. What needs to be fixed, and by when?" with "Add a
+photo of each fire extinguisher." → confirm: toast "Attempt 2 sent to 3 recipients"; Mailpit has the correction emails
+(«Safety audit» necesita correcciones). The page shows attempt 2 open, "On question 2 of 4", the approved answers as
+"Approved before" and "Send reminder" again.
+
+**ASG-21 · Attempts**
+On Safety audit choose "Attempt 1" in the attempt selector: the URL gets `?attempt=1`, "This is a previous attempt: it
+can only be read.", and the review dialog has no Approve/Reject.
+
+**ASG-22 · Follow-up nobody opened**
+View Monthly store report: "Nobody has opened the follow-up yet", "in 5 days", "Send reminder" (confirm → "Reminder
+sent to 2 recipients"), "There are no answers in this attempt yet." and "Who can carry it on (2)".
+
+**ASG-23 · Not found**
+Open /console/assignations/{a Globex id} as Acme, or a made-up id: "This assignation does not exist." with "Back to
+Assignations".
+
+**ASG-24 · Daily reminders**
+`docker compose exec php php bin/console app:assignations:send-reminders`. **Expected:** "Sent N reminder(s)…" for the
+open follow-ups not reminded today (UTC); running it again the same day sends 0. Mailpit: the respondents' reminders
+and the owner's status.
+
+**ASG-25 · Respondent login (API, until ARS)**
+`POST /api/v1/assignations/{Monthly store report}/sessions` with `{"name":"x","email":"maria@acme-retail.test"}`: 200
+with `token` (rt.…), `questionnaire` and `flow`; with Lucía's email: 403 NOT_IN_AUDIENCE (area Sales only); with an
+unknown email: 403 USER_NOT_FOUND; with neither email nor phone: 400 MISSING_IDENTIFIER.
+
+**ASG-26 · Español**
+Switch to Español on the list, the form and both details. **Expected:** "Asignaciones", "Nueva asignación", tabs
+"Todas, Estándar, Seguimiento", "2 de 4 personas", "vencido hace 3 días", "¿Enviar el recordatorio ahora?", "¿Quién
+responde?", "Responderán N personas", "Registro", "En revisión", "Quién puede continuarlo (4)", "Enviar a corrección"…
+no raw translation keys.
+
+<!-- ASG-27 – 30: free. -->
+
 **PRJ-01 · The list**
 As `owner@acme.test` (language English) open Projects. **Expected:** "2 projects", newest first: "Supplier audit" and
 "Store opening Q4", each with "AR" on a colour, the name, "Acme Retail · created {date}". Supplier audit: "Overdue",
