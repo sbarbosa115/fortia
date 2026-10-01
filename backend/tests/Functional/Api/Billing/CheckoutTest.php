@@ -198,6 +198,20 @@ final class CheckoutTest extends ApiTestCase
         self::assertTrue($this->data($this->api('GET', '/api/v1/customer/usage', as: $email))['plan_active'], 'the renewed period is the plan window: the plan stays active (PRD §7.1)');
     }
 
+    public function testARenewalEndsTheTrialButNotTheTrialMarker(): void
+    {
+        $email = $this->account('GLOBEX01', plan: 'starter');
+        $this->subscribe($email, 'pro');
+        self::assertNotNull($this->data($this->api('GET', '/api/v1/plans', as: $email))['trial_end']);
+
+        $this->gateway()->renew((string) $this->customerPlan('GLOBEX01')->stripeSubscriptionId());
+        $this->api('GET', '/api/v1/plans', as: $email);
+
+        $plans = $this->data($this->api('GET', '/api/v1/plans', as: $email));
+        self::assertNull($plans['trial_end'], 'the renewed period is paid');
+        self::assertFalse($plans['trial_eligible'], 'PRD §7.3: the trial marker is never cleared');
+    }
+
     public function testACancelledSubscriptionEndsAtRenewalAndKeepsThePaidPlan(): void
     {
         $email = $this->account('GLOBEX01', plan: 'starter');

@@ -297,6 +297,7 @@ final class FakePaymentGateway implements PaymentGateway, SimulatedGateway
         $subscription['current_period_start'] = $start->getTimestamp();
         $subscription['current_period_end'] = self::addInterval($start, (string) $subscription['interval'])->getTimestamp();
         $subscription['status'] = 'active';
+        $subscription['trial_end'] = null; // a renewal starts a paid period: any trial is over
         $this->save('subscription', $subscriptionId, $subscription);
         $price = $this->price((string) $subscription['price_id']);
         $this->emitInvoice(GatewayEvent::INVOICE_PAID, $subscription, 'subscription_cycle', self::discounted($price->amount ?? 0, $subscription['discount']));
