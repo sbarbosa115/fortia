@@ -28,6 +28,10 @@ class WebhookDelivery
     #[ORM\Column(nullable: true)]
     private ?int $lastStatusCode = null;
 
+    /** What went wrong on the last failed attempt ("HTTP 500", "Timeout"…), for the delivery log. */
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $lastError = null;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $nextAttemptAt = null;
 
@@ -61,14 +65,17 @@ class WebhookDelivery
         ++$this->attempts;
         $this->status = self::DELIVERED;
         $this->lastStatusCode = $statusCode;
+        $this->lastError = null;
         $this->nextAttemptAt = null;
         $this->updatedAt = $at;
     }
 
-    public function recordFailure(?int $statusCode, ?\DateTimeImmutable $retryAt, \DateTimeImmutable $at): void
+    /** A failed attempt; $retryAt null = no retries left (failed). */
+    public function recordFailure(?int $statusCode, string $error, ?\DateTimeImmutable $retryAt, \DateTimeImmutable $at): void
     {
         ++$this->attempts;
         $this->lastStatusCode = $statusCode;
+        $this->lastError = mb_substr($error, 0, 255);
         $this->nextAttemptAt = $retryAt;
         $this->status = null === $retryAt ? self::FAILED : self::PENDING;
         $this->updatedAt = $at;
@@ -113,6 +120,21 @@ class WebhookDelivery
     public function lastStatusCode(): ?int
     {
         return $this->lastStatusCode;
+    }
+
+    public function lastError(): ?string
+    {
+        return $this->lastError;
+    }
+
+    public function isPending(): bool
+    {
+        return self::PENDING === $this->status;
+    }
+
+    public function updatedAt(): \DateTimeImmutable
+    {
+        return $this->updatedAt;
     }
 
     public function nextAttemptAt(): ?\DateTimeImmutable

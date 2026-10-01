@@ -1,0 +1,10 @@
+# Integrations (API keys, external API, outgoing webhooks). In tests, webhooks go to a transport that records the
+# requests instead of sending them (WebhookDispatchTest).
+services:
+    App\Integrations\Application\Port\WebhookTransport: '@App\Integrations\Infrastructure\Http\HttpWebhookTransport'
+
+when@test:
+    services:
+        App\Tests\Functional\Api\Integrations\RecordingWebhookTransport:
+            public: true
+        App\Integrations\Application\Port\WebhookTransport: '@App\Tests\Functional\Api\Integrations\RecordingWebhookTransport'
