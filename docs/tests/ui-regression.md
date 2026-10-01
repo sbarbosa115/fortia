@@ -439,6 +439,110 @@ Clear the pixel id and Save: it is gone after a reload. Changing only the langua
 As `reader@acme.test`, Profile → Settings. **Expected:** every control is disabled and the read-only reason shows; Save
 is disabled with the same reason.
 
+### Plans and billing — BIL (item billing)
+
+Billing runs on the fake payment gateway (`PAYMENT_PROVIDER=fake`): its pages are under `/fake-gateway/*`, say "Test
+payment gateway" and never ask for payment data. Its webhooks reach the API at the end of each request, so a paid
+checkout is applied by the time the console reloads. On the seed data `owner@acme.test` is on Pro **without** a
+subscription and `owner@globex.test` is on Starter.
+
+**BIL-01 · The plans page**
+Sign in as `owner@acme.test`, Profile → Plan & usage → "Change plan" (or open `/console/profile/plans`).
+**Expected:** cards Pro ($49 / month, or $470 / year), Business ($149), Enterprise and Starter ("Price on request");
+Pro has "Current plan · Monthly" and "14 days free"; Business shows "Buy yearly · Save 20%"; Enterprise has "Get in
+touch"; "Have a promo code? Apply it at checkout." above the cards. Each card lists Experiences, Responses and the
+plan's features ("Unlimited" for a negative limit).
+
+**BIL-02 · Checkout on the hosted page**
+On Pro press "Subscribe". **Expected:** the same tab opens the test gateway: "Subscribe to Pro", "Billed monthly",
+49 USD / month, "14 days free", the account's email. Press Pay. **Expected:** back on Plans with "Payment received.
+Your plan and usage are up to date.", no `?checkout=` left in the address bar, Pro "Current plan · Monthly" with
+"Free trial until <date>", "Cancel subscription" on the card and no more "days free" badges.
+
+**BIL-03 · An invalid promotion code**
+Start a checkout again from a plan without subscription (or in BIL-02 before paying) and type `NOPE` as the promotion
+code, Pay. **Expected:** "This promotion code is not valid." on the gateway page; nothing changes in Mappi.
+
+**BIL-04 · Upgrading**
+With the Pro subscription, press "Upgrade" on Business. **Expected:** no confirmation; toast "You're now on Business.";
+Business becomes "Current plan · Monthly" right away; Profile → Plan & usage shows Business with every counter back
+at 0 (PRD §7.4: a pricier plan resets usage).
+
+**BIL-05 · Switching to a smaller plan asks first and is scheduled**
+On Pro press "Switch to this plan". **Expected:** "Switch to a smaller plan?" saying Pro starts when the current
+period ends and Business is kept until then. Confirm "Switch plan". **Expected:** toast "Pro starts on <date>."; Pro
+shows "Next plan" and "Starts on <date> · Monthly"; Business is still current.
+
+**BIL-06 · Keeping the current plan**
+On the Business card press "Keep my current plan". **Expected:** no confirmation; toast "You'll stay on Business.";
+"Next plan" is gone.
+
+**BIL-07 · Yearly billing**
+On Business press "Switch to yearly". **Expected:** toast "You're now on Business." and "Current plan · Yearly" (same
+price monthly → yearly is an upgrade). Then press "Switch to this plan" on Business (monthly). **Expected:** "Go back
+to monthly billing?"; Cancel closes it without a change.
+
+**BIL-08 · Cancelling the subscription**
+On the current card press "Cancel subscription". **Expected:** "Cancel your subscription?" saying the plan is kept
+until <date>, with "Keep my plan" and "Cancel subscription". Confirm. **Expected:** toast "Your subscription ends on
+<date>."; the card says "Ends on <date>" and offers "Resume subscription"; the plan is still current.
+
+**BIL-09 · Resuming**
+Press "Resume subscription". **Expected:** no confirmation; toast "Your subscription renews on <date>."; the card
+says "Renews on <date>" (or "Free trial until <date>" while a trial runs) and offers "Cancel subscription" again.
+
+**BIL-10 · Manage billing (the portal)**
+Schedule Pro again (BIL-05), then Profile → Plan & usage. **Expected:** the plan name, "Active", "Current period until
+<date>", a bar per row ("Questionnaires (all types)", "Responses", one per feature, "Unlimited" rows without a bar),
+"Manage billing" and "Change plan". Press "Manage billing". **Expected:** the test gateway's "Billing portal" with the
+subscription, "Renews on … · then price_fake_pro_month", and "Return to Mappi".
+
+**BIL-11 · A renewal starts the scheduled plan**
+In the portal press "Simulate renewal", then "Return to Mappi". **Expected:** Plans shows Pro "Current plan ·
+Monthly", no "Next plan", "Renews on <date>". (This leaves `owner@acme.test` on Pro, as the seed had it.)
+
+**BIL-12 · An account without subscription**
+Sign in as `owner@globex.test`, open Plans. **Expected:** Starter is "Current plan · Monthly" with "N days left · until
+<date>" and no button; Pro offers "Subscribe" and "14 days free"; Profile → Plan & usage has no "Manage billing".
+
+**BIL-13 · Get in touch**
+On Enterprise press "Get in touch". **Expected:** "Get in touch about Enterprise" with the email pre-filled. Press Send
+request with an empty phone: "Enter a phone number (up to 50 characters)."; a bad email: "Enter a valid email
+address.". Type a phone and send. **Expected:** "Request received / You'll be contacted soon." and in Mailpit an email
+to `sales@mappi.test` (SALES_LEAD_RECIPIENTS) with the subject "[Ventas] <name> está interesado en el plan
+Enterprise", in Spanish, with the plan, contact email, phone, user and account.
+
+**BIL-14 · Leaving the hosted checkout**
+On Pro press "Subscribe", then "Cancel" on the gateway. **Expected:** back on Plans with "Checkout canceled. Nothing was
+charged."; Starter is still current.
+
+**BIL-15 · Read-only members**
+Sign in as `reader@acme.test`, open Plans. **Expected:** every billing button (Subscribe, Upgrade, Switch…, Buy yearly,
+Cancel subscription) is disabled with "Your read-only role can't make changes."; "Get in touch" still works. Profile →
+Plan & usage: "Manage billing" is disabled with the same reason.
+
+**BIL-16 · Spanish**
+Switch the console to Español and open Plans. **Expected:** "Plan actual · Mensual", "Precio a consultar", "Mejorar
+plan", "Ahorra 20 %", dates and prices in Spanish formats; no raw translation keys.
+
+**BIL-17 · The usage banner**
+As `owner@globex.test` (Starter: 5 regular questionnaires) create regular questionnaires until 3 exist. **Expected:** an
+amber banner above the page "You're using 60% of your plan." with "See all (N)" (→ Profile) and "Upgrade" (→ Plans).
+Dismiss it: it stays hidden while the usage stays in the same tier (50 / 75 / 90 / 100) and comes back at the next
+one; from 90 % it is red.
+
+**BIL-18 · The plan-limit alert**
+Keep creating regular questionnaires as `owner@globex.test` until the sixth. **Expected:** an amber toast with the
+plan-limit reason; Profile → Plan & usage shows "Regular questionnaires 5 of 5" with a red bar; the banner says 100%.
+
+**BIL-19 · Payment webhooks are signed**
+`curl -i -X POST http://localhost:8080/api/v1/checkout/webhook -H 'Stripe-Signature: t=1,v1=forged' -d '{}'`.
+**Expected:** `401` with the plain-text body "Invalid signature" (PRD §8.3); nothing changes.
+
+**BIL-20 · Super-admin and plans**
+Sign in as `admin@mappi.test` without assuming anyone and open Plans. **Expected:** the page loads for the admin's own
+account; no usage banner is shown to a super-admin who is not assuming an account.
+
 ## 4. Super-admin — ADM (admin)
 
 <!-- ADM-01 – 15: admin. -->
