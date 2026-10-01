@@ -1,0 +1,12 @@
+{
+  "log": "Conversation with the assistant",
+  "label": "Your message",
+  "placeholder": "Type your message…",
+  "send": "Send",
+  "thinking": "Thinking…",
+  "failed": "Something went wrong processing your message.",
+  "retry": "Retry",
+  "full": "This conversation reached its message limit. Refresh the page to start over.",
+  "quickReplies": "Quick replies",
+  "counter": "{{count}} / {{max}}"
+}

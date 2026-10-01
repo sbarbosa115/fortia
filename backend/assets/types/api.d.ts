@@ -369,6 +369,199 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_chat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/{customer_id}/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** P (D4: kept public, rate limited). Bare: [{product_id, name, description, price, image_url, product_url}]. */
+        get: operations["get_api_products_public"];
+        put?: never;
+        post: operations["post_api_products_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A. The console's listing of the caller's catalog: newest first, `search` matches every word of the name. */
+        get: operations["get_api_products_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/{customer_id}/products/{product_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_products_get"];
+        put: operations["put_api_products_update"];
+        post?: never;
+        delete: operations["delete_api_products_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/scrapers/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A. Job `scrape_products` (stage scraping). Result {type: "scrape_products", products}; fails with
+         *     CATALOG_UNREACHABLE or NO_PRODUCTS_FOUND. Persists nothing.
+         */
+        post: operations["post_api_scrapers_products"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/quiz-funnel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AG, Cap(quiz-funnel). Job `create_quiz_funnel` (stages loading_products → saving_products →
+         *     generating_questionnaire → saving). Result {type: "create_quiz_funnel", flow: {id, slug, questionnaire_id},
+         *     questionnaire_url}. Without source_url the connected store is used (400 SHOPIFY_NOT_CONNECTED without one).
+         */
+        post: operations["post_api_questionnaire_quiz_funnel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/shopify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A, write permission. `shop` must be a *.myshopify.com store. */
+        get: operations["get_api_shopify_authorize"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/shopify/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * P. Where the platform sends the merchant back. Verifies the state (D5), exchanges the code for the tokens and
+         *     stores them; the first connection also syncs the products. Answers an HTML page that closes itself.
+         */
+        get: operations["get_api_shopify_callback"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopify/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_shopify_connection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopify/sync/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A, write permission. Replaces all of the account's products with the store's (§7.17). */
+        get: operations["get_api_shopify_sync"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shopify/webhooks/{topic}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_shopify_gdpr_webhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/videos": {
         parameters: {
             query?: never;
@@ -1795,6 +1988,203 @@ export interface components {
             styles?: {
                 [key: string]: unknown;
             } | null;
+        };
+        ChatChoiceOutput: {
+            label: string;
+            value?: (number) | null;
+        };
+        ChatDraftQuestionOutput: {
+            /** @description The stored question's id, for a questionnaire being edited */
+            id?: string | null;
+            title: string;
+            description?: string | null;
+            /** @enum {string} */
+            type: "radio" | "checkbox" | "select" | "text" | "range";
+            choices: components["schemas"]["ChatChoiceOutput"][];
+            category?: string | null;
+            required: boolean;
+            min?: number | null;
+            max?: number | null;
+        };
+        ChatTierOutput: {
+            name: string;
+            description?: string | null;
+            recommendations: string[];
+            action_plan: string[];
+        };
+        ChatEndingOutput: {
+            message?: string | null;
+            tiers: components["schemas"]["ChatTierOutput"][];
+        };
+        ChatDraftOutput: {
+            /** @description Set when an existing questionnaire is being edited */
+            questionnaire_id?: string | null;
+            /** @enum {string} */
+            phase: "basics" | "questions" | "ending" | "review";
+            title?: string | null;
+            /** @enum {string|null} */
+            type?: "regular" | "diagnostic" | "chain" | null;
+            topic?: string | null;
+            description?: string | null;
+            landing_page?: boolean | null;
+            has_disclaimer?: boolean | null;
+            disclaimer?: string | null;
+            capture_user_data?: boolean | null;
+            basics_confirmed: boolean;
+            questions: components["schemas"]["ChatDraftQuestionOutput"][];
+            ending: components["schemas"]["ChatEndingOutput"];
+            /** @description Chains: the instructions that generate the next stage */
+            chain_prompt?: string | null;
+        };
+        ChatPendingWriteOutput: {
+            id: string;
+            tool: string;
+            input: {
+                [key: string]: unknown;
+            };
+            label: string;
+        };
+        ChatInput: {
+            messages: {
+                /** @enum {string} */
+                role: "user" | "assistant";
+                content: string;
+            }[];
+            /**
+             * @default create
+             * @enum {string|null}
+             */
+            mode: "create" | "draft" | null;
+            draft?: components["schemas"]["ChatDraftOutput"] | null;
+            item?: {
+                /** @enum {string} */
+                kind: "questionnaire" | "organization" | "assignation" | "project";
+                /** Format: uuid */
+                id: string;
+            } | null;
+            pending_writes?: components["schemas"]["ChatPendingWriteOutput"][] | null;
+        };
+        ChatErrorOutput: {
+            code: string;
+            message: string;
+        };
+        ChatActionOutput: {
+            id: string;
+            tool: string;
+            label: string;
+            /** @enum {string} */
+            status: "done" | "failed" | "declined";
+            /** @default null */
+            error: components["schemas"]["ChatErrorOutput"] | null;
+            /** @default null */
+            job_id: string | null;
+            /**
+             * @default null
+             * @enum {string|null}
+             */
+            language: "es" | "en" | null;
+            /** @default null */
+            url: string | null;
+            /** @default null */
+            result: {
+                [key: string]: unknown;
+            } | null;
+        };
+        ChatTurnResultOutput: {
+            /** @enum {string} */
+            type: "chat" | "chat-questionnaire-created" | "chat-questionnaire-drafted" | "chat-questionnaire-approved";
+            /** @description The assistant's answer, in Markdown; records are linked as [Name](item:<kind>/<id>) */
+            message: string;
+            quick_replies: string[];
+            draft?: components["schemas"]["ChatDraftOutput"] | null;
+            actions: components["schemas"]["ChatActionOutput"][];
+            pending_writes: components["schemas"]["ChatPendingWriteOutput"][];
+            /**
+             * @description chat-questionnaire-created: the questionnaire saved
+             * @default null
+             */
+            questionnaire_id: string | null;
+            /**
+             * @description chat-questionnaire-approved: the approved draft as the body of POST /questionnaire (states, cta, layout); the slug is the caller's
+             * @default null
+             */
+            flow: {
+                [key: string]: unknown;
+            } | null;
+        };
+        ChatJobOutput: {
+            job_id: string;
+            /** @enum {string} */
+            job_type: "chat";
+            /** @enum {string} */
+            status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "CANCELLED";
+            result?: components["schemas"]["ChatTurnResultOutput"] | null;
+            stage?: string | null;
+            created_at: string;
+            updated_at: string;
+        };
+        ChatJobEnvelopeOutput: {
+            job: components["schemas"]["ChatJobOutput"];
+        };
+        ProductInput: {
+            name: string;
+            /** @description HTML; sanitized when stored (D11) */
+            description?: string | null;
+            /** Format: float */
+            price?: number | null;
+            image_url?: string | null;
+            product_url?: string | null;
+        };
+        CatalogProductOutput: {
+            product_id: string;
+            customer_id: string;
+            name: string;
+            /** @description Sanitized HTML (D11) */
+            description: string;
+            /** Format: float */
+            price?: number | null;
+            image_url?: string | null;
+            product_url?: string | null;
+            /** @description The store origin it was imported from */
+            source_url?: string | null;
+            /** @description The quiz funnel created from it */
+            questionnaire_id?: string | null;
+            created_at?: string | null;
+            updated_at?: string | null;
+        };
+        CatalogPageOutput: {
+            items: components["schemas"]["CatalogProductOutput"][];
+            page: number;
+            page_size: number;
+            total: number;
+            total_pages: number;
+        };
+        ScrapeInput: {
+            /** The URL as given, with https:// when it had no scheme. */
+            url: string;
+            limit?: number | null;
+        };
+        QuizFunnelInput: {
+            /** @enum {string} */
+            type: "experience" | "profiling";
+            source_url?: string | null;
+            products?: {
+                name?: string;
+                description?: string | null;
+                price?: number | null;
+                image_url?: string | null;
+                product_url?: string | null;
+            }[] | null;
+        };
+        ShopifyAuthorizeOutput: {
+            url: string;
+        };
+        ShopifyConnectionOutput: {
+            shop?: string | null;
+        };
+        ShopifySyncOutput: {
+            shop: string;
+            products: components["schemas"]["CatalogProductOutput"][];
         };
         VideoOutput: {
             id: string;
@@ -3475,6 +3865,514 @@ export interface operations {
             };
             /** @description PLAN_LIMIT_REACHED */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_chat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ChatInput"];
+            };
+        };
+        responses: {
+            /** @description The turn's job; its result is a ChatTurnResultOutput */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatJobEnvelopeOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_products_public: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account's catalog (bare) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductOutput"][];
+                };
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_products_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ProductInput"];
+            };
+        };
+        responses: {
+            /** @description The new product */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogProductOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_products_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of the catalog */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogPageOutput"];
+                };
+            };
+        };
+    };
+    get_api_products_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The product */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogProductOutput"];
+                };
+            };
+            /** @description CUSTOMER_NOT_FOUND, PRODUCT_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_products_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ProductInput"];
+            };
+        };
+        responses: {
+            /** @description The saved product */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogProductOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND, PRODUCT_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_products_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+                product_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND, PRODUCT_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_scrapers_products: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ScrapeInput"];
+            };
+        };
+        responses: {
+            /** @description The scraping job */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobEnvelopeOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_questionnaire_quiz_funnel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["QuizFunnelInput"];
+            };
+        };
+        responses: {
+            /** @description The quiz funnel job */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobEnvelopeOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, SHOPIFY_NOT_CONNECTED */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_shopify_authorize: {
+        parameters: {
+            query: {
+                shop: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The authorization URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopifyAuthorizeOutput"];
+                };
+            };
+            /** @description INVALID_REQUEST (shop missing or not a myshopify.com store) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_shopify_callback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description An HTML page that closes itself */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/html": unknown;
+                };
+            };
+            /** @description INVALID_REQUEST, TOKEN_EXCHANGE_FAILED */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_shopify_connection: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The connected store, or null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopifyConnectionOutput"];
+                };
+            };
+        };
+    };
+    get_api_shopify_sync: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The catalog after the sync */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopifySyncOutput"];
+                };
+            };
+            /** @description SHOPIFY_NOT_CONNECTED, SHOPIFY_TOKEN_EXPIRED */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN (read-only) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_shopify_gdpr_webhook: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Shopify-Hmac-Sha256": string;
+            };
+            path: {
+                topic: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Received */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_SIGNATURE */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

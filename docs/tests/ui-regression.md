@@ -1280,6 +1280,63 @@ Vencidos, Completados", "Requiere tu revisión", "0 de 2 aprobadas", "en N días
 respuestas", "Pregunta 3 de 4", the legend, "¿Eliminar este proyecto?" and the edit dialog, all in Spanish; no raw
 translation keys.
 
+The PRJ-13 – 20 cases use `/console/projects/new` as `owner@acme.test` (English). Dev runs the chat offline with the
+fake assistant, which answers in the account's language: "Create a questionnaire about {topic}" → the basics, "Sí" →
+the complete draft, "Sí" again → approved. These cases add projects to Acme: run them after PRJ-01 – 12.
+
+**PRJ-13 · The wizard**
+New project. **Expected:** "New project" with "Projects" (a link) · "A follow-up project in three steps"; the steps
+Questions (current), Organization and Project, the last two disabled; "STEP 1 OF 3" / "What do you want to ask?"; tabs
+"Draft with the assistant" (selected) and "Use an existing questionnaire"; the chat with "Hi! What do you want to ask in
+this project? ✨". On the right "What we're going to create": Questionnaire, Organization, Assignation and Project,
+dashed, with "Step 1/2/2/3", and "Nothing is saved until you press Create…". Continue is disabled; Cancel goes back to
+Projects.
+
+**PRJ-14 · Drafting with the chat**
+Type `Create a questionnaire about onboarding` and press Enter ("Thinking…" while it works). **Expected:** the basics
+(Título: Onboarding…) with quick replies Sí / No. Press Sí: the draft with 3 questions, "Review the draft", a strip
+"Onboarding · 3 questions" with "Draft", and under the card "Approve the draft in the chat to continue." (Continue
+still disabled). Shift+Enter in the box breaks the line instead of sending.
+
+**PRJ-15 · Approving saves the questionnaire**
+Press Sí again. **Expected:** "Questionnaire saved", a note "Saved Onboarding. Open it in the editor (a new tab…)" whose
+link opens /console/questionnaires/{id}/edit in a new tab, the strip says "Approved", the summary's Questionnaire is
+"Onboarding · 3 questions" with a check, and Continue is enabled. The questionnaire is in Questionnaires already, with
+a slug like `onboarding-1a2b3c`.
+
+**PRJ-16 · An existing questionnaire**
+Start again; "Use an existing questionnaire". **Expected:** a search ("Search questionnaires", server-side, ~300 ms) and
+the account's questionnaires with their question counts, 20 at a time with "Load more". Pick one: "Chosen: {title}.
+Edit it (new tab)", the summary says "Existing · N questions", Continue is enabled. If another organization already
+follows it, step 2 warns "{organization} already follows this questionnaire: a copy will be assigned."
+
+**PRJ-17 · Organization and who responds**
+Continue. **Expected:** "Who is it for?", a searchable list of organizations ("acme-retail.test · 4 members"); choose
+Acme Retail: "Who responds?" (Everybody / People / Area / Role, "4 people will respond") and "Assignation name" =
+"Acme Retail: Onboarding" (it follows the organization until you type your own). "+ Create an organization" opens "New
+organization" (Name, Email domain, Members — each needs a name and an email or phone); "Use this organization" adds it
+on top of the list with "New", and the summary says "New · N members". Choosing People with nobody checked: "Choose
+who responds: nobody would answer." and Continue is disabled.
+
+**PRJ-18 · The project**
+Continue. **Expected:** "Which project?" with Acme Retail's projects ("2 assignations · due {date}"…) and "+ Create a
+project". Its dialog has Name = the questionnaire title, Organization read-only, Description and Deadline; "Use this
+project" without a deadline says "Choose a deadline for the project". With one, the project is listed first with "New".
+The step chips now show Questions ✓ and Organization ✓; clicking either goes back keeping everything.
+
+**PRJ-19 · Create**
+Create ("Creating…"). **Expected:** toast "Done: questionnaire, assignation and project created" and the Projects list,
+with the new project "Not started", "0 of 1 approved" and its deadline. Its assignation "Acme Retail: Onboarding" is a
+Follow-up with the default registration. Choosing an existing project instead adds the follow-up to it ("0 of 3
+approved" for Store opening Q4). If Create fails half-way (stop the database briefly), pressing Create again finishes
+without a second organization, questionnaire or assignation.
+
+**PRJ-20 · Gates and Español**
+As `reader@acme.test`, /console/projects/new redirects to Projects. On an account whose plan lacks the assistant, the
+chat says "The assistant isn't included in your plan…" and the composer is disabled (the existing questionnaire still
+works). Switch to Español: "Nuevo proyecto", "¿Qué quieres preguntar?", "Redactar con el asistente", "Lo que vamos a
+crear", "¿Para quién es?", "¿Qué proyecto?", "Crear", "Listo: cuestionario, asignación y proyecto creados"; no raw keys.
+
 <!-- ORG-01 – 15: organizations. ASG-01 – 30: assignations. ARS-01 – 15: assignation-respondent.
      PRJ-01 – 12: projects. PRJ-13 – 20: project-wizard. -->
 

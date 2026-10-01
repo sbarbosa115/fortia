@@ -1114,6 +1114,528 @@
                 }
             }
         },
+        "/api/v1/chat": {
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "operationId": "post_api_chat",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChatInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "The turn's job; its result is a ChatTurnResultOutput",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChatJobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/{customer_id}/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "P (D4: kept public, rate limited). Bare: [{product_id, name, description, price, image_url, product_url}].",
+                "operationId": "get_api_products_public",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The account's catalog (bare)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProductOutput"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "operationId": "post_api_products_create",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The new product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CatalogProductOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only)"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "summary": "A. The console's listing of the caller's catalog: newest first, `search` matches every word of the name.",
+                "operationId": "get_api_products_list",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 200
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "One page of the catalog",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CatalogPageOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/{customer_id}/products/{product_id}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "operationId": "get_api_products_get",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CatalogProductOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND, PRODUCT_NOT_FOUND"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Products"
+                ],
+                "operationId": "put_api_products_update",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProductInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The saved product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CatalogProductOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only)"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND, PRODUCT_NOT_FOUND"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "operationId": "delete_api_products_delete",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only)"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND, PRODUCT_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/scrapers/products": {
+            "post": {
+                "tags": [
+                    "Quiz funnel"
+                ],
+                "summary": "A. Job `scrape_products` (stage scraping). Result {type: \"scrape_products\", products}; fails with\nCATALOG_UNREACHABLE or NO_PRODUCTS_FOUND. Persists nothing.",
+                "operationId": "post_api_scrapers_products",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScrapeInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "The scraping job",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/quiz-funnel": {
+            "post": {
+                "tags": [
+                    "Quiz funnel"
+                ],
+                "summary": "AG, Cap(quiz-funnel). Job `create_quiz_funnel` (stages loading_products \u2192 saving_products \u2192\ngenerating_questionnaire \u2192 saving). Result {type: \"create_quiz_funnel\", flow: {id, slug, questionnaire_id},\nquestionnaire_url}. Without source_url the connected store is used (400 SHOPIFY_NOT_CONNECTED without one).",
+                "operationId": "post_api_questionnaire_quiz_funnel",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuizFunnelInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "The quiz funnel job",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, SHOPIFY_NOT_CONNECTED"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/shopify": {
+            "get": {
+                "tags": [
+                    "Shopify"
+                ],
+                "summary": "A, write permission. `shop` must be a *.myshopify.com store.",
+                "operationId": "get_api_shopify_authorize",
+                "parameters": [
+                    {
+                        "name": "shop",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[a-z0-9][a-z0-9-]*\\.myshopify\\.com$"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The authorization URL",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopifyAuthorizeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_REQUEST (shop missing or not a myshopify.com store)"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only)"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/shopify/callback": {
+            "get": {
+                "tags": [
+                    "Shopify"
+                ],
+                "summary": "P. Where the platform sends the merchant back. Verifies the state (D5), exchanges the code for the tokens and\nstores them; the first connection also syncs the products. Answers an HTML page that closes itself.",
+                "operationId": "get_api_shopify_callback",
+                "responses": {
+                    "200": {
+                        "description": "An HTML page that closes itself",
+                        "content": {
+                            "text/html": {}
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_REQUEST, TOKEN_EXCHANGE_FAILED"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/shopify/connection": {
+            "get": {
+                "tags": [
+                    "Shopify"
+                ],
+                "operationId": "get_api_shopify_connection",
+                "responses": {
+                    "200": {
+                        "description": "The connected store, or null",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopifyConnectionOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/shopify/sync/products": {
+            "get": {
+                "tags": [
+                    "Shopify"
+                ],
+                "summary": "A, write permission. Replaces all of the account's products with the store's (\u00a77.17).",
+                "operationId": "get_api_shopify_sync",
+                "responses": {
+                    "200": {
+                        "description": "The catalog after the sync",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopifySyncOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "SHOPIFY_NOT_CONNECTED, SHOPIFY_TOKEN_EXPIRED"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN (read-only)"
+                    }
+                }
+            }
+        },
+        "/api/v1/shopify/webhooks/{topic}": {
+            "post": {
+                "tags": [
+                    "Shopify"
+                ],
+                "operationId": "post_api_shopify_gdpr_webhook",
+                "parameters": [
+                    {
+                        "name": "X-Shopify-Hmac-Sha256",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "topic",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "customers/data_request|customers/redact|shop/redact"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Received"
+                    },
+                    "401": {
+                        "description": "INVALID_SIGNATURE"
+                    }
+                }
+            }
+        },
         "/api/v1/admin/videos": {
             "get": {
                 "tags": [
@@ -5866,6 +6388,743 @@
                 },
                 "type": "object"
             },
+            "ChatChoiceOutput": {
+                "required": [
+                    "label"
+                ],
+                "properties": {
+                    "label": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "type": "number",
+                                "format": "float"
+                            },
+                            {
+                                "type": "integer"
+                            }
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "ChatDraftQuestionOutput": {
+                "required": [
+                    "title",
+                    "type",
+                    "choices",
+                    "required"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "The stored question's id, for a questionnaire being edited",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "radio",
+                            "checkbox",
+                            "select",
+                            "text",
+                            "range"
+                        ]
+                    },
+                    "choices": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChatChoiceOutput"
+                        }
+                    },
+                    "category": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "required": {
+                        "type": "boolean"
+                    },
+                    "min": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "max": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ChatTierOutput": {
+                "required": [
+                    "name",
+                    "recommendations",
+                    "action_plan"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "recommendations": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "action_plan": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ChatEndingOutput": {
+                "required": [
+                    "tiers"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "tiers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChatTierOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ChatDraftOutput": {
+                "required": [
+                    "phase",
+                    "basics_confirmed",
+                    "questions",
+                    "ending"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "description": "Set when an existing questionnaire is being edited",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phase": {
+                        "type": "string",
+                        "enum": [
+                            "basics",
+                            "questions",
+                            "ending",
+                            "review"
+                        ]
+                    },
+                    "title": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "regular",
+                            "diagnostic",
+                            "chain"
+                        ]
+                    },
+                    "topic": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "landing_page": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "has_disclaimer": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "disclaimer": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "capture_user_data": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "basics_confirmed": {
+                        "type": "boolean"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChatDraftQuestionOutput"
+                        }
+                    },
+                    "ending": {
+                        "$ref": "#/components/schemas/ChatEndingOutput"
+                    },
+                    "chain_prompt": {
+                        "description": "Chains: the instructions that generate the next stage",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ChatPendingWriteOutput": {
+                "required": [
+                    "id",
+                    "tool",
+                    "input",
+                    "label"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "tool": {
+                        "type": "string"
+                    },
+                    "input": {
+                        "type": "object",
+                        "additionalProperties": true
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ChatInput": {
+                "required": [
+                    "messages"
+                ],
+                "properties": {
+                    "messages": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "role",
+                                "content"
+                            ],
+                            "properties": {
+                                "role": {
+                                    "type": "string",
+                                    "enum": [
+                                        "user",
+                                        "assistant"
+                                    ]
+                                },
+                                "content": {
+                                    "type": "string",
+                                    "maxLength": 20000,
+                                    "minLength": 1
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "maxItems": 40,
+                        "minItems": 1
+                    },
+                    "mode": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": "create",
+                        "enum": [
+                            "create",
+                            "draft"
+                        ]
+                    },
+                    "draft": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ChatDraftOutput"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "item": {
+                        "required": [
+                            "kind",
+                            "id"
+                        ],
+                        "properties": {
+                            "kind": {
+                                "type": "string",
+                                "enum": [
+                                    "questionnaire",
+                                    "organization",
+                                    "assignation",
+                                    "project"
+                                ]
+                            },
+                            "id": {
+                                "type": "string",
+                                "format": "uuid"
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "pending_writes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChatPendingWriteOutput"
+                        },
+                        "nullable": true,
+                        "maxItems": 50
+                    }
+                },
+                "type": "object"
+            },
+            "ChatErrorOutput": {
+                "required": [
+                    "code",
+                    "message"
+                ],
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ChatActionOutput": {
+                "required": [
+                    "id",
+                    "tool",
+                    "label",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "tool": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "done",
+                            "failed",
+                            "declined"
+                        ]
+                    },
+                    "error": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ChatErrorOutput"
+                            }
+                        ],
+                        "default": null
+                    },
+                    "job_id": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "language": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null,
+                        "enum": [
+                            "es",
+                            "en"
+                        ]
+                    },
+                    "url": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "result": {
+                        "type": "object",
+                        "nullable": true,
+                        "default": null,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "ChatTurnResultOutput": {
+                "required": [
+                    "type",
+                    "message",
+                    "quick_replies",
+                    "actions",
+                    "pending_writes"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "chat",
+                            "chat-questionnaire-created",
+                            "chat-questionnaire-drafted",
+                            "chat-questionnaire-approved"
+                        ]
+                    },
+                    "message": {
+                        "description": "The assistant's answer, in Markdown; records are linked as [Name](item:<kind>/<id>)",
+                        "type": "string"
+                    },
+                    "quick_replies": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "draft": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ChatDraftOutput"
+                            }
+                        ]
+                    },
+                    "actions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChatActionOutput"
+                        }
+                    },
+                    "pending_writes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChatPendingWriteOutput"
+                        }
+                    },
+                    "questionnaire_id": {
+                        "description": "chat-questionnaire-created: the questionnaire saved",
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "flow": {
+                        "description": "chat-questionnaire-approved: the approved draft as the body of POST /questionnaire (states, cta, layout); the slug is the caller's",
+                        "type": "object",
+                        "nullable": true,
+                        "default": null,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "ChatJobOutput": {
+                "required": [
+                    "job_id",
+                    "job_type",
+                    "status",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "job_id": {
+                        "type": "string"
+                    },
+                    "job_type": {
+                        "type": "string",
+                        "enum": [
+                            "chat"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "PROCESSING",
+                            "COMPLETED",
+                            "FAILED",
+                            "CANCELLED"
+                        ]
+                    },
+                    "result": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ChatTurnResultOutput"
+                            }
+                        ]
+                    },
+                    "stage": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "updated_at": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ChatJobEnvelopeOutput": {
+                "required": [
+                    "job"
+                ],
+                "properties": {
+                    "job": {
+                        "$ref": "#/components/schemas/ChatJobOutput"
+                    }
+                },
+                "type": "object"
+            },
+            "ProductInput": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 500
+                    },
+                    "description": {
+                        "description": "HTML; sanitized when stored (D11)",
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20000
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true,
+                        "maximum": 10000000000,
+                        "exclusiveMaximum": true,
+                        "minimum": 0
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2048
+                    },
+                    "product_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2048
+                    }
+                },
+                "type": "object"
+            },
+            "CatalogProductOutput": {
+                "required": [
+                    "product_id",
+                    "customer_id",
+                    "name",
+                    "description"
+                ],
+                "properties": {
+                    "product_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "description": "Sanitized HTML (D11)",
+                        "type": "string"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "product_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "source_url": {
+                        "description": "The store origin it was imported from",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "questionnaire_id": {
+                        "description": "The quiz funnel created from it",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CatalogPageOutput": {
+                "required": [
+                    "items",
+                    "page",
+                    "page_size",
+                    "total",
+                    "total_pages"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CatalogProductOutput"
+                        }
+                    },
+                    "page": {
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "total_pages": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ScrapeInput": {
+                "required": [
+                    "url"
+                ],
+                "properties": {
+                    "url": {
+                        "title": "The URL as given, with https:// when it had no scheme.",
+                        "type": "string",
+                        "maxLength": 2048
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "nullable": true,
+                        "maximum": 30,
+                        "minimum": 1
+                    }
+                },
+                "type": "object"
+            },
+            "QuizFunnelInput": {
+                "required": [
+                    "type"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "experience",
+                            "profiling"
+                        ]
+                    },
+                    "source_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2048
+                    },
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "nullable": true
+                                },
+                                "price": {
+                                    "type": "number",
+                                    "nullable": true
+                                },
+                                "image_url": {
+                                    "type": "string",
+                                    "nullable": true
+                                },
+                                "product_url": {
+                                    "type": "string",
+                                    "nullable": true
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "nullable": true,
+                        "maxItems": 250
+                    }
+                },
+                "type": "object"
+            },
+            "ShopifyAuthorizeOutput": {
+                "required": [
+                    "url"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "ShopifyConnectionOutput": {
+                "properties": {
+                    "shop": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ShopifySyncOutput": {
+                "required": [
+                    "shop",
+                    "products"
+                ],
+                "properties": {
+                    "shop": {
+                        "type": "string"
+                    },
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CatalogProductOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "VideoOutput": {
                 "required": [
                     "id",
@@ -7939,6 +9198,18 @@
         },
         {
             "name": "Styles"
+        },
+        {
+            "name": "Chat"
+        },
+        {
+            "name": "Products"
+        },
+        {
+            "name": "Quiz funnel"
+        },
+        {
+            "name": "Shopify"
         },
         {
             "name": "Admin"

@@ -27,5 +27,25 @@
     "done": "completado"
   },
   "linkCopied": "Enlace copiado",
-  "linkNotCopied": "No se pudo copiar el enlace"
+  "linkNotCopied": "No se pudo copiar el enlace",
+  "picker": {
+    "label": "¿Quién responde?",
+    "needsOrganization": "Primero elige una organización.",
+    "all": "Todos",
+    "allBody": "Todos los miembros de la organización",
+    "members": "Personas",
+    "membersBody": "Las personas que marques",
+    "area": "Área",
+    "areaBody": "Todos en las áreas que marques",
+    "role": "Cargo",
+    "roleBody": "Todos con los cargos que marques",
+    "search": "Buscar personas",
+    "searchPlaceholder": "Buscar por nombre, correo, área o cargo",
+    "noPeople": "Nadie coincide",
+    "noValues": "Ningún miembro tiene uno todavía",
+    "valueCount_one": "{{value}} ({{count}} persona)",
+    "valueCount_other": "{{value}} ({{count}} personas)",
+    "count_one": "Responderá {{count}} persona",
+    "count_other": "Responderán {{count}} personas"
+  }
 }

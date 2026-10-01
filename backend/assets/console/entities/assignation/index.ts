@@ -44,6 +44,7 @@ export {
 } from './lib/registration';
 export type {RegistrationField, RegistrationSettings} from './lib/registration';
 export {AudienceChip} from './ui/AudienceChip';
+export {AudiencePicker} from './ui/AudiencePicker';
 export {ReviewStatusBadge} from './ui/ReviewStatusBadge';
 export {DueDate} from './ui/DueDate';
 export {useCopyLink} from './model/useCopyLink';

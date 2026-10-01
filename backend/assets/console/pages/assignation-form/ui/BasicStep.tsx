@@ -1,4 +1,7 @@
-import type {AssignationType} from '@console/entities/assignation';
+import {
+  type AssignationType,
+  AudiencePicker,
+} from '@console/entities/assignation';
 import {
   Card,
   CardBody,
@@ -9,7 +12,6 @@ import {
 } from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import type {AssignationFormState} from '../model/useAssignationForm';
-import {AudiencePicker} from './AudiencePicker';
 import {OrganizationPicker} from './OrganizationPicker';
 import {QuestionnairePicker} from './QuestionnairePicker';
 
@@ -64,7 +66,7 @@ export function BasicStep({state}: {state: AssignationFormState}) {
             error={error('organization')}
           />
           <AudiencePicker
-            organization={state.organization}
+            members={state.organization?.organization_users ?? null}
             value={form.audience}
             onChange={(audience) => state.setField({audience})}
             error={error('audience')}

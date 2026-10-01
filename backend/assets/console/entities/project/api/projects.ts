@@ -47,6 +47,30 @@ export function fetchProject(id: string): Promise<Project> {
   return api.get<Project>(`/projects/${id}`);
 }
 
+/** POST /projects: organization_id, name and due_date are required (PRD §8.9). */
+export type NewProjectPayload = {
+  organization_id: string;
+  name: string;
+  description?: string | null;
+  due_date: string;
+  assignation_ids?: string[];
+};
+
+export function createProject(payload: NewProjectPayload): Promise<Project> {
+  return api.post<Project>('/projects', payload);
+}
+
+/** Every project of the account, 100 per request (the list has no organization filter). */
+export async function fetchAllProjects(): Promise<Project[]> {
+  const params = {status: null, q: '', page: 1, pageSize: 100};
+  const first = await fetchProjects(params);
+  const items = [...first.projects];
+  for (let page = 2; page <= first.pagination.total_pages; page += 1) {
+    items.push(...(await fetchProjects({...params, page})).projects);
+  }
+  return items;
+}
+
 export function updateProject(
   id: string,
   payload: ProjectPayload,

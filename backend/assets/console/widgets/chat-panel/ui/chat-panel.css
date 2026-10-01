@@ -1,0 +1,108 @@
+/* widgets/chat-panel: the conversation with the assistant (PRD §10.4); everything else is the house kit. */
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.chat-panel__log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-height: 440px;
+  min-height: 160px;
+  overflow-y: auto;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  background: var(--color-bg);
+}
+.chat-panel__message {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.chat-panel__message p {
+  margin: 0;
+}
+.chat-panel__message p + p {
+  margin-top: 8px;
+}
+.chat-panel__message--assistant {
+  align-self: flex-start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+.chat-panel__message--user {
+  align-self: flex-end;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  white-space: pre-wrap;
+}
+.chat-panel__message--note {
+  align-self: stretch;
+  max-width: none;
+  background: var(--color-primary-soft);
+}
+.chat-panel__message--note a {
+  font-weight: 600;
+}
+.chat-panel__thinking {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.chat-panel__failure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-danger);
+  font-size: 14px;
+}
+.chat-panel__notice {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.chat-panel__replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.chat-panel__composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  position: relative;
+}
+.chat-panel__input {
+  flex: 1;
+  min-width: 0;
+  resize: vertical;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  font: inherit;
+  font-size: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.chat-panel__input:focus-visible {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+.chat-panel__counter {
+  position: absolute;
+  right: 56px;
+  bottom: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}

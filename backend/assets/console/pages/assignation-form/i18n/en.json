@@ -32,26 +32,6 @@
     "members_one": "{{count}} member",
     "members_other": "{{count}} members"
   },
-  "audience": {
-    "label": "Who responds?",
-    "needsOrganization": "Choose an organization first.",
-    "all": "Everybody",
-    "allBody": "Every member of the organization",
-    "members": "People",
-    "membersBody": "The people you check",
-    "area": "Area",
-    "areaBody": "Everybody in the areas you check",
-    "role": "Role",
-    "roleBody": "Everybody with the roles you check",
-    "search": "Search people",
-    "searchPlaceholder": "Search by name, email, area or role",
-    "noPeople": "Nobody matches",
-    "noValues": "No member has one yet",
-    "valueCount_one": "{{value}} ({{count}} person)",
-    "valueCount_other": "{{value}} ({{count}} people)",
-    "count_one": "{{count}} person will respond",
-    "count_other": "{{count}} people will respond"
-  },
   "questionnaire": {
     "label": "Questionnaire",
     "search": "Search questionnaires",

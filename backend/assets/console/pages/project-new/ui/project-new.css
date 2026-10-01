@@ -1,0 +1,395 @@
+/* pages/project-new (item project-wizard): the wizard's own layout; everything else is the house kit. */
+.prj-new {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.prj-new__steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.prj-new__step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: none;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: 999px;
+}
+.prj-new__step:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.prj-new__step:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.prj-new__step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  font-size: 13px;
+  font-weight: 600;
+}
+.prj-new__step--current {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.prj-new__step--current .prj-new__step-number,
+.prj-new__step--done .prj-new__step-number {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+.prj-new__step--done {
+  color: var(--color-text);
+}
+.prj-new__step--incomplete {
+  color: var(--color-text);
+}
+.prj-new__step--incomplete .prj-new__step-number {
+  border-color: var(--color-warning);
+  background: color-mix(
+    in srgb,
+    var(--color-warning) 14%,
+    var(--color-surface)
+  );
+}
+.prj-new__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-6);
+  align-items: start;
+}
+.prj-new__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  max-width: 760px;
+}
+.prj-new__hero h2 {
+  margin: 4px 0;
+  font-size: 30px;
+  line-height: 1.2;
+}
+.prj-new__hero p {
+  margin: 0;
+}
+.prj-new__kicker {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.prj-new__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.prj-new__card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.prj-new__stack .muted,
+.prj-new__fieldset .muted {
+  margin: 0;
+}
+.prj-new__fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+/* The kit's .search grows along a row; in these columns it would grow tall. */
+.prj-new__fieldset > .search,
+.prj-new__stack > .search {
+  flex: 0 0 auto;
+}
+.prj-new__options {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 6px;
+}
+.prj-new__options--scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+.prj-new__option {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.prj-new__option--rich {
+  grid-template-columns: auto auto 1fr auto;
+}
+.prj-new__option:hover {
+  background: var(--color-hover);
+}
+.prj-new__option:has(input:checked) {
+  background: var(--color-primary-soft);
+}
+.prj-new__option .muted {
+  font-size: 13px;
+}
+.prj-new__initials {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  font-size: 12px;
+  font-weight: 700;
+}
+.prj-new__option-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.prj-new__option-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prj-new__empty {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.prj-new__create {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 45%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--color-surface));
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.prj-new__create:hover {
+  border-color: var(--color-primary);
+}
+.prj-new__create:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.prj-new__create-title {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.prj-new__create .muted {
+  font-size: 13px;
+}
+.prj-new__chosen {
+  margin: 0;
+  font-weight: 600;
+}
+.prj-new__draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--color-bg);
+  font-size: 14px;
+}
+.prj-new__notice {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(
+    in srgb,
+    var(--color-warning) 12%,
+    var(--color-surface)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-warning) 45%, transparent);
+  font-size: 14px;
+}
+.prj-new__missing {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 6%, var(--color-surface));
+}
+.prj-new__missing p {
+  margin: 0 0 6px;
+  font-weight: 600;
+  color: var(--color-danger);
+}
+.prj-new__missing ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.prj-new__missing li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 14px;
+}
+.prj-new__hint {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.prj-new__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+.prj-new__summary {
+  position: sticky;
+  top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.prj-new__summary-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.prj-new__summary ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.prj-new__piece {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+.prj-new__piece--pending {
+  border-style: dashed;
+  opacity: 0.75;
+}
+.prj-new__piece-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+}
+.prj-new__piece-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+  font-size: 13px;
+}
+.prj-new__piece-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.prj-new__piece-title {
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prj-new__piece-done {
+  color: var(--color-success);
+}
+.prj-new__note {
+  margin: 0;
+  font-size: 12px;
+}
+.prj-new__members {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.prj-new__member {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.prj-new__member-cells {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+  gap: 6px;
+  align-items: center;
+}
+@media (max-width: 1080px) {
+  .prj-new__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .prj-new__summary {
+    position: static;
+  }
+}
+@media (max-width: 640px) {
+  .prj-new__member-cells {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .prj-new__option,
+  .prj-new__option--rich {
+    grid-template-columns: auto 1fr;
+  }
+  .prj-new__hero h2 {
+    font-size: 24px;
+  }
+}

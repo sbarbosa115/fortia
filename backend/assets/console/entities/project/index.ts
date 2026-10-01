@@ -1,6 +1,8 @@
 export {
   fetchProjects,
   fetchProject,
+  fetchAllProjects,
+  createProject,
   updateProject,
   deleteProject,
   PROJECTS_QUERY_KEY,
@@ -13,6 +15,7 @@ export type {
   ProjectPage,
   ProjectListParams,
   ProjectPayload,
+  NewProjectPayload,
 } from './api/projects';
 export {
   PROJECT_TABS,
