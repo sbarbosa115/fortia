@@ -20,6 +20,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/assignations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Newest first; an Admin sees every account's. `questionnaire_id` finds the assignation of a questionnaire. */
+        get: operations["get_api_assignations_list"];
+        put?: never;
+        /** AG, Cap(assignations). Counts one "assignations" (AssignationCreated). */
+        post: operations["post_api_assignations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Public (the respondent page). An anonymous caller needs the owner's plan to include assignations (429) and does
+         *     not see the description nor the answers; a console user sees only their account's (another's is 404).
+         */
+        get: operations["get_api_assignations_get"];
+        /** Partial. `type` cannot change; `due_date: null` clears it; the organization stays while in a project. */
+        put: operations["put_api_assignations_update"];
+        post?: never;
+        /** 204. Counts one "assignations" (AssignationDeleted). The respondents' answers stay. */
+        delete: operations["delete_api_assignations_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignations/{id}/respondents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A, a non-owner receives an empty page. The audience by name, with each member's status and attempts. */
+        get: operations["get_api_assignations_respondents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignations/{id}/reminders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** The manual "Send reminder" (§7.13). */
+        post: operations["post_api_assignations_remind"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignations/{id}/reviews/{questionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Approve or reject one answer of the current attempt of a complete follow-up. */
+        put: operations["put_api_assignations_review"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignations/{id}/retries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** "Send for correction": 201 with the new attempt. With 502 RETRY_EMAIL_NOT_SENT the attempt already exists. */
+        post: operations["post_api_assignations_retry"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects": {
         parameters: {
             query?: never;
@@ -52,6 +160,22 @@ export interface paths {
         post?: never;
         /** 204. Its assignations are unlinked, not deleted. */
         delete: operations["delete_api_projects_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignations/{id}/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_assignations_login"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -669,6 +793,156 @@ export interface components {
         QuestionnaireUrlOutput: {
             questionnaire_url: string;
         };
+        AudienceOutput: {
+            /** @enum {string} */
+            type: "all" | "members" | "area" | "role";
+            values: string[];
+        };
+        FollowUpAnswerOutput: {
+            question_id: string;
+            /** 1-based among the answerable questions. */
+            position: number;
+            title: string;
+            type: string;
+            /** The answer as text (option labels, "7 / 10", file names); null when unanswered. */
+            answer?: string | null;
+            skipped: boolean;
+            answered_at?: string | null;
+            locked: boolean;
+            review?: components["schemas"]["ReviewOutput"] | null;
+            /** @enum {string} */
+            review_state: "locked" | "approved" | "rejected" | "not_reviewed";
+        };
+        AssignationAttemptOutput: {
+            number: number;
+            session_id: string;
+            created_at: string;
+            status?: string | null;
+            started_at?: string | null;
+            ended_at?: string | null;
+            completed: boolean;
+            /** @enum {string} */
+            review_status: "not_ready" | "in_review" | "changes_requested" | "approved";
+            answers?: components["schemas"]["FollowUpAnswerOutput"][] | null;
+        };
+        AssignationProgressOutput: {
+            completed: number;
+            total: number;
+            /** @enum {string} */
+            unit: "respondents" | "questions";
+            /** Follow-ups: the first answerable question not answered or skipped; null when none is left. */
+            current_question?: number | null;
+        };
+        AssignationOutput: {
+            assignations_id: string;
+            customer_id: string;
+            organization_id: string;
+            organization_name: string;
+            questionnaire_id: string;
+            questionnaire_name: string;
+            questionnaire_url: string;
+            name: string;
+            /** Internal note; never sent to the respondent page. */
+            description?: string | null;
+            max_follow_ups: number;
+            active: boolean;
+            /** @enum {string} */
+            type: "default" | "follow_up";
+            due_date?: string | null;
+            audience: components["schemas"]["AudienceOutput"];
+            audience_size: number;
+            /** The registration slide (the respondent login). */
+            questions: components["schemas"]["QuestionOutput"][];
+            project_id?: string | null;
+            shared_session_id?: string | null;
+            attempts: components["schemas"]["AssignationAttemptOutput"][];
+            /** The current attempt (1 before anybody opens a follow-up). */
+            attempt: number;
+            last_reminder_sent_at?: string | null;
+            progress: components["schemas"]["AssignationProgressOutput"];
+            completed: boolean;
+            /** @enum {string|null} */
+            review_status?: "not_ready" | "in_review" | "changes_requested" | "approved" | null;
+            created_at?: string | null;
+            updated_at?: string | null;
+        };
+        ProjectPaginationOutput: {
+            page: number;
+            page_size: number;
+            total_items: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
+        AssignationListOutput: {
+            assignations: components["schemas"]["AssignationOutput"][];
+            pagination: components["schemas"]["ProjectPaginationOutput"];
+        };
+        AssignationInput: {
+            organization_id?: string | null;
+            questionnaire_id?: string | null;
+            name?: string | null;
+            description?: string | null;
+            max_follow_ups?: number | null;
+            active?: boolean | null;
+            /** @enum {string|null} */
+            type?: "default" | "follow_up" | null;
+            due_date?: string | null;
+            /** {type: all | members | area | role, values: string[]} */
+            audience: {
+                /** @enum {string} */
+                type?: "all" | "members" | "area" | "role";
+                values?: string[];
+            };
+            /** the registration slide (respondent login): at least one question */
+            questions: Record<string, never>[];
+        };
+        AssignationCreatedOutput: {
+            questionnaire_url: string;
+            assignation_id: string;
+        };
+        RespondentAttemptOutput: {
+            number: number;
+            session_id: string;
+            status: string;
+            started_at?: string | null;
+            ended_at?: string | null;
+        };
+        RespondentOutput: {
+            organization_user_id: string;
+            organization_user_name: string;
+            organization_user_email?: string | null;
+            /** @enum {string} */
+            status: "pending" | "in_progress" | "completed";
+            session_id?: string | null;
+            completed_stages: number;
+            total_stages: number;
+            attempts: number;
+            attempts_detail: components["schemas"]["RespondentAttemptOutput"][];
+        };
+        RespondentListOutput: {
+            respondents: components["schemas"]["RespondentOutput"][];
+            next_cursor?: string | null;
+        };
+        ReminderSentOutput: {
+            recipients: number;
+        };
+        ReviewInput: {
+            /** @enum {string} */
+            status: "approved" | "rejected";
+            comment?: string | null;
+        };
+        AnswerReviewedOutput: {
+            question_id: string;
+            review: components["schemas"]["ReviewOutput"];
+            /** @enum {string} */
+            review_status: "not_ready" | "in_review" | "changes_requested" | "approved";
+        };
+        RetryOutput: {
+            attempt: number;
+            session_id: string;
+            recipients: number;
+        };
         ProjectAssignationProgressOutput: {
             completed: number;
             total: number;
@@ -729,14 +1003,6 @@ export interface components {
             /** @default null */
             available_assignations: components["schemas"]["ProjectAvailableAssignationOutput"][] | null;
         };
-        ProjectPaginationOutput: {
-            page: number;
-            page_size: number;
-            total_items: number;
-            total_pages: number;
-            has_next: boolean;
-            has_previous: boolean;
-        };
         ProjectListOutput: {
             projects: components["schemas"]["ProjectOutput"][];
             pagination: components["schemas"]["ProjectPaginationOutput"];
@@ -747,6 +1013,18 @@ export interface components {
             description?: string | null;
             due_date?: string | null;
             assignation_ids?: string[] | null;
+        };
+        RespondentLoginInput: {
+            name: string;
+            email?: string | null;
+            phone?: string | null;
+            role?: string | null;
+            area?: string | null;
+        };
+        RespondentLoginOutput: {
+            token: string;
+            questionnaire: components["schemas"]["SessionOutput"];
+            flow?: components["schemas"]["FlowOutput"] | null;
         };
         CustomerPlanOutput: {
             plan_id: string;
@@ -1005,6 +1283,446 @@ export interface operations {
             };
         };
     };
+    get_api_assignations_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                type?: "default" | "follow_up";
+                /** @description Only the assignations of this questionnaire (the form checks the one-organization rule with it) */
+                questionnaire_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description {assignations, pagination} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignationListOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR (type, page, page_size or questionnaire_id) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_assignations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignationInput"];
+            };
+        };
+        responses: {
+            /** @description The respondent link and the id */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignationCreatedOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, AUDIENCE_MEMBER_NOT_IN_ORGANIZATION */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_assignations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The enriched assignation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignationOutput"];
+                };
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED (anonymous callers only) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_assignations_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignationInput"];
+            };
+        };
+        responses: {
+            /** @description The enriched assignation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignationOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID, ASSIGNATION_IN_PROJECT, AUDIENCE_MEMBER_NOT_IN_ORGANIZATION */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_NOT_FOUND, ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_ALREADY_ASSIGNED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_assignations_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_assignations_respondents: {
+        parameters: {
+            query?: {
+                /** @description Also "limit" */
+                page_size?: number;
+                /** @description next_cursor of the previous page */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description {respondents, next_cursor} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RespondentListOutput"];
+                };
+            };
+            /** @description INVALID_UUID, INVALID_PAGE_SIZE, INVALID_CURSOR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_assignations_remind: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description {recipients} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderSentOutput"];
+                };
+            };
+            /** @description INVALID_UUID, NOT_A_FOLLOW_UP */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FOLLOW_UP_COMPLETED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description NO_RECIPIENTS */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description REMINDER_NOT_SENT */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_assignations_review: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                questionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ReviewInput"];
+            };
+        };
+        responses: {
+            /** @description {question_id, review, review_status} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerReviewedOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID, NOT_A_FOLLOW_UP, QUESTION_LOCKED */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_NOT_FOUND, QUESTION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FOLLOW_UP_NOT_COMPLETED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_assignations_retry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description {attempt, session_id, recipients} */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryOutput"];
+                };
+            };
+            /** @description INVALID_UUID, NOT_A_FOLLOW_UP, NOTHING_TO_RETRY */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FOLLOW_UP_NOT_COMPLETED, REVIEW_INCOMPLETE */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description RETRY_EMAIL_NOT_SENT */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_api_projects_list: {
         parameters: {
             query?: {
@@ -1222,6 +1940,67 @@ export interface operations {
             };
             /** @description PROJECT_NOT_FOUND */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_assignations_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RespondentLoginInput"];
+            };
+        };
+        responses: {
+            /** @description Bare: {token, questionnaire, flow} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RespondentLoginOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID, MISSING_IDENTIFIER */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description USER_NOT_FOUND, NOT_IN_AUDIENCE */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FOLLOW_UP_COMPLETED */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED (assignations, then responses), TOO_MANY_ATTEMPTS */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

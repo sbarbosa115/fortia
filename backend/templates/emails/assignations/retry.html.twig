@@ -1,0 +1,15 @@
+{# "Send for correction": a new attempt of a follow-up is open (PRD §7.11 Retry step 4). #}
+{% extends 'emails/layout.html.twig' %}
+{% set domain = 'emails_assignations' %}
+
+{% block title %}{{ 'retry.title'|trans({}, domain, locale) }}{% endblock %}
+
+{% block content %}
+    <h1 style="margin:0 0 12px;font-size:20px;">{{ 'retry.title'|trans({}, domain, locale) }}</h1>
+    <p style="margin:0 0 12px;">{{ 'retry.body'|trans({name: assignation.name, organization: assignation.organization_name, rejected: rejected}, domain, locale) }}</p>
+    <p style="margin:0 0 20px;">{{ 'retry.attempt'|trans({attempt: attempt}, domain, locale) }}</p>
+    <p style="margin:0 0 4px;">
+        <a href="{{ link }}" style="display:inline-block;background:#8249df;color:#ffffff;text-decoration:none;font-weight:600;padding:10px 22px;border-radius:999px;">{{ 'retry.button'|trans({}, domain, locale) }}</a>
+    </p>
+    <p style="margin:0;font-size:13px;color:#5e5c6b;">{{ link }}</p>
+{% endblock %}

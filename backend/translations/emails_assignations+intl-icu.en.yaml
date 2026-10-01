@@ -1,0 +1,34 @@
+# Assignation emails (PRD §7.13 reminders and status, §7.11 retry). ICU message format.
+reminder:
+    subject:
+        no_date: 'Reminder: "{name}" is waiting for your answers'
+        due_today: '"{name}" is due today'
+        due_in: '"{name}" is due in {days, plural, one {# day} other {# days}}'
+        overdue: '"{name}" is {days, plural, one {# day} other {# days}} overdue'
+    title: 'Your answers are still pending'
+    body: 'Your team at {organization} is waiting for your answers to "{name}".'
+    due:
+        no_date: 'There is no due date, but the sooner the better.'
+        due_today: 'It is due today.'
+        due_in: 'It is due in {days, plural, one {# day} other {# days}} ({date}).'
+        overdue: 'It was due {days, plural, one {# day} other {# days}} ago ({date}).'
+    button: 'Continue answering'
+    ignore: 'If someone on your team already finished it, you can ignore this email.'
+status:
+    subject: 'Status of "{name}": {percent}% answered'
+    title: 'Follow-up status'
+    body: 'This is how "{name}" ({organization}) is going today.'
+    progress: '{completed} of {total} questions answered ({percent}%).'
+    due:
+        no_date: 'No due date.'
+        due_today: 'Due today.'
+        due_in: 'Due in {days, plural, one {# day} other {# days}} ({date}).'
+        overdue: 'Overdue by {days, plural, one {# day} other {# days}} ({date}).'
+    reminded: 'We reminded {count, plural, one {# person} other {# people}} to answer it.'
+    button: 'Open the follow-up'
+retry:
+    subject: '"{name}" needs some corrections'
+    title: 'Some answers need corrections'
+    body: 'The answers to "{name}" ({organization}) were reviewed and {rejected, plural, one {# answer needs} other {# answers need}} changes. The approved answers are kept.'
+    attempt: 'This is attempt {attempt}.'
+    button: 'Correct the answers'

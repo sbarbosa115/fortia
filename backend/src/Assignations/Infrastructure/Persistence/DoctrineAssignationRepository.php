@@ -25,11 +25,17 @@ final class DoctrineAssignationRepository extends DoctrineRepository implements 
         return $this->repository()->findOneBy(['questionnaireId' => $questionnaireId]);
     }
 
-    public function page(?string $customerId, ?string $type, int $offset, int $limit): array
+    public function listByQuestionnaire(string $questionnaireId): array
+    {
+        return $this->repository()->findBy(['questionnaireId' => $questionnaireId], ['createdAt' => 'ASC']);
+    }
+
+    public function page(?string $customerId, ?string $type, int $offset, int $limit, ?string $questionnaireId = null): array
     {
         /** @var list<Assignation> $rows */
-        $rows = $this->filtered($customerId, $type)
+        $rows = $this->filtered($customerId, $type, $questionnaireId)
             ->orderBy('a.createdAt', 'DESC')
+            ->addOrderBy('a.assignationsId', 'ASC')
             ->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()
@@ -38,9 +44,9 @@ final class DoctrineAssignationRepository extends DoctrineRepository implements 
         return $rows;
     }
 
-    public function count(?string $customerId, ?string $type): int
+    public function count(?string $customerId, ?string $type, ?string $questionnaireId = null): int
     {
-        return (int) $this->filtered($customerId, $type)->select('COUNT(a.assignationsId)')->getQuery()->getSingleScalarResult();
+        return (int) $this->filtered($customerId, $type, $questionnaireId)->select('COUNT(a.assignationsId)')->getQuery()->getSingleScalarResult();
     }
 
     public function listByProject(string $projectId): array
@@ -81,7 +87,7 @@ final class DoctrineAssignationRepository extends DoctrineRepository implements 
         $this->delete($assignation);
     }
 
-    private function filtered(?string $customerId, ?string $type): QueryBuilder
+    private function filtered(?string $customerId, ?string $type, ?string $questionnaireId): QueryBuilder
     {
         $qb = $this->repository()->createQueryBuilder('a');
         if (null !== $customerId) {
@@ -89,6 +95,9 @@ final class DoctrineAssignationRepository extends DoctrineRepository implements 
         }
         if (null !== $type) {
             $qb->andWhere('a.type = :type')->setParameter('type', $type);
+        }
+        if (null !== $questionnaireId) {
+            $qb->andWhere('a.questionnaireId = :questionnaire')->setParameter('questionnaire', $questionnaireId);
         }
 
         return $qb;

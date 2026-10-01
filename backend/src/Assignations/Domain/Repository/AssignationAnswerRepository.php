@@ -12,4 +12,7 @@ interface AssignationAnswerRepository
     public function listByAssignation(string $assignationsId): array;
 
     public function add(AssignationAnswer $answer): void;
+
+    /** Deletes the answers of an assignation (it is being deleted). */
+    public function removeByAssignation(string $assignationsId): void;
 }

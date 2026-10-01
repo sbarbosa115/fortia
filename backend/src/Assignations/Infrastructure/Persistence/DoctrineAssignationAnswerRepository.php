@@ -28,4 +28,11 @@ final class DoctrineAssignationAnswerRepository extends DoctrineRepository imple
     {
         $this->persist($answer);
     }
+
+    public function removeByAssignation(string $assignationsId): void
+    {
+        foreach ($this->listByAssignation($assignationsId) as $answer) {
+            $this->delete($answer);
+        }
+    }
 }

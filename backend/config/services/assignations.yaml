@@ -1,0 +1,8 @@
+# Wiring of the Assignations context (everything else is autowired by config/services.yaml).
+when@test:
+    services:
+        # Lets ReminderTest and RetryTest make the email provider fail (502 REMINDER_NOT_SENT / RETRY_EMAIL_NOT_SENT).
+        App\Tests\Support\SwitchableMailer:
+            decorates: App\Shared\Application\Mail\Mailer
+            arguments: ['@.inner']
+            public: true

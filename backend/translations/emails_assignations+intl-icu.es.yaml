@@ -1,0 +1,34 @@
+# Correos de las asignaciones (PRD §7.13 recordatorios y estado, §7.11 corrección). Formato de mensajes ICU.
+reminder:
+    subject:
+        no_date: 'Recordatorio: «{name}» espera tus respuestas'
+        due_today: '«{name}» vence hoy'
+        due_in: '«{name}» vence en {days, plural, one {# día} other {# días}}'
+        overdue: '«{name}» está vencido hace {days, plural, one {# día} other {# días}}'
+    title: 'Tus respuestas siguen pendientes'
+    body: 'Tu equipo en {organization} espera tus respuestas a «{name}».'
+    due:
+        no_date: 'No tiene fecha límite, pero cuanto antes, mejor.'
+        due_today: 'Vence hoy.'
+        due_in: 'Vence en {days, plural, one {# día} other {# días}} ({date}).'
+        overdue: 'Venció hace {days, plural, one {# día} other {# días}} ({date}).'
+    button: 'Seguir respondiendo'
+    ignore: 'Si alguien de tu equipo ya lo terminó, puedes ignorar este correo.'
+status:
+    subject: 'Estado de «{name}»: {percent} % respondido'
+    title: 'Estado del seguimiento'
+    body: 'Así va «{name}» ({organization}) hoy.'
+    progress: '{completed} de {total} preguntas respondidas ({percent} %).'
+    due:
+        no_date: 'Sin fecha límite.'
+        due_today: 'Vence hoy.'
+        due_in: 'Vence en {days, plural, one {# día} other {# días}} ({date}).'
+        overdue: 'Vencido hace {days, plural, one {# día} other {# días}} ({date}).'
+    reminded: 'Le recordamos responderlo a {count, plural, one {# persona} other {# personas}}.'
+    button: 'Abrir el seguimiento'
+retry:
+    subject: '«{name}» necesita correcciones'
+    title: 'Algunas respuestas necesitan correcciones'
+    body: 'Las respuestas a «{name}» ({organization}) fueron revisadas y {rejected, plural, one {# respuesta necesita} other {# respuestas necesitan}} cambios. Las respuestas aprobadas se conservan.'
+    attempt: 'Este es el intento {attempt}.'
+    button: 'Corregir las respuestas'

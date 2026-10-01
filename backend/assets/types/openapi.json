@@ -43,6 +43,441 @@
                 }
             }
         },
+        "/api/v1/assignations": {
+            "get": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "Newest first; an Admin sees every account's. `questionnaire_id` finds the assignation of a questionnaire.",
+                "operationId": "get_api_assignations_list",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "default",
+                                "follow_up"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "questionnaire_id",
+                        "in": "query",
+                        "description": "Only the assignations of this questionnaire (the form checks the one-organization rule with it)",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{assignations, pagination}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignationListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR (type, page, page_size or questionnaire_id)"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "AG, Cap(assignations). Counts one \"assignations\" (AssignationCreated).",
+                "operationId": "post_api_assignations_create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignationInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The respondent link and the id",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignationCreatedOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, AUDIENCE_MEMBER_NOT_IN_ORGANIZATION"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name)"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/assignations/{id}": {
+            "get": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "Public (the respondent page). An anonymous caller needs the owner's plan to include assignations (429) and does\nnot see the description nor the answers; a console user sees only their account's (another's is 404).",
+                "operationId": "get_api_assignations_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The enriched assignation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignationOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "404": {
+                        "description": "ASSIGNATION_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (anonymous callers only)"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "Partial. `type` cannot change; `due_date: null` clears it; the organization stays while in a project.",
+                "operationId": "put_api_assignations_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignationInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The enriched assignation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignationOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID, ASSIGNATION_IN_PROJECT, AUDIENCE_MEMBER_NOT_IN_ORGANIZATION"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ASSIGNATION_NOT_FOUND, ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "QUESTIONNAIRE_ALREADY_ASSIGNED"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "204. Counts one \"assignations\" (AssignationDeleted). The respondents' answers stay.",
+                "operationId": "delete_api_assignations_delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ASSIGNATION_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/assignations/{id}/respondents": {
+            "get": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "A, a non-owner receives an empty page. The audience by name, with each member's status and attempts.",
+                "operationId": "get_api_assignations_respondents",
+                "parameters": [
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Also \"limit\"",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "description": "next_cursor of the previous page",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{respondents, next_cursor}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RespondentListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID, INVALID_PAGE_SIZE, INVALID_CURSOR"
+                    }
+                }
+            }
+        },
+        "/api/v1/assignations/{id}/reminders": {
+            "post": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "The manual \"Send reminder\" (\u00a77.13).",
+                "operationId": "post_api_assignations_remind",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{recipients}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReminderSentOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID, NOT_A_FOLLOW_UP"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ASSIGNATION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "FOLLOW_UP_COMPLETED"
+                    },
+                    "422": {
+                        "description": "NO_RECIPIENTS"
+                    },
+                    "502": {
+                        "description": "REMINDER_NOT_SENT"
+                    }
+                }
+            }
+        },
+        "/api/v1/assignations/{id}/reviews/{questionId}": {
+            "put": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "Approve or reject one answer of the current attempt of a complete follow-up.",
+                "operationId": "put_api_assignations_review",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "questionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReviewInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "{question_id, review, review_status}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnswerReviewedOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID, NOT_A_FOLLOW_UP, QUESTION_LOCKED"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ASSIGNATION_NOT_FOUND, QUESTION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "FOLLOW_UP_NOT_COMPLETED"
+                    }
+                }
+            }
+        },
+        "/api/v1/assignations/{id}/retries": {
+            "post": {
+                "tags": [
+                    "Assignations"
+                ],
+                "summary": "\"Send for correction\": 201 with the new attempt. With 502 RETRY_EMAIL_NOT_SENT the attempt already exists.",
+                "operationId": "post_api_assignations_retry",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "{attempt, session_id, recipients}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RetryOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID, NOT_A_FOLLOW_UP, NOTHING_TO_RETRY"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ASSIGNATION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "FOLLOW_UP_NOT_COMPLETED, REVIEW_INCOMPLETE"
+                    },
+                    "502": {
+                        "description": "RETRY_EMAIL_NOT_SENT"
+                    }
+                }
+            }
+        },
         "/api/v1/projects": {
             "get": {
                 "tags": [
@@ -267,6 +702,60 @@
                     },
                     "404": {
                         "description": "PROJECT_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/assignations/{id}/sessions": {
+            "post": {
+                "tags": [
+                    "Assignations"
+                ],
+                "operationId": "post_api_assignations_login",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RespondentLoginInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bare: {token, questionnaire, flow}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RespondentLoginOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID, MISSING_IDENTIFIER"
+                    },
+                    "403": {
+                        "description": "USER_NOT_FOUND, NOT_IN_AUDIENCE"
+                    },
+                    "404": {
+                        "description": "ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "FOLLOW_UP_COMPLETED"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (assignations, then responses), TOO_MANY_ATTEMPTS"
                     }
                 }
             }
@@ -2323,6 +2812,611 @@
                 },
                 "type": "object"
             },
+            "AudienceOutput": {
+                "required": [
+                    "type",
+                    "values"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "all",
+                            "members",
+                            "area",
+                            "role"
+                        ]
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "FollowUpAnswerOutput": {
+                "required": [
+                    "question_id",
+                    "position",
+                    "title",
+                    "type",
+                    "skipped",
+                    "locked",
+                    "review_state"
+                ],
+                "properties": {
+                    "question_id": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "title": "1-based among the answerable questions.",
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "answer": {
+                        "title": "The answer as text (option labels, \"7 / 10\", file names); null when unanswered.",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "skipped": {
+                        "type": "boolean"
+                    },
+                    "answered_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "locked": {
+                        "type": "boolean"
+                    },
+                    "review": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ReviewOutput"
+                            }
+                        ]
+                    },
+                    "review_state": {
+                        "type": "string",
+                        "enum": [
+                            "locked",
+                            "approved",
+                            "rejected",
+                            "not_reviewed"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "AssignationAttemptOutput": {
+                "required": [
+                    "number",
+                    "session_id",
+                    "created_at",
+                    "completed",
+                    "review_status"
+                ],
+                "properties": {
+                    "number": {
+                        "type": "integer"
+                    },
+                    "session_id": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "review_status": {
+                        "type": "string",
+                        "enum": [
+                            "not_ready",
+                            "in_review",
+                            "changes_requested",
+                            "approved"
+                        ]
+                    },
+                    "answers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FollowUpAnswerOutput"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "AssignationProgressOutput": {
+                "required": [
+                    "completed",
+                    "total",
+                    "unit"
+                ],
+                "properties": {
+                    "completed": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": [
+                            "respondents",
+                            "questions"
+                        ]
+                    },
+                    "current_question": {
+                        "title": "Follow-ups: the first answerable question not answered or skipped; null when none is left.",
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "AssignationOutput": {
+                "required": [
+                    "assignations_id",
+                    "customer_id",
+                    "organization_id",
+                    "organization_name",
+                    "questionnaire_id",
+                    "questionnaire_name",
+                    "questionnaire_url",
+                    "name",
+                    "max_follow_ups",
+                    "active",
+                    "type",
+                    "audience",
+                    "audience_size",
+                    "questions",
+                    "attempts",
+                    "attempt",
+                    "progress",
+                    "completed"
+                ],
+                "properties": {
+                    "assignations_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "organization_id": {
+                        "type": "string"
+                    },
+                    "organization_name": {
+                        "type": "string"
+                    },
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "questionnaire_name": {
+                        "type": "string"
+                    },
+                    "questionnaire_url": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "title": "Internal note; never sent to the respondent page.",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "max_follow_ups": {
+                        "type": "integer"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "follow_up"
+                        ]
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "audience": {
+                        "$ref": "#/components/schemas/AudienceOutput"
+                    },
+                    "audience_size": {
+                        "type": "integer"
+                    },
+                    "questions": {
+                        "title": "The registration slide (the respondent login).",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionOutput"
+                        }
+                    },
+                    "project_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "shared_session_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "attempts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AssignationAttemptOutput"
+                        }
+                    },
+                    "attempt": {
+                        "title": "The current attempt (1 before anybody opens a follow-up).",
+                        "type": "integer"
+                    },
+                    "last_reminder_sent_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "progress": {
+                        "$ref": "#/components/schemas/AssignationProgressOutput"
+                    },
+                    "completed": {
+                        "type": "boolean"
+                    },
+                    "review_status": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "not_ready",
+                            "in_review",
+                            "changes_requested",
+                            "approved"
+                        ]
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectPaginationOutput": {
+                "required": [
+                    "page",
+                    "page_size",
+                    "total_items",
+                    "total_pages",
+                    "has_next",
+                    "has_previous"
+                ],
+                "properties": {
+                    "page": {
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "type": "integer"
+                    },
+                    "total_items": {
+                        "type": "integer"
+                    },
+                    "total_pages": {
+                        "type": "integer"
+                    },
+                    "has_next": {
+                        "type": "boolean"
+                    },
+                    "has_previous": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "AssignationListOutput": {
+                "required": [
+                    "assignations",
+                    "pagination"
+                ],
+                "properties": {
+                    "assignations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AssignationOutput"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/ProjectPaginationOutput"
+                    }
+                },
+                "type": "object"
+            },
+            "AssignationInput": {
+                "required": [
+                    "audience",
+                    "questions"
+                ],
+                "properties": {
+                    "organization_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "questionnaire_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2000
+                    },
+                    "max_follow_ups": {
+                        "type": "integer",
+                        "nullable": true,
+                        "minimum": 0
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "type": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "default",
+                            "follow_up"
+                        ]
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "audience": {
+                        "title": "{type: all | members | area | role, values: string[]}",
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "all",
+                                    "members",
+                                    "area",
+                                    "role"
+                                ]
+                            },
+                            "values": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "questions": {
+                        "title": "the registration slide (respondent login): at least one question",
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        },
+                        "minItems": 1
+                    }
+                },
+                "type": "object"
+            },
+            "AssignationCreatedOutput": {
+                "required": [
+                    "questionnaire_url",
+                    "assignation_id"
+                ],
+                "properties": {
+                    "questionnaire_url": {
+                        "type": "string"
+                    },
+                    "assignation_id": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "RespondentAttemptOutput": {
+                "required": [
+                    "number",
+                    "session_id",
+                    "status"
+                ],
+                "properties": {
+                    "number": {
+                        "type": "integer"
+                    },
+                    "session_id": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "RespondentOutput": {
+                "required": [
+                    "organization_user_id",
+                    "organization_user_name",
+                    "status",
+                    "completed_stages",
+                    "total_stages",
+                    "attempts",
+                    "attempts_detail"
+                ],
+                "properties": {
+                    "organization_user_id": {
+                        "type": "string"
+                    },
+                    "organization_user_name": {
+                        "type": "string"
+                    },
+                    "organization_user_email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "in_progress",
+                            "completed"
+                        ]
+                    },
+                    "session_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "completed_stages": {
+                        "type": "integer"
+                    },
+                    "total_stages": {
+                        "type": "integer"
+                    },
+                    "attempts": {
+                        "type": "integer"
+                    },
+                    "attempts_detail": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RespondentAttemptOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "RespondentListOutput": {
+                "required": [
+                    "respondents"
+                ],
+                "properties": {
+                    "respondents": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RespondentOutput"
+                        }
+                    },
+                    "next_cursor": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ReminderSentOutput": {
+                "required": [
+                    "recipients"
+                ],
+                "properties": {
+                    "recipients": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ReviewInput": {
+                "required": [
+                    "status"
+                ],
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "approved",
+                            "rejected"
+                        ]
+                    },
+                    "comment": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 1000
+                    }
+                },
+                "type": "object"
+            },
+            "AnswerReviewedOutput": {
+                "required": [
+                    "question_id",
+                    "review",
+                    "review_status"
+                ],
+                "properties": {
+                    "question_id": {
+                        "type": "string"
+                    },
+                    "review": {
+                        "$ref": "#/components/schemas/ReviewOutput"
+                    },
+                    "review_status": {
+                        "type": "string",
+                        "enum": [
+                            "not_ready",
+                            "in_review",
+                            "changes_requested",
+                            "approved"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "RetryOutput": {
+                "required": [
+                    "attempt",
+                    "session_id",
+                    "recipients"
+                ],
+                "properties": {
+                    "attempt": {
+                        "type": "integer"
+                    },
+                    "session_id": {
+                        "type": "string"
+                    },
+                    "recipients": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
             "ProjectAssignationProgressOutput": {
                 "required": [
                     "completed",
@@ -2554,37 +3648,6 @@
                 },
                 "type": "object"
             },
-            "ProjectPaginationOutput": {
-                "required": [
-                    "page",
-                    "page_size",
-                    "total_items",
-                    "total_pages",
-                    "has_next",
-                    "has_previous"
-                ],
-                "properties": {
-                    "page": {
-                        "type": "integer"
-                    },
-                    "page_size": {
-                        "type": "integer"
-                    },
-                    "total_items": {
-                        "type": "integer"
-                    },
-                    "total_pages": {
-                        "type": "integer"
-                    },
-                    "has_next": {
-                        "type": "boolean"
-                    },
-                    "has_previous": {
-                        "type": "boolean"
-                    }
-                },
-                "type": "object"
-            },
             "ProjectListOutput": {
                 "required": [
                     "projects",
@@ -2629,6 +3692,61 @@
                             "type": "string"
                         },
                         "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "RespondentLoginInput": {
+                "required": [
+                    "name"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 254
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 50
+                    },
+                    "role": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 120
+                    },
+                    "area": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 120
+                    }
+                },
+                "type": "object"
+            },
+            "RespondentLoginOutput": {
+                "required": [
+                    "token",
+                    "questionnaire"
+                ],
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "questionnaire": {
+                        "$ref": "#/components/schemas/SessionOutput"
+                    },
+                    "flow": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FlowOutput"
+                            }
+                        ]
                     }
                 },
                 "type": "object"
@@ -3459,6 +4577,9 @@
     "tags": [
         {
             "name": "Flows"
+        },
+        {
+            "name": "Assignations"
         },
         {
             "name": "Projects"
