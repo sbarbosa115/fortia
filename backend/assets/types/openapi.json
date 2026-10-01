@@ -1098,6 +1098,84 @@
                 }
             }
         },
+        "/api/v1/questionnaire/prompt": {
+            "post": {
+                "tags": [
+                    "Flows and generation"
+                ],
+                "summary": "P. Job `prompt_questionnaire`; result {type: \"prompt_questionnaire\", questionnaire_id} (the generated stage, a\nchild of the chain's root with origin_session_id = session_id).",
+                "operationId": "post_api_questionnaire_prompt",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PromptStageInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "The generation job",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND, SESSION_NOT_FOUND, PROMPT_NOT_FOUND (no further stage to generate)"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/linkedin": {
+            "post": {
+                "tags": [
+                    "Flows and generation"
+                ],
+                "summary": "P. Job `linkedin_questionnaire`; result {type: \"linkedin_questionnaire\", questionnaire_id}, a diagnostic owned\nby the configured account (LINKEDIN_OWNER_CUSTOMER_ID).",
+                "operationId": "post_api_questionnaire_linkedin",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LinkedinInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "The generation job",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/JobEnvelopeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    },
+                    "503": {
+                        "description": "LINKEDIN_UNAVAILABLE (no owner account configured)"
+                    }
+                }
+            }
+        },
         "/api/v1/auth/token": {
             "post": {
                 "tags": [
@@ -1147,39 +1225,73 @@
                 }
             }
         },
-        "/api/v1/customer/{customer_id}/settings": {
+        "/api/v1/auth/google/authorize": {
             "get": {
                 "tags": [
-                    "Account"
+                    "Auth"
                 ],
-                "operationId": "get_api_settings_get",
+                "operationId": "get_api_auth_google_authorize",
                 "parameters": [
                     {
-                        "name": "customer_id",
-                        "in": "path",
+                        "name": "state",
+                        "in": "query",
                         "required": true,
                         "schema": {
-                            "type": "string",
-                            "pattern": "[A-Za-z0-9]{1,16}"
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "code_challenge",
+                        "in": "query",
+                        "description": "S256 PKCE challenge",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "CustomerSettings",
+                        "description": "Google's consent URL",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CustomerSettingsOutput"
+                                    "$ref": "#/components/schemas/GoogleAuthorizationOutput"
                                 }
                             }
                         }
                     },
-                    "404": {
-                        "description": "CUSTOMER_NOT_FOUND"
+                    "503": {
+                        "description": "PROVIDER_NOT_CONFIGURED"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/google/token": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "operationId": "post_api_auth_google_token",
+                "responses": {
+                    "200": {
+                        "description": "Signed in",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenOutput"
+                                }
+                            }
+                        }
                     },
-                    "429": {
-                        "description": "TOO_MANY_ATTEMPTS"
+                    "401": {
+                        "description": "GOOGLE_SIGN_IN_FAILED"
+                    },
+                    "409": {
+                        "description": "EMAIL_LINKED_RETRY_LOGIN: retry the sign-in once"
+                    },
+                    "503": {
+                        "description": "PROVIDER_NOT_CONFIGURED"
                     }
                 }
             }
@@ -1218,6 +1330,249 @@
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/password-recovery": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "operationId": "post_api_password_recovery",
+                "responses": {
+                    "200": {
+                        "description": "If the account exists, a recovery code is on its way."
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/password-recovery/confirm": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "operationId": "post_api_password_recovery_confirm",
+                "responses": {
+                    "200": {
+                        "description": "The password was changed"
+                    },
+                    "400": {
+                        "description": "INVALID_RESET_CODE, EXPIRED_RESET_CODE, INVALID_PASSWORD"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/profile": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "get_api_profile",
+                "responses": {
+                    "200": {
+                        "description": "The profile",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProfileOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "operationId": "post_api_register",
+                "responses": {
+                    "201": {
+                        "description": "The account was created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RegisterOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "409": {
+                        "description": "EMAIL_ALREADY_EXISTS"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/{customer_id}/settings": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "get_api_settings_get",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[A-Za-z0-9]{1,16}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomerSettings",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerSettingsOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "AG; a non-Admin only on their own account (another account is 404). Cap(profile) unless only the language\nchanges; ProfileEdited counts \"profile\" (\u00a77.2).",
+                "operationId": "patch_api_settings_patch",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[A-Za-z0-9]{1,16}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CustomerSettings after the change",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerSettingsOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/users": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "get_api_users_list",
+                "responses": {
+                    "200": {
+                        "description": "Root first, then by name",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserListOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "AG, Cap(users): a user with a permanent password and an assignable role; counts \"users\" (UserCreated).",
+                "operationId": "post_api_users_create",
+                "responses": {
+                    "201": {
+                        "description": "The user was created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_ROLE, VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "409": {
+                        "description": "EMAIL_ALREADY_EXISTS"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/workspace": {
+            "patch": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "patch_api_workspace_patch",
+                "responses": {
+                    "200": {
+                        "description": "The workspace",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WorkspaceOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
                     },
                     "404": {
                         "description": "CUSTOMER_NOT_FOUND"
@@ -2088,6 +2443,258 @@
                     },
                     "404": {
                         "description": "QUESTIONNAIRE_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}/answers": {
+            "get": {
+                "tags": [
+                    "Reporting"
+                ],
+                "summary": "The responses of a questionnaire, newest first, a cursor page at a time (PRD \u00a78.4, \u00a710.8). Any console user of\nthe account; another tenant's id is 404.",
+                "operationId": "get_api_questionnaire_answers",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "completed",
+                            "enum": [
+                                "completed",
+                                "filling",
+                                "filled_out",
+                                "processing",
+                                "all",
+                                "in_progress",
+                                "submitted"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 100,
+                            "enum": [
+                                20,
+                                50,
+                                100
+                            ]
+                        }
+                    },
+                    {
+                        "name": "cursor",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include_chain",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "assignations_id",
+                        "in": "query",
+                        "description": "Only the sessions of this assignation (the Sheets export of an assignation).",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A page of sessions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnswersPageOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID, INVALID_REQUEST (status), INVALID_PAGE_SIZE, INVALID_CURSOR"
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}/answers/{sessionId}": {
+            "get": {
+                "tags": [
+                    "Reporting"
+                ],
+                "summary": "One response of the questionnaire (or of one of its generated stages) with its results: the answer detail's\nfallback when the session chain is not available (PRD \u00a710.8).",
+                "operationId": "get_api_questionnaire_answer",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The session and its results",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnswerDetailOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND, SESSION_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}/dashboard": {
+            "get": {
+                "tags": [
+                    "Reporting"
+                ],
+                "summary": "The dashboard layout. The first request has the LLM choose it (once, stored forever; counts one \"dashboards\");\nwithout a stored dashboard and without dashboards capacity it answers 200 with locked and no charts.",
+                "operationId": "get_api_questionnaire_dashboard",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The dashboard, or locked",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DashboardOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (analytics)"
+                    },
+                    "502": {
+                        "description": "DASHBOARD_GENERATION_FAILED: nothing was stored"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}/dashboard/data": {
+            "get": {
+                "tags": [
+                    "Reporting"
+                ],
+                "summary": "The data behind the charts (PRD \u00a710.9), computed from the stored sessions. Counts one \"analytics\".",
+                "operationId": "get_api_questionnaire_dashboard_data",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The dashboard data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DashboardDataOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (analytics)"
+                    },
+                    "502": {
+                        "description": "ANALYTICS_UNAVAILABLE"
+                    }
+                }
+            }
+        },
+        "/api/v1/questionnaire/{id}/analytics": {
+            "get": {
+                "tags": [
+                    "Reporting"
+                ],
+                "summary": "The general analytics of a questionnaire (PRD \u00a78.4). Counts one \"analytics\" (AnalyticsFetched).",
+                "operationId": "get_api_questionnaire_analytics",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The analytics",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AnalyticsOutput"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "QUESTIONNAIRE_NOT_FOUND"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED (analytics)"
+                    },
+                    "502": {
+                        "description": "ANALYTICS_UNAVAILABLE"
                     }
                 }
             }
@@ -4832,6 +5439,57 @@
                 },
                 "type": "object"
             },
+            "PromptStageInput": {
+                "required": [
+                    "questionnaire_id",
+                    "answers"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "title": "The parent: the chain's root questionnaire (or one of its stages).",
+                        "type": "string"
+                    },
+                    "answers": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "question": {
+                                    "type": "string"
+                                },
+                                "answer": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "session_id": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "LinkedinInput": {
+                "required": [
+                    "linkedin_url"
+                ],
+                "properties": {
+                    "linkedin_url": {
+                        "title": "A public profile: https?://([a-z]{2,3}.)?(www.)?linkedin.com/in/.",
+                        "description": "..",
+                        "type": "string",
+                        "maxLength": 2048
+                    },
+                    "language": {
+                        "title": "en or es; any other value becomes es.",
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 16
+                    }
+                },
+                "type": "object"
+            },
             "TokenOutput": {
                 "required": [
                     "id_token",
@@ -4847,6 +5505,120 @@
                     },
                     "expires_in": {
                         "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "GoogleAuthorizationOutput": {
+                "required": [
+                    "authorization_url"
+                ],
+                "properties": {
+                    "authorization_url": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "OnboardingOutput": {
+                "required": [
+                    "onboarding_completed"
+                ],
+                "properties": {
+                    "onboarding_completed": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "ProfileCustomerOutput": {
+                "required": [
+                    "customer_id",
+                    "name",
+                    "email",
+                    "language"
+                ],
+                "properties": {
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "type": "string",
+                        "enum": [
+                            "es-CO",
+                            "en-US"
+                        ]
+                    },
+                    "logo_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "website": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "styles": {
+                        "type": "object",
+                        "nullable": true,
+                        "additionalProperties": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProfileOutput": {
+                "required": [
+                    "customer"
+                ],
+                "properties": {
+                    "customer": {
+                        "$ref": "#/components/schemas/ProfileCustomerOutput"
+                    }
+                },
+                "type": "object"
+            },
+            "RegisteredUserOutput": {
+                "required": [
+                    "email",
+                    "name",
+                    "root",
+                    "role"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "root": {
+                        "type": "boolean"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "Customer-Admin"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterOutput": {
+                "required": [
+                    "customer_id",
+                    "user"
+                ],
+                "properties": {
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/RegisteredUserOutput"
                     }
                 },
                 "type": "object"
@@ -4896,13 +5668,71 @@
                 },
                 "type": "object"
             },
-            "OnboardingOutput": {
+            "UserOutput": {
                 "required": [
-                    "onboarding_completed"
+                    "email",
+                    "name",
+                    "root",
+                    "role",
+                    "customer_id"
                 ],
                 "properties": {
-                    "onboarding_completed": {
+                    "email": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "root": {
                         "type": "boolean"
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "Admin",
+                            "Customer-Admin",
+                            "Customer-Read-Only"
+                        ]
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "UserListOutput": {
+                "required": [
+                    "users"
+                ],
+                "properties": {
+                    "users": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UserOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "WorkspaceOutput": {
+                "required": [
+                    "language"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "language": {
+                        "type": "string",
+                        "enum": [
+                            "es-CO",
+                            "en-US"
+                        ]
+                    },
+                    "website": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -5675,6 +6505,731 @@
                 },
                 "type": "object"
             },
+            "AnswerMemberOutput": {
+                "required": [
+                    "organization_user_id",
+                    "name"
+                ],
+                "properties": {
+                    "organization_user_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "AnswerChainOutput": {
+                "required": [
+                    "stage",
+                    "total_stages"
+                ],
+                "properties": {
+                    "stage": {
+                        "type": "integer"
+                    },
+                    "total_stages": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "AnswerOutput": {
+                "required": [
+                    "session_id",
+                    "questionnaire_id",
+                    "customer_id",
+                    "title",
+                    "capture_user_data",
+                    "landing_page",
+                    "type",
+                    "is_active",
+                    "parent",
+                    "status",
+                    "attempt",
+                    "question_count",
+                    "questions"
+                ],
+                "properties": {
+                    "session_id": {
+                        "type": "string"
+                    },
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "disclaimer": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "capture_user_data": {
+                        "type": "boolean"
+                    },
+                    "landing_page": {
+                        "type": "boolean"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "ecommerce",
+                            "quiz_funnel",
+                            "samurai8",
+                            "ai_team_profile",
+                            "diagnostic",
+                            "prompt"
+                        ]
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "on_completed": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/OnCompletedOutput"
+                            }
+                        ]
+                    },
+                    "parent": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "flow_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "filling",
+                            "filled_out",
+                            "processing",
+                            "completed",
+                            "in_progress",
+                            "submitted"
+                        ]
+                    },
+                    "user_data": {
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "email": {
+                                "type": "string"
+                            },
+                            "phone": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "assignations_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "organization_user_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "assignation_type": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "follow_up"
+                        ]
+                    },
+                    "attempt": {
+                        "type": "integer"
+                    },
+                    "question_count": {
+                        "type": "integer"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionOutput"
+                        }
+                    },
+                    "member": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AnswerMemberOutput"
+                            }
+                        ]
+                    },
+                    "chain": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AnswerChainOutput"
+                            }
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "AnsweredQuestionnaireOutput": {
+                "required": [
+                    "questionnaire_id",
+                    "title",
+                    "type",
+                    "is_chain",
+                    "public_id"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "default",
+                            "ecommerce",
+                            "quiz_funnel",
+                            "samurai8",
+                            "ai_team_profile",
+                            "diagnostic",
+                            "prompt"
+                        ]
+                    },
+                    "is_chain": {
+                        "type": "boolean"
+                    },
+                    "public_id": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "GeneratedStageOutput": {
+                "required": [
+                    "questionnaire_id",
+                    "title"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "origin_session_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "AnswersPageOutput": {
+                "required": [
+                    "items",
+                    "total",
+                    "questionnaire",
+                    "generated_stages"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AnswerOutput"
+                        }
+                    },
+                    "next_cursor": {
+                        "description": "Opaque; pass it back as ?cursor= for the next page. null on the last page.",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "questionnaire": {
+                        "$ref": "#/components/schemas/AnsweredQuestionnaireOutput"
+                    },
+                    "generated_stages": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GeneratedStageOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "AnswerDetailOutput": {
+                "required": [
+                    "session"
+                ],
+                "properties": {
+                    "session": {
+                        "$ref": "#/components/schemas/AnswerOutput"
+                    },
+                    "results": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/SessionResultsOutput"
+                            }
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "DashboardChartOutput": {
+                "required": [
+                    "id",
+                    "chart_type",
+                    "title",
+                    "question_ids",
+                    "order"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "chart_type": {
+                        "type": "string",
+                        "enum": [
+                            "kpi",
+                            "gauge",
+                            "line",
+                            "donut",
+                            "bar",
+                            "horizontal_bar",
+                            "stacked_bar",
+                            "treemap",
+                            "histogram",
+                            "boxplot",
+                            "ranking_avg",
+                            "heatmap",
+                            "tier_distribution"
+                        ]
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "question_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "order": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "DashboardQuestionOutput": {
+                "required": [
+                    "id",
+                    "title",
+                    "type",
+                    "options"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "radio",
+                            "checkbox",
+                            "select",
+                            "range",
+                            "text",
+                            "audio",
+                            "ranking",
+                            "file",
+                            "message",
+                            "email",
+                            "tel",
+                            "phone"
+                        ]
+                    },
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "label",
+                                "value"
+                            ],
+                            "properties": {
+                                "label": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "min": {
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "max": {
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "DashboardLockOutput": {
+                "required": [
+                    "feature",
+                    "reason"
+                ],
+                "properties": {
+                    "feature": {
+                        "type": "string",
+                        "enum": [
+                            "dashboards"
+                        ]
+                    },
+                    "reason": {
+                        "type": "string",
+                        "enum": [
+                            "NO_PLAN",
+                            "PLAN_INACTIVE",
+                            "PLAN_NOT_FOUND",
+                            "FEATURE_NOT_IN_PLAN",
+                            "FEATURE_LIMIT_REACHED",
+                            "RESPONSE_LIMIT_REACHED",
+                            "QUESTIONNAIRE_LIMIT_REACHED"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "DashboardOutput": {
+                "required": [
+                    "questionnaire_id",
+                    "customer_id",
+                    "title",
+                    "charts",
+                    "questions"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "satisfaction",
+                            "knowledge",
+                            "profiling",
+                            "recommendations",
+                            "eligibility",
+                            "opinion"
+                        ]
+                    },
+                    "charts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DashboardChartOutput"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DashboardQuestionOutput"
+                        }
+                    },
+                    "locked": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/DashboardLockOutput"
+                            }
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "DashboardSessionsOutput": {
+                "required": [
+                    "total",
+                    "completed",
+                    "completion_rate",
+                    "timeline",
+                    "by_source",
+                    "duration_seconds"
+                ],
+                "properties": {
+                    "total": {
+                        "type": "integer"
+                    },
+                    "completed": {
+                        "type": "integer"
+                    },
+                    "completion_rate": {
+                        "type": "number",
+                        "format": "float",
+                        "maximum": 1,
+                        "minimum": 0
+                    },
+                    "timeline": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "date",
+                                "started",
+                                "completed"
+                            ],
+                            "properties": {
+                                "date": {
+                                    "type": "string",
+                                    "format": "date"
+                                },
+                                "started": {
+                                    "type": "integer"
+                                },
+                                "completed": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "by_source": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "source",
+                                "count"
+                            ],
+                            "properties": {
+                                "source": {
+                                    "type": "string",
+                                    "enum": [
+                                        "link",
+                                        "assignation"
+                                    ]
+                                },
+                                "count": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "duration_seconds": {
+                        "required": [
+                            "avg",
+                            "median"
+                        ],
+                        "properties": {
+                            "avg": {
+                                "type": "number",
+                                "nullable": true
+                            },
+                            "median": {
+                                "type": "number",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionStatsOutput": {
+                "required": [
+                    "question_id",
+                    "answers_count",
+                    "values"
+                ],
+                "properties": {
+                    "question_id": {
+                        "type": "string"
+                    },
+                    "answers_count": {
+                        "type": "integer"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "required": [
+                                "value",
+                                "count"
+                            ],
+                            "properties": {
+                                "value": {
+                                    "type": "string"
+                                },
+                                "count": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "numeric": {
+                        "required": [
+                            "count",
+                            "avg",
+                            "min",
+                            "q1",
+                            "median",
+                            "q3",
+                            "max"
+                        ],
+                        "properties": {
+                            "count": {
+                                "type": "integer"
+                            },
+                            "avg": {
+                                "type": "number"
+                            },
+                            "min": {
+                                "type": "number"
+                            },
+                            "q1": {
+                                "type": "number"
+                            },
+                            "median": {
+                                "type": "number"
+                            },
+                            "q3": {
+                                "type": "number"
+                            },
+                            "max": {
+                                "type": "number"
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "TierCountOutput": {
+                "required": [
+                    "tier_id",
+                    "name",
+                    "count"
+                ],
+                "properties": {
+                    "tier_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "count": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "DashboardDataOutput": {
+                "required": [
+                    "sessions",
+                    "questions",
+                    "tiers"
+                ],
+                "properties": {
+                    "sessions": {
+                        "$ref": "#/components/schemas/DashboardSessionsOutput"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionStatsOutput"
+                        }
+                    },
+                    "tiers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TierCountOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "AnalyticsOutput": {
+                "required": [
+                    "questionnaire_id",
+                    "questions_analytics",
+                    "total_sessions",
+                    "sessions_completed"
+                ],
+                "properties": {
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "questions_analytics": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/QuestionStatsOutput"
+                        }
+                    },
+                    "total_sessions": {
+                        "type": "integer"
+                    },
+                    "sessions_completed": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
             "TranscriptionTokenOutput": {
                 "required": [
                     "token",
@@ -5859,6 +7414,9 @@
             "name": "Documentation"
         },
         {
+            "name": "Flows and generation"
+        },
+        {
             "name": "Auth"
         },
         {
@@ -5878,6 +7436,9 @@
         },
         {
             "name": "Questionnaires"
+        },
+        {
+            "name": "Reporting"
         },
         {
             "name": "Respondent sessions"

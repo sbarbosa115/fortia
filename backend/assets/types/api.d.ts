@@ -274,6 +274,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/questionnaire/prompt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * P. Job `prompt_questionnaire`; result {type: "prompt_questionnaire", questionnaire_id} (the generated stage, a
+         *     child of the chain's root with origin_session_id = session_id).
+         */
+        post: operations["post_api_questionnaire_prompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/linkedin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * P. Job `linkedin_questionnaire`; result {type: "linkedin_questionnaire", questionnaire_id}, a diagnostic owned
+         *     by the configured account (LINKEDIN_OWNER_CUSTOMER_ID).
+         */
+        post: operations["post_api_questionnaire_linkedin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/token": {
         parameters: {
             query?: never;
@@ -306,16 +346,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/customer/{customer_id}/settings": {
+    "/api/v1/auth/google/authorize": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["get_api_settings_get"];
+        get: operations["get_api_auth_google_authorize"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_auth_google_token"];
         delete?: never;
         options?: never;
         head?: never;
@@ -336,6 +392,123 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["patch_api_onboarding_set"];
+        trace?: never;
+    };
+    "/api/v1/password-recovery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_password_recovery"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/password-recovery/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_password_recovery_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_profile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/{customer_id}/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * AG; a non-Admin only on their own account (another account is 404). Cap(profile) unless only the language
+         *     changes; ProfileEdited counts "profile" (§7.2).
+         */
+        patch: operations["patch_api_settings_patch"];
+        trace?: never;
+    };
+    "/api/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_users_list"];
+        put?: never;
+        /** AG, Cap(users): a user with a permanent password and an assignable role; counts "users" (UserCreated). */
+        post: operations["post_api_users_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["patch_api_workspace_patch"];
         trace?: never;
     };
     "/api/v1/api-keys": {
@@ -569,6 +742,100 @@ export interface paths {
             cookie?: never;
         };
         get: operations["get_api_questionnaire_prompts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The responses of a questionnaire, newest first, a cursor page at a time (PRD §8.4, §10.8). Any console user of
+         *     the account; another tenant's id is 404.
+         */
+        get: operations["get_api_questionnaire_answers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}/answers/{sessionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One response of the questionnaire (or of one of its generated stages) with its results: the answer detail's
+         *     fallback when the session chain is not available (PRD §10.8).
+         */
+        get: operations["get_api_questionnaire_answer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The dashboard layout. The first request has the LLM choose it (once, stored forever; counts one "dashboards");
+         *     without a stored dashboard and without dashboards capacity it answers 200 with locked and no charts.
+         */
+        get: operations["get_api_questionnaire_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}/dashboard/data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The data behind the charts (PRD §10.9), computed from the stored sessions. Counts one "analytics". */
+        get: operations["get_api_questionnaire_dashboard_data"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/questionnaire/{id}/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The general analytics of a questionnaire (PRD §8.4). Counts one "analytics" (AnalyticsFetched). */
+        get: operations["get_api_questionnaire_analytics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1331,10 +1598,60 @@ export interface components {
             order?: number | null;
             duration_minutes?: number | null;
         };
+        PromptStageInput: {
+            /** The parent: the chain's root questionnaire (or one of its stages). */
+            questionnaire_id: string;
+            answers: {
+                question?: string;
+                answer?: string;
+            }[];
+            session_id?: string | null;
+        };
+        LinkedinInput: {
+            /**
+             * A public profile: https?://([a-z]{2,3}.)?(www.)?linkedin.com/in/.
+             * @description ..
+             */
+            linkedin_url: string;
+            /** en or es; any other value becomes es. */
+            language?: string | null;
+        };
         TokenOutput: {
             id_token: string;
             refresh_token: string;
             expires_in: number;
+        };
+        GoogleAuthorizationOutput: {
+            authorization_url: string;
+        };
+        OnboardingOutput: {
+            onboarding_completed: boolean;
+        };
+        ProfileCustomerOutput: {
+            customer_id: string;
+            name: string;
+            email: string;
+            /** @enum {string} */
+            language: "es-CO" | "en-US";
+            logo_url?: string | null;
+            website?: string | null;
+            styles?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        ProfileOutput: {
+            customer: components["schemas"]["ProfileCustomerOutput"];
+        };
+        RegisteredUserOutput: {
+            email: string;
+            name: string;
+            root: boolean;
+            /** @enum {string} */
+            role: "Customer-Admin";
+        };
+        RegisterOutput: {
+            customer_id: string;
+            user: components["schemas"]["RegisteredUserOutput"];
         };
         CustomerSettingsOutput: {
             /** @enum {string} */
@@ -1347,8 +1664,22 @@ export interface components {
             google_ads_conversion_label?: string | null;
             max_files: number;
         };
-        OnboardingOutput: {
-            onboarding_completed: boolean;
+        UserOutput: {
+            email: string;
+            name: string;
+            root: boolean;
+            /** @enum {string} */
+            role: "Admin" | "Customer-Admin" | "Customer-Read-Only";
+            customer_id: string;
+        };
+        UserListOutput: {
+            users: components["schemas"]["UserOutput"][];
+        };
+        WorkspaceOutput: {
+            name?: string | null;
+            /** @enum {string} */
+            language: "es-CO" | "en-US";
+            website?: string | null;
         };
         ApiKeyOutput: {
             id: string;
@@ -1549,6 +1880,170 @@ export interface components {
         };
         PromptListOutput: {
             prompts: components["schemas"]["PromptOutput"][];
+        };
+        AnswerMemberOutput: {
+            organization_user_id: string;
+            name: string;
+            email?: string | null;
+            phone?: string | null;
+        };
+        AnswerChainOutput: {
+            stage: number;
+            total_stages: number;
+        };
+        AnswerOutput: {
+            session_id: string;
+            questionnaire_id: string;
+            customer_id: string;
+            title: string;
+            description?: string | null;
+            disclaimer?: string | null;
+            capture_user_data: boolean;
+            landing_page: boolean;
+            /** @enum {string} */
+            type: "default" | "ecommerce" | "quiz_funnel" | "samurai8" | "ai_team_profile" | "diagnostic" | "prompt";
+            is_active: boolean;
+            on_completed?: components["schemas"]["OnCompletedOutput"] | null;
+            parent: string;
+            slug?: string | null;
+            started_at?: string | null;
+            ended_at?: string | null;
+            flow_id?: string | null;
+            /** @enum {string} */
+            status: "filling" | "filled_out" | "processing" | "completed" | "in_progress" | "submitted";
+            user_data?: {
+                name?: string;
+                email?: string;
+                phone?: string;
+            } | null;
+            assignations_id?: string | null;
+            organization_user_id?: string | null;
+            /** @enum {string|null} */
+            assignation_type?: "follow_up" | null;
+            attempt: number;
+            question_count: number;
+            questions: components["schemas"]["QuestionOutput"][];
+            member?: components["schemas"]["AnswerMemberOutput"] | null;
+            chain?: components["schemas"]["AnswerChainOutput"] | null;
+        };
+        AnsweredQuestionnaireOutput: {
+            questionnaire_id: string;
+            title: string;
+            /** @enum {string} */
+            type: "default" | "ecommerce" | "quiz_funnel" | "samurai8" | "ai_team_profile" | "diagnostic" | "prompt";
+            is_chain: boolean;
+            public_id: string;
+        };
+        GeneratedStageOutput: {
+            questionnaire_id: string;
+            title: string;
+            origin_session_id?: string | null;
+            created_at?: string | null;
+        };
+        AnswersPageOutput: {
+            items: components["schemas"]["AnswerOutput"][];
+            /** @description Opaque; pass it back as ?cursor= for the next page. null on the last page. */
+            next_cursor?: string | null;
+            total: number;
+            questionnaire: components["schemas"]["AnsweredQuestionnaireOutput"];
+            generated_stages: components["schemas"]["GeneratedStageOutput"][];
+        };
+        AnswerDetailOutput: {
+            session: components["schemas"]["AnswerOutput"];
+            results?: components["schemas"]["SessionResultsOutput"] | null;
+        };
+        DashboardChartOutput: {
+            id: string;
+            /** @enum {string} */
+            chart_type: "kpi" | "gauge" | "line" | "donut" | "bar" | "horizontal_bar" | "stacked_bar" | "treemap" | "histogram" | "boxplot" | "ranking_avg" | "heatmap" | "tier_distribution";
+            title: string;
+            question_ids: string[];
+            order: number;
+        };
+        DashboardQuestionOutput: {
+            id: string;
+            title: string;
+            /** @enum {string} */
+            type: "radio" | "checkbox" | "select" | "range" | "text" | "audio" | "ranking" | "file" | "message" | "email" | "tel" | "phone";
+            options: {
+                label: string;
+                value: string;
+            }[];
+            /** Format: float */
+            min?: number | null;
+            /** Format: float */
+            max?: number | null;
+        };
+        DashboardLockOutput: {
+            /** @enum {string} */
+            feature: "dashboards";
+            /** @enum {string} */
+            reason: "NO_PLAN" | "PLAN_INACTIVE" | "PLAN_NOT_FOUND" | "FEATURE_NOT_IN_PLAN" | "FEATURE_LIMIT_REACHED" | "RESPONSE_LIMIT_REACHED" | "QUESTIONNAIRE_LIMIT_REACHED";
+        };
+        DashboardOutput: {
+            questionnaire_id: string;
+            customer_id: string;
+            title: string;
+            /** @enum {string|null} */
+            type?: "satisfaction" | "knowledge" | "profiling" | "recommendations" | "eligibility" | "opinion" | null;
+            charts: components["schemas"]["DashboardChartOutput"][];
+            created_at?: string | null;
+            questions: components["schemas"]["DashboardQuestionOutput"][];
+            locked?: components["schemas"]["DashboardLockOutput"] | null;
+        };
+        DashboardSessionsOutput: {
+            total: number;
+            completed: number;
+            /** Format: float */
+            completion_rate: number;
+            timeline: {
+                /** Format: date */
+                date: string;
+                started: number;
+                completed: number;
+            }[];
+            by_source: {
+                /** @enum {string} */
+                source: "link" | "assignation";
+                count: number;
+            }[];
+            duration_seconds: {
+                avg: number | null;
+                median: number | null;
+            };
+        };
+        QuestionStatsOutput: {
+            question_id: string;
+            answers_count: number;
+            values: {
+                value: string;
+                count: number;
+            }[];
+            numeric?: {
+                count: number;
+                avg: number;
+                min: number;
+                q1: number;
+                median: number;
+                q3: number;
+                max: number;
+            } | null;
+        };
+        TierCountOutput: {
+            tier_id: string;
+            name: string;
+            count: number;
+        };
+        DashboardDataOutput: {
+            sessions: components["schemas"]["DashboardSessionsOutput"];
+            questions: components["schemas"]["QuestionStatsOutput"][];
+            tiers: components["schemas"]["TierCountOutput"][];
+        };
+        AnalyticsOutput: {
+            questionnaire_id: string;
+            questions_analytics: components["schemas"]["QuestionStatsOutput"][];
+            total_sessions: number;
+            sessions_completed: number;
         };
         TranscriptionTokenOutput: {
             token: string;
@@ -2711,6 +3206,96 @@ export interface operations {
             };
         };
     };
+    post_api_questionnaire_prompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PromptStageInput"];
+            };
+        };
+        responses: {
+            /** @description The generation job */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobEnvelopeOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND, SESSION_NOT_FOUND, PROMPT_NOT_FOUND (no further stage to generate) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_questionnaire_linkedin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LinkedinInput"];
+            };
+        };
+        responses: {
+            /** @description The generation job */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobEnvelopeOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description LINKEDIN_UNAVAILABLE (no owner account configured) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_api_auth_token: {
         parameters: {
             query?: never;
@@ -2772,35 +3357,71 @@ export interface operations {
             };
         };
     };
-    get_api_settings_get: {
+    get_api_auth_google_authorize: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
+            query: {
+                state: string;
+                /** @description S256 PKCE challenge */
+                code_challenge: string;
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description CustomerSettings */
+            /** @description Google's consent URL */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CustomerSettingsOutput"];
+                    "application/json": components["schemas"]["GoogleAuthorizationOutput"];
                 };
             };
-            /** @description CUSTOMER_NOT_FOUND */
-            404: {
+            /** @description PROVIDER_NOT_CONFIGURED */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description TOO_MANY_ATTEMPTS */
-            429: {
+        };
+    };
+    post_api_auth_google_token: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Signed in */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenOutput"];
+                };
+            };
+            /** @description GOOGLE_SIGN_IN_FAILED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description EMAIL_LINKED_RETRY_LOGIN: retry the sign-in once */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PROVIDER_NOT_CONFIGURED */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2845,6 +3466,319 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OnboardingOutput"];
                 };
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_password_recovery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description If the account exists, a recovery code is on its way. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_password_recovery_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The password was changed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_RESET_CODE, EXPIRED_RESET_CODE, INVALID_PASSWORD */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOutput"];
+                };
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The account was created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description EMAIL_ALREADY_EXISTS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CustomerSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSettingsOutput"];
+                };
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    patch_api_settings_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CustomerSettings after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerSettingsOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_users_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Root first, then by name */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserListOutput"];
+                };
+            };
+        };
+    };
+    post_api_users_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The user was created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOutput"];
+                };
+            };
+            /** @description INVALID_ROLE, VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description EMAIL_ALREADY_EXISTS */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    patch_api_workspace_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workspace */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description CUSTOMER_NOT_FOUND */
             404: {
@@ -3688,6 +4622,208 @@ export interface operations {
             };
             /** @description QUESTIONNAIRE_NOT_FOUND */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_answers: {
+        parameters: {
+            query?: {
+                status?: "completed" | "filling" | "filled_out" | "processing" | "all" | "in_progress" | "submitted";
+                limit?: 20 | 50 | 100;
+                cursor?: string;
+                include_chain?: boolean;
+                /** @description Only the sessions of this assignation (the Sheets export of an assignation). */
+                assignations_id?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of sessions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswersPageOutput"];
+                };
+            };
+            /** @description INVALID_UUID, INVALID_REQUEST (status), INVALID_PAGE_SIZE, INVALID_CURSOR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                sessionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The session and its results */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerDetailOutput"];
+                };
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND, SESSION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The dashboard, or locked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardOutput"];
+                };
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED (analytics) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DASHBOARD_GENERATION_FAILED: nothing was stored */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_dashboard_data: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The dashboard data */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardDataOutput"];
+                };
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED (analytics) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ANALYTICS_UNAVAILABLE */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_analytics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The analytics */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsOutput"];
+                };
+            };
+            /** @description QUESTIONNAIRE_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED (analytics) */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ANALYTICS_UNAVAILABLE */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
