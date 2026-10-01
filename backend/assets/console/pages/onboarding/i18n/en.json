@@ -1,3 +1,353 @@
 {
-  "title": "Welcome to Mappi"
+  "title": "Welcome to Mappi",
+  "header": {
+    "duration": "8–12 minutes",
+    "explore": "Explore on my own",
+    "progress": "Setup progress",
+    "step": "Step {{step}} of {{total}}"
+  },
+  "steps": {
+    "1": "Goal",
+    "2": "Workspace",
+    "3": "Template",
+    "4": "Builder",
+    "5": "Publish",
+    "6": "Test",
+    "7": "Result"
+  },
+  "actions": {
+    "continue": "Continue",
+    "back": "Back"
+  },
+  "readOnly": "Your read-only role can't set up the workspace. Ask an administrator, or explore on your own.",
+  "goal": {
+    "title": "What do you want to achieve with Mappi?",
+    "subtitle": "We'll recommend a template for it. You can change everything later.",
+    "label": "Your goal",
+    "options": {
+      "diagnose": {
+        "title": "Diagnose",
+        "body": "Measure a situation and deliver a level, recommendations, and a plan.",
+        "tag": "Scoring + levels"
+      },
+      "qualify": {
+        "title": "Qualify or recommend",
+        "body": "Direct each person to the right service or next step.",
+        "tag": "Segments + CTA"
+      },
+      "capture": {
+        "title": "Capture processes",
+        "body": "Understand how a team works through text, audio, and follow-ups.",
+        "tag": "Evidence + follow-ups"
+      },
+      "collect": {
+        "title": "Collect information",
+        "body": "Create a structured survey without mandatory scoring.",
+        "tag": "Regular survey"
+      }
+    }
+  },
+  "workspace": {
+    "title": "Set up your workspace",
+    "subtitle": "Tell us about your organization.",
+    "name": "Workspace name",
+    "namePlaceholder": "Acme Inc.",
+    "nameTooLong": "At most 120 characters.",
+    "language": "Language",
+    "languageHint": "Your questionnaires, results and emails use this language.",
+    "languages": {
+      "es-CO": "Spanish",
+      "en-US": "English"
+    },
+    "website": "Website (optional)",
+    "websitePlaceholder": "acme.com",
+    "websiteInvalid": "Enter a valid website, like acme.com.",
+    "saved": "Workspace saved."
+  },
+  "template": {
+    "title": "Start from a template",
+    "subtitle": "Recommended for your goal. You'll adjust it in the next step.",
+    "recommended": "Recommended",
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions",
+    "use": "Use template",
+    "scratch": "Start from scratch →"
+  },
+  "builder": {
+    "title": "Make it yours",
+    "subtitle": "Complete the checklist to save your questionnaire.",
+    "checklist": "Checklist",
+    "checklistProgress": "{{done}} of 3 done",
+    "done": "Done",
+    "pending": "Pending",
+    "items": {
+      "title": "Confirm your questionnaire title",
+      "question": "Edit a question to fit your context",
+      "ending": "Review what the person will receive at the end"
+    },
+    "titleLabel": "Questionnaire title",
+    "confirmTitle": "Confirm title",
+    "questionsTitle": "Questions",
+    "questionLabel": "Question {{number}}",
+    "editHint": "Edit the first four questions here; the rest can be edited later in the editor.",
+    "category": "Category: {{name}}",
+    "ending": {
+      "title": "What the person receives at the end",
+      "diagnostic": "A result with their level, a recommendation and an action plan:",
+      "range": "{{min}}–{{max}} points",
+      "message": "A thank-you screen:",
+      "processMapping": "A thank-you screen, while their answers are mapped into a process:",
+      "review": "Looks good",
+      "reviewed": "Reviewed"
+    },
+    "save": "Save and publish",
+    "saveDisabled": "Complete the checklist first.",
+    "confirm": {
+      "title": "Create the questionnaire?",
+      "body_one": "We'll save \"{{title}}\" with {{count}} question to your account. You can edit it later.",
+      "body_other": "We'll save \"{{title}}\" with {{count}} questions to your account. You can edit it later.",
+      "confirm": "Create questionnaire"
+    },
+    "created": "Questionnaire created."
+  },
+  "publish": {
+    "title": "Publish it",
+    "subtitle": "Choose the link people will open to answer.",
+    "slug": "Custom link",
+    "slugHint": "Lowercase letters, numbers and hyphens.",
+    "slugInvalid": "Use only lowercase letters, numbers and hyphens (at most 100 characters).",
+    "publish": "Publish and open test"
+  },
+  "test": {
+    "title": "Try it as a respondent",
+    "subtitle": "We opened your questionnaire in a new tab. Answer it once to see what your respondents get.",
+    "open": "Open the test again",
+    "waiting": "Waiting for your first answer…",
+    "processing": "Processing your answer…",
+    "ready": "Your answer arrived. Everything works!",
+    "status": "Test status",
+    "skip": "Skip the test"
+  },
+  "result": {
+    "title": "You're all set!",
+    "subtitle": "Your questionnaire is live. Share it and watch the answers come in.",
+    "linkLabel": "Your questionnaire's link",
+    "share": "Share link",
+    "copied": "Link copied.",
+    "copyFailed": "We couldn't copy the link.",
+    "customize": "Customize more",
+    "invite": "Invite team",
+    "dashboard": "Go to dashboard",
+    "finishFailed": "We couldn't finish your setup. Please try again."
+  },
+  "templates": {
+    "aiMaturity": {
+      "title": "AI Maturity Diagnostic",
+      "description": "Find out how ready your organization is to adopt artificial intelligence.",
+      "scale": {
+        "l0": "Not started",
+        "l1": "Exploring",
+        "l2": "In progress",
+        "l3": "Established"
+      },
+      "categories": {
+        "strategy": "Strategy",
+        "data": "Data",
+        "processes": "Processes",
+        "talent": "Talent",
+        "culture": "Culture",
+        "technology": "Technology"
+      },
+      "questions": {
+        "strategyPlan": {
+          "title": "Does your organization have a defined AI strategy?"
+        },
+        "strategyGoals": {
+          "title": "Are your AI initiatives tied to business goals and a budget?"
+        },
+        "dataAccess": {
+          "title": "Is your data organized and easy to access?"
+        },
+        "dataQuality": {
+          "title": "Do you have data quality and governance practices?"
+        },
+        "processes": {
+          "title": "Have you identified processes that AI could automate or improve?"
+        },
+        "talent": {
+          "title": "Does your team have the skills to work with AI?"
+        },
+        "culture": {
+          "title": "Is your organization open to experimenting with AI?"
+        },
+        "technology": {
+          "title": "Do you have the tools and infrastructure to deploy AI solutions?"
+        }
+      },
+      "tiers": {
+        "initial": {
+          "name": "Initial",
+          "description": "AI is still an idea: there is no strategy, data or team behind it yet.",
+          "recommendation": "Start with one internal use case with clear value and little risk.",
+          "action": "Pick a pilot this month and name the person in charge."
+        },
+        "developing": {
+          "name": "Developing",
+          "description": "There are AI initiatives, but they are isolated and hard to scale.",
+          "recommendation": "Connect your initiatives to business goals and measure their impact.",
+          "action": "Define three metrics and review them every month."
+        },
+        "advanced": {
+          "name": "Advanced",
+          "description": "AI is part of how your organization works and makes decisions.",
+          "recommendation": "Scale what works and share your practices across teams.",
+          "action": "Document your playbook and train the next teams."
+        }
+      }
+    },
+    "serviceQualification": {
+      "title": "Service Qualification",
+      "description": "Tell us about your needs and we'll suggest the right next step.",
+      "questions": {
+        "need": {
+          "title": "What do you need help with?",
+          "options": {
+            "strategy": "Strategy",
+            "implementation": "Implementation",
+            "training": "Training",
+            "support": "Ongoing support"
+          }
+        },
+        "size": {
+          "title": "How big is your team?",
+          "options": {
+            "xs": "1–10 people",
+            "s": "11–50 people",
+            "m": "51–200 people",
+            "l": "More than 200 people"
+          }
+        },
+        "timeline": {
+          "title": "When do you want to start?",
+          "options": {
+            "now": "Right away",
+            "quarter": "In 1–3 months",
+            "half": "In 3–6 months",
+            "exploring": "Just exploring"
+          }
+        },
+        "budget": {
+          "title": "What budget do you have in mind?",
+          "options": {
+            "low": "Under $5,000",
+            "mid": "$5,000–$20,000",
+            "high": "Over $20,000",
+            "unknown": "Not defined yet"
+          }
+        },
+        "challenge": {
+          "title": "What is the main challenge you want to solve?"
+        },
+        "role": {
+          "title": "What is your role in the decision?",
+          "options": {
+            "decider": "I make the decision",
+            "influencer": "I influence the decision",
+            "researcher": "I'm researching options"
+          }
+        }
+      },
+      "ending": {
+        "title": "Thank you!",
+        "message": "We'll review your answers and contact you with the right next step."
+      }
+    },
+    "processDiscovery": {
+      "title": "Process Discovery",
+      "description": "Help us understand how your team works, step by step.",
+      "questions": {
+        "process": {
+          "title": "Which process do you want to describe?",
+          "criterion": "Names a specific process and what it is for."
+        },
+        "steps": {
+          "title": "Walk us through the steps of the process, from start to finish.",
+          "criterion": "Describes the steps in order, with a start and an end."
+        },
+        "people": {
+          "title": "Who takes part in each step?"
+        },
+        "tools": {
+          "title": "Which tools or systems do you use?"
+        },
+        "bottlenecks": {
+          "title": "Where does the process get stuck or take the longest?",
+          "criterion": "Points to a specific step and explains why it is slow."
+        },
+        "frequency": {
+          "title": "How often does the process run?",
+          "options": {
+            "daily": "Every day",
+            "weekly": "Every week",
+            "monthly": "Every month",
+            "occasionally": "Occasionally"
+          }
+        },
+        "improvement": {
+          "title": "If you could change one thing about the process, what would it be?"
+        }
+      },
+      "ending": {
+        "title": "Thank you!",
+        "message": "Thanks for sharing how your process works."
+      }
+    },
+    "customerDiscovery": {
+      "title": "Customer Discovery",
+      "description": "Help us understand what you value and how we can do better.",
+      "questions": {
+        "source": {
+          "title": "How did you hear about us?",
+          "options": {
+            "search": "Search engine",
+            "social": "Social media",
+            "referral": "A recommendation",
+            "event": "An event",
+            "other": "Other"
+          }
+        },
+        "recommend": {
+          "title": "How likely are you to recommend us to a friend?"
+        },
+        "value": {
+          "title": "What do you value most about us?",
+          "options": {
+            "quality": "Quality",
+            "price": "Price",
+            "service": "Customer service",
+            "speed": "Speed"
+          }
+        },
+        "improve": {
+          "title": "What could we do better?"
+        },
+        "usage": {
+          "title": "How often do you use our products or services?",
+          "options": {
+            "weekly": "Every week",
+            "monthly": "Every month",
+            "rarely": "Rarely",
+            "first": "This is my first time"
+          }
+        },
+        "other": {
+          "title": "Is there anything else you'd like to tell us?"
+        }
+      },
+      "ending": {
+        "title": "Thank you!",
+        "message": "Your answers help us improve."
+      }
+    }
+  }
 }

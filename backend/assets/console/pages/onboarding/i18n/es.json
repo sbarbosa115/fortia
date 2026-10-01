@@ -1,3 +1,353 @@
 {
-  "title": "Bienvenido a Mappi"
+  "title": "Bienvenido a Mappi",
+  "header": {
+    "duration": "8–12 minutos",
+    "explore": "Explorar por mi cuenta",
+    "progress": "Progreso de la configuración",
+    "step": "Paso {{step}} de {{total}}"
+  },
+  "steps": {
+    "1": "Objetivo",
+    "2": "Espacio",
+    "3": "Plantilla",
+    "4": "Editor",
+    "5": "Publicar",
+    "6": "Probar",
+    "7": "Resultado"
+  },
+  "actions": {
+    "continue": "Continuar",
+    "back": "Atrás"
+  },
+  "readOnly": "Tu rol de solo lectura no puede configurar el espacio de trabajo. Pídeselo a un administrador o explora por tu cuenta.",
+  "goal": {
+    "title": "¿Qué quieres lograr con Mappi?",
+    "subtitle": "Te recomendaremos una plantilla. Podrás cambiarlo todo después.",
+    "label": "Tu objetivo",
+    "options": {
+      "diagnose": {
+        "title": "Diagnosticar",
+        "body": "Mide una situación y entrega un nivel, recomendaciones y un plan.",
+        "tag": "Puntaje + niveles"
+      },
+      "qualify": {
+        "title": "Calificar o recomendar",
+        "body": "Dirige a cada persona al servicio o siguiente paso adecuado.",
+        "tag": "Segmentos + CTA"
+      },
+      "capture": {
+        "title": "Capturar procesos",
+        "body": "Entiende cómo trabaja un equipo con texto, audio y repreguntas.",
+        "tag": "Evidencia + repreguntas"
+      },
+      "collect": {
+        "title": "Recopilar información",
+        "body": "Crea una encuesta estructurada sin puntaje obligatorio.",
+        "tag": "Encuesta regular"
+      }
+    }
+  },
+  "workspace": {
+    "title": "Configura tu espacio de trabajo",
+    "subtitle": "Cuéntanos sobre tu organización.",
+    "name": "Nombre del espacio",
+    "namePlaceholder": "Acme S.A.S.",
+    "nameTooLong": "Máximo 120 caracteres.",
+    "language": "Idioma",
+    "languageHint": "Tus cuestionarios, resultados y correos usan este idioma.",
+    "languages": {
+      "es-CO": "Español",
+      "en-US": "Inglés"
+    },
+    "website": "Sitio web (opcional)",
+    "websitePlaceholder": "acme.com",
+    "websiteInvalid": "Escribe un sitio web válido, como acme.com.",
+    "saved": "Espacio de trabajo guardado."
+  },
+  "template": {
+    "title": "Empieza con una plantilla",
+    "subtitle": "Recomendada para tu objetivo. La ajustarás en el siguiente paso.",
+    "recommended": "Recomendada",
+    "questions_one": "{{count}} pregunta",
+    "questions_other": "{{count}} preguntas",
+    "use": "Usar plantilla",
+    "scratch": "Empezar desde cero →"
+  },
+  "builder": {
+    "title": "Hazlo tuyo",
+    "subtitle": "Completa la lista para guardar tu cuestionario.",
+    "checklist": "Lista de pasos",
+    "checklistProgress": "{{done}} de 3 listos",
+    "done": "Listo",
+    "pending": "Pendiente",
+    "items": {
+      "title": "Confirma el título de tu cuestionario",
+      "question": "Edita una pregunta para adaptarla a tu contexto",
+      "ending": "Revisa lo que la persona recibirá al final"
+    },
+    "titleLabel": "Título del cuestionario",
+    "confirmTitle": "Confirmar título",
+    "questionsTitle": "Preguntas",
+    "questionLabel": "Pregunta {{number}}",
+    "editHint": "Edita aquí las cuatro primeras preguntas; las demás puedes editarlas luego en el editor.",
+    "category": "Categoría: {{name}}",
+    "ending": {
+      "title": "Lo que la persona recibe al final",
+      "diagnostic": "Un resultado con su nivel, una recomendación y un plan de acción:",
+      "range": "{{min}}–{{max}} puntos",
+      "message": "Una pantalla de agradecimiento:",
+      "processMapping": "Una pantalla de agradecimiento, mientras sus respuestas se convierten en un proceso:",
+      "review": "Se ve bien",
+      "reviewed": "Revisado"
+    },
+    "save": "Guardar y publicar",
+    "saveDisabled": "Primero completa la lista.",
+    "confirm": {
+      "title": "¿Crear el cuestionario?",
+      "body_one": "Guardaremos «{{title}}» con {{count}} pregunta en tu cuenta. Podrás editarlo después.",
+      "body_other": "Guardaremos «{{title}}» con {{count}} preguntas en tu cuenta. Podrás editarlo después.",
+      "confirm": "Crear cuestionario"
+    },
+    "created": "Cuestionario creado."
+  },
+  "publish": {
+    "title": "Publícalo",
+    "subtitle": "Elige el enlace que las personas abrirán para responder.",
+    "slug": "Enlace personalizado",
+    "slugHint": "Letras minúsculas, números y guiones.",
+    "slugInvalid": "Usa solo letras minúsculas, números y guiones (máximo 100 caracteres).",
+    "publish": "Publicar y abrir prueba"
+  },
+  "test": {
+    "title": "Pruébalo como encuestado",
+    "subtitle": "Abrimos tu cuestionario en una pestaña nueva. Respóndelo una vez para ver lo que reciben tus encuestados.",
+    "open": "Abrir la prueba de nuevo",
+    "waiting": "Esperando tu primera respuesta…",
+    "processing": "Procesando tu respuesta…",
+    "ready": "Tu respuesta llegó. ¡Todo funciona!",
+    "status": "Estado de la prueba",
+    "skip": "Omitir la prueba"
+  },
+  "result": {
+    "title": "¡Todo listo!",
+    "subtitle": "Tu cuestionario está publicado. Compártelo y mira cómo llegan las respuestas.",
+    "linkLabel": "El enlace de tu cuestionario",
+    "share": "Compartir enlace",
+    "copied": "Enlace copiado.",
+    "copyFailed": "No pudimos copiar el enlace.",
+    "customize": "Personalizar más",
+    "invite": "Invitar al equipo",
+    "dashboard": "Ir al panel",
+    "finishFailed": "No pudimos terminar tu configuración. Inténtalo de nuevo."
+  },
+  "templates": {
+    "aiMaturity": {
+      "title": "Diagnóstico de Madurez en IA",
+      "description": "Descubre qué tan preparada está tu organización para adoptar la inteligencia artificial.",
+      "scale": {
+        "l0": "No hemos empezado",
+        "l1": "Explorando",
+        "l2": "En progreso",
+        "l3": "Consolidado"
+      },
+      "categories": {
+        "strategy": "Estrategia",
+        "data": "Datos",
+        "processes": "Procesos",
+        "talent": "Talento",
+        "culture": "Cultura",
+        "technology": "Tecnología"
+      },
+      "questions": {
+        "strategyPlan": {
+          "title": "¿Tu organización tiene una estrategia de IA definida?"
+        },
+        "strategyGoals": {
+          "title": "¿Tus iniciativas de IA están ligadas a objetivos de negocio y a un presupuesto?"
+        },
+        "dataAccess": {
+          "title": "¿Tus datos están organizados y son fáciles de consultar?"
+        },
+        "dataQuality": {
+          "title": "¿Tienen prácticas de calidad y gobierno de datos?"
+        },
+        "processes": {
+          "title": "¿Han identificado procesos que la IA podría automatizar o mejorar?"
+        },
+        "talent": {
+          "title": "¿Tu equipo tiene las habilidades para trabajar con IA?"
+        },
+        "culture": {
+          "title": "¿Tu organización está abierta a experimentar con IA?"
+        },
+        "technology": {
+          "title": "¿Cuentan con las herramientas y la infraestructura para implementar soluciones de IA?"
+        }
+      },
+      "tiers": {
+        "initial": {
+          "name": "Inicial",
+          "description": "La IA todavía es una idea: aún no hay estrategia, datos ni equipo detrás.",
+          "recommendation": "Empieza con un caso de uso interno de valor claro y poco riesgo.",
+          "action": "Elige un piloto este mes y nombra a un responsable."
+        },
+        "developing": {
+          "name": "En desarrollo",
+          "description": "Hay iniciativas de IA, pero están aisladas y cuesta escalarlas.",
+          "recommendation": "Conecta tus iniciativas con los objetivos de negocio y mide su impacto.",
+          "action": "Define tres métricas y revísalas cada mes."
+        },
+        "advanced": {
+          "name": "Avanzado",
+          "description": "La IA es parte de cómo tu organización trabaja y toma decisiones.",
+          "recommendation": "Escala lo que funciona y comparte tus prácticas entre equipos.",
+          "action": "Documenta tu metodología y capacita a los siguientes equipos."
+        }
+      }
+    },
+    "serviceQualification": {
+      "title": "Calificación de Servicio",
+      "description": "Cuéntanos qué necesitas y te sugeriremos el siguiente paso adecuado.",
+      "questions": {
+        "need": {
+          "title": "¿Con qué necesitas ayuda?",
+          "options": {
+            "strategy": "Estrategia",
+            "implementation": "Implementación",
+            "training": "Capacitación",
+            "support": "Acompañamiento continuo"
+          }
+        },
+        "size": {
+          "title": "¿Qué tan grande es tu equipo?",
+          "options": {
+            "xs": "1–10 personas",
+            "s": "11–50 personas",
+            "m": "51–200 personas",
+            "l": "Más de 200 personas"
+          }
+        },
+        "timeline": {
+          "title": "¿Cuándo quieres empezar?",
+          "options": {
+            "now": "De inmediato",
+            "quarter": "En 1–3 meses",
+            "half": "En 3–6 meses",
+            "exploring": "Solo estoy explorando"
+          }
+        },
+        "budget": {
+          "title": "¿Qué presupuesto tienes en mente?",
+          "options": {
+            "low": "Menos de USD 5.000",
+            "mid": "USD 5.000–20.000",
+            "high": "Más de USD 20.000",
+            "unknown": "Aún no está definido"
+          }
+        },
+        "challenge": {
+          "title": "¿Cuál es el principal reto que quieres resolver?"
+        },
+        "role": {
+          "title": "¿Cuál es tu rol en la decisión?",
+          "options": {
+            "decider": "Yo tomo la decisión",
+            "influencer": "Influyo en la decisión",
+            "researcher": "Estoy investigando opciones"
+          }
+        }
+      },
+      "ending": {
+        "title": "¡Gracias!",
+        "message": "Revisaremos tus respuestas y te contactaremos con el siguiente paso adecuado."
+      }
+    },
+    "processDiscovery": {
+      "title": "Descubrimiento de Procesos",
+      "description": "Ayúdanos a entender cómo trabaja tu equipo, paso a paso.",
+      "questions": {
+        "process": {
+          "title": "¿Qué proceso quieres describir?",
+          "criterion": "Nombra un proceso concreto y para qué sirve."
+        },
+        "steps": {
+          "title": "Cuéntanos los pasos del proceso, de principio a fin.",
+          "criterion": "Describe los pasos en orden, con un inicio y un final."
+        },
+        "people": {
+          "title": "¿Quién participa en cada paso?"
+        },
+        "tools": {
+          "title": "¿Qué herramientas o sistemas usan?"
+        },
+        "bottlenecks": {
+          "title": "¿Dónde se atasca el proceso o qué paso toma más tiempo?",
+          "criterion": "Señala un paso concreto y explica por qué es lento."
+        },
+        "frequency": {
+          "title": "¿Con qué frecuencia se ejecuta el proceso?",
+          "options": {
+            "daily": "Todos los días",
+            "weekly": "Cada semana",
+            "monthly": "Cada mes",
+            "occasionally": "De vez en cuando"
+          }
+        },
+        "improvement": {
+          "title": "Si pudieras cambiar una sola cosa del proceso, ¿cuál sería?"
+        }
+      },
+      "ending": {
+        "title": "¡Gracias!",
+        "message": "Gracias por contarnos cómo funciona tu proceso."
+      }
+    },
+    "customerDiscovery": {
+      "title": "Descubrimiento de Clientes",
+      "description": "Ayúdanos a entender qué valoras y cómo podemos mejorar.",
+      "questions": {
+        "source": {
+          "title": "¿Cómo te enteraste de nosotros?",
+          "options": {
+            "search": "Buscador",
+            "social": "Redes sociales",
+            "referral": "Una recomendación",
+            "event": "Un evento",
+            "other": "Otro"
+          }
+        },
+        "recommend": {
+          "title": "¿Qué tan probable es que nos recomiendes a un amigo?"
+        },
+        "value": {
+          "title": "¿Qué es lo que más valoras de nosotros?",
+          "options": {
+            "quality": "La calidad",
+            "price": "El precio",
+            "service": "La atención al cliente",
+            "speed": "La rapidez"
+          }
+        },
+        "improve": {
+          "title": "¿Qué podríamos hacer mejor?"
+        },
+        "usage": {
+          "title": "¿Con qué frecuencia usas nuestros productos o servicios?",
+          "options": {
+            "weekly": "Cada semana",
+            "monthly": "Cada mes",
+            "rarely": "Rara vez",
+            "first": "Es mi primera vez"
+          }
+        },
+        "other": {
+          "title": "¿Hay algo más que quieras contarnos?"
+        }
+      },
+      "ending": {
+        "title": "¡Gracias!",
+        "message": "Tus respuestas nos ayudan a mejorar."
+      }
+    }
+  }
 }
