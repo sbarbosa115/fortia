@@ -5,11 +5,12 @@ namespace App\Responses\UI\Http\Input;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-/** PRD §8.4 POST /signed-urls. */
+/** PRD §8.4 POST /signed-urls (template: a file question's template, written in the console). */
 final class SignedUrlInput
 {
     public const ANSWER_MEDIA = 'answer_media';
     public const PROMPT = 'prompt';
+    public const TEMPLATE = 'template';
 
     #[Assert\NotNull]
     #[Assert\Length(min: 1, max: 255)]
@@ -24,7 +25,7 @@ final class SignedUrlInput
     #[Assert\Length(min: 1, max: 16)]
     public ?string $customer_id = null;
 
-    #[Assert\Choice(choices: [self::ANSWER_MEDIA, self::PROMPT])]
+    #[Assert\Choice(choices: [self::ANSWER_MEDIA, self::PROMPT, self::TEMPLATE])]
     public ?string $upload_type = self::ANSWER_MEDIA;
 
     public ?string $session_id = null;

@@ -1,4 +1,5 @@
 import {api, type Job, type Schema} from '@shared/api';
+import type {TableRow} from '@shared/lib';
 
 export type Session = Schema<'SessionOutput'>;
 export type Question = Schema<'QuestionOutput'>;
@@ -9,8 +10,9 @@ export type Validation = Schema<'ValidationOutput'>;
 export type SessionResults = Schema<'SessionResultsOutput'>;
 export type Submission = Schema<'SessionSubmissionOutput'>;
 export type UserData = {name?: string; email?: string; phone?: string};
-/** A control's answer: one value, several (checkbox, ranking, files, recordings) or none yet. */
-export type AnswerValue = string | string[] | null;
+export type {TableRow};
+/** A control's answer: one value, several (checkbox, ranking, files, recordings), a table's rows or none yet. */
+export type AnswerValue = string | string[] | TableRow[] | null;
 
 /** What POST /questionnaire/session answers: the result, or the job computing it (quiz funnel, PRD §7.7). */
 export type SubmitResponse = Submission | {job: Job};

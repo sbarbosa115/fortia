@@ -10,5 +10,11 @@
   "uploading": "Subiendo... {{progress}}%",
   "failed": "No pudimos subir tu archivo. Inténtalo de nuevo.",
   "retry": "Intentar de nuevo",
-  "remove": "Quitar {{name}}"
+  "remove": "Quitar {{name}}",
+  "template": {
+    "title": "Usa la plantilla",
+    "help": "Descárgala, complétala y súbela aquí.",
+    "download": "Descargar la plantilla {{name}}",
+    "failed": "No se pudo descargar la plantilla. Inténtalo de nuevo."
+  }
 }

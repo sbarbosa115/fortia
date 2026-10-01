@@ -30,3 +30,5 @@ export {
   EXPORT_KEY_PROPERTY,
 } from './sheets';
 export type {SheetQuestion, SheetSession, SheetLabels} from './sheets';
+export {tableColumns, tableRowsOf, tableFilled, tableText} from './table';
+export type {TableRow, TableColumn} from './table';

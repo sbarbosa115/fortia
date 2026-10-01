@@ -111,6 +111,41 @@ function PreviewQuestion({
       {question.type === 'file' ? (
         <span className="preview__input">{t('preview.fileAnswer')}</span>
       ) : null}
+      {question.type === 'file' && question.template ? (
+        <span className="preview__template">
+          <Icon name="download" size={14} />
+          {t('preview.template', {name: question.template.filename})}
+        </span>
+      ) : null}
+      {question.type === 'table' ? (
+        <table className="preview__table">
+          <thead>
+            <tr>
+              {question.tableRows.some((row) => row.trim()) ? <td /> : null}
+              {question.options.map((option, i) => (
+                <th key={option.key} scope="col">
+                  {option.label || t('questions.columnLabel', {n: i + 1})}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {(question.tableRows.some((row) => row.trim())
+              ? question.tableRows.filter((row) => row.trim())
+              : ['']
+            ).map((row, i) => (
+              <tr key={i}>
+                {row ? <th scope="row">{row}</th> : null}
+                {question.options.map((option) => (
+                  <td key={option.key}>
+                    <span className="preview__cell" />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
       {question.type === 'range' ? (
         <div className="preview__range" aria-hidden>
           <span>{question.rangeMin}</span>

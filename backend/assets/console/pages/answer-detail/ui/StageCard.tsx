@@ -7,6 +7,7 @@ import {
 import {Card, CardHeader, Table, type Column} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {FileAnswer} from './FileAnswer';
+import {TableAnswer} from './TableAnswer';
 
 type Row = {question: Question; seconds: number | null};
 
@@ -38,6 +39,15 @@ export function StageCard({
         switch (value.kind) {
           case 'files':
             return <FileAnswer keys={value.keys} />;
+          case 'table':
+            return (
+              <TableAnswer
+                columns={value.columns}
+                rowLabels={value.rowLabels}
+                rows={value.rows}
+                caption={row.question.title}
+              />
+            );
           case 'text':
             return <span className="detail-answer">{value.text}</span>;
           default:

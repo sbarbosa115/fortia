@@ -66,6 +66,16 @@ function questions(draft: Draft): Issue[] {
         }
       }
     }
+    if (question.type === 'table') {
+      const labels = question.options.map((o) => o.label.trim().toLowerCase());
+      if (labels.length === 0) {
+        add('errors.noColumns', field, {n});
+      } else if (labels.some((label) => label === '')) {
+        add('errors.columnLabel', field, {title});
+      } else if (new Set(labels).size !== labels.length) {
+        add('errors.uniqueColumns', field, {title});
+      }
+    }
     if (question.type === 'range') {
       const min = toNumber(question.rangeMin);
       const max = toNumber(question.rangeMax);

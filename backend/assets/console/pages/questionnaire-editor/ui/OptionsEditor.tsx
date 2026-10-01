@@ -2,9 +2,16 @@ import {Button, Icon, IconButton, TextInput} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {isScored, newOption} from '../model/draft';
 import {useEditorContext} from '../model/EditorContext';
-import type {DraftOption, DraftQuestion} from '../model/types';
+import {
+  type DraftOption,
+  type DraftQuestion,
+  MAX_TABLE_COLUMNS,
+} from '../model/types';
 
-/** Labelled answer choices; the scored types also carry a numeric score per choice (PRD §10.5). */
+/**
+ * Labelled answer choices; the scored types also carry a numeric score per choice (PRD §10.5). A table's columns are
+ * edited the same way.
+ */
 export function OptionsEditor({
   question,
   number,
@@ -15,6 +22,21 @@ export function OptionsEditor({
   const {t} = useTranslation('pages.questionnaire-editor');
   const editor = useEditorContext();
   const scored = isScored(question.type, editor.draft.kind);
+  // A table's options are its columns: the same list, its own words.
+  const words =
+    question.type === 'table'
+      ? {
+          legend: 'questions.columns',
+          label: 'questions.columnLabel',
+          add: 'questions.addColumn',
+          remove: 'questions.removeColumn',
+        }
+      : {
+          legend: 'questions.options',
+          label: 'questions.optionLabel',
+          add: 'questions.addOption',
+          remove: 'questions.removeOption',
+        };
   const setOptions = (options: DraftOption[]) =>
     editor.updateQuestion(question.key, {options});
   const change = (key: string, patch: Partial<DraftOption>) =>
@@ -24,12 +46,12 @@ export function OptionsEditor({
 
   return (
     <fieldset className="options">
-      <legend className="field__label">{t('questions.options')}</legend>
+      <legend className="field__label">{t(words.legend)}</legend>
       {question.options.map((option, i) => (
         <div key={option.key} className="options__row">
           <TextInput
-            aria-label={`${t('questions.question', {n: number})} · ${t('questions.optionLabel', {n: i + 1})}`}
-            placeholder={t('questions.optionLabel', {n: i + 1})}
+            aria-label={`${t('questions.question', {n: number})} · ${t(words.label, {n: i + 1})}`}
+            placeholder={t(words.label, {n: i + 1})}
             value={option.label}
             onChange={(e) => change(option.key, {label: e.target.value})}
           />
@@ -45,7 +67,7 @@ export function OptionsEditor({
           ) : null}
           <IconButton
             size="sm"
-            label={t('questions.removeOption', {n: i + 1})}
+            label={t(words.remove, {n: i + 1})}
             icon={<Icon name="close" />}
             onClick={() =>
               setOptions(question.options.filter((o) => o.key !== option.key))
@@ -58,6 +80,10 @@ export function OptionsEditor({
           size="sm"
           variant="ghost"
           icon={<Icon name="plus" />}
+          disabled={
+            question.type === 'table' &&
+            question.options.length >= MAX_TABLE_COLUMNS
+          }
           onClick={() =>
             setOptions([
               ...question.options,
@@ -65,7 +91,7 @@ export function OptionsEditor({
             ])
           }
         >
-          {t('questions.addOption')}
+          {t(words.add)}
         </Button>
       </div>
     </fieldset>

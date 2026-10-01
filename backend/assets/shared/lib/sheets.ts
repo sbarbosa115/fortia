@@ -7,6 +7,8 @@
  * need GOOGLE_SHEETS_CLIENT_ID (appConfig().googleSheetsClientId): without it the export is disabled.
  */
 
+import {tableText} from './table';
+
 export const SHEETS_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 export const EXPORT_KEY_PROPERTY = 'skylineExportKey';
 
@@ -19,6 +21,7 @@ export type SheetQuestion = {
     value?: unknown;
     skipped?: boolean | null;
     options?: Array<{label: string; value?: unknown}>;
+    rows?: string[] | null;
   }>;
 };
 
@@ -67,6 +70,9 @@ export function sheetCell(
   }
   if (control.skipped) {
     return labels.skipped;
+  }
+  if (control.type === 'table') {
+    return tableText({...control, options: control.options ?? []});
   }
   const values = (
     Array.isArray(control.value) ? control.value : [control.value]

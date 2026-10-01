@@ -5,6 +5,7 @@ import {
   controlOf,
   type Question,
   type Session,
+  stringsOf,
 } from '@respondent/entities/session';
 import {Icon} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
@@ -68,7 +69,7 @@ export function QuestionView({
     body = (
       <AudioControl
         label={question.title}
-        value={Array.isArray(control.value) ? control.value : []}
+        value={stringsOf(control.value)}
         disabled={disabled}
         language={language}
         onChange={runner.change}
@@ -83,6 +84,7 @@ export function QuestionView({
         max={maxFiles}
         disabled={disabled}
         token={token}
+        template={control.template ?? null}
         target={{
           customerId: session.customer_id,
           sessionId: session.session_id,

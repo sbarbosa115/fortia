@@ -14,7 +14,7 @@ import {
 } from '@shared/ui';
 import {type InputHTMLAttributes, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {isOptionType, requiredLocked} from '../model/draft';
+import {hasOptions, requiredLocked} from '../model/draft';
 import {useEditorContext} from '../model/EditorContext';
 import {
   DIAGNOSTIC_FIELD_TYPES,
@@ -25,6 +25,8 @@ import {
 import {FollowUpsFields} from './FollowUpsFields';
 import {OptionsEditor} from './OptionsEditor';
 import {RangeFields} from './RangeFields';
+import {TableRowsFields} from './TableRowsFields';
+import {TemplateField} from './TemplateField';
 import {TextFormatFields} from './TextFormatFields';
 
 /** One question of Step 2: a header to drag, open, duplicate and delete it, and its fields by input type. */
@@ -165,8 +167,14 @@ export function QuestionCard({
                 {t('questions.rawType', {type: question.rawType})}
               </p>
             ) : null}
-            {isOptionType(question.type) ? (
+            {hasOptions(question.type) ? (
               <OptionsEditor question={question} number={number} />
+            ) : null}
+            {question.type === 'table' ? (
+              <TableRowsFields question={question} />
+            ) : null}
+            {question.type === 'file' ? (
+              <TemplateField question={question} />
             ) : null}
             {question.type === 'text' && !question.rawType ? (
               <TextFormatFields question={question} />

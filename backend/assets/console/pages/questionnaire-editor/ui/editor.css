@@ -526,3 +526,49 @@
   flex-direction: column;
   gap: var(--space-1);
 }
+
+/* A file question's template: its name opens it; replace or remove it. */
+.template-field__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--color-primary);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* The preview of a table question and of a file question's template. */
+.preview__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.preview__table th {
+  padding: 4px 6px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-align: left;
+}
+.preview__table td {
+  padding: 4px;
+}
+.preview__cell {
+  display: block;
+  height: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+.preview__template {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-size: 13px;
+}

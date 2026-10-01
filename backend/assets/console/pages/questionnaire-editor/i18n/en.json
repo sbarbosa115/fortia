@@ -86,7 +86,8 @@
       "audio": "Audio",
       "range": "Range (slider)",
       "message": "Message (no answer)",
-      "file": "File upload"
+      "file": "File upload",
+      "table": "Table"
     },
     "rawType": "This question keeps its {{type}} format.",
     "options": "Answer choices",
@@ -118,7 +119,24 @@
     "rangeMin": "Min",
     "rangeMax": "Max",
     "maxScore": "Max score: {{max}}",
-    "categoryMax": "{{category}}: up to {{max}} points"
+    "categoryMax": "{{category}}: up to {{max}} points",
+    "columns": "Columns",
+    "columnLabel": "Column {{n}}",
+    "addColumn": "Add column",
+    "removeColumn": "Remove column {{n}}",
+    "tableRows": "Rows",
+    "fixedRows": "Fixed rows",
+    "fixedRowsHint": "The respondent fills in each of these rows.",
+    "freeRowsHint": "The respondent adds the rows they need (up to {{max}}).",
+    "rowLabel": "Row {{n}}",
+    "addRow": "Add row",
+    "removeRow": "Remove row {{n}}",
+    "template": "Template (optional)",
+    "templateHint": "A file the respondent downloads, fills in and uploads back (up to 20 MB).",
+    "templateUpload": "Upload template",
+    "templateReplace": "Replace",
+    "templateRemove": "Remove the template {{name}}",
+    "templateTooLarge": "The template is larger than 20 MB. Please choose a smaller file."
   },
   "end": {
     "title": "When it ends",
@@ -221,7 +239,8 @@
     "audioAnswer": "Record your answer",
     "fileAnswer": "Upload a file",
     "selectAnswer": "Select an option",
-    "close": "Close preview"
+    "close": "Close preview",
+    "template": "Template: {{name}}"
   },
   "success": {
     "created": "Questionnaire created successfully!",
@@ -287,6 +306,9 @@
     "noPrompts": "Add at least one prompt.",
     "tooManyPrompts": "A chain can have at most {{max}} prompts.",
     "promptEmpty": "Prompt {{n}} can't be empty.",
-    "upload": "We couldn't upload the prompts. Please try again."
+    "upload": "We couldn't upload the prompts. Please try again.",
+    "noColumns": "Question {{n}} needs at least one column.",
+    "columnLabel": "All columns in question \"{{title}}\" must have a name.",
+    "uniqueColumns": "The columns in question \"{{title}}\" must have different names."
   }
 }

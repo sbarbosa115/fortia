@@ -1,4 +1,8 @@
-import {toggleChoice, visibleOptions} from '@respondent/entities/session';
+import {
+  stringsOf,
+  toggleChoice,
+  visibleOptions,
+} from '@respondent/entities/session';
 import {Icon} from '@shared/ui';
 import {useId} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -68,7 +72,7 @@ export function CheckboxControl({
   disabled,
   onChange,
 }: ControlProps) {
-  const selected = Array.isArray(control.value) ? control.value : [];
+  const selected = stringsOf(control.value);
   return (
     <div className="answer-choices" role="group" aria-label={question.title}>
       {visibleOptions(control, gender).map((option, index) => {

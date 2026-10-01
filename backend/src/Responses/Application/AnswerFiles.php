@@ -8,6 +8,7 @@ use App\Responses\Domain\Error\SessionNotFound;
 use App\Responses\Domain\Repository\SessionRepository;
 use App\Shared\Application\Storage\ObjectStorage;
 use App\Shared\Application\Storage\SignedUpload;
+use App\Shared\Domain\Document\FileTemplate;
 use App\Shared\Domain\Error\NotFound;
 use App\Shared\Domain\Ids;
 
@@ -18,6 +19,7 @@ use App\Shared\Domain\Ids;
  *   only for a session still being filled that belongs to that account and has that question (D4: not for any
  *   customer_id a caller names);
  * - a chain prompt's text: a direct upload to prompts/{customer_id}/{uuid}{ext|.txt};
+ * - a file question's template: an upload by the account's users, a download by anyone answering it;
  * - a download of an answer's file, inline or as an attachment.
  *
  * Each URL lasts 15 minutes.
@@ -57,6 +59,33 @@ final class AnswerFiles
         $key = \sprintf('prompts/%s/%s%s', $customerId, Ids::uuid4(), self::extension($filename) ?: '.txt');
 
         return $this->storage->signedPutUrl($key, $contentType);
+    }
+
+    /**
+     * A file question's template: a form-style upload of 1 byte to 20 MB to templates/{customer_id}/{uuid}/{filename}
+     * (the key ends with the file's name, so the download keeps it).
+     */
+    public function templateUpload(string $customerId, string $filename, string $contentType): SignedUpload
+    {
+        if (!$this->accounts->exists($customerId)) {
+            throw new NotFound('CUSTOMER_NOT_FOUND', 'The account does not exist.');
+        }
+        $key = FileTemplate::keyFor($customerId, Ids::uuid4(), FileTemplate::filename($filename, 'template'.self::extension($filename)));
+
+        return $this->storage->signedUploadForm($key, $contentType, 1, FileTemplate::MAX_BYTES);
+    }
+
+    /**
+     * A signed download of a file question's template, for anyone answering it (the key is in the public
+     * questionnaire). TEMPLATE_NOT_FOUND when the key is not a template's or nothing is stored there.
+     */
+    public function templateDownload(string $key): string
+    {
+        if (!FileTemplate::isKey($key) || !$this->storage->exists($key)) {
+            throw new NotFound('TEMPLATE_NOT_FOUND', 'The template does not exist.');
+        }
+
+        return $this->storage->signedDownloadUrl($key, 'attachment');
     }
 
     /** @param 'inline'|'attachment' $disposition */

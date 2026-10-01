@@ -60,5 +60,12 @@
     "us-sizes": "Tallas US",
     "inches": "Pulgadas",
     "centimeters": "Centímetros"
+  },
+  "table": {
+    "row": "Fila {{n}}",
+    "cell": "{{column}}, {{row}}",
+    "remove": "Quitar {{row}}",
+    "add": "Agregar una fila",
+    "limit": "Puedes agregar hasta {{max}} filas."
   }
 }

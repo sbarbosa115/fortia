@@ -6,6 +6,7 @@ use App\Responses\Application\AnswerFiles;
 use App\Responses\Application\Port\TranscriptionTokens;
 use App\Responses\UI\Http\Input\DownloadUrlInput;
 use App\Responses\UI\Http\Input\SignedUrlInput;
+use App\Responses\UI\Http\Input\TemplateDownloadInput;
 use App\Responses\UI\Http\Output\DownloadUrlOutput;
 use App\Responses\UI\Http\Output\SignedUploadOutput;
 use App\Responses\UI\Http\Output\TranscriptionTokenOutput;
@@ -47,7 +48,7 @@ final class FilesController
 
     /**
      * A signed upload. answer_media (P): only for a session still being filled, of that account, with that question
-     * (D4). prompt: the account's own users only (a chain prompt is written in the console).
+     * (D4). prompt and template: the account's own users only (written in the console).
      */
     #[Route('/signed-urls', name: 'api_signed_urls', methods: ['POST'])]
     #[OA\Response(response: 200, description: 'The signed upload', content: new Model(type: SignedUploadOutput::class))]
@@ -69,6 +70,16 @@ final class FilesController
 
             return ApiResponse::ok(SignedUploadOutput::put($this->files->promptUpload($customerId, (string) $input->filename, (string) $input->content_type)));
         }
+        if (SignedUrlInput::TEMPLATE === $input->uploadType()) {
+            if (null === $caller) {
+                throw new Unauthenticated('UNAUTHORIZED', 'Sign in to upload a template.');
+            }
+            if (!$caller->owns($customerId)) {
+                throw new NotAllowed('FORBIDDEN', 'You can only upload templates to your own account.');
+            }
+
+            return ApiResponse::ok(SignedUploadOutput::form($this->files->templateUpload($customerId, (string) $input->filename, (string) $input->content_type)));
+        }
 
         return ApiResponse::ok(SignedUploadOutput::form($this->files->answerUpload(
             $customerId,
@@ -77,6 +88,21 @@ final class FilesController
             (string) $input->filename,
             (string) $input->content_type,
         )));
+    }
+
+    /**
+     * A signed download of a file question's template (P, rate limited): the respondent downloads it, fills it in and
+     * uploads it as the answer. Only keys of templates (templates/{customer_id}/{uuid}/{filename}).
+     */
+    #[Route('/templates/download-urls', name: 'api_templates_download', methods: ['POST'])]
+    #[OA\Response(response: 200, description: 'The signed URL', content: new Model(type: DownloadUrlOutput::class))]
+    #[OA\Response(response: 400, description: 'VALIDATION_ERROR')]
+    #[OA\Response(response: 404, description: 'TEMPLATE_NOT_FOUND')]
+    public function templateDownloadUrl(#[Payload(allowExtraFields: false)] TemplateDownloadInput $input, Request $request): JsonResponse
+    {
+        $this->rateLimit->consume($request);
+
+        return ApiResponse::ok(new DownloadUrlOutput($this->files->templateDownload((string) $input->key), ObjectStorage::SIGNED_URL_TTL));
     }
 
     /** A signed download of an answer's file, for the account it belongs to (the key's first segment). */

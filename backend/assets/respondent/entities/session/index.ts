@@ -18,6 +18,7 @@ export type {
   SubmitResponse,
   UserData,
   AnswerValue,
+  TableRow,
 } from './api/session';
 export {
   DEFAULT_GENDER,
@@ -36,8 +37,14 @@ export {
   inputModeOf,
   needsChange,
   hasAnswer,
+  stringsOf,
+  MAX_TABLE_ROWS,
+  tableColumns,
+  tableRowsOf,
+  tableFilled,
+  tableText,
 } from './model/controls';
-export type {Gender, Issue, VisibleOption} from './model/controls';
+export type {Gender, Issue, VisibleOption, TableColumn} from './model/controls';
 export {
   formatWeight,
   parseWeight,

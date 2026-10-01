@@ -24,6 +24,7 @@ import {
   visibleQuestions,
   withEvaluation,
   writeSnapshot,
+  stringsOf,
 } from '@respondent/entities/session';
 import {pollJob} from '@shared/api';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
@@ -55,7 +56,7 @@ export function needsEvaluation(question: Question): boolean {
   }
   const value = control.value;
   const filled = Array.isArray(value)
-    ? value.some((segment) => segment.trim() !== '')
+    ? stringsOf(value).some((segment) => segment.trim() !== '')
     : typeof value === 'string' && value.trim() !== '';
   return filled && (question.max_followups ?? 0) > 0;
 }

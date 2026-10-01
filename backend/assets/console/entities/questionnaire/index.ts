@@ -21,6 +21,8 @@ export {
   updateQuestionnaire,
   copyQuestionnaire,
   uploadPromptText,
+  uploadTemplate,
+  templateDownloadUrl,
   questionnaireQueryKey,
 } from './api/authoring';
 export type {
@@ -28,6 +30,7 @@ export type {
   QuestionnaireFlow,
   ChainPrompt,
   FlowBody,
+  UploadedTemplate,
 } from './api/authoring';
 export {questionnaireKind, questionnairePublicUrl} from './lib/kind';
 export type {QuestionnaireKind} from './lib/kind';

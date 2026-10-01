@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import {useTranslation} from 'react-i18next';
-import {uploadAnswerFile} from '../api/upload';
+import {downloadTemplate, uploadAnswerFile} from '../api/upload';
 import {
   acceptFiles,
   keysOf,
@@ -22,7 +22,8 @@ type Notice = {key: string; count?: number} | null;
 /**
  * A file answer (PRD §9.9): choose several files, drag and drop them, or paste a screenshot anywhere on the page.
  * Each file uploads with its progress, can be retried or removed; the saved value is the list of object keys. Next
- * waits until at least one file is uploaded and none is still uploading.
+ * waits until at least one file is uploaded and none is still uploading. A question with a template offers it first:
+ * the respondent downloads it, fills it in and uploads it.
  */
 export function FileControl({
   label,
@@ -30,6 +31,7 @@ export function FileControl({
   max,
   disabled,
   target,
+  template = null,
   token = null,
   onChange,
   onBusyChange,
@@ -39,6 +41,7 @@ export function FileControl({
   max: number;
   disabled: boolean;
   target: {customerId: string; sessionId: string; questionId: string};
+  template?: {key: string; filename: string} | null;
   token?: string | null;
   onChange: (keys: string[]) => void;
   onBusyChange: (busy: boolean) => void;
@@ -51,6 +54,9 @@ export function FileControl({
   );
   const [notice, setNotice] = useState<Notice>(null);
   const [dragging, setDragging] = useState(false);
+  const [templateState, setTemplateState] = useState<
+    'idle' | 'loading' | 'error'
+  >('idle');
   const busy = uploads.some((upload) => upload.status === 'uploading');
   const full = uploads.length >= max;
 
@@ -141,8 +147,41 @@ export function FileControl({
     add(Array.from(event.dataTransfer.files));
   };
 
+  const getTemplate = () => {
+    if (!template) {
+      return;
+    }
+    setTemplateState('loading');
+    downloadTemplate(template.key, token)
+      .then(() => setTemplateState('idle'))
+      .catch(() => setTemplateState('error'));
+  };
+
   return (
     <div className="files" role="group" aria-label={label}>
+      {template ? (
+        <div className="files__template">
+          <Icon name="file" size={20} />
+          <div className="files__template-body">
+            <span className="files__template-title">{t('template.title')}</span>
+            <span className="muted">{t('template.help')}</span>
+          </div>
+          <Button
+            size="sm"
+            icon={<Icon name="download" />}
+            loading={templateState === 'loading'}
+            aria-label={t('template.download', {name: template.filename})}
+            onClick={getTemplate}
+          >
+            {template.filename}
+          </Button>
+        </div>
+      ) : null}
+      {templateState === 'error' ? (
+        <p className="answer-error" role="alert">
+          {t('template.failed')}
+        </p>
+      ) : null}
       <div
         className="files__drop"
         data-dragging={dragging || undefined}

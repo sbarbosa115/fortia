@@ -1227,9 +1227,29 @@ export interface paths {
         put?: never;
         /**
          * A signed upload. answer_media (P): only for a session still being filled, of that account, with that question
-         *     (D4). prompt: the account's own users only (a chain prompt is written in the console).
+         *     (D4). prompt and template: the account's own users only (written in the console).
          */
         post: operations["post_api_signed_urls"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/templates/download-urls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A signed download of a file question's template (P, rate limited): the respondent downloads it, fills it in and
+         *     uploads it as the answer. Only keys of templates (templates/{customer_id}/{uuid}/{filename}).
+         */
+        post: operations["post_api_templates_download"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1411,16 +1431,25 @@ export interface components {
             /** @default null */
             pattern: string | null;
         };
+        FileTemplateOutput: {
+            key: string;
+            filename: string;
+        };
         InputControlOutput: {
             name: string;
             /** @enum {string} */
-            type: "radio" | "checkbox" | "select" | "range" | "text" | "audio" | "ranking" | "file" | "message" | "email" | "tel" | "phone";
+            type: "radio" | "checkbox" | "select" | "range" | "text" | "audio" | "ranking" | "file" | "message" | "email" | "tel" | "phone" | "table";
             options: components["schemas"]["OptionOutput"][];
             validations: components["schemas"]["ValidationOutput"][];
+            /** @description A table's fixed rows (none: the respondent adds rows) */
+            rows?: string[] | null;
+            template?: components["schemas"]["FileTemplateOutput"] | null;
             /** @default null */
             default_value: (string | number | boolean) | null;
             /** @default null */
-            value: (string | string[]) | null;
+            value: (string | string[] | {
+                [key: string]: string;
+            }[]) | null;
             /** @default null */
             timestamp: string | null;
             /** @default null */
@@ -1993,18 +2022,29 @@ export interface components {
             label: string;
             value?: (number) | null;
         };
+        ChatTemplateOutput: {
+            filename: string;
+            key?: string | null;
+            columns?: string[] | null;
+            example_rows?: string[][] | null;
+        };
         ChatDraftQuestionOutput: {
             /** @description The stored question's id, for a questionnaire being edited */
             id?: string | null;
             title: string;
             description?: string | null;
             /** @enum {string} */
-            type: "radio" | "checkbox" | "select" | "text" | "range";
+            type: "radio" | "checkbox" | "select" | "text" | "range" | "table" | "file";
             choices: components["schemas"]["ChatChoiceOutput"][];
             category?: string | null;
             required: boolean;
             min?: number | null;
             max?: number | null;
+            /** @description table: its columns */
+            columns?: string[] | null;
+            /** @description table: its fixed rows (none: the respondent adds rows) */
+            rows?: string[] | null;
+            template?: components["schemas"]["ChatTemplateOutput"] | null;
         };
         ChatTierOutput: {
             name: string;
@@ -2578,7 +2618,7 @@ export interface components {
             id: string;
             title: string;
             /** @enum {string} */
-            type: "radio" | "checkbox" | "select" | "range" | "text" | "audio" | "ranking" | "file" | "message" | "email" | "tel" | "phone";
+            type: "radio" | "checkbox" | "select" | "range" | "text" | "audio" | "ranking" | "file" | "message" | "email" | "tel" | "phone" | "table";
             options: {
                 label: string;
                 value: string;
@@ -6350,6 +6390,40 @@ export interface operations {
                 content?: never;
             };
             /** @description SESSION_NOT_FOUND, QUESTION_NOT_FOUND, CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_templates_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The signed URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadUrlOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TEMPLATE_NOT_FOUND */
             404: {
                 headers: {
                     [name: string]: unknown;

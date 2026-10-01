@@ -1,5 +1,16 @@
-import {EMAIL_PATTERN, normalizePhone} from '@shared/lib';
+import {
+  EMAIL_PATTERN,
+  normalizePhone,
+  type TableColumn,
+  tableColumns,
+  tableFilled,
+  tableRowsOf,
+  tableText,
+} from '@shared/lib';
 import type {AnswerValue, Control, ControlType, Question} from '../api/session';
+
+export {tableColumns, tableFilled, tableRowsOf, tableText};
+export type {TableColumn};
 
 export type Gender = 'male' | 'female';
 
@@ -15,8 +26,16 @@ export type Issue = {key: string} | {message: string};
 /** An option as the controls show it: its value is the label when the value is null (§9.4 radio). */
 export type VisibleOption = {label: string; value: string};
 
-const CHOICE_TYPES: ControlType[] = ['radio', 'checkbox', 'select', 'ranking'];
+/** The types that need options to be rendered: the choices, and a table's columns. */
+const CHOICE_TYPES: ControlType[] = [
+  'radio',
+  'checkbox',
+  'select',
+  'ranking',
+  'table',
+];
 const RENDERABLE: ControlType[] = [
+  'table',
   'radio',
   'checkbox',
   'select',
@@ -320,6 +339,9 @@ export function hasAnswer(
   if (needsChange(question, control)) {
     return false;
   }
+  if (control.type === 'table') {
+    return tableFilled(value);
+  }
   if (Array.isArray(value)) {
     return value.length > 0;
   }
@@ -328,3 +350,13 @@ export function hasAnswer(
   }
   return issueOf(control) === null;
 }
+
+/** The texts of a list answer (checkbox, ranking, files, recordings); a table's rows are not texts. */
+export function stringsOf(value: AnswerValue | undefined): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
+}
+
+/** The most rows a respondent adds to a table without fixed rows (the server keeps 50). */
+export const MAX_TABLE_ROWS = 50;

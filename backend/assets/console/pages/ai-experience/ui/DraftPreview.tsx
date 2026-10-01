@@ -188,6 +188,49 @@ function Question({
         {question.type === 'text' ? (
           <span className="pv-text">{t('shopper.textPlaceholder')}</span>
         ) : null}
+        {question.type === 'table' ? (
+          <table className="pv-table">
+            <thead>
+              <tr>
+                {(question.rows ?? []).length > 0 ? <td /> : null}
+                {(question.columns ?? []).map((column, i) => (
+                  <th key={i} scope="col">
+                    {column}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {((question.rows ?? []).length > 0
+                ? (question.rows ?? [])
+                : ['']
+              ).map((row, i) => (
+                <tr key={i}>
+                  {row ? <th scope="row">{row}</th> : null}
+                  {(question.columns ?? []).map((_, j) => (
+                    <td key={j}>
+                      <span className="pv-table__cell" />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : null}
+        {question.type === 'file' ? (
+          <div className="pv-file">
+            {question.template ? (
+              <span className="pv-file__template">
+                <Icon name="download" size={14} />
+                {t('shopper.template', {name: question.template.filename})}
+              </span>
+            ) : null}
+            <span className="pv-text pv-file__drop">
+              <Icon name="upload" size={16} />
+              {t('shopper.filePlaceholder')}
+            </span>
+          </div>
+        ) : null}
       </div>
 
       <div className="pv-question__nav">

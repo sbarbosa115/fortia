@@ -2,6 +2,7 @@ import type {ControlProps} from '../model/types';
 import {CheckboxControl, RadioControl, SelectControl} from './ChoiceControls';
 import {ContactControl, RangeControl, TextControl} from './InputControls';
 import {RankingControl} from './RankingControl';
+import {TableControl} from './TableControl';
 import {
   GenderControl,
   HeightControl,
@@ -46,6 +47,8 @@ export function AnswerControl(props: ControlProps) {
       return <ContactControl {...props} />;
     case 'ranking':
       return <RankingControl {...props} />;
+    case 'table':
+      return <TableControl {...props} />;
     default:
       return null;
   }

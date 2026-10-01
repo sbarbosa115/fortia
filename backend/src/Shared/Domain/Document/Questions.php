@@ -102,6 +102,14 @@ final class Questions
             'validations' => $validations,
             'default_value' => $c['default_value'] ?? null,
         ];
+        // A table's fixed rows and a file question's template exist only on those controls.
+        $type = ControlType::tryFrom($control['type']);
+        if (ControlType::Table === $type && [] !== ($rows = TableAnswer::rowLabels($c['rows'] ?? null))) {
+            $control['rows'] = $rows;
+        }
+        if (ControlType::File === $type && null !== ($template = FileTemplate::normalize($c['template'] ?? null))) {
+            $control['template'] = $template;
+        }
         if ($keepRuntime) {
             $control['value'] = $c['value'] ?? null;
             $control['timestamp'] = self::nullableString($c['timestamp'] ?? null);
@@ -210,6 +218,10 @@ final class Questions
             return [];
         }
         $value = $control['value'] ?? null;
+        if (ControlType::Table->value === ($control['type'] ?? null)) {
+            // A table's rows are not values to select, score or count.
+            return [];
+        }
         $values = \is_array($value) ? $value : [$value];
 
         return array_values(array_map(

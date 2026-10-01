@@ -48,3 +48,19 @@ export async function uploadAnswerFile(
   onProgress(100);
   return signed.key;
 }
+
+/**
+ * Downloads a file question's template: POST /templates/download-urls signs a 15-minute URL that answers the file as
+ * an attachment, so opening it saves the file without leaving the questionnaire.
+ */
+export async function downloadTemplate(
+  key: string,
+  token: string | null = null,
+): Promise<void> {
+  const signed = await api.post<Schema<'DownloadUrlOutput'>>(
+    '/templates/download-urls',
+    {key},
+    {token},
+  );
+  window.location.assign(signed.url);
+}

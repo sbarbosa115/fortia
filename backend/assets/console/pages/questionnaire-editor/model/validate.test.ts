@@ -101,6 +101,28 @@ describe('Step 2. Questions — validation messages (PRD §10.5)', () => {
     ]);
   });
 
+  it('needs a table to have named, distinct columns', () => {
+    const table = (labels: string[]) =>
+      messages(
+        validateStep(
+          regular({
+            questions: [
+              q({type: 'table', options: labels.map((l) => newOption(l))}),
+            ],
+          }),
+          2,
+        ),
+      );
+    expect(table([])).toEqual(['Question 1 needs at least one column.']);
+    expect(table(['Name', ' '])).toEqual([
+      'All columns in question "How was it?" must have a name.',
+    ]);
+    expect(table(['Name', 'name'])).toEqual([
+      'The columns in question "How was it?" must have different names.',
+    ]);
+    expect(table(['Name', 'Role'])).toEqual([]);
+  });
+
   it('needs a numeric and unique score on scored choices', () => {
     const scored = (scores: string[]) =>
       q({

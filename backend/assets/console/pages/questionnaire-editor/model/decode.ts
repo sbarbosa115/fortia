@@ -133,9 +133,12 @@ export function decodeQuestion(
   const control = question.options[0];
   const {type, rawType, scored} = fieldType(control, kind);
   const {options: _controls, ...base} = question;
-  const {options: controlOptions = [], ...controlBase} = control ?? {
-    options: [],
-  };
+  const {
+    options: controlOptions = [],
+    rows: _rows,
+    template: _template,
+    ...controlBase
+  } = control ?? {options: []};
   const options: DraftOption[] = controlOptions.map((option) => {
     const {label, value, ...optionBase} = option;
     return {
@@ -162,6 +165,8 @@ export function decodeQuestion(
     textFormat: textFormat(validations),
     rangeMin: rangeBound(validations, 'min', '0'),
     rangeMax: rangeBound(validations, 'max', '10'),
+    tableRows: control?.type === 'table' ? [...(control.rows ?? [])] : [],
+    template: control?.type === 'file' ? (control.template ?? null) : null,
     rawType,
     base: base as Record<string, unknown>,
     controlBase: controlBase as Record<string, unknown>,

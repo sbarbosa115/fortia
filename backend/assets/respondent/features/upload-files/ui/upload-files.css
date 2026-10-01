@@ -56,3 +56,31 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* The template to download, fill in and upload back. */
+.files__template {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.files__template-body {
+  display: grid;
+  flex: 1 1 200px;
+  gap: 2px;
+  min-width: 0;
+}
+.files__template-title {
+  font-weight: 600;
+}
+.files__template .btn {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

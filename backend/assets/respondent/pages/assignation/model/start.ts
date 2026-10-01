@@ -3,6 +3,7 @@ import {
   DEFAULT_GENDER,
   genderOf,
   hasProgress,
+  tableFilled,
   type Question,
   type Session,
   visibleQuestions,
@@ -10,6 +11,9 @@ import {
 
 function filled(control: Control): boolean {
   const value = control.value;
+  if (control.type === 'table') {
+    return tableFilled(value);
+  }
   return Array.isArray(value)
     ? value.length > 0
     : typeof value === 'string' && value.trim() !== '';

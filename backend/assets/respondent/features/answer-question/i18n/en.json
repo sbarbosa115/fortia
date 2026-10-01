@@ -60,5 +60,12 @@
     "us-sizes": "US sizes",
     "inches": "Inches",
     "centimeters": "Centimeters"
+  },
+  "table": {
+    "row": "Row {{n}}",
+    "cell": "{{column}}, {{row}}",
+    "remove": "Remove {{row}}",
+    "add": "Add a row",
+    "limit": "You can add up to {{max}} rows."
   }
 }

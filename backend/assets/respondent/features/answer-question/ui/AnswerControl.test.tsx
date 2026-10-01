@@ -154,4 +154,57 @@ describe('AnswerControl (PRD §9.4)', () => {
     await userEvent.click(screen.getByRole('button', {name: 'Move C up'}));
     expect(onValue).toHaveBeenLastCalledWith(['a', 'c', 'b']);
   });
+
+  it('fills a table, adds rows and removes them', async () => {
+    const onValue = vi.fn();
+    renderControl({
+      control: makeControl({
+        type: 'table',
+        options: [
+          {label: 'Name', value: 'name', visibility: []},
+          {label: 'Role', value: 'role', visibility: []},
+        ],
+      }),
+      onValue,
+    });
+    expect(
+      screen.getByRole('columnheader', {name: 'Name'}),
+    ).toBeInTheDocument();
+    await userEvent.type(
+      screen.getByRole('textbox', {name: 'Name, Row 1'}),
+      'Ana',
+    );
+    expect(onValue).toHaveBeenLastCalledWith([{name: 'Ana'}]);
+    expect(screen.getByRole('button', {name: 'Remove Row 1'})).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('button', {name: 'Add a row'}));
+    await userEvent.type(
+      screen.getByRole('textbox', {name: 'Role, Row 2'}),
+      'CEO',
+    );
+    expect(onValue).toHaveBeenLastCalledWith([{name: 'Ana'}, {role: 'CEO'}]);
+
+    await userEvent.click(screen.getByRole('button', {name: 'Remove Row 1'}));
+    expect(onValue).toHaveBeenLastCalledWith([{role: 'CEO'}]);
+  });
+
+  it("labels a table's fixed rows and keeps one answer per row", async () => {
+    const onValue = vi.fn();
+    renderControl({
+      control: makeControl({
+        type: 'table',
+        options: [{label: 'Sales', value: 'sales', visibility: []}],
+        rows: ['January', 'February'],
+      }),
+      onValue,
+    });
+    expect(
+      screen.getByRole('rowheader', {name: 'February'}),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Add a row'})).toBeNull();
+    fireEvent.change(screen.getByRole('textbox', {name: 'Sales, February'}), {
+      target: {value: '12'},
+    });
+    expect(onValue).toHaveBeenLastCalledWith([{}, {sales: '12'}]);
+  });
 });

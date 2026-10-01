@@ -1263,3 +1263,44 @@
     padding-right: var(--space-4);
   }
 }
+
+/* A table question and a file question (with its template) in the preview. */
+.pv-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.pv-table th {
+  padding: 4px 6px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-align: left;
+}
+.pv-table td {
+  padding: 4px;
+}
+.pv-table__cell {
+  display: block;
+  height: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.pv-file {
+  display: grid;
+  gap: var(--space-2);
+}
+.pv-file__template {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-size: 13px;
+}
+.pv-file__drop {
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: auto;
+  padding: 18px 14px;
+  border-style: dashed;
+}

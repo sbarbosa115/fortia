@@ -6,7 +6,11 @@ import {describe, expect, it, vi} from 'vitest';
 import {FileControl} from './FileControl';
 
 const upload = vi.hoisted(() => vi.fn());
-vi.mock('../api/upload', () => ({uploadAnswerFile: upload}));
+const download = vi.hoisted(() => vi.fn());
+vi.mock('../api/upload', () => ({
+  uploadAnswerFile: upload,
+  downloadTemplate: download,
+}));
 
 const target = {customerId: 'ACME0001', sessionId: 's1', questionId: 'q1'};
 
@@ -81,6 +85,65 @@ describe('FileControl (PRD §9.9)', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', {name: 'Remove a.pdf'}),
+    ).toBeInTheDocument();
+  });
+
+  it("offers the question's template to download, fill in and upload", async () => {
+    download.mockResolvedValue(undefined);
+    render(
+      <I18nextProvider i18n={testI18n('respondent')}>
+        <FileControl
+          label="Attach"
+          value={[]}
+          max={2}
+          disabled={false}
+          target={target}
+          template={{
+            key: 'templates/ACME0001/u/budget.csv',
+            filename: 'budget.csv',
+          }}
+          token="tok"
+          onChange={vi.fn()}
+          onBusyChange={vi.fn()}
+        />
+      </I18nextProvider>,
+    );
+    expect(screen.getByText('Use the template')).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Download the template budget.csv'}),
+    );
+    expect(download).toHaveBeenCalledWith(
+      'templates/ACME0001/u/budget.csv',
+      'tok',
+    );
+  });
+
+  it('says so when the template cannot be downloaded', async () => {
+    download.mockRejectedValue(new Error('404'));
+    render(
+      <I18nextProvider i18n={testI18n('respondent')}>
+        <FileControl
+          label="Attach"
+          value={[]}
+          max={2}
+          disabled={false}
+          target={target}
+          template={{
+            key: 'templates/ACME0001/u/budget.csv',
+            filename: 'budget.csv',
+          }}
+          onChange={vi.fn()}
+          onBusyChange={vi.fn()}
+        />
+      </I18nextProvider>,
+    );
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Download the template budget.csv'}),
+    );
+    expect(
+      await screen.findByText(
+        'Could not download the template. Please try again.',
+      ),
     ).toBeInTheDocument();
   });
 });

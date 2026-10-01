@@ -86,7 +86,8 @@
       "audio": "Audio",
       "range": "Rango (deslizador)",
       "message": "Mensaje (sin respuesta)",
-      "file": "Subir archivo"
+      "file": "Subir archivo",
+      "table": "Tabla"
     },
     "rawType": "Esta pregunta conserva su formato {{type}}.",
     "options": "Opciones de respuesta",
@@ -118,7 +119,24 @@
     "rangeMin": "Mínimo",
     "rangeMax": "Máximo",
     "maxScore": "Puntaje máximo: {{max}}",
-    "categoryMax": "{{category}}: hasta {{max}} puntos"
+    "categoryMax": "{{category}}: hasta {{max}} puntos",
+    "columns": "Columnas",
+    "columnLabel": "Columna {{n}}",
+    "addColumn": "Agregar columna",
+    "removeColumn": "Quitar columna {{n}}",
+    "tableRows": "Filas",
+    "fixedRows": "Filas fijas",
+    "fixedRowsHint": "La persona completa cada una de estas filas.",
+    "freeRowsHint": "La persona agrega las filas que necesite (hasta {{max}}).",
+    "rowLabel": "Fila {{n}}",
+    "addRow": "Agregar fila",
+    "removeRow": "Quitar fila {{n}}",
+    "template": "Plantilla (opcional)",
+    "templateHint": "Un archivo que la persona descarga, completa y vuelve a subir (hasta 20 MB).",
+    "templateUpload": "Subir plantilla",
+    "templateReplace": "Reemplazar",
+    "templateRemove": "Quitar la plantilla {{name}}",
+    "templateTooLarge": "La plantilla pesa más de 20 MB. Elige un archivo más pequeño."
   },
   "end": {
     "title": "Al terminar",
@@ -221,7 +239,8 @@
     "audioAnswer": "Graba tu respuesta",
     "fileAnswer": "Sube un archivo",
     "selectAnswer": "Selecciona una opción",
-    "close": "Cerrar la vista previa"
+    "close": "Cerrar la vista previa",
+    "template": "Plantilla: {{name}}"
   },
   "success": {
     "created": "¡Cuestionario creado con éxito!",
@@ -287,6 +306,9 @@
     "noPrompts": "Agrega al menos un prompt.",
     "tooManyPrompts": "Una cadena puede tener como máximo {{max}} prompts.",
     "promptEmpty": "El prompt {{n}} no puede estar vacío.",
-    "upload": "No pudimos subir los prompts. Inténtalo de nuevo."
+    "upload": "No pudimos subir los prompts. Inténtalo de nuevo.",
+    "noColumns": "La pregunta {{n}} necesita al menos una columna.",
+    "columnLabel": "Todas las columnas de la pregunta \"{{title}}\" deben tener un nombre.",
+    "uniqueColumns": "Las columnas de la pregunta \"{{title}}\" deben tener nombres distintos."
   }
 }

@@ -4,8 +4,11 @@ namespace App\Questionnaires\Domain\Flow;
 
 use App\Questionnaires\Domain\Error\InvalidFlow;
 use App\Questionnaires\Domain\Model\Flow;
+use App\Shared\Domain\Document\ControlType;
+use App\Shared\Domain\Document\FileTemplate;
 use App\Shared\Domain\Document\QuestionnaireType;
 use App\Shared\Domain\Document\Questions;
+use App\Shared\Domain\Document\TableAnswer;
 use App\Shared\Domain\Text;
 
 /**
@@ -22,7 +25,9 @@ use App\Shared\Domain\Text;
  *   state keeps `{diagnostic_id}`, so the public flow never shows it;
  * - a `prompt` state carries its text's storage key in `parameters.key` (`prompts/{customer_id}/…`, from
  *   POST /signed-urls) or the text itself in `parameters.text`, which the server uploads; once stored, `{key,
- *   prompt_id}`.
+ *   prompt_id}`;
+ * - a file question's template is `{key, filename}` (`templates/{customer_id}/…`, from POST /signed-urls) or
+ *   `{filename, text}`, which the server stores; a table needs at least one column.
  */
 final class FlowDraft
 {
@@ -167,6 +172,48 @@ final class FlowDraft
             }
         }
         InvalidFlow::unless($violations);
+    }
+
+    /**
+     * A file question's template key must be one of the account's templates (`templates/{customer_id}/…`).
+     *
+     * @throws InvalidFlow
+     */
+    public function assertTemplateKeysBelongTo(string $customerId): void
+    {
+        $violations = [];
+        foreach ($this->questions as $i => $question) {
+            foreach ($question['options'] as $j => $control) {
+                $key = $control['template']['key'] ?? null;
+                if (\is_string($key) && FileTemplate::customerOf($key) !== $customerId) {
+                    $violations[] = ['field' => "questions[$i].options[$j].template.key", 'message' => 'The template must be one of this account\'s uploads (templates/'.$customerId.'/…).'];
+                }
+            }
+        }
+        InvalidFlow::unless($violations);
+    }
+
+    /**
+     * The questions as stored: a template sent as text ({filename, text}) is stored by $store, which answers its key.
+     *
+     * @param callable(string $filename, string $text): string $store
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function questionsWithStoredTemplates(callable $store): array
+    {
+        $questions = $this->questions;
+        foreach ($questions as $i => $question) {
+            foreach ($question['options'] as $j => $control) {
+                $template = $control['template'] ?? null;
+                if (\is_array($template) && isset($template['text'])) {
+                    $filename = (string) $template['filename'];
+                    $questions[$i]['options'][$j]['template'] = ['key' => $store($filename, (string) $template['text']), 'filename' => $filename];
+                }
+            }
+        }
+
+        return $questions;
     }
 
     /**
@@ -373,8 +420,16 @@ final class FlowDraft
             }
             $list[] = $question;
         }
+        $prepared = QuestionList::prepare($list);
+        foreach ($prepared as $i => $question) {
+            foreach ($question['options'] as $j => $control) {
+                if (ControlType::Table->value === $control['type'] && [] === TableAnswer::columns($control)) {
+                    $add("$prefix.questions[$i].options[$j].options", 'A table needs at least one column.');
+                }
+            }
+        }
 
-        return QuestionList::prepare($list);
+        return $prepared;
     }
 
     /**

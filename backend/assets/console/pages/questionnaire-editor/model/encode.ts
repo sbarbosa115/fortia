@@ -1,5 +1,5 @@
 import {slugify} from '@shared/lib';
-import {isOptionType, isScored, requiredLocked} from './draft';
+import {hasOptions, isScored, requiredLocked} from './draft';
 import {toNumber} from './scoring';
 import {
   type Draft,
@@ -106,7 +106,7 @@ function encodeQuestion(
     ...omit(question.controlBase, CONTROL_RUNTIME_KEYS),
     ...(question.controlName ? {name: question.controlName} : {}),
     type: controlType(question),
-    options: isOptionType(question.type)
+    options: hasOptions(question.type)
       ? question.options.map((option) => ({
           ...option.base,
           label: option.label.trim(),
@@ -115,6 +115,14 @@ function encodeQuestion(
       : [],
     validations: validations(question),
   };
+  if (question.type === 'table') {
+    control['rows'] = question.tableRows
+      .map((row) => row.trim())
+      .filter(Boolean);
+  }
+  if (question.type === 'file' && question.template) {
+    control['template'] = question.template;
+  }
   const followUps = question.type === 'text' || question.type === 'audio';
   return {
     ...omit(question.base, RUNTIME_KEYS),

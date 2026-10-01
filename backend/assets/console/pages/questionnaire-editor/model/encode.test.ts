@@ -147,6 +147,102 @@ describe('encoding the questions (PRD §10.5)', () => {
   });
 });
 
+describe('a table and a file template', () => {
+  it('sends a table’s columns as its options and its fixed rows', () => {
+    const flow = encodeFlow(
+      draftWith({
+        type: 'table',
+        options: [newOption('Name'), newOption('Role')],
+        tableRows: ['Q1', ' ', 'Q2'],
+      }),
+    );
+    expect(questionnaireOf(flow).questions[0]!.options[0]).toMatchObject({
+      type: 'table',
+      options: [
+        {label: 'Name', value: 'name'},
+        {label: 'Role', value: 'role'},
+      ],
+      rows: ['Q1', 'Q2'],
+    });
+  });
+
+  it('sends a file question’s template, and nothing once it is removed', () => {
+    const template = {key: 'templates/C1/u/budget.csv', filename: 'budget.csv'};
+    const withTemplate = encodeFlow(draftWith({type: 'file', template}));
+    expect(
+      questionnaireOf(withTemplate).questions[0]!.options[0],
+    ).toMatchObject({type: 'file', template});
+    const without = encodeFlow(draftWith({type: 'file', template: null}));
+    expect(
+      questionnaireOf(without).questions[0]!.options[0],
+    ).not.toHaveProperty('template');
+  });
+
+  it('reads a table and a template back', () => {
+    const control = (partial: Record<string, unknown>) => ({
+      name: 'c',
+      options: [],
+      validations: [],
+      default_value: null,
+      value: null,
+      timestamp: null,
+      skipped: null,
+      locked: null,
+      ...partial,
+    });
+    const question = (id: string, partial: Record<string, unknown>) => ({
+      id,
+      order: 0,
+      title: id,
+      required: true,
+      visibility: [],
+      acceptance_criteria: [],
+      improvement_message: null,
+      flagged_answer: null,
+      review: null,
+      options: [control(partial)],
+    });
+    const draft = decodeDraft(
+      {
+        questionnaire_id: 'q1',
+        customer_id: 'C1',
+        title: 'Plan',
+        capture_user_data: false,
+        landing_page: false,
+        type: 'default',
+        is_active: true,
+        is_chain: false,
+        parent: 'ROOT',
+        question_count: 2,
+        questions: [
+          question('t', {
+            type: 'table',
+            options: [{label: 'Sales', value: 'sales', visibility: []}],
+            rows: ['Jan'],
+          }),
+          question('f', {
+            type: 'file',
+            template: {key: 'templates/C1/u/b.csv', filename: 'b.csv'},
+          }),
+        ],
+      } as unknown as Parameters<typeof decodeDraft>[0],
+      null,
+      [],
+      'regular',
+    );
+    expect(draft.questions[0]).toMatchObject({
+      type: 'table',
+      tableRows: ['Jan'],
+      options: [{label: 'Sales'}],
+    });
+    expect(draft.questions[1]!.template).toEqual({
+      key: 'templates/C1/u/b.csv',
+      filename: 'b.csv',
+    });
+    expect(draft.questions[0]!.controlBase).not.toHaveProperty('rows');
+  });
+});
+
 describe('encoding the flow by type', () => {
   it('a regular questionnaire ends with its thank-you texts and CTA', () => {
     const flow = encodeFlow({

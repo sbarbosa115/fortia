@@ -26,6 +26,11 @@ export function isOptionType(type: FieldType): boolean {
   return OPTION_FIELD_TYPES.includes(type);
 }
 
+/** The types edited as a list of labels: the choices, and a table's columns. */
+export function hasOptions(type: FieldType): boolean {
+  return isOptionType(type) || type === 'table';
+}
+
 /** Whether a question's options carry a numeric score: the two "with score" types, and ranking in a diagnostic. */
 export function isScored(type: FieldType, kind: EditorKind): boolean {
   return (
@@ -62,7 +67,7 @@ export function newQuestion(
     category,
     required: true,
     type,
-    options: isOptionType(type)
+    options: hasOptions(type)
       ? [newOption('', scored ? '0' : ''), newOption('', scored ? '1' : '')]
       : [],
     maxFollowups: 0,
@@ -70,6 +75,8 @@ export function newQuestion(
     textFormat: {preset: 'free', all: true, charsets: []},
     rangeMin: '0',
     rangeMax: '10',
+    tableRows: [],
+    template: null,
     rawType: null,
     base: {},
     controlBase: {},
@@ -77,8 +84,8 @@ export function newQuestion(
 }
 
 /**
- * The question with another input type: options are kept between option types (scores filled in when the new type
- * scores them), a range gets 0–10, and a scorable type in a diagnostic is required.
+ * The question with another input type: options are kept between option types and a table's columns (scores filled
+ * in when the new type scores them), a range gets 0–10, and a scorable type in a diagnostic is required.
  */
 export function withType(
   question: DraftQuestion,
@@ -86,8 +93,8 @@ export function withType(
   kind: EditorKind,
 ): DraftQuestion {
   const scored = isScored(type, kind);
-  let options = isOptionType(type) ? question.options : [];
-  if (isOptionType(type) && options.length === 0) {
+  let options = hasOptions(type) ? question.options : [];
+  if (hasOptions(type) && options.length === 0) {
     options = [newOption(), newOption()];
   }
   if (scored) {
@@ -115,6 +122,7 @@ export function duplicateQuestion(question: DraftQuestion): DraftQuestion {
     controlName: null,
     options: question.options.map((option) => ({...option, key: newKey('o')})),
     criteria: [...question.criteria],
+    tableRows: [...question.tableRows],
     base: {},
     controlBase: {},
   };

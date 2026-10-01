@@ -844,3 +844,64 @@
     font-size: 36px;
   }
 }
+
+/* Table: a column per option; fixed rows are labelled, otherwise the respondent adds rows. Scrolls sideways on
+   narrow screens. */
+.answer-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.answer-table__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+.answer-table__scroll:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.answer-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.answer-table__table th {
+  padding: 10px 12px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+.answer-table__table thead th {
+  border-bottom: 1px solid var(--color-border);
+}
+.answer-table__table tbody th {
+  color: var(--color-text);
+}
+.answer-table__table td {
+  padding: 6px;
+}
+.answer-table__table tbody tr + tr {
+  border-top: 1px solid var(--color-border);
+}
+.answer-table__cell {
+  min-width: 140px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.answer-table__corner,
+.answer-table__actions {
+  width: 1%;
+}
+.answer-table__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.answer-table__footer .link-button {
+  justify-self: start;
+  color: var(--color-primary);
+}

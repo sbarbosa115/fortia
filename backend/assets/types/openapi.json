@@ -3541,7 +3541,7 @@
                 "tags": [
                     "Files and transcription"
                 ],
-                "summary": "A signed upload. answer_media (P): only for a session still being filled, of that account, with that question\n(D4). prompt: the account's own users only (a chain prompt is written in the console).",
+                "summary": "A signed upload. answer_media (P): only for a session still being filled, of that account, with that question\n(D4). prompt and template: the account's own users only (written in the console).",
                 "operationId": "post_api_signed_urls",
                 "responses": {
                     "200": {
@@ -3565,6 +3565,33 @@
                     },
                     "404": {
                         "description": "SESSION_NOT_FOUND, QUESTION_NOT_FOUND, CUSTOMER_NOT_FOUND"
+                    }
+                }
+            }
+        },
+        "/api/v1/templates/download-urls": {
+            "post": {
+                "tags": [
+                    "Files and transcription"
+                ],
+                "summary": "A signed download of a file question's template (P, rate limited): the respondent downloads it, fills it in and\nuploads it as the answer. Only keys of templates (templates/{customer_id}/{uuid}/{filename}).",
+                "operationId": "post_api_templates_download",
+                "responses": {
+                    "200": {
+                        "description": "The signed URL",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DownloadUrlOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "404": {
+                        "description": "TEMPLATE_NOT_FOUND"
                     }
                 }
             }
@@ -4074,6 +4101,21 @@
                 },
                 "type": "object"
             },
+            "FileTemplateOutput": {
+                "required": [
+                    "key",
+                    "filename"
+                ],
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "filename": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
             "InputControlOutput": {
                 "required": [
                     "name",
@@ -4099,7 +4141,8 @@
                             "message",
                             "email",
                             "tel",
-                            "phone"
+                            "phone",
+                            "table"
                         ]
                     },
                     "options": {
@@ -4113,6 +4156,22 @@
                         "items": {
                             "$ref": "#/components/schemas/ValidationOutput"
                         }
+                    },
+                    "rows": {
+                        "description": "A table's fixed rows (none: the respondent adds rows)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "template": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FileTemplateOutput"
+                            }
+                        ],
+                        "nullable": true
                     },
                     "default_value": {
                         "nullable": true,
@@ -4139,6 +4198,15 @@
                                 "type": "array",
                                 "items": {
                                     "type": "string"
+                                }
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
                                 }
                             }
                         ],
@@ -6411,6 +6479,38 @@
                 },
                 "type": "object"
             },
+            "ChatTemplateOutput": {
+                "required": [
+                    "filename"
+                ],
+                "properties": {
+                    "filename": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "example_rows": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "ChatDraftQuestionOutput": {
                 "required": [
                     "title",
@@ -6438,7 +6538,9 @@
                             "checkbox",
                             "select",
                             "text",
-                            "range"
+                            "range",
+                            "table",
+                            "file"
                         ]
                     },
                     "choices": {
@@ -6460,6 +6562,30 @@
                     },
                     "max": {
                         "type": "integer",
+                        "nullable": true
+                    },
+                    "columns": {
+                        "description": "table: its columns",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "rows": {
+                        "description": "table: its fixed rows (none: the respondent adds rows)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "template": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ChatTemplateOutput"
+                            }
+                        ],
                         "nullable": true
                     }
                 },
@@ -8677,7 +8803,8 @@
                             "message",
                             "email",
                             "tel",
-                            "phone"
+                            "phone",
+                            "table"
                         ]
                     },
                     "options": {

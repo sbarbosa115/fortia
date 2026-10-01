@@ -1,5 +1,5 @@
 import type {AnswerValue, Control, Question, Session} from '../api/session';
-import {controlOf} from './controls';
+import {controlOf, stringsOf, tableFilled, tableText} from './controls';
 
 function mapQuestion(
   session: Session,
@@ -102,6 +102,9 @@ export function withEvaluation(
 
 function answered(control: Control): boolean {
   const value = control.value;
+  if (control.type === 'table') {
+    return tableFilled(value);
+  }
   return Array.isArray(value)
     ? value.length > 0
     : typeof value === 'string' && value !== '';
@@ -125,8 +128,12 @@ export function hasProgress(session: Session): boolean {
   );
 }
 
-function valueText(value: AnswerValue): string {
-  return Array.isArray(value) ? value.join(', ') : (value ?? '');
+function valueText(control: Control): string {
+  if (control.type === 'table') {
+    return tableText(control);
+  }
+  const value: AnswerValue = control.value;
+  return Array.isArray(value) ? stringsOf(value).join(', ') : (value ?? '');
 }
 
 /**
@@ -141,7 +148,7 @@ export function flattenAnswers(
     if (control === null || control.type === 'message') {
       return [];
     }
-    const text = valueText(control.value).trim();
+    const text = valueText(control).trim();
     return text === '' ? [] : [{question: question.title, answer: text}];
   });
 }

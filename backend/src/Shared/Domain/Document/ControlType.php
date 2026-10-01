@@ -17,8 +17,10 @@ enum ControlType: string
     case Email = 'email';
     case Tel = 'tel';
     case Phone = 'phone';
+    /** A table: its options are the columns, `rows` the optional fixed rows; the value is a list of rows (TableAnswer). */
+    case Table = 'table';
 
-    public const VALUES = ['radio', 'checkbox', 'select', 'range', 'text', 'audio', 'ranking', 'file', 'message', 'email', 'tel', 'phone'];
+    public const VALUES = ['radio', 'checkbox', 'select', 'range', 'text', 'audio', 'ranking', 'file', 'message', 'email', 'tel', 'phone', 'table'];
 
     /** @return list<string> */
     public static function values(): array

@@ -79,6 +79,8 @@
     "defaultEndMessage": "Gracias por completar el cuestionario. Guardamos tus respuestas y el equipo ya puede revisarlas.",
     "generatingEyebrow": "Un momento",
     "generatingTitle": "Preparando tus siguientes preguntas",
-    "generatingSubtitle": "Estamos personalizando el siguiente paso con tus respuestas."
+    "generatingSubtitle": "Estamos personalizando el siguiente paso con tus respuestas.",
+    "filePlaceholder": "Sube tus archivos",
+    "template": "Plantilla: {{name}}"
   }
 }

@@ -5,6 +5,7 @@ namespace App\Responses\Domain;
 use App\Shared\Domain\Document\ControlType;
 use App\Shared\Domain\Document\Questions;
 use App\Shared\Domain\Document\Scoring;
+use App\Shared\Domain\Document\TableAnswer;
 
 /**
  * The answers of a session as the outgoing webhook and the external API send them (PRD §7.14):
@@ -16,6 +17,7 @@ use App\Shared\Domain\Document\Scoring;
  * | text…     | a string (a list is joined with ", ")                                        |
  * | file      | the list of storage keys                                                     |
  * | range     | a number, with min and max                                                   |
+ * | table     | the rows, each {column label: text}, a fixed row's label under "row"         |
  * | selection | the option labels when the values are numeric; a list for checkbox, ranking  |
  *
  * An unanswered question has a null value.
@@ -50,6 +52,11 @@ final class AnswerValues
      */
     private static function answer(string $title, ControlType $type, array $control, array $values): array
     {
+        if (ControlType::Table === $type) {
+            $rows = TableAnswer::labelled($control['value'] ?? null, $control);
+
+            return ['title' => $title, 'value' => [] === $rows ? null : $rows];
+        }
         if (ControlType::Range === $type) {
             [$min, $max] = Scoring::rangeBounds($control);
             $number = Scoring::number($values[0] ?? null);

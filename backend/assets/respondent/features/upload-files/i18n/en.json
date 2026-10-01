@@ -10,5 +10,11 @@
   "uploading": "Uploading... {{progress}}%",
   "failed": "Could not upload your file. Please try again.",
   "retry": "Try again",
-  "remove": "Remove {{name}}"
+  "remove": "Remove {{name}}",
+  "template": {
+    "title": "Use the template",
+    "help": "Download it, fill it in and upload it here.",
+    "download": "Download the template {{name}}",
+    "failed": "Could not download the template. Please try again."
+  }
 }

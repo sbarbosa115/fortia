@@ -2,7 +2,9 @@
 
 namespace App\Responses\Domain;
 
+use App\Shared\Domain\Document\ControlType;
 use App\Shared\Domain\Document\Questions;
+use App\Shared\Domain\Document\TableAnswer;
 
 /**
  * How the respondent's answers get into a stored session.
@@ -168,7 +170,7 @@ final class SessionAnswers
      */
     private static function replace(array $stored, array $sent): array
     {
-        $stored['value'] = self::cleanValue($sent['value'] ?? null);
+        $stored['value'] = self::cleanValue($sent['value'] ?? null, $stored);
         $stored['skipped'] = true === ($sent['skipped'] ?? false);
         $stored['timestamp'] = self::timestamp($sent['timestamp'] ?? null) ?? ($stored['timestamp'] ?? null);
 
@@ -183,7 +185,7 @@ final class SessionAnswers
      */
     private static function merge(array $stored, array $sent): array
     {
-        $value = self::cleanValue($sent['value'] ?? null);
+        $value = self::cleanValue($sent['value'] ?? null, $stored);
         if (Questions::hasValue($value)) {
             $stored['value'] = $value;
             $stored['skipped'] = false;
@@ -205,9 +207,16 @@ final class SessionAnswers
         return $stored;
     }
 
-    /** A value is a string, a number or a list of them; anything else is dropped. */
-    private static function cleanValue(mixed $value): mixed
+    /**
+     * A value is a string, a number or a list of them; a table's is its rows (TableAnswer). Anything else is dropped.
+     *
+     * @param array<string, mixed> $control the stored control
+     */
+    private static function cleanValue(mixed $value, array $control): mixed
     {
+        if (ControlType::Table->value === ($control['type'] ?? null)) {
+            return TableAnswer::clean($value, $control);
+        }
         if (\is_array($value)) {
             return array_values(array_filter($value, static fn ($v): bool => \is_string($v) || \is_int($v) || \is_float($v)));
         }

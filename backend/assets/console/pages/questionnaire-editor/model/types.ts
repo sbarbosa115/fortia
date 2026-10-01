@@ -19,7 +19,8 @@ export type FieldType =
   | 'audio'
   | 'range'
   | 'message'
-  | 'file';
+  | 'file'
+  | 'table';
 
 export const FIELD_TYPES: FieldType[] = [
   'radio',
@@ -33,6 +34,7 @@ export const FIELD_TYPES: FieldType[] = [
   'range',
   'message',
   'file',
+  'table',
 ];
 
 /** A diagnostic allows single or multiple selection (with or without score), ranking, range, text, audio, file. */
@@ -66,6 +68,10 @@ export const OPTION_FIELD_TYPES: FieldType[] = [
   'single_selection_with_score',
 ];
 
+/** A table's columns, and the most fixed rows it may have (the server keeps 20 and 50). */
+export const MAX_TABLE_COLUMNS = 20;
+export const MAX_TABLE_ROWS = 50;
+
 export const MAX_FOLLOWUPS = 5;
 export const MAX_CRITERIA = 10;
 export const MAX_PROMPTS = 10;
@@ -81,6 +87,8 @@ export type TextFormat = {
   all: boolean;
   charsets: TextCharset[];
 };
+
+export type FileTemplate = {key: string; filename: string};
 
 export type DraftOption = {
   key: string;
@@ -109,6 +117,10 @@ export type DraftQuestion = {
   textFormat: TextFormat;
   rangeMin: string;
   rangeMax: string;
+  /** A table's fixed row labels (none: the respondent adds rows); its columns are `options`. */
+  tableRows: string[];
+  /** A file question's template: the file the respondent downloads, fills in and uploads. */
+  template: FileTemplate | null;
   /** email / tel / phone controls are edited as text and saved back with their own type. */
   rawType: string | null;
   base: Record<string, unknown>;

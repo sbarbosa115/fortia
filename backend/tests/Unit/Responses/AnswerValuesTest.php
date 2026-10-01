@@ -4,6 +4,7 @@ namespace App\Tests\Unit\Responses;
 
 use App\Responses\Domain\AnswerEvaluation;
 use App\Responses\Domain\AnswerValues;
+use App\Responses\Domain\SessionAnswers;
 use PHPUnit\Framework\TestCase;
 
 /** The answers of a session as webhooks and the external API send them (PRD §7.14), and the §7.9 pass rule. */
@@ -33,6 +34,31 @@ final class AnswerValuesTest extends TestCase
             ['title' => 'Words', 'value' => 'green'],
             ['title' => 'Email', 'value' => 'ana@acme.test'],
         ], $answers, '§7.14: audio a list, text a string, files keys, range a number with min/max, labels for numeric selections; message slides omitted');
+    }
+
+    public function testATablesValueIsItsRowsKeyedByColumnLabel(): void
+    {
+        $columns = [['label' => 'Name', 'value' => 'name'], ['label' => 'Role', 'value' => 'role']];
+        $months = self::q('Months', 'table', [['name' => 'x']], options: $columns);
+        $months['options'][0]['rows'] = ['Jan'];
+        $answers = AnswerValues::of([
+            self::q('Team', 'table', [['name' => 'Ana', 'role' => 'CEO'], ['name' => 'Luis']], options: $columns),
+            self::q('Empty', 'table', null, options: $columns),
+            $months,
+        ]);
+
+        self::assertSame(['title' => 'Team', 'value' => [['Name' => 'Ana', 'Role' => 'CEO'], ['Name' => 'Luis', 'Role' => '']]], $answers[0]);
+        self::assertSame(['title' => 'Empty', 'value' => null], $answers[1], 'an unanswered table is null');
+        self::assertSame(['title' => 'Months', 'value' => [['row' => 'Jan', 'Name' => 'x', 'Role' => '']]], $answers[2], 'a fixed row\'s label is under "row"');
+    }
+
+    public function testSavingATableKeepsOnlyItsColumnsAndRows(): void
+    {
+        $stored = [['id' => 'q1', 'options' => [['name' => 'c', 'type' => 'table', 'options' => [['label' => 'Name', 'value' => 'name']], 'value' => null]]]];
+
+        $saved = SessionAnswers::apply($stored, [['id' => 'q1', 'options' => [['name' => 'c', 'value' => [['name' => 'Ana', 'admin' => true], ['name' => '']]]]]], followUp: false);
+
+        self::assertSame([['name' => 'Ana']], $saved[0]['options'][0]['value'], 'the respondent\'s rows are reduced to the table\'s columns');
     }
 
     public function testAnAnswerPassesWhenRelatedAndItsCriteriaAverageAtLeast30(): void

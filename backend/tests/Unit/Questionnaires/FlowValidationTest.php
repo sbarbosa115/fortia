@@ -171,6 +171,39 @@ final class FlowValidationTest extends TestCase
         self::assertSame(['same', 'same-2'], array_column($draft->questions[0]['options'][0]['options'], 'value'));
     }
 
+    public function testATableNeedsAtLeastOneColumn(): void
+    {
+        $states = self::states();
+        $states[0]['parameters']['questionnaire']['questions'][0]['options'] = [['type' => 'table', 'options' => [], 'rows' => ['Q1']]];
+        self::assertViolation('column', static fn () => FlowDraft::parse($states, null, null, null, null));
+
+        $states[0]['parameters']['questionnaire']['questions'][0]['options'][0]['options'] = [['label' => 'Sales', 'value' => 'sales']];
+        $draft = FlowDraft::parse($states, null, null, null, null);
+
+        self::assertSame(['Q1'], $draft->questions[0]['options'][0]['rows'], 'a table keeps its fixed rows');
+    }
+
+    public function testAFileQuestionsTemplateMustBeTheAccountsAndATextOneIsStored(): void
+    {
+        $theirs = 'templates/GLOBEX01/0f8fad5b-d9cb-469f-a165-70867728950e/theirs.csv';
+        $states = self::states();
+        $states[0]['parameters']['questionnaire']['questions'][] = ['title' => 'Your budget', 'options' => [['type' => 'file', 'template' => ['key' => $theirs, 'filename' => 'theirs.csv']]]];
+        $draft = FlowDraft::parse($states, null, null, null, null);
+        self::assertViolation('account', static fn () => $draft->assertTemplateKeysBelongTo('ACME0001'));
+        $draft->assertTemplateKeysBelongTo('GLOBEX01');
+
+        $states[0]['parameters']['questionnaire']['questions'][1]['options'][0]['template'] = ['filename' => 'budget.csv', 'text' => "Item,Cost\n"];
+        $stored = [];
+        $questions = FlowDraft::parse($states, null, null, null, null)->questionsWithStoredTemplates(static function (string $filename, string $text) use (&$stored): string {
+            $stored[] = [$filename, $text];
+
+            return 'templates/ACME0001/0f8fad5b-d9cb-469f-a165-70867728950e/budget.csv';
+        });
+
+        self::assertSame([['budget.csv', "Item,Cost\n"]], $stored, 'a template sent as text is stored');
+        self::assertSame(['key' => 'templates/ACME0001/0f8fad5b-d9cb-469f-a165-70867728950e/budget.csv', 'filename' => 'budget.csv'], $questions[1]['options'][0]['template'], 'and the question keeps its key, never the text');
+    }
+
     public function testStoredStatesPointToWhatWasSavedInsteadOfCarryingIt(): void
     {
         $states = self::diagnosticStates();

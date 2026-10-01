@@ -21,6 +21,7 @@ use App\Responses\Application\Query\SessionQueries;
 use App\Shared\Application\Bus\EventBus;
 use App\Shared\Application\Storage\ObjectStorage;
 use App\Shared\Domain\Clock;
+use App\Shared\Domain\Document\FileTemplate;
 use App\Shared\Domain\Ids;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -43,6 +44,7 @@ final class SaveFlowHandler
     {
         $draft = FlowDraft::parse($command->states, $command->slug, $command->cta, $command->layout, $command->resultCopy);
         $draft->assertPromptKeysBelongTo($command->customerId);
+        $draft->assertTemplateKeysBelongTo($command->customerId);
 
         return null === $command->questionnaireId ? $this->create($command, $draft) : $this->update($command, $command->questionnaireId, $draft);
     }
@@ -53,7 +55,7 @@ final class SaveFlowHandler
         $slug = $this->slugFor($draft, null);
         $id = Ids::uuid4();
 
-        $questionnaire = new Questionnaire($id, $command->customerId, $draft->title(), $draft->type, $draft->questions, $now);
+        $questionnaire = new Questionnaire($id, $command->customerId, $draft->title(), $draft->type, $this->questions($draft, $command->customerId), $now);
         $questionnaire->describe(self::fields($draft), $now);
         $questionnaire->syncFlowCopies($slug, $draft->isChain());
         $this->questionnaires->add($questionnaire);
@@ -85,7 +87,7 @@ final class SaveFlowHandler
         $slug = $this->slugFor($draft, $flow);
 
         $questionnaire->describe(self::fields($draft), $now);
-        $questionnaire->replaceQuestions($draft->questions, $now);
+        $questionnaire->replaceQuestions($this->questions($draft, $command->customerId), $now);
         $questionnaire->syncFlowCopies($slug, $draft->isChain());
 
         if (null === $flow) {
@@ -157,6 +159,21 @@ final class SaveFlowHandler
         }
 
         return $saved;
+    }
+
+    /**
+     * The questions to store: a template sent as text is uploaded to templates/{customer_id}/{uuid}/{filename}.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function questions(FlowDraft $draft, string $customerId): array
+    {
+        return $draft->questionsWithStoredTemplates(function (string $filename, string $text) use ($customerId): string {
+            $key = FileTemplate::keyFor($customerId, Ids::uuid4(), $filename);
+            $this->storage->put($key, $text, 'text/csv; charset=utf-8');
+
+            return $key;
+        });
     }
 
     private function slugFor(FlowDraft $draft, ?Flow $flow): string

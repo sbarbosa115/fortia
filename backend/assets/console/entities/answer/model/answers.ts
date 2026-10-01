@@ -3,6 +3,13 @@
  * answer's display value and the time spent on it, and what kind of file a stored key is.
  */
 import type {Schema} from '@shared/api';
+import {
+  type TableColumn,
+  tableColumns,
+  tableFilled,
+  type TableRow,
+  tableRowsOf,
+} from '@shared/lib';
 
 export type Answer = Schema<'AnswerOutput'>;
 export type AnswersPage = Schema<'AnswersPageOutput'>;
@@ -69,7 +76,9 @@ export function isCountable(question: Question): boolean {
 
 export function hasValue(value: Control['value'] | undefined): boolean {
   if (Array.isArray(value)) {
-    return value.some((v) => String(v).trim() !== '');
+    return value.some((v) =>
+      typeof v === 'object' ? tableFilled([v]) : String(v).trim() !== '',
+    );
   }
   return value !== null && value !== undefined && String(value).trim() !== '';
 }
@@ -109,9 +118,15 @@ export type DisplayValue =
   | {kind: 'skipped'}
   | {kind: 'viewed'}
   | {kind: 'text'; text: string}
-  | {kind: 'files'; keys: string[]};
+  | {kind: 'files'; keys: string[]}
+  | {
+      kind: 'table';
+      columns: TableColumn[];
+      rowLabels: string[];
+      rows: TableRow[];
+    };
 
-/** What an answer shows: option labels, text, file keys, or "Not answered" / "Skipped" / "Viewed". */
+/** What an answer shows: option labels, text, file keys, a table, or "Not answered" / "Skipped" / "Viewed". */
 export function displayValue(question: Question): DisplayValue {
   const control = controlOf(question);
   if (!control) {
@@ -125,6 +140,14 @@ export function displayValue(question: Question): DisplayValue {
   }
   if (!hasValue(control.value)) {
     return {kind: 'notAnswered'};
+  }
+  if (control.type === 'table') {
+    return {
+      kind: 'table',
+      columns: tableColumns(control),
+      rowLabels: control.rows ?? [],
+      rows: tableRowsOf(control.value),
+    };
   }
   const values = (
     Array.isArray(control.value) ? control.value : [control.value]
