@@ -6,10 +6,8 @@ import {
   writeFlowRun,
 } from '@respondent/entities/flow';
 import {pollJob} from '@shared/api';
-import {
-  RESPONDENT_POLL,
-  StatusScreen,
-} from '@respondent/widgets/questionnaire-runner';
+import {RESPONDENT_POLL} from '../model/useRunner';
+import {StatusScreen} from './RunnerFrame';
 import {Button} from '@shared/ui';
 import {useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -33,7 +31,7 @@ export function GeneratingStage({
   token?: string | null;
   onReady: (next: FlowRun) => void;
 }) {
-  const {t} = useTranslation('pages.flow');
+  const {t} = useTranslation('widgets.questionnaire-runner');
   const [message, setMessage] = useState(0);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);

@@ -25,6 +25,7 @@ import {
   QuestionnaireRunner,
   RunnerFrame,
   UnavailableScreen,
+  GeneratingStage,
 } from '@respondent/widgets/questionnaire-runner';
 import {useDocumentTitle} from '@shared/lib';
 import {LoadingState} from '@shared/ui';
@@ -32,7 +33,6 @@ import {useQuery} from '@tanstack/react-query';
 import {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Navigate, useLocation, useNavigate, useParams} from 'react-router';
-import {GeneratingStage} from './GeneratingStage';
 
 /**
  * /f/:id and /f/:id/generating — a multi-stage flow by flow id, slug or questionnaire id (PRD §9.11). Each

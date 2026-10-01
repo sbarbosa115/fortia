@@ -68,5 +68,18 @@
     "notFound": "This questionnaire does not exist.",
     "create": "Want to create this questionnaire?",
     "flow": "This flow could not be found."
+  },
+  "generating": {
+    "eyebrow": "One moment",
+    "title": "Preparing your next questions",
+    "messages": {
+      "0": "We're tailoring the next step from your answers.",
+      "1": "Reviewing what you've told us so far…",
+      "2": "Picking the questions that matter most for you.",
+      "3": "Almost there — putting the finishing touches on it.",
+      "4": "Thanks for your patience, this only takes a moment."
+    },
+    "failed": "We couldn't prepare your next questions.",
+    "retry": "Try again"
   }
 }
