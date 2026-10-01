@@ -181,6 +181,119 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/checkout/session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_checkout_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/plan-change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_checkout_plan_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/plan-change/revert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_checkout_plan_change_revert"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_checkout_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_checkout_resume"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/portal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_checkout_portal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** "Get in touch" about a plan: emails the sales lead to SALES_LEAD_RECIPIENTS (PRD §8.3, §7.21, D8). */
+        post: operations["post_api_contact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/usage": {
         parameters: {
             query?: never;
@@ -190,6 +303,39 @@ export interface paths {
         };
         /** The caller's plan, usage and feature verdicts; loaded once per account by the console (PRD §10.21). */
         get: operations["get_api_customer_usage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/checkout/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["post_api_checkout_webhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The plans the account can buy, its current plan and what is pending in the gateway (PRD §8.3, §10.15). */
+        get: operations["get_api_plans"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1507,6 +1653,38 @@ export interface components {
             questionnaire: components["schemas"]["SessionOutput"];
             flow?: components["schemas"]["FlowOutput"] | null;
         };
+        CheckoutSessionOutput: {
+            checkout_url: string;
+        };
+        PlanChangeOutput: {
+            /** @enum {string} */
+            type: "changed" | "checkout";
+            plan_id: string;
+            /** @enum {string} */
+            billing_interval: "month" | "year";
+            /**
+             * @default null
+             * @enum {string|null}
+             */
+            change: "upgrade" | "downgrade" | null;
+            /** @default null */
+            effective_at: string | null;
+            /** @default null */
+            checkout_url: string | null;
+        };
+        SubscriptionRenewalOutput: {
+            subscription_id: string;
+            plan_id?: string | null;
+            renews_at?: string | null;
+        };
+        SubscriptionCancelOutput: {
+            subscription_id: string;
+            plan_id?: string | null;
+            active_until?: string | null;
+        };
+        PortalSessionOutput: {
+            portal_url: string;
+        };
         CustomerPlanOutput: {
             plan_id: string;
             from_at: string;
@@ -1553,6 +1731,51 @@ export interface components {
             features: {
                 [key: string]: components["schemas"]["FeatureVerdictOutput"];
             };
+        };
+        DiscountOutput: {
+            coupon_id: string;
+            promotion_code?: string | null;
+            /** Format: float */
+            percent_off?: number | null;
+            amount_off?: number | null;
+            currency?: string | null;
+            /** @enum {string} */
+            duration: "once" | "repeating" | "forever";
+            ends_at?: string | null;
+        };
+        PlanFeatureLimitOutput: {
+            feature_id: string;
+            feature_name: string;
+            limit: number;
+        };
+        CatalogPlanOutput: {
+            id: string;
+            plan_name: string;
+            plan_description: string;
+            price_amount?: number | null;
+            currency: string;
+            purchasable: boolean;
+            yearly_price_amount?: number | null;
+            yearly_purchasable: boolean;
+            max_questionnaires?: number | null;
+            max_responses?: number | null;
+            trial_days: number;
+            features: components["schemas"]["PlanFeatureLimitOutput"][];
+        };
+        PlansOutput: {
+            current_plan_id?: string | null;
+            /** @enum {string|null} */
+            current_billing_interval?: "month" | "year" | null;
+            /** The last day of the plan window (YYYY-MM-DD). */
+            active_until?: string | null;
+            scheduled_plan_id?: string | null;
+            /** @enum {string|null} */
+            scheduled_billing_interval?: "month" | "year" | null;
+            cancel_at_period_end: boolean;
+            trial_eligible: boolean;
+            trial_end?: string | null;
+            discount?: components["schemas"]["DiscountOutput"] | null;
+            plans: components["schemas"]["CatalogPlanOutput"][];
         };
         StylesOutput: {
             /** @description logoUrl, font, body, h1–h3, p, label, a, button.primary/secondary, input (PRD §6.18) */
@@ -1601,6 +1824,7 @@ export interface components {
         PromptStageInput: {
             /** The parent: the chain's root questionnaire (or one of its stages). */
             questionnaire_id: string;
+            /** each {question: string, answer: string} */
             answers: {
                 question?: string;
                 answer?: string;
@@ -2856,6 +3080,240 @@ export interface operations {
             };
         };
     };
+    post_api_checkout_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The hosted checkout page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckoutSessionOutput"];
+                };
+            };
+            /** @description PLAN_NOT_PURCHASABLE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description STRIPE_UNAVAILABLE */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_checkout_plan_change: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Changed now (upgrade) or at the end of the period (downgrade), or a checkout */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanChangeOutput"];
+                };
+            };
+            /** @description SAME_PLAN, PLAN_NOT_PURCHASABLE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description STRIPE_UNAVAILABLE */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_checkout_plan_change_revert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The scheduled change is undone */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionRenewalOutput"];
+                };
+            };
+            /** @description NO_SUBSCRIPTION, NO_SCHEDULED_CHANGE */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_checkout_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Canceled at the end of the period */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionCancelOutput"];
+                };
+            };
+            /** @description NO_SUBSCRIPTION */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_checkout_resume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The cancellation is removed (idempotent) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionRenewalOutput"];
+                };
+            };
+            /** @description NO_SUBSCRIPTION */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The period has already expired */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_checkout_portal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The gateway's billing portal */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalSessionOutput"];
+                };
+            };
+            /** @description NO_STRIPE_CUSTOMER */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request received */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message?: string;
+                        data?: Record<string, never> | null;
+                    };
+                };
+            };
+            /** @description PLAN_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description EMAIL_UNAVAILABLE */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_api_customer_usage: {
         parameters: {
             query?: never;
@@ -2872,6 +3330,65 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CustomerUsageOutput"];
+                };
+            };
+        };
+    };
+    post_api_checkout_webhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The gateway's event, signed in the Stripe-Signature header */
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description OK (text/plain) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/plain": string;
+                };
+            };
+            /** @description Bad signature (text/plain) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not applied: the gateway retries (text/plain) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_plans: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Plans and the account's subscription */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlansOutput"];
                 };
             };
         };

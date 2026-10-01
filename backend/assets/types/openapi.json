@@ -760,6 +760,195 @@
                 }
             }
         },
+        "/api/v1/checkout/session": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "operationId": "post_api_checkout_session",
+                "responses": {
+                    "200": {
+                        "description": "The hosted checkout page",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CheckoutSessionOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "PLAN_NOT_PURCHASABLE"
+                    },
+                    "404": {
+                        "description": "PLAN_NOT_FOUND"
+                    },
+                    "502": {
+                        "description": "STRIPE_UNAVAILABLE"
+                    }
+                }
+            }
+        },
+        "/api/v1/checkout/plan-change": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "operationId": "post_api_checkout_plan_change",
+                "responses": {
+                    "200": {
+                        "description": "Changed now (upgrade) or at the end of the period (downgrade), or a checkout",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlanChangeOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "SAME_PLAN, PLAN_NOT_PURCHASABLE"
+                    },
+                    "404": {
+                        "description": "PLAN_NOT_FOUND"
+                    },
+                    "502": {
+                        "description": "STRIPE_UNAVAILABLE"
+                    }
+                }
+            }
+        },
+        "/api/v1/checkout/plan-change/revert": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "operationId": "post_api_checkout_plan_change_revert",
+                "responses": {
+                    "200": {
+                        "description": "The scheduled change is undone",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubscriptionRenewalOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "NO_SUBSCRIPTION, NO_SCHEDULED_CHANGE"
+                    }
+                }
+            }
+        },
+        "/api/v1/checkout/cancel": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "operationId": "post_api_checkout_cancel",
+                "responses": {
+                    "200": {
+                        "description": "Canceled at the end of the period",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubscriptionCancelOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "NO_SUBSCRIPTION"
+                    }
+                }
+            }
+        },
+        "/api/v1/checkout/resume": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "operationId": "post_api_checkout_resume",
+                "responses": {
+                    "200": {
+                        "description": "The cancellation is removed (idempotent)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubscriptionRenewalOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "NO_SUBSCRIPTION"
+                    },
+                    "502": {
+                        "description": "The period has already expired"
+                    }
+                }
+            }
+        },
+        "/api/v1/checkout/portal": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "operationId": "post_api_checkout_portal",
+                "responses": {
+                    "200": {
+                        "description": "The gateway's billing portal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PortalSessionOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "NO_STRIPE_CUSTOMER"
+                    }
+                }
+            }
+        },
+        "/api/v1/contact": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "\"Get in touch\" about a plan: emails the sales lead to SALES_LEAD_RECIPIENTS (PRD \u00a78.3, \u00a77.21, D8).",
+                "operationId": "post_api_contact",
+                "responses": {
+                    "200": {
+                        "description": "Request received",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "PLAN_NOT_FOUND"
+                    },
+                    "502": {
+                        "description": "EMAIL_UNAVAILABLE"
+                    }
+                }
+            }
+        },
         "/api/v1/customer/usage": {
             "get": {
                 "tags": [
@@ -774,6 +963,64 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/CustomerUsageOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/checkout/webhook": {
+            "post": {
+                "tags": [
+                    "Billing"
+                ],
+                "operationId": "post_api_checkout_webhook",
+                "requestBody": {
+                    "description": "The gateway's event, signed in the Stripe-Signature header",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK (text/plain)",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Bad signature (text/plain)"
+                    },
+                    "500": {
+                        "description": "Not applied: the gateway retries (text/plain)"
+                    }
+                }
+            }
+        },
+        "/api/v1/plans": {
+            "get": {
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "The plans the account can buy, its current plan and what is pending in the gateway (PRD \u00a78.3, \u00a710.15).",
+                "operationId": "get_api_plans",
+                "responses": {
+                    "200": {
+                        "description": "Plans and the account's subscription",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlansOutput"
                                 }
                             }
                         }
@@ -5110,6 +5357,112 @@
                 },
                 "type": "object"
             },
+            "CheckoutSessionOutput": {
+                "required": [
+                    "checkout_url"
+                ],
+                "properties": {
+                    "checkout_url": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "PlanChangeOutput": {
+                "required": [
+                    "type",
+                    "plan_id",
+                    "billing_interval"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "changed",
+                            "checkout"
+                        ]
+                    },
+                    "plan_id": {
+                        "type": "string"
+                    },
+                    "billing_interval": {
+                        "type": "string",
+                        "enum": [
+                            "month",
+                            "year"
+                        ]
+                    },
+                    "change": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null,
+                        "enum": [
+                            "upgrade",
+                            "downgrade"
+                        ]
+                    },
+                    "effective_at": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    },
+                    "checkout_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "SubscriptionRenewalOutput": {
+                "required": [
+                    "subscription_id"
+                ],
+                "properties": {
+                    "subscription_id": {
+                        "type": "string"
+                    },
+                    "plan_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "renews_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "SubscriptionCancelOutput": {
+                "required": [
+                    "subscription_id"
+                ],
+                "properties": {
+                    "subscription_id": {
+                        "type": "string"
+                    },
+                    "plan_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "active_until": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PortalSessionOutput": {
+                "required": [
+                    "portal_url"
+                ],
+                "properties": {
+                    "portal_url": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
             "CustomerPlanOutput": {
                 "required": [
                     "plan_id",
@@ -5298,6 +5651,187 @@
                 },
                 "type": "object"
             },
+            "DiscountOutput": {
+                "required": [
+                    "coupon_id",
+                    "duration"
+                ],
+                "properties": {
+                    "coupon_id": {
+                        "type": "string"
+                    },
+                    "promotion_code": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "percent_off": {
+                        "type": "number",
+                        "format": "float",
+                        "nullable": true
+                    },
+                    "amount_off": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "currency": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "duration": {
+                        "type": "string",
+                        "enum": [
+                            "once",
+                            "repeating",
+                            "forever"
+                        ]
+                    },
+                    "ends_at": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PlanFeatureLimitOutput": {
+                "required": [
+                    "feature_id",
+                    "feature_name",
+                    "limit"
+                ],
+                "properties": {
+                    "feature_id": {
+                        "type": "string"
+                    },
+                    "feature_name": {
+                        "type": "string"
+                    },
+                    "limit": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "CatalogPlanOutput": {
+                "required": [
+                    "id",
+                    "plan_name",
+                    "plan_description",
+                    "currency",
+                    "purchasable",
+                    "yearly_purchasable",
+                    "trial_days",
+                    "features"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "plan_name": {
+                        "type": "string"
+                    },
+                    "plan_description": {
+                        "type": "string"
+                    },
+                    "price_amount": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "purchasable": {
+                        "type": "boolean"
+                    },
+                    "yearly_price_amount": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "yearly_purchasable": {
+                        "type": "boolean"
+                    },
+                    "max_questionnaires": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "max_responses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "trial_days": {
+                        "type": "integer"
+                    },
+                    "features": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlanFeatureLimitOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PlansOutput": {
+                "required": [
+                    "cancel_at_period_end",
+                    "trial_eligible",
+                    "plans"
+                ],
+                "properties": {
+                    "current_plan_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "current_billing_interval": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "month",
+                            "year"
+                        ]
+                    },
+                    "active_until": {
+                        "title": "The last day of the plan window (YYYY-MM-DD).",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "scheduled_plan_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "scheduled_billing_interval": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "month",
+                            "year"
+                        ]
+                    },
+                    "cancel_at_period_end": {
+                        "type": "boolean"
+                    },
+                    "trial_eligible": {
+                        "type": "boolean"
+                    },
+                    "trial_end": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "discount": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/DiscountOutput"
+                            }
+                        ]
+                    },
+                    "plans": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CatalogPlanOutput"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "StylesOutput": {
                 "properties": {
                     "styles": {
@@ -5450,6 +5984,7 @@
                         "type": "string"
                     },
                     "answers": {
+                        "title": "each {question: string, answer: string}",
                         "type": "array",
                         "items": {
                             "properties": {
