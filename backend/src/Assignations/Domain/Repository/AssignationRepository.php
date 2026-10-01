@@ -24,6 +24,18 @@ interface AssignationRepository
     public function listByProject(string $projectId): array;
 
     /**
+     * The assignations of several projects in one query, oldest first in each.
+     *
+     * @param list<string> $projectIds
+     *
+     * @return array<string, list<Assignation>> by project id
+     */
+    public function listByProjects(array $projectIds): array;
+
+    /** @return list<Assignation> the organization's follow-ups, oldest first */
+    public function followUpsOfOrganization(string $organizationId): array;
+
+    /**
      * Active follow-ups not completed and not reminded on $today (the reminder run, PRD §7.13).
      *
      * @return list<Assignation>

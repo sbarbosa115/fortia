@@ -20,6 +20,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Newest first; an Admin sees every account's. */
+        get: operations["get_api_projects_list"];
+        put?: never;
+        /** Feat(assignations). */
+        post: operations["post_api_projects_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The enriched project, with the follow-ups that may join it (available_assignations). */
+        get: operations["get_api_projects_get"];
+        /** Partial. assignation_ids replaces the set; organization_id may only be sent unchanged. */
+        put: operations["put_api_projects_update"];
+        post?: never;
+        /** 204. Its assignations are unlinked, not deleted. */
+        delete: operations["delete_api_projects_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/usage": {
         parameters: {
             query?: never;
@@ -632,6 +669,85 @@ export interface components {
         QuestionnaireUrlOutput: {
             questionnaire_url: string;
         };
+        ProjectAssignationProgressOutput: {
+            completed: number;
+            total: number;
+            /** Always "questions" for a follow-up. */
+            unit: string;
+            /** 1-based; null when every question is answered or skipped. */
+            current_question?: number | null;
+        };
+        ProjectReviewCountsOutput: {
+            reviewed: number;
+            total: number;
+            approved: number;
+            rejected: number;
+        };
+        ProjectAssignationOutput: {
+            assignations_id: string;
+            name: string;
+            questionnaire_id: string;
+            active: boolean;
+            /** @enum {string} */
+            state: "review" | "overdue" | "correction" | "progress" | "pending" | "approved";
+            /** The shared session has ended. */
+            completed: boolean;
+            /** @enum {string} */
+            review_status: "not_ready" | "in_review" | "changes_requested" | "approved";
+            attempt: number;
+            /** Its own due date, or the project's. */
+            due_date?: string | null;
+            overdue: boolean;
+            /** 0–100; a complete follow-up is 100. */
+            percent: number;
+            progress: components["schemas"]["ProjectAssignationProgressOutput"];
+            review: components["schemas"]["ProjectReviewCountsOutput"];
+        };
+        ProjectAvailableAssignationOutput: {
+            assignations_id: string;
+            name: string;
+            /** This project's id when it already belongs to it, else null. */
+            project_id?: string | null;
+        };
+        ProjectOutput: {
+            project_id: string;
+            customer_id: string;
+            organization_id: string;
+            organization_name: string;
+            name: string;
+            description?: string | null;
+            due_date?: string | null;
+            created_at?: string | null;
+            updated_at?: string | null;
+            /** @enum {string} */
+            state: "review" | "overdue" | "correction" | "progress" | "pending" | "approved" | "empty";
+            progress_percent: number;
+            completed_assignations: number;
+            approved_assignations: number;
+            total_assignations: number;
+            assignations: components["schemas"]["ProjectAssignationOutput"][];
+            /** @default null */
+            available_assignations: components["schemas"]["ProjectAvailableAssignationOutput"][] | null;
+        };
+        ProjectPaginationOutput: {
+            page: number;
+            page_size: number;
+            total_items: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
+        ProjectListOutput: {
+            projects: components["schemas"]["ProjectOutput"][];
+            pagination: components["schemas"]["ProjectPaginationOutput"];
+        };
+        ProjectInput: {
+            organization_id?: string | null;
+            name?: string | null;
+            description?: string | null;
+            due_date?: string | null;
+            assignation_ids?: string[] | null;
+        };
         CustomerPlanOutput: {
             plan_id: string;
             from_at: string;
@@ -881,6 +997,230 @@ export interface operations {
                 content?: never;
             };
             /** @description FLOW_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_projects_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                /** @description progress includes pending */
+                status?: "review" | "progress" | "correction" | "overdue" | "approved";
+                /** @description Every word in the project's or its organization's name */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description {projects, pagination} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectListOutput"];
+                };
+            };
+            /** @description INVALID_PROJECT_STATUS */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_projects_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ProjectInput"];
+            };
+        };
+        responses: {
+            /** @description The enriched project */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, ASSIGNATION_ORGANIZATION_MISMATCH, ASSIGNATION_NOT_FOLLOW_UP */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_IN_OTHER_PROJECT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PLAN_LIMIT_REACHED */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The enriched project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOutput"];
+                };
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PROJECT_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_api_projects_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ProjectInput"];
+            };
+        };
+        responses: {
+            /** @description The enriched project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR, INVALID_UUID, ASSIGNATION_ORGANIZATION_MISMATCH, ASSIGNATION_NOT_FOLLOW_UP */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ASSIGNATION_IN_OTHER_PROJECT */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_api_projects_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_UUID */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description PROJECT_NOT_FOUND */
             404: {
                 headers: {
                     [name: string]: unknown;

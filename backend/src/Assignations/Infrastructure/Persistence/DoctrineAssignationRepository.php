@@ -48,6 +48,24 @@ final class DoctrineAssignationRepository extends DoctrineRepository implements 
         return $this->repository()->findBy(['projectId' => $projectId], ['createdAt' => 'ASC']);
     }
 
+    public function listByProjects(array $projectIds): array
+    {
+        if ([] === $projectIds) {
+            return [];
+        }
+        $byProject = [];
+        foreach ($this->repository()->findBy(['projectId' => $projectIds], ['createdAt' => 'ASC']) as $assignation) {
+            $byProject[(string) $assignation->projectId()][] = $assignation;
+        }
+
+        return $byProject;
+    }
+
+    public function followUpsOfOrganization(string $organizationId): array
+    {
+        return $this->repository()->findBy(['organizationId' => $organizationId, 'type' => Assignation::FOLLOW_UP], ['createdAt' => 'ASC']);
+    }
+
     public function activeFollowUps(): array
     {
         return $this->repository()->findBy(['type' => Assignation::FOLLOW_UP, 'active' => true]);

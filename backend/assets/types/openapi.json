@@ -43,6 +43,234 @@
                 }
             }
         },
+        "/api/v1/projects": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Newest first; an Admin sees every account's.",
+                "operationId": "get_api_projects_list",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 100
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "progress includes pending",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "review",
+                                "progress",
+                                "correction",
+                                "overdue",
+                                "approved"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Every word in the project's or its organization's name",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 200
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{projects, pagination}",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProjectListOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_PROJECT_STATUS"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Feat(assignations).",
+                "operationId": "post_api_projects_create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProjectInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The enriched project",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProjectOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, ASSIGNATION_ORGANIZATION_MISMATCH, ASSIGNATION_NOT_FOLLOW_UP"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "ASSIGNATION_IN_OTHER_PROJECT"
+                    },
+                    "429": {
+                        "description": "PLAN_LIMIT_REACHED"
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{id}": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "The enriched project, with the follow-ups that may join it (available_assignations).",
+                "operationId": "get_api_projects_get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The enriched project",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProjectOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "404": {
+                        "description": "PROJECT_NOT_FOUND"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Partial. assignation_ids replaces the set; organization_id may only be sent unchanged.",
+                "operationId": "put_api_projects_update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProjectInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The enriched project",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProjectOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR, INVALID_UUID, ASSIGNATION_ORGANIZATION_MISMATCH, ASSIGNATION_NOT_FOLLOW_UP"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND"
+                    },
+                    "409": {
+                        "description": "ASSIGNATION_IN_OTHER_PROJECT"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "204. Its assignations are unlinked, not deleted.",
+                "operationId": "delete_api_projects_delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Deleted"
+                    },
+                    "400": {
+                        "description": "INVALID_UUID"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "PROJECT_NOT_FOUND"
+                    }
+                }
+            }
+        },
         "/api/v1/customer/usage": {
             "get": {
                 "tags": [
@@ -2095,6 +2323,316 @@
                 },
                 "type": "object"
             },
+            "ProjectAssignationProgressOutput": {
+                "required": [
+                    "completed",
+                    "total",
+                    "unit"
+                ],
+                "properties": {
+                    "completed": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "unit": {
+                        "title": "Always \"questions\" for a follow-up.",
+                        "type": "string"
+                    },
+                    "current_question": {
+                        "title": "1-based; null when every question is answered or skipped.",
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectReviewCountsOutput": {
+                "required": [
+                    "reviewed",
+                    "total",
+                    "approved",
+                    "rejected"
+                ],
+                "properties": {
+                    "reviewed": {
+                        "type": "integer"
+                    },
+                    "total": {
+                        "type": "integer"
+                    },
+                    "approved": {
+                        "type": "integer"
+                    },
+                    "rejected": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectAssignationOutput": {
+                "required": [
+                    "assignations_id",
+                    "name",
+                    "questionnaire_id",
+                    "active",
+                    "state",
+                    "completed",
+                    "review_status",
+                    "attempt",
+                    "overdue",
+                    "percent",
+                    "progress",
+                    "review"
+                ],
+                "properties": {
+                    "assignations_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "questionnaire_id": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "state": {
+                        "type": "string",
+                        "enum": [
+                            "review",
+                            "overdue",
+                            "correction",
+                            "progress",
+                            "pending",
+                            "approved"
+                        ]
+                    },
+                    "completed": {
+                        "title": "The shared session has ended.",
+                        "type": "boolean"
+                    },
+                    "review_status": {
+                        "type": "string",
+                        "enum": [
+                            "not_ready",
+                            "in_review",
+                            "changes_requested",
+                            "approved"
+                        ]
+                    },
+                    "attempt": {
+                        "type": "integer"
+                    },
+                    "due_date": {
+                        "title": "Its own due date, or the project's.",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "overdue": {
+                        "type": "boolean"
+                    },
+                    "percent": {
+                        "title": "0\u2013100; a complete follow-up is 100.",
+                        "type": "integer"
+                    },
+                    "progress": {
+                        "$ref": "#/components/schemas/ProjectAssignationProgressOutput"
+                    },
+                    "review": {
+                        "$ref": "#/components/schemas/ProjectReviewCountsOutput"
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectAvailableAssignationOutput": {
+                "required": [
+                    "assignations_id",
+                    "name"
+                ],
+                "properties": {
+                    "assignations_id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "project_id": {
+                        "title": "This project's id when it already belongs to it, else null.",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectOutput": {
+                "required": [
+                    "project_id",
+                    "customer_id",
+                    "organization_id",
+                    "organization_name",
+                    "name",
+                    "state",
+                    "progress_percent",
+                    "completed_assignations",
+                    "approved_assignations",
+                    "total_assignations",
+                    "assignations"
+                ],
+                "properties": {
+                    "project_id": {
+                        "type": "string"
+                    },
+                    "customer_id": {
+                        "type": "string"
+                    },
+                    "organization_id": {
+                        "type": "string"
+                    },
+                    "organization_name": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "state": {
+                        "type": "string",
+                        "enum": [
+                            "review",
+                            "overdue",
+                            "correction",
+                            "progress",
+                            "pending",
+                            "approved",
+                            "empty"
+                        ]
+                    },
+                    "progress_percent": {
+                        "type": "integer"
+                    },
+                    "completed_assignations": {
+                        "type": "integer"
+                    },
+                    "approved_assignations": {
+                        "type": "integer"
+                    },
+                    "total_assignations": {
+                        "type": "integer"
+                    },
+                    "assignations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProjectAssignationOutput"
+                        }
+                    },
+                    "available_assignations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProjectAvailableAssignationOutput"
+                        },
+                        "nullable": true,
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectPaginationOutput": {
+                "required": [
+                    "page",
+                    "page_size",
+                    "total_items",
+                    "total_pages",
+                    "has_next",
+                    "has_previous"
+                ],
+                "properties": {
+                    "page": {
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "type": "integer"
+                    },
+                    "total_items": {
+                        "type": "integer"
+                    },
+                    "total_pages": {
+                        "type": "integer"
+                    },
+                    "has_next": {
+                        "type": "boolean"
+                    },
+                    "has_previous": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectListOutput": {
+                "required": [
+                    "projects",
+                    "pagination"
+                ],
+                "properties": {
+                    "projects": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProjectOutput"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/ProjectPaginationOutput"
+                    }
+                },
+                "type": "object"
+            },
+            "ProjectInput": {
+                "properties": {
+                    "organization_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 2000
+                    },
+                    "due_date": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "assignation_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "CustomerPlanOutput": {
                 "required": [
                     "plan_id",
@@ -2921,6 +3459,9 @@
     "tags": [
         {
             "name": "Flows"
+        },
+        {
+            "name": "Projects"
         },
         {
             "name": "Billing"
