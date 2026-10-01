@@ -191,3 +191,7 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
   when they were taken; retake them from the demo data and drop the PNGs in `public/docs/screenshots/{es,en}/`). The
   demo videos use placeholder YouTube ids, so the embedded player says the video is unavailable until an Admin sets
   real links through `/admin/videos`; there is no admin UI for videos (the "tower" console is out of scope).
+- Billing: the Stripe adapter (Checkout, Billing Portal, Subscription Schedules, coupons, signed webhooks) is written
+  against `stripe/stripe-php` but has not been run against a Stripe account in this repo (no keys in dev); dev and
+  tests use the fake gateway (`/fake-gateway/*`), whose "Simulate renewal" renews a subscription now instead of on
+  its renewal date. Payments from `invoice.paid` are recorded in `billing_payment`; no screen shows them.
