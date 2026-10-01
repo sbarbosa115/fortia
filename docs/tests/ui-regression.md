@@ -579,7 +579,8 @@ audience chip ("Everybody", "Area: Sales"), Type, progress ("2 of 4 people" with
 
 **ASG-02 · Type tabs**
 Default: only Customer service survey, without the Type column. Follow-up: the follow-ups with a Due column ("Monthly
-store report": its date and "in 5 days"; "Safety audit": "overdue by 3 days" in red). A type with no rows: "No
+store report": its date and "in 5 days"; "Safety audit": its date and "completed" while it waits for review, "overdue by
+3 days" in red once it is sent for correction, ASG-20). A type with no rows: "No
 assignations of this type" with "Clear filters", which brings All back.
 
 **ASG-03 · Copy link and Active**
