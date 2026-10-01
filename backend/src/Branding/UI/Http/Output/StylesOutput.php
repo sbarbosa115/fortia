@@ -11,6 +11,8 @@ final class StylesOutput
     public function __construct(
         #[OA\Property(type: 'object', nullable: true, additionalProperties: true, description: 'logoUrl, font, body, h1–h3, p, label, a, button.primary/secondary, input (PRD §6.18)')]
         public readonly ?array $styles,
+        #[OA\Property(nullable: true, description: 'The website the styles were read from: only for a console user of that account, else null')]
+        public readonly ?string $website = null,
     ) {
     }
 }

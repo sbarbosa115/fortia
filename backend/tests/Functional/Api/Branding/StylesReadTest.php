@@ -14,7 +14,7 @@ final class StylesReadTest extends ApiTestCase
 
         $data = $this->data($this->api('GET', '/api/v1/styles?customer_id=ACME0001'));
 
-        self::assertSame(['styles' => null], $data, '§8.5 {styles | null}: the respondent app keeps its default theme');
+        self::assertSame(['styles' => null, 'website' => null], $data, '§8.5 {styles | null}: the respondent app keeps its default theme');
     }
 
     public function testAnAccountsStylesArePublic(): void
@@ -32,6 +32,6 @@ final class StylesReadTest extends ApiTestCase
     public function testCustomerIdOrQuestionnaireIdIsRequired(): void
     {
         $this->assertApiError($this->api('GET', '/api/v1/styles'), 400, 'INVALID_REQUEST', '§8.5: 400 if both are missing');
-        self::assertSame(['styles' => null], $this->data($this->api('GET', '/api/v1/styles?questionnaire_id=x')), 'only customer_id is used');
+        self::assertSame(['styles' => null, 'website' => null], $this->data($this->api('GET', '/api/v1/styles?questionnaire_id=x')), 'only customer_id is used');
     }
 }

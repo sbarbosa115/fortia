@@ -1,0 +1,11 @@
+# Branding (brand styles, PRD §7.16): the website reader. BRAND_EXTRACTOR=http reads real sites; fake (dev, tests)
+# answers offline with a palette per host.
+services:
+    App\Branding\Application\Port\BrandExtractor:
+        factory: ['@App\Branding\Infrastructure\Extractor\BrandExtractorFactory', 'create']
+        arguments: ['%env(BRAND_EXTRACTOR)%']
+
+when@test:
+    services:
+        App\Branding\Infrastructure\Extractor\FakeBrandExtractor:
+            public: true
