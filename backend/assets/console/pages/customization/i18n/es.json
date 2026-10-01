@@ -1,3 +1,53 @@
 {
-  "title": "Personalización"
+  "title": "Personalización",
+  "subtitle": "Tu marca en las pantallas que ven tus encuestados.",
+  "brand": "Tu marca",
+  "website": "URL del sitio web",
+  "websiteHint": "No te preocupes: tomaremos los estilos de tu sitio web automáticamente y luego podrás ajustarlos.",
+  "websitePlaceholder": "https://www.tuempresa.com",
+  "websiteChanged": "Al guardar, leeremos este sitio web y diseñaremos tus estilos a partir de él. Esta vez no se enviarán el logo, la fuente ni el color de abajo.",
+  "websiteRemoved": "Al guardar, se quita el sitio web y se conservan tu logo, fuente y color actuales.",
+  "logo": "URL del logo",
+  "logoHint": "Una imagen PNG, SVG o JPG publicada en la web.",
+  "logoPlaceholder": "https://www.tuempresa.com/logo.svg",
+  "logoPreview": "Vista previa del logo",
+  "noLogo": "Sin logo",
+  "logoBroken": "No se puede cargar la imagen",
+  "font": "Fuente",
+  "brandColor": "Color de marca",
+  "brandColorHint": "Se usa en los botones, los enlaces y el campo activo. Formato #RRGGBB.",
+  "pickColor": "Elegir un color",
+  "reset": "Restablecer",
+  "resetDone": "Valores predeterminados restablecidos",
+  "save": "Guardar",
+  "saved": "Estilos actualizados correctamente",
+  "fixErrors": "Revisa los campos marcados.",
+  "errors": {
+    "website": "Escribe una dirección web que empiece por http:// o https://.",
+    "logoUrl": "Escribe la dirección de una imagen que empiece por http:// o https://.",
+    "brandColor": "Escribe un color como # seguido de 6 dígitos hexadecimales, p. ej. #8249DF."
+  },
+  "stages": {
+    "queued": "Preparando…",
+    "reading_website": "Leyendo tu sitio web…",
+    "designing_styles": "Eligiendo colores y fuentes…",
+    "saving": "Guardando tus estilos…"
+  },
+  "preview": {
+    "title": "Vista previa",
+    "label": "Vista previa de una pantalla del encuestado con tu marca",
+    "note": "Así ven tus encuestados una pregunta.",
+    "logo": "Tu logo",
+    "monogram": "M",
+    "step": "Pregunta 2 de 5",
+    "eyebrow": "Tu experiencia",
+    "question": "¿Cómo calificarías tu última compra?",
+    "description": "Elige la opción que mejor encaje.",
+    "optionA": "Excelente",
+    "optionB": "Buena",
+    "optionC": "Podría mejorar",
+    "placeholder": "Cuéntanos más (opcional)",
+    "back": "Atrás",
+    "next": "Continuar"
+  }
 }

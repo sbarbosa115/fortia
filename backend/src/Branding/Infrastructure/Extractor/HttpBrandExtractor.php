@@ -129,7 +129,7 @@ final class HttpBrandExtractor implements BrandExtractor
         preg_match_all('/font-family\s*:\s*([^;}{]+)/i', $css, $matches);
         foreach ($matches[1] as $list) {
             $first = trim(explode(',', $list)[0], " \t\n\r\"'");
-            if ('' === $first || str_starts_with($first, 'var(') || \in_array(strtolower($first), self::GENERIC_FONTS, true) || \strlen($first) > 60) {
+            if (1 !== preg_match('/^[A-Za-z][A-Za-z0-9 _-]{0,59}$/', $first) || \in_array(strtolower($first), self::GENERIC_FONTS, true)) {
                 continue;
             }
             $counts[$first] = ($counts[$first] ?? 0) + 1;

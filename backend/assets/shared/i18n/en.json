@@ -157,6 +157,7 @@
     "FEATURE_NOT_FOUND": "That feature does not exist.",
     "COUPON_NOT_FOUND": "That coupon does not exist.",
     "UNKNOWN_PROMPT": "That system prompt does not exist.",
-    "INVALID_PLACEHOLDERS": "The text is missing required placeholders."
+    "INVALID_PLACEHOLDERS": "The text is missing required placeholders.",
+    "WEBSITE_UNREACHABLE": "We could not read that website. Check the address and try again."
   }
 }

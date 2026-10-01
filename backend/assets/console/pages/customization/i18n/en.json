@@ -1,3 +1,53 @@
 {
-  "title": "Customization"
+  "title": "Customization",
+  "subtitle": "Your brand on the screens your respondents see.",
+  "brand": "Your brand",
+  "website": "Website URL",
+  "websiteHint": "Don't worry — we'll fetch the styles from your website automatically, and you can adjust them afterwards.",
+  "websitePlaceholder": "https://www.yourcompany.com",
+  "websiteChanged": "When you save, we'll read this website and design your styles from it. The logo, font and color below won't be sent this time.",
+  "websiteRemoved": "When you save, the website is removed and your current logo, font and color are kept.",
+  "logo": "Logo URL",
+  "logoHint": "A PNG, SVG or JPG image published on the web.",
+  "logoPlaceholder": "https://www.yourcompany.com/logo.svg",
+  "logoPreview": "Logo preview",
+  "noLogo": "No logo",
+  "logoBroken": "The image can't be loaded",
+  "font": "Font",
+  "brandColor": "Brand color",
+  "brandColorHint": "Used for buttons, links and the focused field. Format #RRGGBB.",
+  "pickColor": "Pick a color",
+  "reset": "Reset",
+  "resetDone": "Reset to default values",
+  "save": "Save",
+  "saved": "Styles updated successfully",
+  "fixErrors": "Check the highlighted fields.",
+  "errors": {
+    "website": "Enter a website address that starts with http:// or https://.",
+    "logoUrl": "Enter an image address that starts with http:// or https://.",
+    "brandColor": "Enter a color as # followed by 6 hexadecimal digits, e.g. #8249DF."
+  },
+  "stages": {
+    "queued": "Getting ready…",
+    "reading_website": "Reading your website…",
+    "designing_styles": "Choosing colors and fonts…",
+    "saving": "Saving your styles…"
+  },
+  "preview": {
+    "title": "Preview",
+    "label": "Preview of a respondent screen with your brand",
+    "note": "This is how a question looks to your respondents.",
+    "logo": "Your logo",
+    "monogram": "M",
+    "step": "Question 2 of 5",
+    "eyebrow": "Your experience",
+    "question": "How would you rate your last purchase?",
+    "description": "Pick the option that fits best.",
+    "optionA": "Excellent",
+    "optionB": "Good",
+    "optionC": "Could be better",
+    "placeholder": "Tell us more (optional)",
+    "back": "Back",
+    "next": "Continue"
+  }
 }

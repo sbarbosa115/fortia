@@ -157,6 +157,7 @@
     "FEATURE_NOT_FOUND": "Esa funcionalidad no existe.",
     "COUPON_NOT_FOUND": "Ese cupón no existe.",
     "UNKNOWN_PROMPT": "Ese prompt del sistema no existe.",
-    "INVALID_PLACEHOLDERS": "Al texto le faltan marcadores obligatorios."
+    "INVALID_PLACEHOLDERS": "Al texto le faltan marcadores obligatorios.",
+    "WEBSITE_UNREACHABLE": "No pudimos leer ese sitio web. Revisa la dirección e inténtalo de nuevo."
   }
 }
