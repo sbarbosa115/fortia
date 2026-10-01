@@ -1,0 +1,141 @@
+/* pages/projects (item projects): the listing's own layout; everything else is the house kit. */
+.projects {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.projects__project {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.projects__initials {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.projects__name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.projects__name strong {
+  overflow-wrap: anywhere;
+}
+.projects__meta {
+  font-size: 13px;
+}
+.projects__meta > span + span::before {
+  content: ' · ';
+}
+.projects__approved {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+  font-size: 13px;
+}
+.projects__deadline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  white-space: nowrap;
+}
+.projects__row--open td {
+  border-bottom-color: transparent;
+}
+.projects__detail > td {
+  background: var(--color-bg);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+.projects__assignations {
+  background: var(--color-surface);
+  border-radius: 10px;
+}
+.projects__review {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.projects__attempt {
+  display: block;
+  font-size: 12px;
+}
+.projects__none {
+  margin: 0;
+}
+.projects__menu {
+  position: relative;
+}
+.projects__menu-list {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 160px;
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-pop);
+}
+.projects__menu-list .btn {
+  justify-content: flex-start;
+  width: 100%;
+}
+.projects__legend-title {
+  margin: 0 0 var(--space-3);
+  font-size: 15px;
+}
+.projects__legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+.projects__legend-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.projects__legend-item dt {
+  flex: none;
+}
+.projects__legend-item dd {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.projects__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.projects__fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.projects__choices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 220px;
+  overflow-y: auto;
+}

@@ -1,3 +1,124 @@
 {
-  "title": "Proyectos"
+  "title": "Proyectos",
+  "subtitle": "Agrupa los seguimientos de una organización y síguelos hasta la fecha límite.",
+  "count_one": "{{count}} proyecto",
+  "count_other": "{{count}} proyectos",
+  "new": "Nuevo proyecto",
+  "notInPlan": "Tu plan no incluye asignaciones.",
+  "tabs": {
+    "label": "Proyectos por estado",
+    "all": "Todos",
+    "review": "Por revisar",
+    "progress": "En progreso",
+    "correction": "En corrección",
+    "overdue": "Vencidos",
+    "completed": "Completados"
+  },
+  "search": {
+    "label": "Buscar proyectos",
+    "placeholder": "Busca por proyecto u organización"
+  },
+  "columns": {
+    "project": "Proyecto",
+    "state": "Estado",
+    "assignations": "Asignaciones",
+    "deadline": "Fecha límite",
+    "nextStep": "Siguiente paso",
+    "actions": "Acciones"
+  },
+  "created": "creado el {{date}}",
+  "expand": "Mostrar las asignaciones de {{name}}",
+  "collapse": "Ocultar las asignaciones de {{name}}",
+  "state": {
+    "pending": "Sin empezar",
+    "progress": "En progreso",
+    "review": "Requiere tu revisión",
+    "correction": "En corrección",
+    "approved": "Completado",
+    "overdue": "Vencido",
+    "empty": "Sin asignaciones"
+  },
+  "approvedOf": "{{approved}} de {{total}} aprobadas",
+  "progressLabel": "{{name}}: {{percent}} % completado",
+  "noDeadline": "Sin fecha límite",
+  "urgency": {
+    "inDays_one": "en {{count}} día",
+    "inDays_other": "en {{count}} días",
+    "today": "vence hoy",
+    "overdue_one": "vencido hace {{count}} día",
+    "overdue_other": "vencido hace {{count}} días",
+    "done": "completado"
+  },
+  "next": {
+    "review": "Revisar respuestas",
+    "openOverdue": "Abrir vencida",
+    "seeCorrection": "Ver corrección",
+    "seeProgress": "Ver progreso",
+    "seeResults": "Ver resultados",
+    "addAssignations": "Agregar asignaciones"
+  },
+  "menu": {
+    "label": "Más acciones para {{name}}",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "detail": {
+    "caption": "Asignaciones de {{name}}",
+    "assignation": "Asignación",
+    "answers": "Respuestas",
+    "review": "Revisión",
+    "status": "Estado",
+    "questionOf": "Pregunta {{n}} de {{total}}",
+    "questionsAnswered": "{{n}} de {{total}} preguntas",
+    "reviewed": "{{reviewed}} de {{total}} revisadas",
+    "sentBack_one": "{{count}} devuelta al cliente",
+    "sentBack_other": "{{count}} devueltas al cliente",
+    "notReady": "Aún no está completa",
+    "attempt": "Intento {{n}}",
+    "reviewLink": "Revisar",
+    "openLink": "Abrir",
+    "none": "Este proyecto aún no tiene asignaciones. Edítalo para agregar los seguimientos de la organización."
+  },
+  "legend": {
+    "title": "Qué significa cada estado",
+    "pending": "Nadie ha empezado sus seguimientos.",
+    "progress": "Sus seguimientos se están respondiendo.",
+    "review": "Un seguimiento está completo y espera tu revisión.",
+    "correction": "Algunas respuestas se devolvieron y se están corrigiendo.",
+    "approved": "Todos los seguimientos están completos y aprobados.",
+    "overdue": "Un seguimiento pasó su fecha límite sin completarse.",
+    "empty": "El proyecto aún no tiene asignaciones."
+  },
+  "delete": {
+    "title": "¿Eliminar este proyecto?",
+    "body": "Se eliminará \"{{name}}\". Sus asignaciones y sus respuestas se conservan; solo dejan de pertenecer a un proyecto.",
+    "confirm": "Eliminar proyecto",
+    "done": "Proyecto \"{{name}}\" eliminado"
+  },
+  "edit": {
+    "title": "Editar proyecto",
+    "name": "Nombre",
+    "organization": "Organización",
+    "organizationHint": "La organización de un proyecto no puede cambiar.",
+    "description": "Descripción",
+    "deadline": "Fecha límite",
+    "deadlineHint": "Puedes mover la fecha límite, pero no quitarla.",
+    "assignations": "Asignaciones",
+    "assignationsHint": "Los seguimientos de la organización que no están en otro proyecto.",
+    "noAvailable": "Esta organización no tiene seguimientos disponibles para el proyecto.",
+    "saved": "Proyecto \"{{name}}\" actualizado",
+    "errors": {
+      "nameRequired": "El nombre es obligatorio",
+      "nameTooLong": "Usa 200 caracteres o menos",
+      "descriptionTooLong": "Usa 2000 caracteres o menos",
+      "deadlineRequired": "Elige una fecha límite para el proyecto",
+      "deadlineInvalid": "Ingresa una fecha límite válida"
+    }
+  },
+  "empty": {
+    "noneTitle": "Aún no hay proyectos",
+    "noneBody": "Un proyecto agrupa los seguimientos de una organización con una sola fecha límite, para ver de un vistazo qué revisar y qué está atrasado.",
+    "filteredTitle": "Ningún proyecto coincide",
+    "filteredBody": "Ningún proyecto coincide con esta pestaña y esta búsqueda."
+  }
 }

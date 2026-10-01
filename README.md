@@ -86,6 +86,10 @@ below is added by the item that builds the endpoint.
 | `/api/v1/organizations` | POST | AG, Cap(`organizations`) | `{name, domain_email?, description?, active?, organization_users[]}` (no extra fields, also in members). 201 the organization with its members. Names/emails/phones normalized (§6.13). 400 `VALIDATION_ERROR` (each member with an email or phone, unique emails in the list), 403 `FORBIDDEN`, 409 `DOMAIN_EMAIL_CONFLICT` (any account), 429 plan. `OrganizationCreated` counts `organizations` |
 | `/api/v1/organizations/{id}` | PUT | write permission, owner or Admin (D1) | partial, at least one field; `organization_users` is reconciled (by id, then email, then name + phone; the rest deleted). 200 the organization. 400 `VALIDATION_ERROR`/`INVALID_UUID`, 403 `FORBIDDEN` (read-only), 404 `ORGANIZATION_NOT_FOUND` (also another account's), 409 `DOMAIN_EMAIL_CONFLICT` |
 | `/api/v1/organizations/{id}` | DELETE | write permission, owner or Admin (D1) | 204; deletes its members too (D2). 404 `ORGANIZATION_NOT_FOUND`, 409 `ORGANIZATION_HAS_ASSIGNATIONS` while assignations or projects point at it. `OrganizationDeleted` counts `organizations` |
+| `/api/v1/projects` | GET | signed in | `{projects:[enriched], pagination:{page, page_size, total_items, total_pages, has_next, has_previous}}`, newest first; `page_size` default 10, ≤ 100; `status` ∈ review, progress (includes pending), correction, overdue, approved; `q` = every word in the project's or its organization's name. Paginated in SQL without `status` (states come from the sessions, so with `status` every match is evaluated). 400 `INVALID_PROJECT_STATUS`. Admin sees every account |
+| `/api/v1/projects` | POST | write permission, Feat(`assignations`) | `{organization_id, name (1–200), description? (≤ 2000), due_date, assignation_ids[]?}` (deduplicated, no extra fields). 201 the enriched project. 400 `VALIDATION_ERROR`, `ASSIGNATION_NOT_FOLLOW_UP`, `ASSIGNATION_ORGANIZATION_MISMATCH`; 403 `FORBIDDEN` (read-only); 404 `ORGANIZATION_NOT_FOUND`, `ASSIGNATION_NOT_FOUND` (also another account's); 409 `ASSIGNATION_IN_OTHER_PROJECT`; 429 plan |
+| `/api/v1/projects/{id}` | GET | signed in, owner or Admin | the enriched project (§7.12: `state`, `progress_percent`, `completed/approved/total_assignations`, `assignations[]` with `state`, `progress {completed, total, unit, current_question}`, `review {reviewed, total, approved, rejected}`, `review_status`, `attempt`, `due_date`, `overdue`) plus `available_assignations` (the organization's follow-ups not in another project, for the edit dialog). 404 `PROJECT_NOT_FOUND` (also another account's) |
+| `/api/v1/projects/{id}` | PUT, DELETE | write permission, owner or Admin | PUT partial: `name`, `due_date`, `assignation_ids` not null, `assignation_ids` replaces the set (left-out ones are unlinked), `organization_id` only unchanged (400 `VALIDATION_ERROR`); 200 the enriched project. DELETE 204, unlinks its assignations. 404 `PROJECT_NOT_FOUND`, 403 `FORBIDDEN` |
 
 Every endpoint answers `{message, data}` or `{error: {code, message, details?}}` (PRD §8.1); `X-Assume-Customer-Id`
 lets a platform Admin act as an account's root user (logged in `impersonation_log`).
@@ -110,6 +114,10 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
   them would lose answers and reviews, and keeping them would orphan respondents who log in against its members. Delete
   (or move) the assignations and projects first. Member ids sent for new members are ignored (a fresh id is minted), and
   a reconciliation frees emails before rewriting them, so members can swap emails in one update.
+- **Projects.** An assignation within a project is due on its own `due_date` or, without one, on the project's; it is
+  overdue once that date is before "today" in UTC−12 (§7.12). Writing a project needs the console's write permission
+  (a read-only role gets 403), like D1 for organizations. A review counts only for the attempt it was made in, and a
+  locked answer counts as approved (`Assignations\Domain\FollowUpProgress`).
 
 ## Known gaps
 

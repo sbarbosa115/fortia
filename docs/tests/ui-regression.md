@@ -371,6 +371,64 @@ organización", "Editar organización", "Miembros (4)", "Añadir miembro", "Impo
 "Guardar cambios", the domain warning and the delete dialog, all in Spanish (member error texts from the API stay as the
 API writes them).
 
+**PRJ-01 · The list**
+As `owner@acme.test` (language English) open Projects. **Expected:** "2 projects", newest first: "Supplier audit" and
+"Store opening Q4", each with "AR" on a colour, the name, "Acme Retail · created {date}". Supplier audit: "Overdue",
+"0 of 1 approved" with an empty bar, its date with "overdue by 5 days" (red), next step "Open overdue". Store opening
+Q4: "Needs your review", "0 of 2 approved" with the bar at 75%, its date (30 days out) with "in 30 days", next step
+"Review answers". Never a Globex project.
+
+**PRJ-02 · Tabs**
+To review: only Store opening Q4. Overdue: only Supplier audit. In progress, In correction, Completed: "No projects
+match" with "Clear filters", which brings back All and both rows.
+
+**PRJ-03 · Search**
+Type `supplier` (the list updates ~300 ms after you stop typing): only Supplier audit. Type `retail`: both (the
+organization's name is searched too). Type `zzz`: "No projects match" → "Clear filters" empties the search.
+
+**PRJ-04 · Expanded row**
+Click the chevron of Store opening Q4. **Expected:** a table with "Store opening checklist" · "Question 3 of 4" · "Not
+complete yet" · "In progress" · Open, and "Visual merchandising review" · "4 of 4 questions" · "1 of 4 reviewed" ·
+"Needs your review" · Review (primary). Review/Open go to /console/assignations/{id}. The chevron's name says
+Show/Hide the assignations of the project.
+
+**PRJ-05 · Next step**
+"Review answers" goes to the assignation in review; "Open overdue" to Supplier compliance. A project without
+assignations shows "No assignations" and "Add assignations", which opens the edit dialog.
+
+**PRJ-06 · State legend**
+Under the table: "What the states mean" with Not started, In progress, Needs your review, In correction, Completed,
+Overdue and No assignations, each with one line.
+
+**PRJ-07 · Edit dialog**
+⋯ → Edit on Store opening Q4. **Expected:** Name, Organization "Acme Retail" read-only with "A project's organization
+can't change.", Description, Deadline, and Assignations with Store opening checklist and Visual merchandising review
+checked and Staff training plan unchecked (Supplier compliance is not offered: it is in another project). Clear the
+deadline and Save changes: "Choose a deadline for the project". Clear the name: "Name is required".
+
+**PRJ-08 · Saving the edit**
+Set a new deadline and check Staff training plan → Save changes: toast "Project "Store opening Q4" updated", the row
+shows "0 of 3 approved" and the new date. Edit again, uncheck Staff training plan and put the deadline back: 2 again.
+
+**PRJ-09 · Delete confirmation**
+⋯ → Delete on Supplier audit: "Delete this project?" / ""Supplier audit" will be deleted. Its assignations and their
+answers are kept; they just stop belonging to a project." Cancel keeps it. (Deleting it for real unlinks Supplier
+compliance, which then shows up in Store opening Q4's edit dialog.)
+
+**PRJ-10 · Read-only**
+As `reader@acme.test`: "New project" is disabled with "Your read-only role can't create resources."; in ⋯, Edit and
+Delete are disabled with "Your read-only role can't make changes."; expand still works.
+
+**PRJ-11 · New project**
+As the owner, "New project" links to /console/projects/new. On an account whose plan lacks assignations it is disabled
+with "Your plan doesn't include assignations.".
+
+**PRJ-12 · Español**
+Switch to Español. **Expected:** "Proyectos", "Nuevo proyecto", tabs "Todos, Por revisar, En progreso, En corrección,
+Vencidos, Completados", "Requiere tu revisión", "0 de 2 aprobadas", "en 30 días" / "vencido hace 5 días", "Revisar
+respuestas", "Pregunta 3 de 4", the legend, "¿Eliminar este proyecto?" and the edit dialog, all in Spanish; no raw
+translation keys.
+
 <!-- ORG-01 – 15: organizations. ASG-01 – 30: assignations. ARS-01 – 15: assignation-respondent.
      PRJ-01 – 12: projects. PRJ-13 – 20: project-wizard. -->
 

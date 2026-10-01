@@ -1,3 +1,124 @@
 {
-  "title": "Projects"
+  "title": "Projects",
+  "subtitle": "Group an organization's follow-ups and track them to the deadline.",
+  "count_one": "{{count}} project",
+  "count_other": "{{count}} projects",
+  "new": "New project",
+  "notInPlan": "Your plan doesn't include assignations.",
+  "tabs": {
+    "label": "Projects by state",
+    "all": "All",
+    "review": "To review",
+    "progress": "In progress",
+    "correction": "In correction",
+    "overdue": "Overdue",
+    "completed": "Completed"
+  },
+  "search": {
+    "label": "Search projects",
+    "placeholder": "Search by project or organization"
+  },
+  "columns": {
+    "project": "Project",
+    "state": "State",
+    "assignations": "Assignations",
+    "deadline": "Deadline",
+    "nextStep": "Next step",
+    "actions": "Actions"
+  },
+  "created": "created {{date}}",
+  "expand": "Show the assignations of {{name}}",
+  "collapse": "Hide the assignations of {{name}}",
+  "state": {
+    "pending": "Not started",
+    "progress": "In progress",
+    "review": "Needs your review",
+    "correction": "In correction",
+    "approved": "Completed",
+    "overdue": "Overdue",
+    "empty": "No assignations"
+  },
+  "approvedOf": "{{approved}} of {{total}} approved",
+  "progressLabel": "{{name}}: {{percent}}% complete",
+  "noDeadline": "No deadline",
+  "urgency": {
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days",
+    "today": "due today",
+    "overdue_one": "overdue by {{count}} day",
+    "overdue_other": "overdue by {{count}} days",
+    "done": "completed"
+  },
+  "next": {
+    "review": "Review answers",
+    "openOverdue": "Open overdue",
+    "seeCorrection": "See correction",
+    "seeProgress": "See progress",
+    "seeResults": "See results",
+    "addAssignations": "Add assignations"
+  },
+  "menu": {
+    "label": "More actions for {{name}}",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "detail": {
+    "caption": "Assignations of {{name}}",
+    "assignation": "Assignation",
+    "answers": "Answers",
+    "review": "Review",
+    "status": "Status",
+    "questionOf": "Question {{n}} of {{total}}",
+    "questionsAnswered": "{{n}} of {{total}} questions",
+    "reviewed": "{{reviewed}} of {{total}} reviewed",
+    "sentBack_one": "{{count}} sent back to the client",
+    "sentBack_other": "{{count}} sent back to the client",
+    "notReady": "Not complete yet",
+    "attempt": "Attempt {{n}}",
+    "reviewLink": "Review",
+    "openLink": "Open",
+    "none": "This project has no assignations yet. Edit it to add the organization's follow-ups."
+  },
+  "legend": {
+    "title": "What the states mean",
+    "pending": "Nobody has started its follow-ups yet.",
+    "progress": "Its follow-ups are being answered.",
+    "review": "A follow-up is complete and waits for your review.",
+    "correction": "Some answers were sent back and are being corrected.",
+    "approved": "Every follow-up is complete and approved.",
+    "overdue": "A follow-up passed its deadline before being completed.",
+    "empty": "The project has no assignations yet."
+  },
+  "delete": {
+    "title": "Delete this project?",
+    "body": "\"{{name}}\" will be deleted. Its assignations and their answers are kept; they just stop belonging to a project.",
+    "confirm": "Delete project",
+    "done": "Project \"{{name}}\" deleted"
+  },
+  "edit": {
+    "title": "Edit project",
+    "name": "Name",
+    "organization": "Organization",
+    "organizationHint": "A project's organization can't change.",
+    "description": "Description",
+    "deadline": "Deadline",
+    "deadlineHint": "You can move the deadline, but not remove it.",
+    "assignations": "Assignations",
+    "assignationsHint": "The organization's follow-ups that are not in another project.",
+    "noAvailable": "This organization has no follow-ups available for the project.",
+    "saved": "Project \"{{name}}\" updated",
+    "errors": {
+      "nameRequired": "Name is required",
+      "nameTooLong": "Use 200 characters or fewer",
+      "descriptionTooLong": "Use 2000 characters or fewer",
+      "deadlineRequired": "Choose a deadline for the project",
+      "deadlineInvalid": "Enter a valid deadline"
+    }
+  },
+  "empty": {
+    "noneTitle": "No projects yet",
+    "noneBody": "A project groups an organization's follow-ups with one deadline, so you can see at a glance what to review and what is late.",
+    "filteredTitle": "No projects match",
+    "filteredBody": "No project matches this tab and search."
+  }
 }
