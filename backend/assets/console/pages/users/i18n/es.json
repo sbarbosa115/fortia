@@ -1,3 +1,23 @@
 {
-  "title": "Usuarios"
+  "title": "Usuarios",
+  "subtitle": "Las personas que trabajan en esta cuenta y lo que pueden hacer.",
+  "new": "Nuevo usuario",
+  "columns": {
+    "user": "Usuario",
+    "email": "Correo",
+    "role": "Rol",
+    "type": "Tipo"
+  },
+  "roles": {
+    "admin": "Administrador",
+    "readOnly": "Solo lectura"
+  },
+  "types": {
+    "owner": "Propietario",
+    "member": "Miembro"
+  },
+  "empty": {
+    "title": "Aún no hay usuarios. Invita a tu primer compañero de equipo.",
+    "body": "Los miembros del equipo inician sesión con su propio correo y ven los cuestionarios y respuestas de esta cuenta."
+  }
 }

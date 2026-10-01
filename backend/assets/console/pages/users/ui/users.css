@@ -1,0 +1,20 @@
+/* /users (item accounts, PRD §10.16). */
+.user-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.user-cell__avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-strong);
+  font-size: 12px;
+  font-weight: 700;
+}
+.user-cell__name {
+  font-weight: 600;
+}

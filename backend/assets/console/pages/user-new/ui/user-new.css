@@ -1,0 +1,38 @@
+/* /users/new (item accounts, PRD §10.16). */
+.user-new__card {
+  max-width: 760px;
+  padding: var(--space-5);
+}
+.user-new__roles {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.user-new__roles .choice-cards {
+  margin-top: var(--space-2);
+}
+.permissions {
+  width: 100%;
+}
+.permissions__caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: var(--space-2);
+}
+.permissions th[scope='row'] {
+  font-weight: 400;
+  text-align: left;
+}
+.permissions td {
+  text-align: center;
+  font-weight: 700;
+}
+.permissions__yes {
+  color: var(--color-success);
+}
+.permissions__no {
+  color: var(--color-text-muted);
+}
+.user-new__actions {
+  justify-content: flex-end;
+}

@@ -1,3 +1,11 @@
 {
-  "title": "Iniciando sesión"
+  "title": "Iniciando sesión",
+  "working": "Iniciando sesión...",
+  "back": "Volver a iniciar sesión",
+  "errors": {
+    "unavailable": "El inicio de sesión no está disponible por ahora. Intenta más tarde o usa tu correo y contraseña.",
+    "linked": "Tu cuenta de Google ya quedó vinculada a tu cuenta, pero no pudimos terminar de iniciar sesión. Intenta de nuevo.",
+    "cancelled": "Se canceló el inicio de sesión con Google.",
+    "generic": "Algo salió mal. Intenta de nuevo."
+  }
 }

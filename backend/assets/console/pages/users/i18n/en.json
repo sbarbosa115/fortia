@@ -1,3 +1,23 @@
 {
-  "title": "Users"
+  "title": "Users",
+  "subtitle": "The people who work in this account and what they can do.",
+  "new": "New user",
+  "columns": {
+    "user": "User",
+    "email": "Email",
+    "role": "Role",
+    "type": "Type"
+  },
+  "roles": {
+    "admin": "Admin",
+    "readOnly": "Read only"
+  },
+  "types": {
+    "owner": "Owner",
+    "member": "Member"
+  },
+  "empty": {
+    "title": "No users yet. Invite your first team member.",
+    "body": "Team members sign in with their own email and see this account's questionnaires and answers."
+  }
 }

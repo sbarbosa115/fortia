@@ -1,0 +1,9 @@
+{
+  "label": "Seguridad: {{level}}",
+  "levels": {
+    "weak": "Débil",
+    "fair": "Aceptable",
+    "good": "Buena",
+    "strong": "Fuerte"
+  }
+}

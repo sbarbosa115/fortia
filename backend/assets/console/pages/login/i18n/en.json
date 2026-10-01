@@ -1,13 +1,73 @@
 {
-  "documentTitle": "Mappi - Sign in",
-  "title": "Sign in",
-  "email": "Email",
-  "password": "Password",
-  "submit": "Sign in",
-  "forgot": "Forgot your password?",
+  "product": "Mappi",
+  "badge": "14 days free · no card",
+  "or": "or",
+  "tabs": {
+    "label": "Sign in or create an account",
+    "signIn": "Sign in",
+    "signUp": "Sign up"
+  },
+  "fields": {
+    "name": "Name",
+    "email": "Email",
+    "password": "Password"
+  },
+  "signIn": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to keep turning answers into action.",
+    "submit": "Sign in",
+    "forgot": "Forgot your password?"
+  },
+  "signUp": {
+    "title": "Create your account",
+    "subtitle": "Your first questionnaire with a real result, in minutes.",
+    "submit": "Create account",
+    "passwordHint": "At least 8 characters.",
+    "created": "Account created. Welcome to Mappi!",
+    "terms": "By creating an account you accept the Terms and the Privacy policy."
+  },
   "errors": {
+    "name": "Please enter your name.",
     "email": "Enter a valid email address.",
     "password": "Password must be at least 8 characters.",
+    "credentials": "Invalid email or password.",
+    "emailExists": "An account with this email already exists. Try signing in instead.",
+    "notConfirmed": "Your account isn't confirmed yet. Please check your email.",
+    "unavailable": "Sign-in is temporarily unavailable. Please try again later or use your email and password.",
+    "tooMany": "Too many attempts. Please try again in a few minutes.",
     "generic": "Something went wrong. Please try again."
+  },
+  "brand": {
+    "label": "About Mappi",
+    "headline": "Smart questionnaires that end in action.",
+    "show": "Show testimonial {{number}}",
+    "stats": {
+      "conversion": {"value": "32 %", "label": "average conversion"},
+      "guided": {"value": "6.4×", "label": "more than unguided"},
+      "first": {"value": "< 8 min", "label": "first result"}
+    },
+    "testimonials": {
+      "one": {
+        "quote": "We replaced a 40-question form with a diagnostic that tells each client what to do next. Sales calls now start where the questionnaire ends.",
+        "name": "Laura Méndez",
+        "role": "Consulting director"
+      },
+      "two": {
+        "quote": "The AI drafted our maturity assessment in one afternoon. Our team only had to adjust the tone.",
+        "name": "Andrés Gómez",
+        "role": "Head of operations"
+      },
+      "three": {
+        "quote": "Our store quiz recommends the right product and the average order went up. Setting it up took less than a coffee.",
+        "name": "Camila Rojas",
+        "role": "E-commerce lead"
+      }
+    }
+  },
+  "legal": {
+    "label": "Legal and support",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "support": "Support"
   }
 }

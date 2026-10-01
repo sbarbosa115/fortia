@@ -1,3 +1,13 @@
 {
-  "title": "Forgot your password?"
+  "title": "Forgot your password?",
+  "intro": "Enter your email and we'll send you a code to choose a new password.",
+  "email": "Email",
+  "submit": "Send code",
+  "haveCode": "I already have a code",
+  "back": "Back to sign in",
+  "errors": {
+    "email": "Enter a valid email address.",
+    "tooMany": "Too many attempts. Please try again in a few minutes.",
+    "generic": "We could not start the recovery. Please try again."
+  }
 }

@@ -1,3 +1,52 @@
 {
-  "title": "New user"
+  "title": "New user",
+  "subtitle": "They sign in with this email and password; share them yourself.",
+  "fields": {
+    "name": "Full name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role"
+  },
+  "passwordHint": "At least 8 characters.",
+  "roles": {
+    "admin": {
+      "title": "Admin",
+      "body": "Full access, including creating other users."
+    },
+    "readOnly": {
+      "title": "Read only",
+      "body": "Can view resources but cannot make changes."
+    }
+  },
+  "matrix": {
+    "caption": "What each role can do",
+    "action": "Action",
+    "yes": "Allowed",
+    "no": "Not allowed",
+    "yesMark": "✓",
+    "noMark": "–",
+    "actions": {
+      "viewQuestionnaires": "View questionnaires",
+      "editQuestionnaires": "Create and edit questionnaires",
+      "deleteQuestionnaires": "Delete questionnaires",
+      "viewResponses": "View responses",
+      "exportReports": "Export reports",
+      "inviteUsers": "Invite users",
+      "editBilling": "Edit billing and workspace"
+    }
+  },
+  "submit": "Create user",
+  "created": "User {{name}} created",
+  "adminsOnly": "Admins only",
+  "back": "Back to users",
+  "errors": {
+    "name": "Enter the full name.",
+    "email": "Enter a valid email address.",
+    "password": "Password must be at least 8 characters.",
+    "emailExists": "A user with this email already exists.",
+    "role": "Choose Admin or Read only.",
+    "forbidden": "Only admins can create users.",
+    "validation": "Some fields are not valid. Check them and try again.",
+    "generic": "We couldn't create the user. Please try again."
+  }
 }

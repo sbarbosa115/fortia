@@ -1,3 +1,25 @@
 {
-  "title": "Reset your password"
+  "title": "Reset your password",
+  "intro": "Enter the code we sent to your email and choose a new password.",
+  "fields": {
+    "email": "Email",
+    "code": "Code",
+    "password": "New password",
+    "confirmation": "Confirm the new password"
+  },
+  "hint": "At least 8 characters.",
+  "submit": "Update password",
+  "newCode": "Request a new code",
+  "done": "Password updated. Sign in with your new password.",
+  "errors": {
+    "email": "Enter a valid email address.",
+    "code": "Enter the code we sent you.",
+    "password": "Password must be at least 8 characters.",
+    "mismatch": "The two passwords do not match.",
+    "invalidCode": "That code is not valid. Check it and try again.",
+    "expiredCode": "That code expired. Request a new one.",
+    "invalidPassword": "That password does not meet the requirements.",
+    "tooMany": "Too many attempts. Please try again in a few minutes.",
+    "generic": "Something went wrong. Please try again."
+  }
 }

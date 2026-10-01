@@ -1,3 +1,25 @@
 {
-  "title": "Restablece tu contraseña"
+  "title": "Restablece tu contraseña",
+  "intro": "Escribe el código que enviamos a tu correo y elige una contraseña nueva.",
+  "fields": {
+    "email": "Correo",
+    "code": "Código",
+    "password": "Contraseña nueva",
+    "confirmation": "Confirma la contraseña nueva"
+  },
+  "hint": "Al menos 8 caracteres.",
+  "submit": "Actualizar contraseña",
+  "newCode": "Pedir un código nuevo",
+  "done": "Contraseña actualizada. Inicia sesión con tu nueva contraseña.",
+  "errors": {
+    "email": "Ingresa un correo válido.",
+    "code": "Escribe el código que te enviamos.",
+    "password": "La contraseña debe tener al menos 8 caracteres.",
+    "mismatch": "Las dos contraseñas no coinciden.",
+    "invalidCode": "Ese código no es válido. Revísalo e intenta de nuevo.",
+    "expiredCode": "Ese código venció. Pide uno nuevo.",
+    "invalidPassword": "Esa contraseña no cumple los requisitos.",
+    "tooMany": "Demasiados intentos. Intenta de nuevo en unos minutos.",
+    "generic": "Algo salió mal. Intenta de nuevo."
+  }
 }

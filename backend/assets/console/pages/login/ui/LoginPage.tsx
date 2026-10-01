@@ -1,98 +1,101 @@
-import {startSession, type TokenResponse} from '@console/entities/viewer';
-import {api, errorMessageKey, isApiError} from '@shared/api';
+import {GoogleSignInButton} from '@console/features/google-sign-in';
+import {useViewer} from '@console/entities/viewer';
 import {useDocumentTitle} from '@shared/lib';
-import {Button, Card, Field, TextInput} from '@shared/ui';
-import {type FormEvent, useState} from 'react';
+import {Badge, Tabs} from '@shared/ui';
+import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Link, useNavigate, useSearchParams} from 'react-router';
+import {Navigate, useSearchParams} from 'react-router';
+import {authErrorKey, safeNext} from '../model/auth';
+import {BrandPanel} from './BrandPanel';
+import {LegalLinks} from './LegalLinks';
+import {SignInForm} from './SignInForm';
+import {SignUpForm} from './SignUpForm';
+import './login.css';
+
+type Mode = 'signin' | 'signup';
 
 /**
- * Sign in (PRD §10.2). The item-0 version: email and password. The "accounts" item adds the Sign up tab, Google
- * sign-in, the strength meter and the brand panel.
+ * /login (PRD §10.2): tabs "Sign in" / "Sign up" (?mode=signup), Google, the strength meter on sign-up and the
+ * brand panel. A signed-in visitor goes straight to where they were heading.
  */
 export function LoginPage() {
   const {t} = useTranslation('pages.login');
-  const {t: ts} = useTranslation('shared');
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{email?: string; password?: string}>({});
-  const [failure, setFailure] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  useDocumentTitle(t('documentTitle'));
+  const viewer = useViewer();
+  const [params, setParams] = useSearchParams();
+  const [googleError, setGoogleError] = useState<string | null>(null);
+  const mode: Mode = params.get('mode') === 'signup' ? 'signup' : 'signin';
+  const next = params.get('next');
+  useDocumentTitle(
+    `Mappi - ${mode === 'signup' ? t('tabs.signUp') : t('tabs.signIn')}`,
+  );
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    const found: typeof errors = {};
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      found.email = t('errors.email');
+  if (viewer.signedIn) {
+    return <Navigate to={safeNext(next)} replace />;
+  }
+
+  const changeMode = (value: Mode) => {
+    const nextParams = new URLSearchParams(params);
+    if (value === 'signup') {
+      nextParams.set('mode', 'signup');
+    } else {
+      nextParams.delete('mode');
     }
-    if (password.length < 8) {
-      found.password = t('errors.password');
-    }
-    setErrors(found);
-    setFailure(null);
-    if (Object.keys(found).length > 0) {
-      return;
-    }
-    setBusy(true);
-    try {
-      const tokens = await api.post<TokenResponse>(
-        '/auth/token',
-        {email: email.trim().toLowerCase(), password},
-        {anonymous: true},
-      );
-      startSession(tokens);
-      const next = params.get('next');
-      navigate(next && next.startsWith('/') ? next : '/ai-experience', {
-        replace: true,
-      });
-    } catch (error) {
-      setFailure(
-        isApiError(error)
-          ? ts(errorMessageKey(error), {defaultValue: t('errors.generic')})
-          : t('errors.generic'),
-      );
-    } finally {
-      setBusy(false);
-    }
+    setGoogleError(null);
+    setParams(nextParams, {replace: true});
   };
 
   return (
-    <div className="auth-screen">
-      <Card className="auth-card">
-        <form className="stack" onSubmit={submit} noValidate>
-          <h1 className="auth-title serif-heading">{t('title')}</h1>
-          <Field label={t('email')} error={errors.email} required>
-            <TextInput
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+    <div className="login">
+      <main className="login__main">
+        <div className="login__content">
+          <div className="login__brand">
+            <span className="login__logo" aria-hidden>
+              {'M'}
+            </span>
+            <span className="login__product">{t('product')}</span>
+          </div>
+          <Badge tone="accent">{t('badge')}</Badge>
+          <h1 className="login__title serif-heading">
+            {mode === 'signup' ? t('signUp.title') : t('signIn.title')}
+          </h1>
+          <p className="muted login__subtitle">
+            {mode === 'signup' ? t('signUp.subtitle') : t('signIn.subtitle')}
+          </p>
+          <Tabs<Mode>
+            label={t('tabs.label')}
+            active={mode}
+            onChange={changeMode}
+            tabs={[
+              {key: 'signin', label: t('tabs.signIn')},
+              {key: 'signup', label: t('tabs.signUp')},
+            ]}
+          />
+          <div role="tabpanel" className="stack login__panel">
+            <GoogleSignInButton
+              next={next}
+              onError={(error) => setGoogleError(t(authErrorKey(error)))}
             />
-          </Field>
-          <Field label={t('password')} error={errors.password} required>
-            <TextInput
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Field>
-          {failure ? (
-            <p className="field__error" role="alert">
-              {failure}
-            </p>
-          ) : null}
-          <Button type="submit" variant="primary" loading={busy}>
-            {t('submit')}
-          </Button>
-          <Link to="/forgot-password" className="auth-link">
-            {t('forgot')}
-          </Link>
-        </form>
-      </Card>
+            {googleError ? (
+              <p className="field__error" role="alert">
+                {googleError}
+              </p>
+            ) : null}
+            <div className="login__divider">
+              <span>{t('or')}</span>
+            </div>
+            {mode === 'signup' ? (
+              <SignUpForm
+                next={next}
+                onSwitchToSignIn={() => changeMode('signin')}
+              />
+            ) : (
+              <SignInForm next={next} />
+            )}
+          </div>
+        </div>
+        <LegalLinks />
+      </main>
+      <BrandPanel />
     </div>
   );
 }

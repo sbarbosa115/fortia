@@ -1,0 +1,9 @@
+{
+  "label": "Strength: {{level}}",
+  "levels": {
+    "weak": "Weak",
+    "fair": "Fair",
+    "good": "Good",
+    "strong": "Strong"
+  }
+}

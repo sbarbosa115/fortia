@@ -1,3 +1,11 @@
 {
-  "title": "Signing you in"
+  "title": "Signing you in",
+  "working": "Signing you in...",
+  "back": "Back to sign in",
+  "errors": {
+    "unavailable": "Sign-in is temporarily unavailable. Please try again later or use your email and password.",
+    "linked": "Your Google account is now linked to your existing account, but we couldn't finish signing you in. Please try again.",
+    "cancelled": "Google sign-in was cancelled.",
+    "generic": "Something went wrong. Please try again."
+  }
 }

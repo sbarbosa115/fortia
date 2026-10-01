@@ -1,13 +1,73 @@
 {
-  "documentTitle": "Mappi - Iniciar sesión",
-  "title": "Iniciar sesión",
-  "email": "Correo",
-  "password": "Contraseña",
-  "submit": "Iniciar sesión",
-  "forgot": "¿Olvidaste tu contraseña?",
+  "product": "Mappi",
+  "badge": "14 días gratis · sin tarjeta",
+  "or": "o",
+  "tabs": {
+    "label": "Inicia sesión o crea una cuenta",
+    "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta"
+  },
+  "fields": {
+    "name": "Nombre",
+    "email": "Correo",
+    "password": "Contraseña"
+  },
+  "signIn": {
+    "title": "Hola de nuevo",
+    "subtitle": "Inicia sesión para seguir convirtiendo respuestas en acción.",
+    "submit": "Iniciar sesión",
+    "forgot": "¿Olvidaste tu contraseña?"
+  },
+  "signUp": {
+    "title": "Crea tu cuenta",
+    "subtitle": "Tu primer cuestionario con un resultado real, en minutos.",
+    "submit": "Crear cuenta",
+    "passwordHint": "Al menos 8 caracteres.",
+    "created": "Cuenta creada. ¡Bienvenido a Mappi!",
+    "terms": "Al crear una cuenta aceptas los Términos y la Política de privacidad."
+  },
   "errors": {
+    "name": "Escribe tu nombre.",
     "email": "Ingresa un correo válido.",
     "password": "La contraseña debe tener al menos 8 caracteres.",
+    "credentials": "Correo o contraseña incorrectos.",
+    "emailExists": "Ya existe una cuenta con este correo. Intenta iniciar sesión.",
+    "notConfirmed": "Tu cuenta aún no está confirmada. Revisa tu correo.",
+    "unavailable": "El inicio de sesión no está disponible por ahora. Intenta más tarde o usa tu correo y contraseña.",
+    "tooMany": "Demasiados intentos. Intenta de nuevo en unos minutos.",
     "generic": "Algo salió mal. Intenta de nuevo."
+  },
+  "brand": {
+    "label": "Sobre Mappi",
+    "headline": "Cuestionarios inteligentes que terminan en acción.",
+    "show": "Ver testimonio {{number}}",
+    "stats": {
+      "conversion": {"value": "32 %", "label": "conversión promedio"},
+      "guided": {"value": "6,4×", "label": "más que sin guía"},
+      "first": {"value": "< 8 min", "label": "primer resultado"}
+    },
+    "testimonials": {
+      "one": {
+        "quote": "Cambiamos un formulario de 40 preguntas por un diagnóstico que le dice a cada cliente qué hacer después. Las llamadas de ventas empiezan donde termina el cuestionario.",
+        "name": "Laura Méndez",
+        "role": "Directora de consultoría"
+      },
+      "two": {
+        "quote": "La IA redactó nuestra evaluación de madurez en una tarde. El equipo solo tuvo que ajustar el tono.",
+        "name": "Andrés Gómez",
+        "role": "Jefe de operaciones"
+      },
+      "three": {
+        "quote": "El quiz de nuestra tienda recomienda el producto correcto y el ticket promedio subió. Configurarlo tomó menos que un café.",
+        "name": "Camila Rojas",
+        "role": "Líder de e-commerce"
+      }
+    }
+  },
+  "legal": {
+    "label": "Legal y soporte",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "support": "Soporte"
   }
 }

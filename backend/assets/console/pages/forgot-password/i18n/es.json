@@ -1,3 +1,13 @@
 {
-  "title": "¿Olvidaste tu contraseña?"
+  "title": "¿Olvidaste tu contraseña?",
+  "intro": "Escribe tu correo y te enviaremos un código para elegir una contraseña nueva.",
+  "email": "Correo",
+  "submit": "Enviar código",
+  "haveCode": "Ya tengo un código",
+  "back": "Volver a iniciar sesión",
+  "errors": {
+    "email": "Ingresa un correo válido.",
+    "tooMany": "Demasiados intentos. Intenta de nuevo en unos minutos.",
+    "generic": "No pudimos iniciar la recuperación. Intenta de nuevo."
+  }
 }

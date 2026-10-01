@@ -1,3 +1,36 @@
 {
-  "title": "AccountSettings"
+  "saved": "Settings saved",
+  "account": {
+    "title": "Account",
+    "language": "Account language",
+    "languageHint": "Used in emails and on respondent screens. It doesn't change the console's language.",
+    "maxFiles": "Maximum files per question",
+    "maxFilesHint": "How many files a respondent can attach to a file question (1–20)."
+  },
+  "languages": {
+    "es-CO": "Spanish (es-CO)",
+    "en-US": "English (en-US)"
+  },
+  "tracking": {
+    "title": "Tracking",
+    "intro": "Measure conversions from your questionnaires. Leave a field empty to stop sending that event.",
+    "fields": {
+      "pixel_id": "Meta Pixel ID",
+      "linkedin_partner_id": "LinkedIn Partner ID",
+      "linkedin_conversion_id": "LinkedIn Conversion ID",
+      "google_ads_id": "Google Ads Conversion ID",
+      "google_ads_conversion_label": "Google Ads conversion label"
+    },
+    "placeholders": {
+      "pixel_id": "1234567890",
+      "linkedin_partner_id": "1234567",
+      "linkedin_conversion_id": "12345678",
+      "google_ads_id": "AW-123456789",
+      "google_ads_conversion_label": "AbCdEfGhIj"
+    }
+  },
+  "errors": {
+    "maxFiles": "Enter a whole number from 1 to 20.",
+    "tracking": "Use at most {{max}} characters."
+  }
 }

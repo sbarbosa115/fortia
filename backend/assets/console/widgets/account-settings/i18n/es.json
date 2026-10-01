@@ -1,3 +1,36 @@
 {
-  "title": "AccountSettings"
+  "saved": "Configuración guardada",
+  "account": {
+    "title": "Cuenta",
+    "language": "Idioma de la cuenta",
+    "languageHint": "Se usa en los correos y en las pantallas de quien responde. No cambia el idioma de la consola.",
+    "maxFiles": "Máximo de archivos por pregunta",
+    "maxFilesHint": "Cuántos archivos puede adjuntar quien responde en una pregunta de archivo (1–20)."
+  },
+  "languages": {
+    "es-CO": "Español (es-CO)",
+    "en-US": "Inglés (en-US)"
+  },
+  "tracking": {
+    "title": "Seguimiento",
+    "intro": "Mide las conversiones de tus cuestionarios. Deja un campo vacío para dejar de enviar ese evento.",
+    "fields": {
+      "pixel_id": "ID de Meta Pixel",
+      "linkedin_partner_id": "ID de socio de LinkedIn",
+      "linkedin_conversion_id": "ID de conversión de LinkedIn",
+      "google_ads_id": "ID de conversión de Google Ads",
+      "google_ads_conversion_label": "Etiqueta de conversión de Google Ads"
+    },
+    "placeholders": {
+      "pixel_id": "1234567890",
+      "linkedin_partner_id": "1234567",
+      "linkedin_conversion_id": "12345678",
+      "google_ads_id": "AW-123456789",
+      "google_ads_conversion_label": "AbCdEfGhIj"
+    }
+  },
+  "errors": {
+    "maxFiles": "Escribe un número entero de 1 a 20.",
+    "tracking": "Usa como máximo {{max}} caracteres."
+  }
 }

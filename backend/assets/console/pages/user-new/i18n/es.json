@@ -1,3 +1,52 @@
 {
-  "title": "Nuevo usuario"
+  "title": "Nuevo usuario",
+  "subtitle": "Inicia sesión con este correo y contraseña; compártelos tú mismo.",
+  "fields": {
+    "name": "Nombre completo",
+    "email": "Correo",
+    "password": "Contraseña",
+    "role": "Rol"
+  },
+  "passwordHint": "Al menos 8 caracteres.",
+  "roles": {
+    "admin": {
+      "title": "Administrador",
+      "body": "Acceso total, incluso crear otros usuarios."
+    },
+    "readOnly": {
+      "title": "Solo lectura",
+      "body": "Puede ver los recursos pero no hacer cambios."
+    }
+  },
+  "matrix": {
+    "caption": "Lo que puede hacer cada rol",
+    "action": "Acción",
+    "yes": "Permitido",
+    "no": "No permitido",
+    "yesMark": "✓",
+    "noMark": "–",
+    "actions": {
+      "viewQuestionnaires": "Ver cuestionarios",
+      "editQuestionnaires": "Crear y editar cuestionarios",
+      "deleteQuestionnaires": "Eliminar cuestionarios",
+      "viewResponses": "Ver respuestas",
+      "exportReports": "Exportar reportes",
+      "inviteUsers": "Invitar usuarios",
+      "editBilling": "Editar facturación y espacio de trabajo"
+    }
+  },
+  "submit": "Crear usuario",
+  "created": "Usuario {{name}} creado",
+  "adminsOnly": "Solo administradores",
+  "back": "Volver a usuarios",
+  "errors": {
+    "name": "Escribe el nombre completo.",
+    "email": "Ingresa un correo válido.",
+    "password": "La contraseña debe tener al menos 8 caracteres.",
+    "emailExists": "Ya existe un usuario con este correo.",
+    "role": "Elige Administrador o Solo lectura.",
+    "forbidden": "Solo los administradores pueden crear usuarios.",
+    "validation": "Algunos campos no son válidos. Revísalos e intenta de nuevo.",
+    "generic": "No pudimos crear el usuario. Intenta de nuevo."
+  }
 }
