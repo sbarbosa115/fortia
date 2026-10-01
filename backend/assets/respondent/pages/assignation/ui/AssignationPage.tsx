@@ -85,15 +85,15 @@ export function AssignationPage() {
   }
 
   if (!view.entry) {
+    // The login is a page of its own, as skyline-ui draws it: no questionnaire frame around it.
     const fields = loginFields(assignation.questions[0]);
-    return frame(
+    return (
       <LoginSlide
-        eyebrow={assignation.name}
         fields={fields}
         submitting={view.login.isPending}
         outcome={view.loginError}
         onSubmit={(values) => view.login.mutate(loginBody(fields, values))}
-      />,
+      />
     );
   }
   if (!view.flowReady) {

@@ -1188,6 +1188,8 @@
 .modal:has(.prj-dlg) {
   position: relative;
   display: grid;
+  /* One column no wider than the dialog: a long name truncates instead of widening it (no sideways scroll). */
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   max-width: 512px;
   max-height: 90vh;

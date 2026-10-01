@@ -139,7 +139,7 @@ describe('the login slide (PRD §9.10 step 4)', () => {
     expect(
       await screen.findByRole('heading', {name: 'Sign in'}),
     ).toBeInTheDocument();
-    const button = screen.getByRole('button', {name: 'Continue'});
+    const button = screen.getByRole('button', {name: 'Sign in'});
     expect(button).toBeDisabled();
     await userEvent.type(screen.getByLabelText(/Full name/), 'María Gómez');
     expect(button, 'the email is still required').toBeDisabled();
@@ -156,7 +156,7 @@ describe('the login slide (PRD §9.10 step 4)', () => {
       '  Lucía   Fernández',
     );
     await userEvent.type(screen.getByLabelText(/Email/), 'Lucia@Acme.test ');
-    await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
+    await userEvent.click(screen.getByRole('button', {name: 'Sign in'}));
     expect(calls.signIn).toHaveBeenCalledWith(ID, {
       name: 'lucia fernandez',
       email: 'lucia@acme.test',
@@ -164,6 +164,23 @@ describe('the login slide (PRD §9.10 step 4)', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       "This assessment isn't addressed to you.",
     );
+  });
+
+  it('catches an email that is not one before sending, like skyline-ui', async () => {
+    calls.fetchAssignation.mockResolvedValue(assignation());
+    renderPage();
+    expect(
+      await screen.findByRole('form', {name: 'Sign in form'}),
+      'the login is its own page, a labelled form',
+    ).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText(/Full name/), 'Ana');
+    await userEvent.type(screen.getByLabelText(/Email/), 'ana@nowhere');
+    await userEvent.click(screen.getByRole('button', {name: 'Sign in'}));
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Enter a valid email address.',
+    );
+    expect(calls.signIn, 'nothing is sent').not.toHaveBeenCalled();
   });
 
   it('shows USER_NOT_FOUND, and "We could not sign you in" for any other error', async () => {
@@ -177,11 +194,11 @@ describe('the login slide (PRD §9.10 step 4)', () => {
     renderPage();
     await userEvent.type(await screen.findByLabelText(/Full name/), 'Ana');
     await userEvent.type(screen.getByLabelText(/Email/), 'ana@x.test');
-    await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
+    await userEvent.click(screen.getByRole('button', {name: 'Sign in'}));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       "We can't find you in this organization.",
     );
-    await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
+    await userEvent.click(screen.getByRole('button', {name: 'Sign in'}));
     await waitFor(() =>
       expect(screen.getByRole('alert')).toHaveTextContent(
         'We could not sign you in. Please try again.',
@@ -197,7 +214,7 @@ describe('the login slide (PRD §9.10 step 4)', () => {
     renderPage();
     await userEvent.type(await screen.findByLabelText(/Full name/), 'Ana');
     await userEvent.type(screen.getByLabelText(/Email/), 'ana@x.test');
-    await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
+    await userEvent.click(screen.getByRole('button', {name: 'Sign in'}));
     expect(
       await screen.findByRole('heading', {
         name: 'This follow-up has already been completed.',
@@ -222,7 +239,7 @@ describe('the completed screens (PRD §9.10 step 2)', () => {
       expect(
         await screen.findByRole('heading', {name: title}),
       ).toBeInTheDocument();
-      expect(screen.queryByRole('button', {name: 'Continue'})).toBeNull();
+      expect(screen.queryByRole('button', {name: 'Sign in'})).toBeNull();
     },
   );
 });
@@ -273,7 +290,7 @@ describe('after the login (PRD §9.10 step 5)', () => {
     renderPage();
     await userEvent.type(await screen.findByLabelText(/Full name/), 'María');
     await userEvent.type(screen.getByLabelText(/Email/), 'maria@x.test');
-    await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
+    await userEvent.click(screen.getByRole('button', {name: 'Sign in'}));
     expect(
       await screen.findByRole('heading', {name: 'What needs to be fixed?'}),
     ).toBeInTheDocument();

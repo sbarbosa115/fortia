@@ -2,22 +2,39 @@
   "documentTitle": "Mappi - {{title}}",
   "login": {
     "title": "Sign in",
-    "description": "Tell us who you are to answer.",
-    "submit": "Continue",
+    "submit": "Sign in",
     "fields": {
-      "email": {"label": "Email", "placeholder": "you@email.com"},
-      "phone": {"label": "Phone", "placeholder": "Your phone number"},
-      "role": {"label": "Role", "placeholder": "Your role"},
-      "area": {"label": "Area", "placeholder": "Your area"},
-      "name": {"label": "Full name", "placeholder": "Your full name"}
+      "email": {
+        "label": "Email",
+        "placeholder": "you@email.com"
+      },
+      "phone": {
+        "label": "Phone",
+        "placeholder": "Your phone number"
+      },
+      "role": {
+        "label": "Role",
+        "placeholder": "Your role"
+      },
+      "area": {
+        "label": "Area",
+        "placeholder": "Your area"
+      },
+      "name": {
+        "label": "Full name",
+        "placeholder": "Your full name"
+      }
     },
     "outcomes": {
       "notInAudience": "This assessment isn't addressed to you. If you think this is a mistake, contact whoever sent it to you.",
       "userNotFound": "We can't find you in this organization. Check the name and email you were invited with.",
       "failed": "We could not sign you in. Please try again.",
       "completed": "This follow-up has already been completed.",
-      "limit": "The response limit has been reached."
-    }
+      "limit": "The response limit has been reached.",
+      "invalidEmail": "Enter a valid email address."
+    },
+    "form": "Sign in form",
+    "submitting": "Signing in…"
   },
   "completed": {
     "review": {

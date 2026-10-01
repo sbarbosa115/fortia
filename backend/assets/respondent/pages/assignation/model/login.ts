@@ -71,6 +71,13 @@ export function loginFields(slide: Question | undefined): LoginField[] {
   return fields;
 }
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** An email that looks like one; checked before sending, so the message is in the page's language. */
+export function isValidEmail(value: string): boolean {
+  return EMAIL_PATTERN.test(value.trim());
+}
+
 /** "The button is enabled when all required fields are filled." */
 export function canSignIn(fields: LoginField[], values: LoginValues): boolean {
   return fields.every(

@@ -528,7 +528,8 @@ body {
   width: 100%;
   max-width: 520px;
   max-height: calc(100vh - 32px);
-  overflow: auto;
+  /* Like shadcn's DialogContent: a dialog scrolls down when tall, never sideways. */
+  overflow: hidden auto;
   background: var(--color-surface);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-pop);
@@ -549,6 +550,7 @@ body {
   font-weight: 700;
 }
 .modal__body {
+  min-width: 0;
   padding: var(--space-4) var(--space-5);
   font-size: 14px;
   color: var(--color-text);

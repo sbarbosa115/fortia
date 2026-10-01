@@ -2,22 +2,39 @@
   "documentTitle": "Mappi - {{title}}",
   "login": {
     "title": "Inicia sesión",
-    "description": "Cuéntanos quién eres para responder.",
-    "submit": "Continuar",
+    "submit": "Iniciar sesión",
     "fields": {
-      "email": {"label": "Correo", "placeholder": "tu@correo.com"},
-      "phone": {"label": "Teléfono", "placeholder": "Tu número de teléfono"},
-      "role": {"label": "Cargo", "placeholder": "Tu cargo"},
-      "area": {"label": "Área", "placeholder": "Tu área"},
-      "name": {"label": "Nombre completo", "placeholder": "Tu nombre completo"}
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "tu@email.com"
+      },
+      "phone": {
+        "label": "Teléfono",
+        "placeholder": "Tu número de teléfono"
+      },
+      "role": {
+        "label": "Cargo",
+        "placeholder": "Tu cargo"
+      },
+      "area": {
+        "label": "Área",
+        "placeholder": "Tu área"
+      },
+      "name": {
+        "label": "Nombre completo",
+        "placeholder": "Tu nombre completo"
+      }
     },
     "outcomes": {
       "notInAudience": "Esta evaluación no está dirigida a ti. Si crees que es un error, contacta a quien te la envió.",
       "userNotFound": "No te encontramos en esta organización. Revisa el nombre y el correo con los que te invitaron.",
-      "failed": "No pudimos iniciar tu sesión. Inténtalo de nuevo.",
+      "failed": "No pudimos iniciar sesión. Inténtalo de nuevo.",
       "completed": "Este seguimiento ya se completó.",
-      "limit": "Se alcanzó el límite de respuestas."
-    }
+      "limit": "Se alcanzó el límite de respuestas.",
+      "invalidEmail": "Ingresa un correo válido."
+    },
+    "form": "Formulario de inicio de sesión",
+    "submitting": "Iniciando sesión…"
   },
   "completed": {
     "review": {
