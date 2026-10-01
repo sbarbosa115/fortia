@@ -1,0 +1,113 @@
+/* pages/plans (item billing), PRD §10.15. */
+.plans-page__hint {
+  margin: 0 0 var(--space-4);
+  font-size: 14px;
+}
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-5);
+  align-items: stretch;
+}
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+}
+.plan-card--current {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.plan-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: 22px;
+}
+.plan-card__name {
+  margin: 0;
+  font-size: 22px;
+}
+.plan-card__description {
+  margin: 0;
+  font-size: 14px;
+}
+.plan-card__price {
+  margin: var(--space-2) 0 0;
+  font-size: 15px;
+}
+.plan-card__price strong {
+  font-size: 28px;
+  margin-right: var(--space-1);
+}
+.plan-card__yearly {
+  margin: 0;
+  font-size: 14px;
+}
+.plan-card__note {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+.plan-card__subscription {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.plan-card__limits {
+  list-style: none;
+  margin: var(--space-2) 0;
+  padding: var(--space-3) 0 0;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 14px;
+  flex: 1;
+}
+.plan-card__limits li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.plan-card__limits strong {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.plan-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.plan-card__actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+.plan-card__save {
+  margin-left: var(--space-2);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-success);
+}
+.plans-notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 14px;
+}
+.plans-notice p {
+  flex: 1;
+  margin: 0;
+}
+.plans-notice--success > svg {
+  color: var(--color-success);
+}
+.plans-notice--cancel > svg {
+  color: var(--color-text-muted);
+}

@@ -1,3 +1,15 @@
 {
-  "title": "PlanUsagePanel"
+  "active": "Activo",
+  "expired": "Vencido",
+  "changePlan": "Cambiar plan",
+  "choosePlan": "Elegir un plan",
+  "manageBilling": "Gestionar facturación",
+  "period": {
+    "until": "Periodo actual hasta el {{date}}",
+    "ended": "Tu plan terminó el {{date}}"
+  },
+  "noPlan": {
+    "title": "Todavía no tienes plan",
+    "body": "Elige un plan para crear cuestionarios, recibir respuestas y desbloquear funciones."
+  }
 }

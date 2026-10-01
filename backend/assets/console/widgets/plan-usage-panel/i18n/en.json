@@ -1,3 +1,15 @@
 {
-  "title": "PlanUsagePanel"
+  "active": "Active",
+  "expired": "Expired",
+  "changePlan": "Change plan",
+  "choosePlan": "Choose a plan",
+  "manageBilling": "Manage billing",
+  "period": {
+    "until": "Current period until {{date}}",
+    "ended": "Your plan ended on {{date}}"
+  },
+  "noPlan": {
+    "title": "No plan yet",
+    "body": "Choose a plan to create questionnaires, collect responses and unlock features."
+  }
 }

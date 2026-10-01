@@ -1,0 +1,7 @@
+{
+  "label": "Uso del plan",
+  "text": "Estás usando el {{percent}} % de tu plan.",
+  "seeAll": "Ver todo ({{count}})",
+  "upgrade": "Mejorar plan",
+  "dismiss": "Descartar"
+}

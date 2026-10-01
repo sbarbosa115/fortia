@@ -1,0 +1,15 @@
+{
+  "title": "Get in touch about {{plan}}",
+  "intro": "Leave your details and our sales team will contact you.",
+  "email": "Email",
+  "phone": "Phone",
+  "submit": "Send request",
+  "errors": {
+    "email": "Enter a valid email address.",
+    "phone": "Enter a phone number (up to 50 characters)."
+  },
+  "sent": {
+    "title": "Request received",
+    "body": "You'll be contacted soon."
+  }
+}

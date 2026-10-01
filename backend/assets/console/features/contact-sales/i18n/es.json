@@ -1,0 +1,15 @@
+{
+  "title": "Contactar a ventas sobre {{plan}}",
+  "intro": "Déjanos tus datos y el equipo de ventas te contactará.",
+  "email": "Correo electrónico",
+  "phone": "Teléfono",
+  "submit": "Enviar solicitud",
+  "errors": {
+    "email": "Ingresa un correo electrónico válido.",
+    "phone": "Ingresa un número de teléfono (hasta 50 caracteres)."
+  },
+  "sent": {
+    "title": "Solicitud recibida",
+    "body": "Pronto te contactaremos."
+  }
+}
