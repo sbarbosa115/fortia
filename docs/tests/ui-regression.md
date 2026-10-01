@@ -94,6 +94,206 @@ Submit a session of a quiz funnel questionnaire whose account has products. **Ex
 catalog, and `GET /questionnaire/session/{id}/results` lists them in `products`. With no products in the catalog the
 job completes with `products: []`.
 
+### Respondent app — RSP (item respondent-app)
+
+The RSP cases answer the seeded questionnaires of Acme as an anonymous respondent, in a private window (no console
+session, empty local storage). `{S}` is `/f/acme-respondent-showcase` (one question per answer control, with a
+disclaimer, a landing page, a voice question and the data capture), `{D}` is `/f/acme-ai-maturity` (a diagnostic with
+two categories and three tiers), `{C}` is `/f/acme-discovery-chain` (a chain with one prompt stage). `/q/{id}` takes
+the questionnaire id that `GET /api/v1/flow/{slug}` returns. Acme's account language is `es-CO`.
+
+**RSP-01 · The respondent app shows a neutral skeleton, then the brand**
+Open `{S}`. **Expected:** a light-grey page with a spinner first, then the respondent look (warm off-white
+background, black buttons, terracotta eyebrows); without Acme styles the default theme stays. No console errors.
+
+**RSP-02 · The account's language is the starting language**
+Open `{S}` in a browser set to English. **Expected:** the texts are Spanish (Acme is `es-CO`): "Antes de empezar".
+
+**RSP-03 · A language picked by hand wins for the visit**
+On `{S}` press `EN` in the top-right switch, then reload. **Expected:** everything is English and stays English after
+the reload; `<html lang>` is `en`. A new private window starts in Spanish again.
+
+**RSP-04 · The disclaimer comes first and keeps its line breaks**
+Open `{S}`. **Expected:** the "Before you start" dialog with the "Private" badge and the two disclaimer lines on
+separate lines; "Not now, thanks" and "Accept and continue". Escape or the backdrop count as "Not now".
+
+**RSP-05 · Declining the disclaimer closes or ends**
+Press "Not now, thanks". **Expected:** the tab closes if the browser lets it; otherwise "You can now close this tab."
+Reloading shows the disclaimer again.
+
+**RSP-06 · Accepting the disclaimer lasts 24 h**
+Press "Accept and continue", reload. **Expected:** the disclaimer does not come back (until "Start over" or 24 h).
+
+**RSP-07 · The mic check appears before voice questions and can be skipped (D12)**
+After accepting on `{S}`. **Expected:** "Let's test your microphone" with the sentence to read and the microphone
+button; "Skip the mic check" goes on to the landing and the check does not come back after a reload.
+
+**RSP-08 · The mic check hears the respondent**
+On a machine with a microphone (Chrome), reach the mic check, tap the microphone once, allow the permission, read the
+sentence, tap the red stop button. **Expected:** "Preparing your microphone...", then red wave bars and
+"Listening…", then "Your microphone works!" with "We heard" and the transcription; "Continue to the questionnaire".
+
+**RSP-09 · The landing shows the title, description and count**
+**Expected:** eyebrow "Get started", the serif title "Respondent showcase", "Every kind of answer, one per question.",
+"Start questionnaire" and "12 questions".
+
+**RSP-10 · The questions header shows progress**
+Press "Start questionnaire". **Expected:** the monogram (or the brand logo), "Step 1 of 12" and "8%", a continuous
+bar on a phone width and one dash per question on a wide screen; the URL hash is the question's id; eyebrow "01".
+
+**RSP-11 · A message question only shows content**
+On question 01. **Expected:** title and description, no control, "Next" enabled, "Back" disabled. Press Enter
+outside any field: it moves to question 02.
+
+**RSP-12 · Radio cards have letters and unlock Next**
+Question 02 "Which plan do you use?". **Expected:** cards A Starter, B Pro, C Enterprise; "Next" disabled until one is
+picked; arrow keys move between them.
+
+**RSP-13 · An exclusive checkbox clears the others**
+Question 03: check Email and Chat, then "None of the above", then Email. **Expected:** "None" alone after the third
+click, Email alone after the fourth; "Next" disabled with nothing checked.
+
+**RSP-14 · A select starts on "Select an option"**
+Question 04. **Expected:** the dropdown shows "Select an option"; choosing Mexico enables "Next".
+
+**RSP-15 · The slider's starting position is not an answer**
+Question 05. **Expected:** the thumb starts at 5 but the value reads "–" with "Move or tap the slider to answer" and
+"Next" disabled; tapping or moving it shows the number and enables "Next".
+
+**RSP-16 · A text format rule speaks while typing**
+Question 06 "What is your first name?" (letters only): type `abc1`. **Expected:** "Only letters are allowed" in red
+under the field and "Next" disabled; `Ana María` clears it; Enter moves on (no line break).
+
+**RSP-17 · The email error shows when leaving the field**
+Question 07: type `ana@acme`, click outside. **Expected:** "Enter a valid email address (e.g. name@example.com)."
+appears only after leaving the field; `ana@acme.test` clears it.
+
+**RSP-18 · An optional question can be skipped**
+Question 08 (phone, optional). **Expected:** a "Skip" button next to "Next"; "Skip" moves on; required questions
+have no "Skip".
+
+**RSP-19 · The phone answer accepts an international number**
+Go back to question 08, type `+57 (300) 123-4567`, leave the field. **Expected:** no error; `123` shows "Enter a valid
+phone number: digits only, optional international prefix (e.g. +57)."
+
+**RSP-20 · Ranking: the initial order is already an answer**
+Question 09. **Expected:** Price, Quality, Support numbered 1–3, "Next" enabled at once; dragging (mouse or touch) or
+the up/down arrows reorder them and the numbers follow.
+
+**RSP-21 · An answer that misses its criteria asks for more (AI follow-up)**
+Question 10 "What would you improve, and why?": type `Fine`, press Next. **Expected:** "One moment / We're reviewing
+your answer" full screen, then the same question with "1 attempt left" and the improvement message; "Next" stays
+disabled until the answer changes.
+
+**RSP-22 · A complete answer passes the follow-up**
+Add ` - I would improve the onboarding because new users get lost on the first day` and press Next. **Expected:** the
+review screen, then question 11.
+
+**RSP-23 · A file is uploaded with progress and saved by key**
+Question 11: "Choose files" and pick a PDF. **Expected:** "Uploading... N%", then the file listed with "Remove
+{name}"; "1 / 10 files"; "Next" enabled only when no file is still uploading.
+
+**RSP-24 · A pasted screenshot is renamed**
+On question 11, copy a screenshot to the clipboard and press Ctrl+V on the page. **Expected:** a file
+`screenshot-YYYYMMDD-HHmmss.png` is added and uploads.
+
+**RSP-25 · Files over the limits are refused with a reason**
+Pick 12 files on question 11 (Acme allows 10). **Expected:** "2 files were not added: you can attach up to 10
+files." and "You've reached the limit of 10 files. Remove one to add another."; a file over 500 MB: "That file is
+larger than 500 MB. Please choose a smaller one."
+
+**RSP-26 · A voice answer is recorded and transcribed**
+Question 12, Chrome with a microphone: tap "Tap to record your answer", speak, tap stop. **Expected:** "Preparing
+microphone...", red stop button, 9 moving bars, "Listening... 00:0N" and the live text; then "Recording 1" with the
+text, "Remove recording", "Record again", "Add to my answer" and "Record again from scratch".
+
+**RSP-27 · A blocked microphone explains how to unblock it**
+Block the microphone for localhost in the site settings and tap record. **Expected:** "Microphone access is blocked",
+the browser-permission explanation, the lock step, "Try again" and "We only use your microphone while you're
+recording."
+
+**RSP-28 · A respondent without a microphone can type the voice answer (D12)**
+On question 12 press "Can't record? Type your answer instead", type `Busy but good week`, "Add to my answer".
+**Expected:** "Recording 1" shows the text and "Next" is enabled.
+
+**RSP-29 · The data capture asks for name, email and phone**
+Press "Next" on the last question. **Expected:** "One last step", "Where should we send your results?", the three
+required fields and the privacy note. "See my results" with empty fields shows the three errors; editing a field
+clears its error; the phone field only keeps digits and a leading +.
+
+**RSP-30 · Submitting opens the canonical results link**
+Fill `Ana María`, `ana@acme.test`, `+57 300 123 4567`, press "See my results". **Expected:** "Processing", then
+`/session/{id}/results` with "Your answers have been submitted successfully." and the thanks text. The session is
+`completed` with the `user_data` (console answers, or the database).
+
+**RSP-31 · Progress survives a reload, with the resume modal**
+Answer `{S}` up to question 07 and reload. **Expected:** "Pick up where you left off", "Saved just now", "Question 7
+of 12" with its percentage, "Continue" (back on question 07 with the answers kept) and "Start over" with "Your 6 saved
+answers will be deleted"; no network request creates a new session on the reload.
+
+**RSP-32 · Start over begins a new session**
+In the resume modal press "Start over". **Expected:** the disclaimer and the mic check come back and the questions
+are empty; a new `session_id` is created (network tab).
+
+**RSP-33 · Going back from the results starts a new session**
+After RSP-30 press the browser's Back. **Expected:** `{S}` starts again with nothing answered (no resume modal).
+
+**RSP-34 · A submission that fails keeps the answers**
+On the last question, set the browser offline (DevTools) and finish. **Expected:** back on the last question with
+"We couldn't send your answers. Check your connection and try again." and the answers kept; online again, Finish
+works.
+
+**RSP-35 · A diagnostic shows its tier, scores and the lower tier's plan**
+Open `{D}`, answer "Sometimes" and "Yes", finish. **Expected:** "Successfully completed", "Thank you so much for your
+support", "Your level: Leader", "Overall score 11 / 14" with 79 %, "Score by area" Usage 57 % · 4 / 7 and Governance
+100 % · 7 / 7, the recommendation "Share your playbook across teams." and the action plan "Pick a pilot this month."
+(taken from the lower tier, never a higher one); "Full report in PDF" with "Download".
+
+**RSP-36 · The results link can be reloaded and shared**
+Reload the `/session/{id}/results` page of RSP-35, then open it in another private window. **Expected:** the same
+diagnostic (fetched from `GET …/results`), in Acme's language.
+
+**RSP-37 · The diagnostic PDF downloads**
+Press "Download" on RSP-35. **Expected:** "Preparing your PDF…" then `YourResults.pdf` with the tier, the scores by
+area, the recommendations and the action plan, the accent in the brand's primary colour.
+
+**RSP-38 · The layout and the texts of a flow drive the diagnostic**
+In the console set `{D}`'s results layout to score + tier and its title to `Tu resultado`, answer `{D}` again.
+**Expected:** only the tier and the overall score show, under "Tu resultado"; no areas, recommendations or PDF.
+
+**RSP-39 · A diagnostic with three or more areas draws the radar**
+Create a diagnostic with three categories in the console and answer it. **Expected:** "Your category profile" with a
+radar of the three areas (each as % of its maximum) and the legend "Your score (%)".
+
+**RSP-40 · A chain shows its stage and generates the next one**
+Open `{C}` and finish its first question. **Expected:** "Stage 1 of 2" in the header, then `/f/acme-discovery-chain/
+generating` with "One moment / Preparing your next questions" and messages rotating every 3.5 s; on success the
+generated questions load at `/f/acme-discovery-chain` with "Stage 2 of 2". Until the generation item ships
+`POST /questionnaire/prompt`: "We couldn't prepare your next questions." with "Try again".
+
+**RSP-41 · Unknown links say so**
+Open `/q/00000000-0000-4000-8000-000000000000` and `/f/no-such-flow`. **Expected:** "This questionnaire does not
+exist." with "Want to create this questionnaire?" (to the console), and "This flow could not be found."
+
+**RSP-42 · The response limit is explained**
+Use up Acme's responses (or an account at its limit) and open its questionnaire. **Expected:** "The response limit
+has been reached."
+
+**RSP-43 · The privacy page is plain and never branded**
+Open `/privacy`. **Expected:** white page, "Legal", "Privacy Policy", "Last updated April 20, 2026", nine numbered
+sections (Who we are … Changes), the support email as a mailto link and "© {year}. All rights reserved."; in Spanish
+with the switch picked earlier.
+
+**RSP-44 · A brand with styles recolours the respondent app**
+Give Acme styles (console customization when built, or a `customer_styles` row: `body.background #ffffff`,
+`button.primary.background #0055ff`, `logoUrl`), open `{S}`. **Expected:** white background, blue buttons and selected
+cards, the logo instead of the monogram; an unsafe value (e.g. `url(javascript:…)`) is ignored.
+
+**RSP-45 · The account's pixels fire, only when configured**
+Set Acme's `pixel_id` (settings) and open `{S}`, then finish it. **Expected:** in the network tab, Meta's
+`fbevents.js` loads and a `PageView` is sent for that pixel on each route, and a `Lead` on finishing; with no pixel id
+and no global one nothing is loaded.
+
 ## 2. Authentication — AUTH (item accounts)
 
 **AUTH-00 · Sign in and out as the owner (item 0)**

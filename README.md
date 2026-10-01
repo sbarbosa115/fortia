@@ -99,6 +99,8 @@ below is added by the item that builds the endpoint.
 | `/api/v1/projects` | POST | write permission, Feat(`assignations`) | `{organization_id, name (1–200), description? (≤ 2000), due_date, assignation_ids[]?}` (deduplicated, no extra fields). 201 the enriched project. 400 `VALIDATION_ERROR`, `ASSIGNATION_NOT_FOLLOW_UP`, `ASSIGNATION_ORGANIZATION_MISMATCH`; 403 `FORBIDDEN` (read-only); 404 `ORGANIZATION_NOT_FOUND`, `ASSIGNATION_NOT_FOUND` (also another account's); 409 `ASSIGNATION_IN_OTHER_PROJECT`; 429 plan |
 | `/api/v1/projects/{id}` | GET | signed in, owner or Admin | the enriched project (§7.12: `state`, `progress_percent`, `completed/approved/total_assignations`, `assignations[]` with `state`, `progress {completed, total, unit, current_question}`, `review {reviewed, total, approved, rejected}`, `review_status`, `attempt`, `due_date`, `overdue`) plus `available_assignations` (the organization's follow-ups not in another project, for the edit dialog). 404 `PROJECT_NOT_FOUND` (also another account's) |
 | `/api/v1/projects/{id}` | PUT, DELETE | write permission, owner or Admin | PUT partial: `name`, `due_date`, `assignation_ids` not null, `assignation_ids` replaces the set (left-out ones are unlinked), `organization_id` only unchanged (400 `VALIDATION_ERROR`); 200 the enriched project. DELETE 204, unlinks its assignations. 404 `PROJECT_NOT_FOUND`, 403 `FORBIDDEN` |
+| `/api/v1/customer/{customer_id}/settings` | GET | public, rate limited | the account's CustomerSettings `{language, transcription_url, pixel_id, linkedin_partner_id, linkedin_conversion_id, google_ads_id, google_ads_conversion_label, max_files}` (max_files 10 by default) for the respondent app. 404 `CUSTOMER_NOT_FOUND`. Read only here: the accounts item adds the PATCH (its `SettingsController` replaces `CustomerSettingsController`) |
+| `/api/v1/styles` | GET | public, rate limited | `?customer_id=` (and/or `questionnaire_id=`, ignored) → `{styles \| null}` (camelCase §6.18) that the respondent app maps onto its theme (§9.15). 400 `INVALID_REQUEST` without either. Read only here: the branding item adds `POST /styles` |
 
 Every endpoint answers `{message, data}` or `{error: {code, message, details?}}` (PRD §8.1); `X-Assume-Customer-Id`
 lets a platform Admin act as an account's root user (logged in `impersonation_log`).
@@ -132,8 +134,13 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
 
 - Everything the split's items have not built yet is a placeholder page ("This screen is on its way.").
 - No S3 adapter: object storage is local with signed URLs (the port allows adding one).
-- Error tracking (Sentry) and heatmaps (Clarity) are configuration only; nothing loads them yet.
+- Error tracking (Sentry) is configuration only; heatmaps (Clarity), GA page views and the account's pixels load in
+  the respondent app only when their ids are configured.
 - The Claude adapter is written against the official SDK but has not been run against the live API in this repo
   (no key in dev); refusals and output-token exhaustion fail the job with a clear error.
 - Assignations: "Export to Google Sheets" on the default assignation's detail is not built (it needs the analytics
   item's `shared/lib/sheets.ts`); CSV export works.
+- Respondent app: voice answers transcribe with the browser's speech recognition (Chrome/Edge/Safari); the OpenAI
+  real-time transport and the account's `transcription_url` are not wired, and a respondent without either can type
+  the answer (D12). `/f/:id` chains stop at "We couldn't prepare your next questions" until the generation item adds
+  `POST /questionnaire/prompt`. The PDF report is built in the browser (jsPDF, standard fonts).
