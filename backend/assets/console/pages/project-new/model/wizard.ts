@@ -38,6 +38,10 @@ export type WizardQuestionnaire = {title: string; questionCount: number};
 export type NewOrganization = {
   name: string;
   domain: string;
+  /** Optional, as in the organization form. */
+  description?: string;
+  /** Active unless switched off (default true). */
+  active?: boolean;
   members: MemberDraft[];
 };
 
@@ -178,6 +182,10 @@ export function newOrganizationPayload(
   return {
     name: organization.name.trim().replace(/\s+/g, ' '),
     domain_email: organization.domain.trim().toLowerCase() || null,
+    ...(organization.description !== undefined
+      ? {description: organization.description.trim() || null}
+      : {}),
+    ...(organization.active !== undefined ? {active: organization.active} : {}),
     organization_users: membersPayload(organization.members),
   };
 }

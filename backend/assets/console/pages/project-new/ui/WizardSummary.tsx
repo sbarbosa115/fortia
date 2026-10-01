@@ -27,20 +27,26 @@ export function WizardSummary({wizard}: {wizard: ProjectWizardState}) {
           name: wizard.newProject.name.trim(),
           isNew: true,
           dueDate: wizard.newProject.dueDate,
+          assignations: 1,
         }
       : (() => {
           const found = wizard.projects.find(
             (p) => p.project_id === wizard.projectId,
           );
           return found
-            ? {name: found.name, isNew: false, dueDate: found.due_date ?? ''}
+            ? {
+                name: found.name,
+                isNew: false,
+                dueDate: found.due_date ?? '',
+                assignations: found.assignations.length,
+              }
             : null;
         })();
 
   const items: Item[] = [
     {
       key: 'questionnaire',
-      icon: 'list',
+      icon: 'clipboard-list',
       done: errors[0] === null,
       title: questionnaire?.title || t('summary.questionnairePending'),
       detail: questionnaire
@@ -54,12 +60,12 @@ export function WizardSummary({wizard}: {wizard: ProjectWizardState}) {
     },
     {
       key: 'organization',
-      icon: 'building',
+      icon: 'building-2',
       done: organization !== null,
       title: organization?.name ?? t('summary.notChosen'),
       detail: organization
         ? [
-            organization.isNew ? t('summary.new') : null,
+            organization.isNew ? t('summary.newFemale') : null,
             t('summary.members', {count: organization.members.length}),
           ]
             .filter(Boolean)
@@ -68,10 +74,10 @@ export function WizardSummary({wizard}: {wizard: ProjectWizardState}) {
     },
     {
       key: 'assignation',
-      icon: 'send',
-      done: errors[1] === null,
+      icon: 'link-2',
+      done: organization !== null && respondents > 0,
       title: organization
-        ? wizard.assignationName || t('summary.assignationPending')
+        ? wizard.assignationName
         : t('summary.assignationPending'),
       detail: organization
         ? t('summary.respondents', {count: respondents})
@@ -79,17 +85,18 @@ export function WizardSummary({wizard}: {wizard: ProjectWizardState}) {
     },
     {
       key: 'project',
-      icon: 'folder',
+      icon: 'folder-kanban',
       done: project !== null,
       title: project?.name ?? t('summary.notChosen'),
       detail: project
         ? [
             project.isNew ? t('summary.new') : null,
+            t('project.assignations', {count: project.assignations}),
             project.dueDate
               ? t('summary.due', {
                   date: formatDate(project.dueDate, i18n.language),
                 })
-              : null,
+              : t('project.noDeadline'),
           ]
             .filter(Boolean)
             .join(' · ')
@@ -108,6 +115,7 @@ export function WizardSummary({wizard}: {wizard: ProjectWizardState}) {
             key={item.key}
             className={joinClasses(
               'prj-new__piece',
+              `prj-new__piece--${item.key}`,
               !item.done && 'prj-new__piece--pending',
             )}
           >
@@ -121,7 +129,7 @@ export function WizardSummary({wizard}: {wizard: ProjectWizardState}) {
               <span className="prj-new__piece-title" title={item.title}>
                 {item.title}
               </span>
-              <span className="muted">{item.detail}</span>
+              <span className="prj-new__piece-detail">{item.detail}</span>
             </span>
             {item.done ? (
               <span className="prj-new__piece-done">
@@ -132,7 +140,7 @@ export function WizardSummary({wizard}: {wizard: ProjectWizardState}) {
           </li>
         ))}
       </ul>
-      <p className="muted prj-new__note">{t('summary.nothingSaved')}</p>
+      <p className="prj-new__note">{t('summary.nothingSaved')}</p>
     </aside>
   );
 }

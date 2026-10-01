@@ -1,18 +1,11 @@
-import {AudiencePicker} from '@console/entities/assignation';
 import {matchesAllWords} from '@shared/lib';
-import {
-  Card,
-  CardBody,
-  ErrorState,
-  Field,
-  LoadingState,
-  SearchInput,
-  TextInput,
-} from '@shared/ui';
+import {ErrorState, Icon} from '@shared/ui';
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {ProjectWizardState} from '../model/useProjectWizard';
 import {NEW_ORGANIZATION} from '../model/wizard';
+import {AudienceSelector} from './AudienceSelector';
+import {CreateNewButton} from './CreateNewButton';
 import {NewOrganizationDialog} from './NewOrganizationDialog';
 import {type Option, OptionList} from './OptionList';
 
@@ -27,11 +20,7 @@ export function OrganizationStep({wizard}: {wizard: ProjectWizardState}) {
       ' · ',
     );
   const listed: Option[] = wizard.organizations
-    .filter(
-      (o) =>
-        o.organization_id === wizard.organization?.id ||
-        matchesAllWords(`${o.name} ${o.domain_email ?? ''}`, search),
-    )
+    .filter((o) => matchesAllWords(`${o.name} ${o.domain_email ?? ''}`, search))
     .map((o) => ({
       id: o.organization_id,
       name: o.name,
@@ -52,81 +41,92 @@ export function OrganizationStep({wizard}: {wizard: ProjectWizardState}) {
 
   return (
     <div className="prj-new__stack">
-      <Card>
-        <CardBody>
-          <div className="prj-new__stack">
-            <h3 className="prj-new__card-title" id="prj-new-organization">
-              {t('organization.question')}
-            </h3>
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              label={t('organization.search')}
-              placeholder={t('organization.search')}
-            />
-            {wizard.organizationsLoading ? (
-              <LoadingState />
-            ) : wizard.organizationsError ? (
-              <ErrorState
-                error={wizard.organizationsError}
-                onRetry={wizard.retryOrganizations}
-              />
-            ) : (
-              <OptionList
-                label={t('organization.listLabel')}
-                options={options}
-                selected={wizard.organization?.id ?? null}
-                onSelect={wizard.chooseOrganization}
-                emptyLabel={t('organization.none')}
-              />
-            )}
-            <button
-              type="button"
-              className="prj-new__create"
-              onClick={wizard.openOrganizationDialog}
-            >
-              <span className="prj-new__create-title">
-                + {t('organization.create')}
-              </span>
-              <span className="muted">{t('organization.createHint')}</span>
-            </button>
-          </div>
-        </CardBody>
-      </Card>
+      <section className="prj-new__card" aria-labelledby="prj-new-organization">
+        <h2 id="prj-new-organization" className="prj-new__card-title">
+          {t('organization.question')}
+        </h2>
+        <label className="prj-new__search">
+          <span className="visually-hidden">{t('organization.search')}</span>
+          <Icon name="search" size={16} />
+          <input
+            type="search"
+            className="prj-new__input prj-new__input--search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder={t('organization.search')}
+            autoComplete="off"
+          />
+        </label>
+
+        {wizard.organizationsLoading ? (
+          <p className="prj-new__loading">
+            <span className="prj-new__spin">
+              <Icon name="loader" size={14} />
+            </span>
+            {t('loading')}
+          </p>
+        ) : wizard.organizationsError ? (
+          <ErrorState
+            error={wizard.organizationsError}
+            onRetry={wizard.retryOrganizations}
+          />
+        ) : (
+          <OptionList
+            label={t('organization.listLabel')}
+            options={options}
+            selected={wizard.organization?.id ?? null}
+            onSelect={wizard.chooseOrganization}
+            newLabel={t('summary.newFemale')}
+            emptyLabel={t('organization.none')}
+          />
+        )}
+
+        <CreateNewButton
+          title={t('organization.create')}
+          hint={t('organization.createHint')}
+          onClick={wizard.openOrganizationDialog}
+        />
+      </section>
 
       {wizard.organization ? (
-        <Card>
-          <CardBody>
-            <div className="prj-new__stack">
-              <AudiencePicker
-                members={wizard.organization.members}
-                value={wizard.audience}
-                onChange={wizard.setAudience}
-                error={null}
-              />
-              <Field
-                label={t('organization.assignationName')}
-                hint={t('organization.assignationNameHint')}
-                required
-              >
-                <TextInput
-                  value={wizard.assignationName}
-                  maxLength={200}
-                  onChange={(event) =>
-                    wizard.setAssignationName(event.target.value)
-                  }
-                />
-              </Field>
-              {wizard.copyFrom !== null ? (
-                <p className="prj-new__notice" role="status">
-                  {t('organization.copyWarning', {
-                    organization: wizard.copyFrom,
-                  })}
-                </p>
-              ) : null}
-            </div>
-          </CardBody>
-        </Card>
+        <section className="prj-new__card" aria-label={t('audience.label')}>
+          <AudienceSelector
+            members={wizard.organization.members}
+            value={wizard.audience}
+            onChange={wizard.setAudience}
+          />
+          <div className="prj-new__name-field">
+            <label
+              htmlFor="prj-new-assignation-name"
+              className="prj-new__label"
+            >
+              {t('organization.assignationName')}
+            </label>
+            <input
+              id="prj-new-assignation-name"
+              className="prj-new__input"
+              value={wizard.assignationName}
+              maxLength={200}
+              required
+              aria-describedby="prj-new-assignation-name-hint"
+              onChange={(event) =>
+                wizard.setAssignationName(event.target.value)
+              }
+            />
+            <p
+              id="prj-new-assignation-name-hint"
+              className="prj-new__small-muted"
+            >
+              {t('organization.assignationNameHint')}
+            </p>
+          </div>
+          {wizard.copyFrom !== null ? (
+            <p className="prj-new__warning" role="status">
+              <Icon name="alert" size={16} />
+              {t('organization.copyWarning', {organization: wizard.copyFrom})}
+            </p>
+          ) : null}
+        </section>
       ) : null}
 
       {wizard.organizationDialog ? (

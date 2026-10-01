@@ -1,15 +1,9 @@
 import {formatDate} from '@shared/lib';
-import {
-  Button,
-  Card,
-  CardBody,
-  ErrorState,
-  Icon,
-  LoadingState,
-} from '@shared/ui';
+import {ErrorState, Icon} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import type {ProjectWizardState} from '../model/useProjectWizard';
 import {NEW_PROJECT} from '../model/wizard';
+import {CreateNewButton} from './CreateNewButton';
 import {NewProjectDialog} from './NewProjectDialog';
 import {type Option, OptionList} from './OptionList';
 
@@ -20,24 +14,20 @@ export function ProjectStep({wizard}: {wizard: ProjectWizardState}) {
 
   if (!organization) {
     return (
-      <Card>
-        <CardBody>
-          <div className="prj-new__stack">
-            <h3 className="prj-new__card-title">
-              {t('project.noOrganization')}
-            </h3>
-            <p className="muted">{t('project.noOrganizationHint')}</p>
-            <div>
-              <Button
-                icon={<Icon name="chevron-left" size={16} />}
-                onClick={() => wizard.goTo(1)}
-              >
-                {t('project.goToOrganization')}
-              </Button>
-            </div>
-          </div>
-        </CardBody>
-      </Card>
+      <section className="prj-new__card">
+        <h2 className="prj-new__card-title">{t('project.noOrganization')}</h2>
+        <p className="prj-new__muted-13">{t('project.noOrganizationHint')}</p>
+        <div>
+          <button
+            type="button"
+            className="prj-new__btn prj-new__btn--outline prj-new__btn--sm"
+            onClick={() => wizard.goTo(1)}
+          >
+            <Icon name="arrow-left" size={14} />
+            {t('project.goToOrganization')}
+          </button>
+        </div>
+      </section>
     );
   }
 
@@ -70,50 +60,50 @@ export function ProjectStep({wizard}: {wizard: ProjectWizardState}) {
     : listed;
 
   return (
-    <Card>
-      <CardBody>
-        <div className="prj-new__stack">
-          <div>
-            <h3 className="prj-new__card-title">{t('project.question')}</h3>
-            <p className="muted">{t('project.hint')}</p>
-          </div>
-          {wizard.projectsLoading ? (
-            <LoadingState />
-          ) : wizard.projectsError ? (
-            <ErrorState
-              error={wizard.projectsError}
-              onRetry={wizard.retryProjects}
-            />
-          ) : (
-            <OptionList
-              label={t('project.listLabel')}
-              options={options}
-              selected={wizard.projectId}
-              onSelect={wizard.chooseProject}
-              emptyLabel={t('project.none', {name: organization.name})}
-            />
-          )}
-          <button
-            type="button"
-            className="prj-new__create"
-            onClick={wizard.openProjectDialog}
-          >
-            <span className="prj-new__create-title">
-              + {t('project.create')}
-            </span>
-            <span className="muted">{t('project.createHint')}</span>
-          </button>
-        </div>
-      </CardBody>
+    <section className="prj-new__card" aria-labelledby="prj-new-project">
+      <div className="prj-new__card-head">
+        <h2 id="prj-new-project" className="prj-new__card-title">
+          {t('project.question')}
+        </h2>
+        <p className="prj-new__small-muted">{t('project.hint')}</p>
+      </div>
+      {wizard.projectsLoading ? (
+        <p className="prj-new__loading">
+          <span className="prj-new__spin">
+            <Icon name="loader" size={14} />
+          </span>
+          {t('loading')}
+        </p>
+      ) : wizard.projectsError ? (
+        <ErrorState
+          error={wizard.projectsError}
+          onRetry={wizard.retryProjects}
+        />
+      ) : (
+        <OptionList
+          label={t('project.listLabel')}
+          options={options}
+          selected={wizard.projectId}
+          onSelect={wizard.chooseProject}
+          newLabel={t('summary.new')}
+          emptyLabel={t('project.none', {name: organization.name})}
+        />
+      )}
+      <CreateNewButton
+        title={t('project.create')}
+        hint={t('project.createHint')}
+        onClick={wizard.openProjectDialog}
+      />
       {wizard.projectDialog ? (
         <NewProjectDialog
           initial={wizard.newProject}
           defaultName={wizard.questionnaire?.title ?? ''}
           organizationName={organization.name}
+          assignationName={wizard.assignationName}
           onSave={wizard.saveNewProject}
           onClose={wizard.closeProjectDialog}
         />
       ) : null}
-    </Card>
+    </section>
   );
 }

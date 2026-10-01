@@ -189,7 +189,7 @@ describe('ProjectNewPage', () => {
     ).toBeDisabled();
 
     await userEvent.type(screen.getByLabelText('Your message'), 'Yes{Enter}');
-    expect(await screen.findByText(/Saved/)).toBeInTheDocument();
+    expect(await screen.findByText(/has been created/)).toBeInTheDocument();
     const body = vi.mocked(createQuestionnaire).mock.calls[0]?.[0];
     expect(body?.slug, 'PRD §10.12: slugify(title) + 6 hex').toMatch(
       /^onboarding-[0-9a-f]{6}$/,
@@ -206,15 +206,17 @@ describe('ProjectNewPage', () => {
     await userEvent.click(continueButton());
 
     await userEvent.click(
-      await screen.findByRole('button', {name: /Create a project/}),
+      await screen.findByRole('button', {
+        name: /Not listed\? Create a new one/,
+      }),
     );
     const dialog = screen.getByRole('dialog');
     expect(
-      within(dialog).getByLabelText(/Name/),
+      within(dialog).getByLabelText(/Project name/),
       'default name = the questionnaire title',
     ).toHaveValue('Onboarding');
     await userEvent.click(
-      within(dialog).getByRole('button', {name: 'Use this project'}),
+      within(dialog).getByRole('button', {name: 'Create project'}),
     );
     expect(
       within(dialog).getByText('Choose a deadline for the project'),
@@ -224,7 +226,7 @@ describe('ProjectNewPage', () => {
       '2026-12-15',
     );
     await userEvent.click(
-      within(dialog).getByRole('button', {name: 'Use this project'}),
+      within(dialog).getByRole('button', {name: 'Create project'}),
     );
 
     await userEvent.click(screen.getByRole('button', {name: /^Create$/}));
@@ -264,17 +266,20 @@ describe('ProjectNewPage', () => {
     renderPage();
 
     await userEvent.click(
-      screen.getByRole('tab', {name: 'Use an existing questionnaire'}),
+      screen.getByRole('tab', {name: 'Use an existing one'}),
     );
     await userEvent.click(
-      await screen.findByRole('radio', {name: /Store checklist/}),
+      screen.getByRole('combobox', {name: 'Questionnaire'}),
+    );
+    await userEvent.click(
+      await screen.findByRole('option', {name: /Store checklist/}),
     );
     await userEvent.click(continueButton());
     await userEvent.click(
       await screen.findByRole('radio', {name: /Acme Retail/}),
     );
     expect(
-      await screen.findByText(/Globex already follows this questionnaire/),
+      await screen.findByText(/already assigned to "Globex"/),
     ).toBeInTheDocument();
     await userEvent.click(continueButton());
     await userEvent.click(
@@ -297,10 +302,13 @@ describe('ProjectNewPage', () => {
     vi.mocked(updateProject).mockRejectedValueOnce(new Error('down'));
     renderPage();
     await userEvent.click(
-      screen.getByRole('tab', {name: 'Use an existing questionnaire'}),
+      screen.getByRole('tab', {name: 'Use an existing one'}),
     );
     await userEvent.click(
-      await screen.findByRole('radio', {name: /Store checklist/}),
+      screen.getByRole('combobox', {name: 'Questionnaire'}),
+    );
+    await userEvent.click(
+      await screen.findByRole('option', {name: /Store checklist/}),
     );
     await userEvent.click(continueButton());
     await userEvent.click(
