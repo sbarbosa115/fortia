@@ -30,7 +30,8 @@
     "en": "English"
   },
   "account": {
-    "label": "Your account"
+    "label": "Your account",
+    "currentPlan": "Current plan"
   },
   "roles": {
     "Admin": "Admin",

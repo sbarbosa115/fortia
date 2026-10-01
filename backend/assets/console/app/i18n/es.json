@@ -1,6 +1,6 @@
 {
   "brand": "Mappi",
-  "eyebrow": "Consola de administración",
+  "eyebrow": "Consola Admin",
   "titleTemplate": "Mappi - {{title}}",
   "nav": {
     "label": "Navegación principal",
@@ -30,7 +30,8 @@
     "en": "English"
   },
   "account": {
-    "label": "Tu cuenta"
+    "label": "Tu cuenta",
+    "currentPlan": "Plan actual"
   },
   "roles": {
     "Admin": "Administrador",

@@ -1,9 +1,11 @@
 {
+  "eyebrow": "New Questionnaire",
   "title": "What do you want to create?",
-  "subtitle": "Pick a type. You can change everything else before you create it.",
+  "subtitle": "Pick a type: you set it up on the left and see the result live on the right.",
+  "defaultBadge": "Default",
   "cards": {
     "regular": {
-      "title": "Regular (Default)",
+      "title": "Regular",
       "body": "A classic questionnaire that ends with a custom thank-you message of your choice.",
       "label": "Best for surveys"
     },

@@ -1,32 +1,276 @@
-/* pages/questionnaire-new (item editor): the type picker, centered like the creation screens (PRD A.1). */
+/* pages/questionnaire-new: the type picker, as in the admin console's DesignExperience (PRD A.1). Full bleed: the
+   page takes the whole content area and centres itself in it. */
+.shell__content:has(.questionnaire-new) {
+  display: flex;
+  max-width: none;
+  padding: 0;
+}
 .questionnaire-new {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: var(--space-6) 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-4);
 }
-.questionnaire-new__title {
-  font-size: 34px;
-  margin: 0 0 var(--space-2);
+/* margin: auto centres the block in the height left and, unlike justify-content, never cuts its top off. */
+.questionnaire-new__inner {
+  width: 100%;
+  max-width: 1320px;
+  margin: auto;
+  animation: questionnaire-new-in 0.5s ease-out;
 }
-.questionnaire-new > .muted {
-  margin: 0 0 var(--space-5);
+@keyframes questionnaire-new-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-.questionnaire-new .choice-card {
-  min-height: 170px;
-  padding: var(--space-5);
-}
-.questionnaire-new .choice-card__title {
-  font-size: 17px;
-}
-.questionnaire-new__extra {
+
+.questionnaire-new__heading {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin-top: auto;
-  padding-top: var(--space-3);
+  align-items: center;
+  text-align: center;
 }
-.questionnaire-new__limit {
+.questionnaire-new__eyebrow {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-primary);
+}
+.questionnaire-new__title {
+  margin: var(--space-3) 0 0;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+.questionnaire-new__subtitle {
+  max-width: 576px;
+  margin: var(--space-3) 0 0;
+  font-size: 14.5px;
+  line-height: 1.625;
+  color: var(--color-text-muted);
+}
+
+/* One card per row on phones, two by two on tablets and laptops, four in a row from 1280 px. */
+.questionnaire-new__cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 40px;
+}
+.questionnaire-new__slot {
+  width: 100%;
+}
+.questionnaire-new__slot > .tooltip {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+.questionnaire-new__slot .skeleton {
+  border-radius: var(--radius-card);
+}
+
+.kind-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: #fff;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+  transition: all 0.2s;
+}
+.kind-card:hover {
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -2px rgb(0 0 0 / 10%);
+}
+.kind-card:focus-visible {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+.kind-card--active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+.kind-card--active:hover {
+  box-shadow:
+    0 0 0 1px var(--color-primary),
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -2px rgb(0 0 0 / 10%);
+}
+.kind-card--locked,
+.kind-card--locked:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+}
+
+.kind-card__radio {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: #fff;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.kind-card--active .kind-card__radio {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+.kind-card--active .kind-card__radio::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+}
+.kind-card__lock {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  color: var(--color-text-muted);
+}
+
+.kind-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.kind-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.kind-card__title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.kind-card__default {
+  padding: 2px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg);
+  font-size: 9.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+.kind-card__body {
+  flex: 1;
+  margin-top: var(--space-2);
   font-size: 13px;
-  color: var(--color-warning);
+  line-height: 1.625;
+  color: var(--color-text-muted);
+}
+.kind-card__tag,
+.kind-card__limit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.kind-card__tag {
+  margin-top: var(--space-4);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.kind-card__limit {
+  margin-top: var(--space-3);
+  color: #b45309;
+}
+
+.questionnaire-new__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.questionnaire-new__actions .btn {
+  padding: 0 var(--space-4);
+  font-size: 13px;
+  font-weight: 500;
+}
+.questionnaire-new__actions .btn--secondary {
+  background: var(--color-bg);
+}
+.questionnaire-new__actions .btn--secondary:hover:not(:disabled) {
+  border-color: var(--color-border);
+  background: var(--color-hover);
+}
+.questionnaire-new__actions .btn:disabled {
+  opacity: 0.4;
+}
+.questionnaire-new__continue {
+  padding: 0 20px !important;
+}
+.questionnaire-new__continue svg {
+  transition: transform 0.15s;
+}
+.questionnaire-new__continue:hover:not(:disabled) svg {
+  transform: translateX(2px);
+}
+
+@media (width >= 640px) {
+  .questionnaire-new__slot {
+    width: calc(50% - 7px);
+  }
+}
+@media (width >= 768px) {
+  .questionnaire-new {
+    padding: var(--space-6);
+  }
+  .questionnaire-new__title {
+    font-size: 44px;
+  }
+}
+@media (width >= 1280px) {
+  .questionnaire-new__slot {
+    width: calc(25% - 10.5px);
+  }
+}
+
+/* Below 900 px the sidebar's menu button sits at the top left. */
+@media (max-width: 900px) {
+  .shell__content:has(.questionnaire-new) {
+    padding: 0;
+  }
+  .questionnaire-new {
+    padding-top: 64px;
+  }
 }

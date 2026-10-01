@@ -60,11 +60,11 @@ describe('QuestionnaireNewPage', () => {
     expect(
       screen.getByRole('heading', {name: 'What do you want to create?'}),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole('radio', {name: /Regular \(Default\)/}),
-    ).toHaveTextContent(
+    const regular = screen.getByRole('radio', {name: /Regular/});
+    expect(regular).toHaveTextContent(
       'A classic questionnaire that ends with a custom thank-you message of your choice.',
     );
+    expect(regular).toHaveTextContent('Default');
     expect(screen.getByRole('radio', {name: /Diagnostic/})).toHaveTextContent(
       'Best for assessments',
     );
@@ -96,7 +96,19 @@ describe('QuestionnaireNewPage', () => {
     expect(screen.getByRole('radio', {name: /Regular/})).toBeEnabled();
   });
 
-  it('opens the editor of the chosen type', async () => {
+  it('selects the first type the plan allows', () => {
+    usage({
+      'regular': {allowed: false, reason: 'FEATURE_NOT_IN_PLAN'},
+      'diagnostic': {allowed: true},
+      'quiz-funnel': {allowed: true},
+      'chain': {allowed: true},
+    });
+    renderPage();
+
+    expect(screen.getByRole('radio', {name: /Diagnostic/})).toBeChecked();
+  });
+
+  it('opens the editor of the chosen type on Continue', async () => {
     usage({
       'regular': {allowed: true},
       'diagnostic': {allowed: true},
@@ -106,7 +118,26 @@ describe('QuestionnaireNewPage', () => {
     renderPage();
 
     await userEvent.click(screen.getByRole('radio', {name: /Chaining/}));
+    expect(screen.getByRole('radio', {name: /Chaining/})).toBeChecked();
+    expect(screen.queryByText('at another page')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', {name: /Continue/}));
 
     expect(screen.getByText('at another page')).toBeInTheDocument();
+  });
+
+  it('clears the selection with Back, which disables Continue', async () => {
+    usage({
+      'regular': {allowed: true},
+      'diagnostic': {allowed: true},
+      'quiz-funnel': {allowed: true},
+      'chain': {allowed: true},
+    });
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', {name: /Back/}));
+
+    expect(screen.getByRole('radio', {name: /Regular/})).not.toBeChecked();
+    expect(screen.getByRole('button', {name: /Continue/})).toBeDisabled();
   });
 });
