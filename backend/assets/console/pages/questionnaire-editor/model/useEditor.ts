@@ -33,6 +33,16 @@ import {type Issue, type Step, validateDraft, validateStep} from './validate';
 
 export type EditorMode = 'create' | 'edit';
 
+/** Below this width the editor needs the room: the preview starts closed and opens as a drawer. */
+export const PREVIEW_MEDIA_QUERY = '(min-width: 1100px)';
+
+function previewFits(): boolean {
+  return typeof window === 'undefined' ||
+    typeof window.matchMedia !== 'function'
+    ? false
+    : window.matchMedia(PREVIEW_MEDIA_QUERY).matches;
+}
+
 export type SavedResult = {
   questionnaireId: string;
   slug: string | null;
@@ -57,12 +67,21 @@ export function useEditor({
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<Draft>(initial);
   const [step, setStep] = useState<Step>(1);
-  const [previewOpen, setPreviewOpen] = useState(false);
+  // The live preview starts open when it fits beside the editor (as in the admin console).
+  const [previewOpen, setPreviewOpen] = useState(previewFits);
+  /** The screen the preview shows where a step has several: cover / disclaimer, contact / final. */
+  const [previewTab, setPreviewTab] = useState('cover');
+  /** The question the Questions step edits (one at a time, picked in the outline). */
+  const [selectedKey, setSelectedKey] = useState<string | null>(
+    initial.questions[0]?.key ?? null,
+  );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<SavedResult | null>(null);
   const [locked, setLocked] = useState(false);
   const [slugInUse, setSlugInUse] = useState<string | null>(null);
+  /** The question a refused save pointed at (single-page editor): its card is outlined until it is edited. */
+  const [flagged, setFlagged] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(
     () =>
       new Set(
@@ -90,14 +109,39 @@ export function useEditor({
     }
   };
 
+  const selectedIndex = Math.max(
+    0,
+    draft.questions.findIndex((q) => q.key === selectedKey),
+  );
+  const selected = draft.questions[selectedIndex] ?? null;
+  /** The question the Questions step's first problem is in. */
+  const problemKey =
+    issuesOf(2).find((issue) =>
+      draft.questions.some((q) => q.key === issue.field),
+    )?.field ?? null;
+
+  /** Swaps a question with its neighbour inside its category (the outline's order). */
+  const neighbour = (key: string, delta: -1 | 1): number | null => {
+    const index = draft.questions.findIndex((q) => q.key === key);
+    const other = draft.questions[index + delta];
+    const question = draft.questions[index];
+    return question &&
+      other &&
+      other.category.trim() === question.category.trim()
+      ? index + delta
+      : null;
+  };
+
   const setQuestions = (fn: (questions: DraftQuestion[]) => DraftQuestion[]) =>
     setDraft((current) => ({...current, questions: fn(current.questions)}));
 
-  const updateQuestion = (key: string, patch: Partial<DraftQuestion>) =>
+  const updateQuestion = (key: string, patch: Partial<DraftQuestion>) => {
+    setFlagged((current) => (current === key ? null : current));
     setQuestions((questions) => {
       const next = questions.map((q) => (q.key === key ? {...q, ...patch} : q));
       return 'category' in patch ? groupByCategory(next) : next;
     });
+  };
 
   const expand = (key: string, open: boolean) =>
     setExpanded((current) => {
@@ -128,6 +172,7 @@ export function useEditor({
     if (target === 3) {
       setDraft(seedIfEmpty);
     }
+    setPreviewTab(target === 1 ? 'cover' : 'final');
     setStep(target);
     window.scrollTo?.({top: 0});
   };
@@ -156,10 +201,11 @@ export function useEditor({
     toast.apiError(error);
   }
 
-  async function save() {
+  /** Saves the draft; the result (or null when it was not saved) also opens the success screen. */
+  async function save(): Promise<SavedResult | null> {
     setConfirmOpen(false);
     if (allIssues.length > 0 || saving) {
-      return;
+      return null;
     }
     setSaving(true);
     try {
@@ -172,7 +218,7 @@ export function useEditor({
             throw error;
           }
           toast.error(t('errors.upload'));
-          return;
+          return null;
         }
       }
       const body = encodeFlow(draft, promptKeys);
@@ -190,17 +236,20 @@ export function useEditor({
       } catch {
         // The questionnaire was saved; the link falls back to its id.
       }
-      setSaved({questionnaireId: id, slug});
+      const result = {questionnaireId: id, slug};
+      setSaved(result);
+      return result;
     } catch (error) {
       handleError(error);
+      return null;
     } finally {
       setSaving(false);
     }
   }
 
-  /** The main action: Continue on steps 1–2 of a creation; Create (after confirming) or Save changes. */
+  /** The main action: Continue on steps 1–2; then Create (after confirming) or Save changes. */
   const primary = () => {
-    if (mode === 'create' && step < 3) {
+    if (step < 3) {
       goTo((step + 1) as Step);
       return;
     }
@@ -211,8 +260,7 @@ export function useEditor({
     void save();
   };
 
-  const primaryIssues =
-    mode === 'create' && step < 3 ? issuesOf(step) : allIssues;
+  const primaryIssues = step < 3 ? issuesOf(step) : allIssues;
 
   return {
     draft,
@@ -239,17 +287,45 @@ export function useEditor({
     },
     locked,
     slugInUse,
+    flagged,
+    flag: setFlagged,
     previewOpen,
+    previewTab,
+    setPreviewTab,
     togglePreview: () => setPreviewOpen((open) => !open),
     closePreview: () => setPreviewOpen(false),
     update,
     // Questions
     expanded,
     expand,
+    selected,
+    selectedIndex,
+    selectQuestion: setSelectedKey,
+    problemKey,
+    showProblem: () => {
+      if (problemKey) {
+        setSelectedKey(problemKey);
+        setFlagged(problemKey);
+      }
+    },
+    canMove: (key: string, delta: -1 | 1) => neighbour(key, delta) !== null,
+    moveBy: (key: string, delta: -1 | 1) => {
+      const target = neighbour(key, delta);
+      if (target === null) {
+        return;
+      }
+      setQuestions((questions) => {
+        const next = [...questions];
+        const from = next.findIndex((q) => q.key === key);
+        [next[from], next[target]] = [next[target]!, next[from]!];
+        return next;
+      });
+    },
     addQuestion: (category = '') => {
       const question = newQuestion(draft.kind, category);
       setQuestions((questions) => groupByCategory([...questions, question]));
       expand(question.key, true);
+      setSelectedKey(question.key);
     },
     duplicateQuestion: (key: string) =>
       setQuestions((questions) => {
@@ -260,21 +336,33 @@ export function useEditor({
         }
         const copy = duplicateQuestion(original);
         expand(copy.key, true);
+        setSelectedKey(copy.key);
         return [
           ...questions.slice(0, index + 1),
           copy,
           ...questions.slice(index + 1),
         ];
       }),
-    deleteQuestion: (key: string) =>
-      setQuestions((questions) => questions.filter((q) => q.key !== key)),
+    deleteQuestion: (key: string) => {
+      if (draft.questions.length <= 1) {
+        return;
+      }
+      const index = draft.questions.findIndex((q) => q.key === key);
+      const rest = draft.questions.filter((q) => q.key !== key);
+      if (key === selected?.key) {
+        setSelectedKey(rest[Math.min(index, rest.length - 1)]?.key ?? null);
+      }
+      setQuestions((questions) => questions.filter((q) => q.key !== key));
+    },
     updateQuestion,
-    setQuestionType: (key: string, type: FieldType) =>
+    setQuestionType: (key: string, type: FieldType) => {
+      setFlagged((current) => (current === key ? null : current));
       setQuestions((questions) =>
         questions.map((q) =>
           q.key === key ? withType(q, type, draft.kind) : q,
         ),
-      ),
+      );
+    },
     moveQuestion: (
       activeKey: string,
       target: {overKey: string} | {category: string},

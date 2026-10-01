@@ -1,24 +1,28 @@
 import {publicFlowUrl} from '@shared/config';
-import {Button, Card, Icon, useToast} from '@shared/ui';
+import {Button, Icon} from '@shared/ui';
+import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link, useNavigate} from 'react-router';
 import {useEditorContext} from '../model/EditorContext';
 
 /**
- * After saving (PRD §10.5): "Questionnaire created successfully!" / "Your diagnostic is ready." / "Changes saved",
- * with Copy link, View questionnaire, Keep editing, Go to Questionnaires and Create another.
+ * After saving (PRD §10.5), as in the admin console: a header with the breadcrumb and "Create another", then the
+ * card with "Questionnaire created successfully!" / "Your diagnostic is ready." / "Changes saved", the public link
+ * with Copy link, View questionnaire, Keep editing and Go to Questionnaires.
  */
 export function SuccessScreen() {
   const {t} = useTranslation('pages.questionnaire-editor');
   const editor = useEditorContext();
-  const toast = useToast();
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
   const saved = editor.saved;
   if (!saved) {
     return null;
   }
-  const url = publicFlowUrl(saved.slug ?? saved.questionnaireId);
-  const absolute = new URL(url, window.location.origin).toString();
+  const url = new URL(
+    publicFlowUrl(saved.slug ?? saved.questionnaireId),
+    window.location.origin,
+  ).toString();
   const title =
     editor.mode === 'edit'
       ? t('success.saved')
@@ -27,58 +31,81 @@ export function SuccessScreen() {
         : t('success.created');
 
   const copyLink = () => {
-    const done = navigator.clipboard?.writeText(absolute);
-    if (!done) {
-      toast.error(t('success.linkNotCopied'));
-      return;
-    }
-    done.then(
-      () => toast.success(t('success.linkCopied')),
-      () => toast.error(t('success.linkNotCopied')),
-    );
+    void navigator.clipboard?.writeText(url).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    });
   };
 
   return (
-    <div className="editor editor--success">
-      <Card className="success">
-        <span className="success__icon" aria-hidden>
-          <Icon name="check" size={28} />
-        </span>
-        <h1 className="serif-heading success__title">{title}</h1>
-        <p className="muted">{t('success.body')}</p>
-        <p className="success__link">{absolute}</p>
-        <div className="row success__actions">
-          <Button icon={<Icon name="copy" />} onClick={copyLink}>
-            {t('success.copyLink')}
-          </Button>
-          <a
-            className="btn btn--secondary"
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icon name="external" />
-            {t('success.view')}
-          </a>
-          <Button
-            onClick={() => {
-              if (editor.mode === 'edit') {
-                editor.keepEditing();
-              } else {
-                void navigate(editor.editPath(saved.questionnaireId));
-              }
-            }}
-          >
-            {t('success.keepEditing')}
-          </Button>
-          <Link className="btn btn--secondary" to="/questionnaires">
-            {t('success.list')}
-          </Link>
-          <Link className="btn btn--primary" to="/questionnaires/new">
-            {t('success.another')}
-          </Link>
+    <div className="cshell">
+      <header className="cshell__header">
+        <nav
+          aria-label={t('breadcrumb.label')}
+          className="cshell__crumbs cshell__crumbs--grow"
+        >
+          <Link to="/ai-experience">{t('breadcrumb.workspace')}</Link>
+          <span aria-hidden>{'/'}</span>
+          <Link to="/questionnaires">{t('breadcrumb.questionnaires')}</Link>
+          <span aria-hidden>{'/'}</span>
+          <span>{t(`kind.${editor.draft.kind}`)}</span>
+          <span aria-hidden>{'/'}</span>
+          <span aria-current="page" className="cshell__current">
+            {t('success.crumb')}
+          </span>
+        </nav>
+        <Link
+          className="btn btn--secondary cshell__another"
+          to="/questionnaires/new"
+        >
+          <Icon name="plus" size={16} />
+          {t('success.another')}
+        </Link>
+      </header>
+      <div className="cshell__main cshell__main--success">
+        <div className="success">
+          <span className="success__icon" aria-hidden>
+            <Icon name="check" size={28} />
+          </span>
+          <h1 className="serif-heading success__title">{title}</h1>
+          <p className="success__subtitle">{t('success.body')}</p>
+          <div className="success__link">
+            <span className="success__url">{url}</span>
+            <Button
+              size="sm"
+              icon={<Icon name={copied ? 'check' : 'copy'} size={16} />}
+              onClick={copyLink}
+            >
+              {copied ? t('success.linkCopied') : t('success.copyLink')}
+            </Button>
+          </div>
+          <div className="success__actions">
+            <a
+              className="btn btn--primary"
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name="external" size={16} />
+              {t('success.view')}
+            </a>
+            <Button
+              onClick={() => {
+                if (editor.mode === 'edit') {
+                  editor.keepEditing();
+                } else {
+                  void navigate(editor.editPath(saved.questionnaireId));
+                }
+              }}
+            >
+              {t('success.keepEditing')}
+            </Button>
+            <Link className="btn btn--ghost success__list" to="/questionnaires">
+              {t('success.list')}
+            </Link>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

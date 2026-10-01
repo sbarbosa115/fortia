@@ -1,8 +1,4 @@
-import {useSortable} from '@dnd-kit/sortable';
-import {CSS} from '@dnd-kit/utilities';
 import {
-  Badge,
-  Card,
   Field,
   Icon,
   IconButton,
@@ -10,7 +6,6 @@ import {
   TextArea,
   TextInput,
   Toggle,
-  Tooltip,
 } from '@shared/ui';
 import {type InputHTMLAttributes, useState} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -29,7 +24,10 @@ import {TableRowsFields} from './TableRowsFields';
 import {TemplateField} from './TemplateField';
 import {TextFormatFields} from './TextFormatFields';
 
-/** One question of Step 2: a header to drag, open, duplicate and delete it, and its fields by input type. */
+/**
+ * The selected question of the Questions step, as in the admin console: "Question N" with its type, move up / down,
+ * duplicate and delete, then its texts, category, "Required" and input configuration.
+ */
 export function QuestionCard({
   question,
   number,
@@ -39,156 +37,154 @@ export function QuestionCard({
 }) {
   const {t} = useTranslation('pages.questionnaire-editor');
   const editor = useEditorContext();
-  const {attributes, listeners, setNodeRef, transform, transition, isDragging} =
-    useSortable({id: question.key});
-  const open = editor.expanded.has(question.key);
   const kind = editor.draft.kind;
   const types = kind === 'diagnostic' ? DIAGNOSTIC_FIELD_TYPES : FIELD_TYPES;
   const locked = requiredLocked(question.type, kind);
+  const flagged = editor.flagged === question.key;
+  const canRemove = editor.draft.questions.length > 1;
   const set = (patch: Partial<DraftQuestion>) =>
     editor.updateQuestion(question.key, patch);
 
   return (
-    <div
-      ref={setNodeRef}
-      style={{transform: CSS.Transform.toString(transform), transition}}
-      className={isDragging ? 'question question--dragging' : 'question'}
+    <section
+      id={`question-${question.key}`}
+      className={flagged ? 'question question--flagged' : 'question'}
+      aria-labelledby={`question-${question.key}-title`}
     >
-      <Card>
-        <div className="question__header">
-          <IconButton
-            size="sm"
-            label={t('questions.drag', {n: number})}
-            icon={<Icon name="grip" />}
-            className="question__handle"
-            {...attributes}
-            {...listeners}
+      <div className="question__header">
+        <h2 id={`question-${question.key}-title`} className="question__heading">
+          {t('questions.question', {n: number})}
+        </h2>
+        <span className="question__type">
+          {t(`questions.types.${question.type}`)}
+        </span>
+        <span className="question__spacer" />
+        <IconButton
+          size="sm"
+          label={t('questions.moveUp', {n: number})}
+          icon={<Icon name="chevron-up" size={16} />}
+          disabled={!editor.canMove(question.key, -1)}
+          onClick={() => editor.moveBy(question.key, -1)}
+        />
+        <IconButton
+          size="sm"
+          label={t('questions.moveDown', {n: number})}
+          icon={<Icon name="chevron-down" size={16} />}
+          disabled={!editor.canMove(question.key, 1)}
+          onClick={() => editor.moveBy(question.key, 1)}
+        />
+        <IconButton
+          size="sm"
+          label={t('questions.duplicate', {n: number})}
+          icon={<Icon name="copy" size={16} />}
+          onClick={() => editor.duplicateQuestion(question.key)}
+        />
+        <IconButton
+          size="sm"
+          label={t('questions.delete', {n: number})}
+          icon={<Icon name="trash" size={16} />}
+          className="question__delete"
+          disabled={!canRemove}
+          onClick={() => editor.deleteQuestion(question.key)}
+        />
+      </div>
+      <div className="question__body">
+        <Field label={t('questions.titleLabel')} required>
+          <TextInput
+            value={question.title}
+            placeholder={t('questions.titlePlaceholder')}
+            aria-invalid={
+              flagged && question.title.trim() === '' ? true : undefined
+            }
+            onChange={(e) => set({title: e.target.value})}
           />
-          <button
-            type="button"
-            className="question__summary"
-            aria-expanded={open}
-            onClick={() => editor.expand(question.key, !open)}
+        </Field>
+        <Field label={t('questions.descriptionLabel')}>
+          <TextArea
+            rows={2}
+            value={question.description}
+            placeholder={t('questions.descriptionPlaceholder')}
+            onChange={(e) => set({description: e.target.value})}
+          />
+        </Field>
+        <div className="grid-2">
+          <Field label={t('questions.disclaimerLabel')}>
+            <TextArea
+              rows={3}
+              value={question.disclaimer}
+              placeholder={t('questions.disclaimerPlaceholder')}
+              onChange={(e) => set({disclaimer: e.target.value})}
+            />
+          </Field>
+          <Field
+            label={t('questions.categoryLabel')}
+            required={kind === 'diagnostic'}
           >
-            <span className="question__number">
-              {t('questions.question', {n: number})}
+            <CategoryInput
+              value={question.category}
+              placeholder={t('questions.categoryPlaceholder')}
+              onCommit={(category) => set({category})}
+            />
+          </Field>
+        </div>
+        <div className="question__box question__required">
+          <div>
+            <span className="question__box-label">
+              {t('questions.requiredLabel')}
             </span>
-            <span className="question__title">
-              {question.title.trim() || t('questions.titlePlaceholder')}
-            </span>
-            <Badge>{t(`questions.types.${question.type}`)}</Badge>
-            <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} />
-          </button>
-          <IconButton
-            size="sm"
-            label={t('questions.duplicate', {n: number})}
-            icon={<Icon name="copy" />}
-            onClick={() => editor.duplicateQuestion(question.key)}
-          />
-          <IconButton
-            size="sm"
-            label={t('questions.delete', {n: number})}
-            icon={<Icon name="trash" />}
-            onClick={() => editor.deleteQuestion(question.key)}
+            <p className="question__box-hint">
+              {locked
+                ? t('questions.requiredLocked')
+                : t('questions.requiredHint')}
+            </p>
+          </div>
+          <Toggle
+            checked={locked || question.required}
+            disabled={locked}
+            hideLabel
+            label={t('questions.requiredLabel')}
+            onChange={(required) => set({required})}
           />
         </div>
-        {open ? (
-          <div className="question__body stack">
-            <Field label={t('questions.titleLabel')} required>
-              <TextInput
-                value={question.title}
-                placeholder={t('questions.titlePlaceholder')}
-                onChange={(e) => set({title: e.target.value})}
-              />
-            </Field>
-            <div className="grid-2">
-              <Field label={t('questions.descriptionLabel')}>
-                <TextArea
-                  rows={2}
-                  value={question.description}
-                  onChange={(e) => set({description: e.target.value})}
-                />
-              </Field>
-              <Field label={t('questions.disclaimerLabel')}>
-                <TextArea
-                  rows={2}
-                  value={question.disclaimer}
-                  onChange={(e) => set({disclaimer: e.target.value})}
-                />
-              </Field>
-            </div>
-            <div className="grid-2">
-              <Field
-                label={t('questions.categoryLabel')}
-                hint={t('questions.categoryHint')}
-                required={kind === 'diagnostic'}
-              >
-                <CategoryInput
-                  value={question.category}
-                  onCommit={(category) => set({category})}
-                />
-              </Field>
-              <Field label={t('questions.typeLabel')}>
-                <Select
-                  value={question.type}
-                  onChange={(e) =>
-                    editor.setQuestionType(
-                      question.key,
-                      e.target.value as FieldType,
-                    )
-                  }
-                  options={types.map((type) => ({
-                    value: type,
-                    label: t(`questions.types.${type}`),
-                  }))}
-                />
-              </Field>
-            </div>
-            <div className="editor__toggle-row">
-              {locked ? (
-                <Tooltip content={t('questions.requiredLocked')}>
-                  <Toggle
-                    checked
-                    disabled
-                    label={t('questions.requiredLabel')}
-                    onChange={() => undefined}
-                  />
-                </Tooltip>
-              ) : (
-                <Toggle
-                  checked={question.required}
-                  label={t('questions.requiredLabel')}
-                  onChange={(required) => set({required})}
-                />
-              )}
-            </div>
-            {question.rawType ? (
-              <p className="muted">
-                {t('questions.rawType', {type: question.rawType})}
-              </p>
-            ) : null}
-            {hasOptions(question.type) ? (
-              <OptionsEditor question={question} number={number} />
-            ) : null}
-            {question.type === 'table' ? (
-              <TableRowsFields question={question} />
-            ) : null}
-            {question.type === 'file' ? (
-              <TemplateField question={question} />
-            ) : null}
-            {question.type === 'text' && !question.rawType ? (
-              <TextFormatFields question={question} />
-            ) : null}
-            {question.type === 'text' || question.type === 'audio' ? (
-              <FollowUpsFields question={question} />
-            ) : null}
-            {question.type === 'range' ? (
-              <RangeFields question={question} />
-            ) : null}
-          </div>
+
+        <div className="question__divider">
+          <span>{t('questions.inputConfig')}</span>
+        </div>
+        <Field label={t('questions.typeLabel')} className="question__narrow">
+          <Select
+            value={question.type}
+            onChange={(e) =>
+              editor.setQuestionType(question.key, e.target.value as FieldType)
+            }
+            options={types.map((type) => ({
+              value: type,
+              label: t(`questions.types.${type}`),
+            }))}
+          />
+        </Field>
+        {question.rawType ? (
+          <p className="muted">
+            {t('questions.rawType', {type: question.rawType})}
+          </p>
         ) : null}
-      </Card>
-    </div>
+        {question.type === 'text' || question.type === 'audio' ? (
+          <FollowUpsFields question={question} />
+        ) : null}
+        {question.type === 'text' && !question.rawType ? (
+          <TextFormatFields question={question} />
+        ) : null}
+        {question.type === 'range' ? <RangeFields question={question} /> : null}
+        {hasOptions(question.type) ? (
+          <OptionsEditor question={question} number={number} />
+        ) : null}
+        {question.type === 'table' ? (
+          <TableRowsFields question={question} />
+        ) : null}
+        {question.type === 'file' ? (
+          <TemplateField question={question} />
+        ) : null}
+      </div>
+    </section>
   );
 }
 

@@ -3,7 +3,8 @@
   "breadcrumb": {
     "label": "Ruta de navegación",
     "questionnaires": "Cuestionarios",
-    "new": "Nuevo {{kind}}"
+    "new": "Nuevo {{kind}}",
+    "workspace": "Workspace"
   },
   "kind": {
     "regular": "Regular",
@@ -12,8 +13,8 @@
     "generic": "Cuestionario"
   },
   "chip": {
-    "draft": "Borrador · se guarda cuando lo crees",
-    "editing": "Editando · se guarda cuando guardes los cambios"
+    "draft": "Borrador · se guarda al crear",
+    "editing": "Editando · se guarda al guardar cambios"
   },
   "steps": {
     "label": "Pasos",
@@ -23,7 +24,8 @@
     "diagnostic": "Resultados",
     "chaining": "Prompts",
     "stepOf": "Paso {{n}} de 3",
-    "locked": "Completa primero los pasos anteriores."
+    "locked": "Completa primero los pasos anteriores.",
+    "kicker": "Paso {{n}} de 3 · {{type}}"
   },
   "actions": {
     "back": "Atrás",
@@ -32,7 +34,8 @@
     "saveChanges": "Guardar cambios",
     "update": "Actualizar",
     "preview": "Vista previa",
-    "hidePreview": "Ocultar vista previa"
+    "hidePreview": "Ocultar vista previa",
+    "previewHint": "Mostrar u ocultar la vista previa"
   },
   "confirm": {
     "title": "¿Crear el cuestionario?",
@@ -41,40 +44,50 @@
   },
   "details": {
     "title": "Detalles",
-    "subtitle": "Ponle nombre a tu cuestionario y elige cómo se abre.",
+    "subtitle": "Configura lo básico. A la derecha ves en vivo lo que verá tu cliente.",
     "titleLabel": "Título",
-    "titlePlaceholder": "p. ej. Encuesta de satisfacción de clientes",
+    "titlePlaceholder": "Ingresa el título del cuestionario",
     "slugLabel": "Enlace personalizado (slug)",
     "slugHint": "Solo letras minúsculas, números y guiones. Déjalo vacío para generarlo a partir del título.",
     "slugPreview": "Enlace: {{url}}",
     "descriptionLabel": "Descripción",
-    "landingLabel": "Activar página de inicio",
-    "landingHint": "Muestra una portada antes de la primera pregunta.",
+    "landingLabel": "Habilitar landing page",
+    "landingHint": "Habilita una página de bienvenida usando el título y la descripción de tu cuestionario.",
     "disclaimerLabel": "Aviso",
-    "disclaimerHint": "Se muestra a los encuestados antes de empezar.",
-    "disclaimerText": "Texto del aviso"
+    "disclaimerHint": "Muestra a los usuarios un aviso que deben aceptar antes de comenzar el cuestionario.",
+    "disclaimerText": "Texto del aviso",
+    "cardTitle": "Detalles del cuestionario",
+    "titleRequired": "El título es obligatorio",
+    "slugPreviewLabel": "Los usuarios lo abrirán en:",
+    "copyLink": "Copiar enlace",
+    "copied": "¡Copiado!",
+    "descriptionPlaceholder": "Describe brevemente de qué trata este cuestionario",
+    "beforeStart": "Antes de empezar",
+    "disclaimerPlaceholder": "Escribe el aviso que los usuarios deben aceptar para continuar",
+    "disclaimerRequired": "Escribe el texto del aviso para continuar.",
+    "movedNote": "Capturar datos del usuario y Call to action están en el último paso, junto a lo que se ve al terminar."
   },
   "questions": {
     "title": "Preguntas",
-    "subtitle": "Agrega tus preguntas. Arrástralas para reordenarlas o para moverlas a otra categoría.",
-    "add": "Agregar pregunta",
+    "subtitle": "Agrega y ordena las preguntas de tu cuestionario.",
+    "add": "Agregar Pregunta",
     "addTo": "Agregar pregunta a {{category}}",
     "noCategory": "Sin categoría",
     "question": "Pregunta {{n}}",
     "drag": "Arrastrar la pregunta {{n}}",
     "duplicate": "Duplicar la pregunta {{n}}",
     "delete": "Eliminar la pregunta {{n}}",
-    "moveUp": "Subir la pregunta {{n}}",
-    "moveDown": "Bajar la pregunta {{n}}",
-    "titleLabel": "Pregunta",
-    "titlePlaceholder": "Escribe tu pregunta",
+    "moveUp": "Subir pregunta {{n}}",
+    "moveDown": "Bajar pregunta {{n}}",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Título de la pregunta",
     "descriptionLabel": "Descripción",
     "disclaimerLabel": "Aviso",
     "categoryLabel": "Categoría",
     "categoryHint": "Elige una o escribe una categoría nueva.",
-    "requiredLabel": "Obligatoria",
-    "requiredLocked": "Las preguntas con puntaje de un diagnóstico siempre son obligatorias.",
-    "typeLabel": "Tipo de respuesta",
+    "requiredLabel": "Pregunta obligatoria",
+    "requiredLocked": "Las preguntas con puntaje alimentan el cálculo, así que siempre son obligatorias.",
+    "typeLabel": "Tipo de Pregunta",
     "types": {
       "radio": "Selección única",
       "checkbox": "Selección múltiple",
@@ -90,16 +103,16 @@
       "table": "Tabla"
     },
     "rawType": "Esta pregunta conserva su formato {{type}}.",
-    "options": "Opciones de respuesta",
+    "options": "Opciones de Respuesta",
     "optionLabel": "Opción {{n}}",
     "optionScore": "Puntaje de la opción {{n}}",
     "score": "Puntaje",
-    "addOption": "Agregar opción",
+    "addOption": "Agregar Opción",
     "removeOption": "Quitar la opción {{n}}",
-    "followupsLabel": "Máximo de repreguntas",
+    "followupsLabel": "Máximo de seguimientos",
     "followupsHint": "Si la IA encuentra la respuesta poco clara, vuelve a preguntar hasta este número de veces (0–5).",
     "criteriaLabel": "Criterios de aceptación",
-    "criteriaHint": "Lo que debe incluir una buena respuesta (hasta 10).",
+    "criteriaHint": "Define hasta 10 criterios que la respuesta debe cumplir. Solo aplica a preguntas abiertas con seguimientos.",
     "criterion": "Criterio {{n}}",
     "addCriterion": "Agregar criterio",
     "removeCriterion": "Quitar el criterio {{n}}",
@@ -136,7 +149,28 @@
     "templateUpload": "Subir plantilla",
     "templateReplace": "Reemplazar",
     "templateRemove": "Quitar la plantilla {{name}}",
-    "templateTooLarge": "La plantilla pesa más de 20 MB. Elige un archivo más pequeño."
+    "templateTooLarge": "La plantilla pesa más de 20 MB. Elige un archivo más pequeño.",
+    "untitled": "Sin título",
+    "descriptionPlaceholder": "Descripción opcional para la pregunta",
+    "disclaimerPlaceholder": "Texto de aviso opcional",
+    "categoryPlaceholder": "Selecciona o escribe una categoría",
+    "requiredHint": "Si se desactiva, los usuarios pueden omitir esta pregunta sin responder.",
+    "inputConfig": "Configuración de Entrada",
+    "scoredOptions": "Opciones con Puntaje",
+    "optionPlaceholder": "Etiqueta visible",
+    "choiceLabel": "Etiqueta",
+    "scorePlaceholder": "0",
+    "addScoredOption": "Agregar Opción con Puntaje",
+    "followupsNone": "Ninguno",
+    "criterionPlaceholder": "Ej: ¿Es económicamente viable?",
+    "allowedChars": "Caracteres permitidos",
+    "rangeTo": "a",
+    "diagnosticSubtitle": "Agrupa cada pregunta en una categoría. Las respuestas con puntaje suman al total y por área.",
+    "showProblem": "Ver pregunta",
+    "hasProblem": "Esta pregunta tiene algo por completar",
+    "cannotRemove": "Un cuestionario debe tener al menos una pregunta.",
+    "categoryMaxShort": "máx {{max}} pts",
+    "assignCategory": "Asigna una categoría a estas preguntas."
   },
   "end": {
     "title": "Al terminar",
@@ -147,14 +181,39 @@
     "cta": "Llamado a la acción",
     "ctaHint": "Un botón que lleva a los encuestados a su siguiente paso.",
     "capture": "Capturar datos",
-    "captureHint": "Pide nombre, correo y teléfono al final."
+    "captureHint": "Pide nombre, correo y teléfono al final.",
+    "empty": "La página final está vacía. Agrega elementos desde la lista de la izquierda.",
+    "remove": "Quitar {{name}}",
+    "poolTitle": "Elementos",
+    "poolHelp": "Agrega lo que verá tu cliente al terminar.",
+    "used": "{{name}} (agregado)",
+    "elements": {
+      "thank_you": {
+        "name": "Mensaje de agradecimiento",
+        "description": "Título y mensaje al terminar"
+      },
+      "cta": {
+        "name": "Call to action",
+        "description": "Un botón con enlace al final"
+      },
+      "capture": {
+        "name": "Capturar datos",
+        "description": "Nombre, email y teléfono",
+        "note": "Se pide antes de mostrar el final:"
+      }
+    }
   },
   "cta": {
     "title": "Título",
     "description": "Descripción",
     "buttonText": "Texto del botón",
-    "url": "Enlace del botón (URL)",
-    "urlPlaceholder": "https://"
+    "url": "URL del call to action",
+    "urlPlaceholder": "https://example.com/",
+    "titlePlaceholder": "Empezar ahora",
+    "descriptionPlaceholder": "EMPIEZA YA",
+    "buttonPlaceholder": "Empezar ahora",
+    "urlHint": "Usa el enlace exacto de destino, con https:// incluido.",
+    "newTab": "El call to action siempre se abre en una pestaña nueva, así el usuario no pierde sus resultados."
   },
   "results": {
     "title": "Resultados",
@@ -238,21 +297,28 @@
     "audioAnswer": "Graba tu respuesta",
     "fileAnswer": "Sube un archivo",
     "selectAnswer": "Selecciona una opción",
-    "close": "Cerrar la vista previa",
-    "template": "Plantilla: {{name}}"
+    "close": "Cerrar vista previa",
+    "template": "Plantilla: {{name}}",
+    "live": "Vista previa en vivo",
+    "screens": "Pantallas",
+    "tabCover": "Portada",
+    "tabDisclaimer": "Aviso",
+    "tabContact": "Datos de contacto",
+    "tabFinal": "Final"
   },
   "success": {
     "created": "¡Cuestionario creado con éxito!",
     "diagnostic": "Tu diagnóstico está listo.",
     "saved": "Cambios guardados",
-    "body": "Comparte su enlace o sigue trabajando en él.",
+    "body": "Compártelo con tus clientes o asígnalo a una organización.",
     "copyLink": "Copiar enlace",
     "view": "Ver cuestionario",
     "keepEditing": "Seguir editando",
     "list": "Ir a Cuestionarios",
     "another": "Crear otro",
-    "linkCopied": "Enlace copiado",
-    "linkNotCopied": "No pudimos copiar el enlace."
+    "linkCopied": "¡Copiado!",
+    "linkNotCopied": "No pudimos copiar el enlace.",
+    "crumb": "Listo"
   },
   "locked": {
     "badge": "Bloqueado",
@@ -309,5 +375,56 @@
     "noColumns": "La pregunta {{n}} necesita al menos una columna.",
     "columnLabel": "Todas las columnas de la pregunta \"{{title}}\" deben tener un nombre.",
     "uniqueColumns": "Las columnas de la pregunta \"{{title}}\" deben tener nombres distintos."
+  },
+  "stepSubtitles": {
+    "regular": "Arma lo que verá tu cliente cuando termine el cuestionario.",
+    "diagnostic": "Define tus niveles y arma la página de resultado con los elementos que quieras mostrar.",
+    "chaining": "Cada prompt usa las respuestas hasta ahora para generar el siguiente cuestionario.",
+    "generic": ""
+  },
+  "shopper": {
+    "untitled": "Sin título",
+    "untitledQuestion": "Pregunta sin título",
+    "descriptionPlaceholder": "Aquí aparecerá la descripción.",
+    "landingEyebrow": "Comenzamos",
+    "landingCta": "Comenzar cuestionario",
+    "questionCount_one": "{{count}} pregunta",
+    "questionCount_other": "{{count}} preguntas",
+    "disclaimerBrand": "Mappi",
+    "disclaimerBadge": "Privado",
+    "disclaimerTitle": "Antes de empezar",
+    "disclaimerPlaceholder": "Aquí aparecerá el texto del aviso.",
+    "disclaimerYes": "Aceptar y continuar",
+    "disclaimerNo": "Ahora no, gracias",
+    "questionOf": "Pregunta {{n}} de {{total}}",
+    "choiceN": "Opción {{n}}",
+    "selectPlaceholder": "Selecciona una opción",
+    "rankingHint": "Arrastra las opciones para ordenarlas según tu preferencia",
+    "textPlaceholder": "Escribe tu respuesta",
+    "followupHint": "Si tu respuesta es corta, te pediremos que la amplíes.",
+    "audio": "Grabar respuesta de audio",
+    "file": "Elegir un archivo",
+    "message": "Pantalla informativa: no pide respuesta.",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Saltar",
+    "finish": "Finalizar",
+    "contactEyebrow": "Último paso",
+    "contactTitle": "¿A dónde te enviamos tus resultados?",
+    "contactDescription": "Comparte tus datos de contacto para enviarte tus recomendaciones personalizadas.",
+    "contactCta": "Ver mis resultados",
+    "contactPrivacy": "Tu información es privada y solo la usaremos para enviarte tus resultados.",
+    "contactFields": {
+      "name": "Nombre",
+      "email": "Email",
+      "phone": "Teléfono"
+    },
+    "contactPlaceholders": {
+      "name": "Tu nombre completo",
+      "email": "tu@email.com",
+      "phone": "Tu número de teléfono"
+    },
+    "defaultEndTitle": "Tus respuestas se han enviado correctamente.",
+    "defaultEndMessage": "Gracias por completar el cuestionario. Guardamos tus respuestas y el equipo ya puede revisarlas."
   }
 }

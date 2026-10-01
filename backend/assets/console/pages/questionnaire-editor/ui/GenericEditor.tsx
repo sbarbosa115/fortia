@@ -8,6 +8,7 @@ import {DetailsStep} from './DetailsStep';
 import {IssueList} from './IssueList';
 import {LockedView} from './LockedView';
 import {Preview} from './Preview';
+import {QuestionOutline} from './QuestionOutline';
 import {QuestionsStep} from './QuestionsStep';
 import {EndBlock} from './RegularEndStep';
 import {SuccessScreen} from './SuccessScreen';
@@ -85,7 +86,17 @@ export function GenericEditor() {
       >
         <main className="editor__main stack">
           <DetailsStep />
-          <QuestionsStep />
+          <section className="editor__step">
+            <h2 className="editor__step-title">{t('questions.title')}</h2>
+            <div className="generic-questions">
+              <div className="ccard generic-questions__outline">
+                <QuestionOutline />
+              </div>
+              <div className="generic-questions__card">
+                <QuestionsStep />
+              </div>
+            </div>
+          </section>
           <section className="editor__step">
             <h2 className="editor__step-title">{t('generic.end')}</h2>
             <div className="stack">

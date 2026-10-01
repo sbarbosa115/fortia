@@ -131,30 +131,39 @@ describe('QuestionnaireEditorPage', () => {
     vi.mocked(fetchHasAnswers).mockResolvedValue(false);
   });
 
-  it('creates a regular questionnaire through the three steps, after confirming', async () => {
+  it('creates a regular questionnaire through the three steps of the creation shell, after confirming', async () => {
     vi.mocked(createQuestionnaire).mockResolvedValue('q1');
     renderAt('/questionnaires/create/regular');
 
     expect(
       screen.getByText('Draft · saved when you create it'),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText('Step 1 of 3 · Regular'),
+      'each step says where the author is',
+    ).toBeInTheDocument();
     const next = screen.getByRole('button', {name: 'Continue'});
     expect(next, 'a disabled action says why').toBeDisabled();
-    expect(
-      screen.getAllByText('Write a title to continue.').length,
-    ).toBeGreaterThan(0);
 
     await userEvent.type(
-      screen.getByRole('textbox', {name: /Title/}),
+      screen.getByPlaceholderText('Enter questionnaire title'),
       'Customer survey',
     );
+    expect(
+      screen.getByText(/\/f\/customer-survey$/),
+      'the link follows the title',
+    ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
 
     expect(
-      screen.getByRole('heading', {name: 'Questions'}),
+      screen.getByRole('heading', {level: 1, name: 'Questions'}),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('status'),
+      'what blocks the step is said next to it',
+    ).toHaveTextContent('Question 1 must have a title.');
     await userEvent.type(
-      screen.getByRole('textbox', {name: /^Question\*?$/}),
+      screen.getByPlaceholderText('Question title'),
       'How was it?',
     );
     await userEvent.type(
@@ -168,7 +177,11 @@ describe('QuestionnaireEditorPage', () => {
     await userEvent.click(screen.getByRole('button', {name: 'Continue'}));
 
     expect(
-      screen.getByRole('heading', {name: 'When it ends'}),
+      screen.getByRole('heading', {level: 1, name: 'When it ends'}),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', {name: 'Thank-you message'}),
+      'a regular questionnaire ends with its thank-you message',
     ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', {name: 'Create'}));
     const dialog = screen.getByRole('dialog', {
@@ -195,31 +208,43 @@ describe('QuestionnaireEditorPage', () => {
       },
     });
     expect(screen.getByRole('button', {name: 'Copy link'})).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', {name: 'Keep editing'}),
-    ).toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'Create another'})).toHaveAttribute(
       'href',
       '/questionnaires/new',
     );
     expect(
-      screen.getByRole('link', {name: 'View questionnaire'}),
-    ).toHaveAttribute('href', '/f/customer-survey');
-    expect(
       screen.getByRole('link', {name: 'Go to Questionnaires'}),
     ).toBeInTheDocument();
   });
 
-  it('opens an existing regular questionnaire in its editor and saves without asking', async () => {
+  it('adds and removes the elements of the end page from the element pool', async () => {
+    renderAt('/questionnaires/q1/edit/regular');
+    await screen.findByDisplayValue('Customer survey');
+    await userEvent.click(screen.getByRole('button', {name: /When it ends/}));
+
+    await userEvent.click(screen.getByRole('button', {name: /Call to action/}));
+    expect(
+      screen.getByRole('group', {name: 'Call to action'}),
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Remove Call to action'}),
+    );
+    expect(
+      screen.queryByRole('group', {name: 'Call to action'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('opens an existing regular questionnaire in the shell and saves it on the last step', async () => {
     vi.mocked(updateQuestionnaire).mockResolvedValue();
     renderAt('/questionnaires/q1/edit/regular');
 
     expect(
       await screen.findByText('Editing · saved when you save changes'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('textbox', {name: /Title/})).toHaveValue(
-      'Customer survey',
-    );
+    expect(
+      screen.getByPlaceholderText('Enter questionnaire title'),
+    ).toHaveValue('Customer survey');
+    await userEvent.click(screen.getByRole('button', {name: /When it ends/}));
     await userEvent.click(screen.getByRole('button', {name: 'Save changes'}));
 
     expect(
@@ -237,7 +262,7 @@ describe('QuestionnaireEditorPage', () => {
       await screen.findByDisplayValue('Customer survey'),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', {name: 'Save changes'}),
+      screen.getByText('Editing · saved when you save changes'),
     ).toBeInTheDocument();
   });
 
@@ -262,7 +287,7 @@ describe('QuestionnaireEditorPage', () => {
     );
     renderAt('/questionnaires/q1/edit/regular');
     await screen.findByDisplayValue('Customer survey');
-    await userEvent.click(screen.getByRole('button', {name: 'Questions'}));
+    await userEvent.click(screen.getByRole('button', {name: /When it ends/}));
     await userEvent.click(screen.getByRole('button', {name: 'Save changes'}));
 
     expect(
@@ -270,7 +295,9 @@ describe('QuestionnaireEditorPage', () => {
         'That custom link (slug) is already in use by another questionnaire. Choose a different one.',
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', {name: 'Details'})).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {level: 1, name: 'Edit questionnaire'}),
+    ).toBeInTheDocument();
   });
 
   it('sends an unknown kind back to the type picker', () => {

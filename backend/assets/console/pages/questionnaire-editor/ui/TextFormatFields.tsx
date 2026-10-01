@@ -36,7 +36,7 @@ export function TextFormatFields({question}: {question: DraftQuestion}) {
   };
   return (
     <div className="stack">
-      <Field label={t('questions.dataTypeLabel')}>
+      <Field label={t('questions.dataTypeLabel')} className="question__narrow">
         <Select
           value={format.preset}
           onChange={(e) =>
@@ -54,37 +54,42 @@ export function TextFormatFields({question}: {question: DraftQuestion}) {
       </Field>
       {format.preset === 'free' ? (
         <div
-          className="row"
+          className="question__charsets"
           role="group"
-          aria-label={t('questions.dataTypes.free')}
+          aria-label={t('questions.allowedChars')}
         >
-          <Checkbox
-            label={t('questions.charsets.all')}
-            checked={format.all}
-            onChange={(e) =>
-              set({
-                ...format,
-                all: e.target.checked,
-                charsets: e.target.checked ? [] : ['letters'],
-              })
-            }
-          />
-          {TEXT_CHARSETS.map((charset) => (
+          <span className="field__label" aria-hidden>
+            {t('questions.allowedChars')}
+          </span>
+          <div className="row">
             <Checkbox
-              key={charset}
-              label={t(`questions.charsets.${charset}`)}
-              checked={format.all || format.charsets.includes(charset)}
+              label={t('questions.charsets.all')}
+              checked={format.all}
               onChange={(e) =>
-                format.all
-                  ? set({
-                      ...format,
-                      all: false,
-                      charsets: TEXT_CHARSETS.filter((c) => c !== charset),
-                    })
-                  : toggle(charset, e.target.checked)
+                set({
+                  ...format,
+                  all: e.target.checked,
+                  charsets: e.target.checked ? [] : ['letters'],
+                })
               }
             />
-          ))}
+            {TEXT_CHARSETS.map((charset) => (
+              <Checkbox
+                key={charset}
+                label={t(`questions.charsets.${charset}`)}
+                checked={format.all || format.charsets.includes(charset)}
+                onChange={(e) =>
+                  format.all
+                    ? set({
+                        ...format,
+                        all: false,
+                        charsets: TEXT_CHARSETS.filter((c) => c !== charset),
+                      })
+                    : toggle(charset, e.target.checked)
+                }
+              />
+            ))}
+          </div>
         </div>
       ) : null}
     </div>

@@ -3,7 +3,8 @@
   "breadcrumb": {
     "label": "Breadcrumb",
     "questionnaires": "Questionnaires",
-    "new": "New {{kind}}"
+    "new": "New {{kind}}",
+    "workspace": "Workspace"
   },
   "kind": {
     "regular": "Regular",
@@ -23,7 +24,8 @@
     "diagnostic": "Results",
     "chaining": "Prompts",
     "stepOf": "Step {{n}} of 3",
-    "locked": "Complete the previous steps first."
+    "locked": "Complete the previous steps first.",
+    "kicker": "Step {{n}} of 3 · {{type}}"
   },
   "actions": {
     "back": "Back",
@@ -32,7 +34,8 @@
     "saveChanges": "Save changes",
     "update": "Update",
     "preview": "Preview",
-    "hidePreview": "Hide preview"
+    "hidePreview": "Hide preview",
+    "previewHint": "Show or hide the preview"
   },
   "confirm": {
     "title": "Create the questionnaire?",
@@ -41,40 +44,50 @@
   },
   "details": {
     "title": "Details",
-    "subtitle": "Name your questionnaire and choose how it opens.",
+    "subtitle": "Set up the basics. On the right you see live what your customer will see.",
     "titleLabel": "Title",
-    "titlePlaceholder": "e.g. Customer satisfaction survey",
+    "titlePlaceholder": "Enter questionnaire title",
     "slugLabel": "Custom link (slug)",
     "slugHint": "Lowercase letters, numbers and hyphens only. Leave empty to generate it from the title.",
     "slugPreview": "Link: {{url}}",
     "descriptionLabel": "Description",
     "landingLabel": "Enable landing page",
-    "landingHint": "Shows a cover page before the first question.",
+    "landingHint": "Enable a welcome page using your questionnaire's title and description.",
     "disclaimerLabel": "Disclaimer",
-    "disclaimerHint": "Shown to respondents before they start.",
-    "disclaimerText": "Disclaimer text"
+    "disclaimerHint": "Show respondents a disclaimer they must accept before starting the questionnaire.",
+    "disclaimerText": "Disclaimer text",
+    "cardTitle": "Questionnaire details",
+    "titleRequired": "Title is required",
+    "slugPreviewLabel": "Respondents will open it at:",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "descriptionPlaceholder": "Briefly describe what this questionnaire is about",
+    "beforeStart": "Before starting",
+    "disclaimerPlaceholder": "Enter the disclaimer respondents must accept to continue",
+    "disclaimerRequired": "Write the disclaimer text to continue.",
+    "movedNote": "Capture user data and Call to action are in the last step, next to what is shown at the end."
   },
   "questions": {
     "title": "Questions",
-    "subtitle": "Add your questions. Drag them to reorder or to move them to another category.",
-    "add": "Add question",
+    "subtitle": "Add and order the questions of your questionnaire.",
+    "add": "Add Question",
     "addTo": "Add question to {{category}}",
-    "noCategory": "No category",
+    "noCategory": "Uncategorized",
     "question": "Question {{n}}",
     "drag": "Drag question {{n}}",
     "duplicate": "Duplicate question {{n}}",
     "delete": "Delete question {{n}}",
     "moveUp": "Move question {{n}} up",
     "moveDown": "Move question {{n}} down",
-    "titleLabel": "Question",
-    "titlePlaceholder": "Write your question",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Question title",
     "descriptionLabel": "Description",
     "disclaimerLabel": "Disclaimer",
     "categoryLabel": "Category",
     "categoryHint": "Pick one or type a new category.",
-    "requiredLabel": "Required",
-    "requiredLocked": "Scored questions of a diagnostic are always required.",
-    "typeLabel": "Input type",
+    "requiredLabel": "Required question",
+    "requiredLocked": "Scored questions feed the calculation, so they're always required.",
+    "typeLabel": "Question Type",
     "types": {
       "radio": "Single selection",
       "checkbox": "Multiple selection",
@@ -90,16 +103,16 @@
       "table": "Table"
     },
     "rawType": "This question keeps its {{type}} format.",
-    "options": "Answer choices",
+    "options": "Answer Choices",
     "optionLabel": "Choice {{n}}",
     "optionScore": "Score of choice {{n}}",
     "score": "Score",
-    "addOption": "Add choice",
+    "addOption": "Add Choice",
     "removeOption": "Remove choice {{n}}",
-    "followupsLabel": "Maximum follow-ups",
+    "followupsLabel": "Max follow-ups",
     "followupsHint": "When the AI finds the answer unclear, it asks again up to this many times (0–5).",
     "criteriaLabel": "Acceptance criteria",
-    "criteriaHint": "What a good answer must include (up to 10).",
+    "criteriaHint": "Define up to 10 criteria the answer must meet. Only applies to open questions with follow-ups.",
     "criterion": "Criterion {{n}}",
     "addCriterion": "Add criterion",
     "removeCriterion": "Remove criterion {{n}}",
@@ -136,7 +149,28 @@
     "templateUpload": "Upload template",
     "templateReplace": "Replace",
     "templateRemove": "Remove the template {{name}}",
-    "templateTooLarge": "The template is larger than 20 MB. Please choose a smaller file."
+    "templateTooLarge": "The template is larger than 20 MB. Please choose a smaller file.",
+    "untitled": "Untitled",
+    "descriptionPlaceholder": "Optional description for the question",
+    "disclaimerPlaceholder": "Optional disclaimer text",
+    "categoryPlaceholder": "Select or type a category",
+    "requiredHint": "When off, respondents can skip this question without answering.",
+    "inputConfig": "Input Configuration",
+    "scoredOptions": "Scored Choices",
+    "optionPlaceholder": "Display label",
+    "choiceLabel": "Label",
+    "scorePlaceholder": "0",
+    "addScoredOption": "Add Scored Choice",
+    "followupsNone": "None",
+    "criterionPlaceholder": "E.g. Is it economically viable?",
+    "allowedChars": "Allowed characters",
+    "rangeTo": "to",
+    "diagnosticSubtitle": "Put every question in a category. Scored answers add up to the total and to each area.",
+    "showProblem": "Show question",
+    "hasProblem": "This question has something to complete",
+    "cannotRemove": "A questionnaire must have at least one question.",
+    "categoryMaxShort": "max {{max}} pts",
+    "assignCategory": "Give these questions a category."
   },
   "end": {
     "title": "When it ends",
@@ -147,14 +181,39 @@
     "cta": "Call to action",
     "ctaHint": "A button that takes respondents somewhere next.",
     "capture": "Capture data",
-    "captureHint": "Asks for name, email and phone at the end."
+    "captureHint": "Asks for name, email and phone at the end.",
+    "empty": "The final page is empty. Add elements from the list on the left.",
+    "remove": "Remove {{name}}",
+    "poolTitle": "Elements",
+    "poolHelp": "Add what your customer will see at the end.",
+    "used": "{{name}} (added)",
+    "elements": {
+      "thank_you": {
+        "name": "Thank-you message",
+        "description": "Title and message at the end"
+      },
+      "cta": {
+        "name": "Call to action",
+        "description": "A button with a link at the end"
+      },
+      "capture": {
+        "name": "Capture data",
+        "description": "Name, email and phone",
+        "note": "Asked before showing the end:"
+      }
+    }
   },
   "cta": {
     "title": "Title",
     "description": "Description",
     "buttonText": "Button text",
-    "url": "Button link (URL)",
-    "urlPlaceholder": "https://"
+    "url": "Call to action URL",
+    "urlPlaceholder": "https://example.com/",
+    "titlePlaceholder": "Get Started",
+    "descriptionPlaceholder": "START NOW",
+    "buttonPlaceholder": "Get Started",
+    "urlHint": "Use the exact destination link, including https://.",
+    "newTab": "The call to action always opens in a new tab, so the user doesn't lose their results."
   },
   "results": {
     "title": "Results",
@@ -239,20 +298,27 @@
     "fileAnswer": "Upload a file",
     "selectAnswer": "Select an option",
     "close": "Close preview",
-    "template": "Template: {{name}}"
+    "template": "Template: {{name}}",
+    "live": "Live preview",
+    "screens": "Screens",
+    "tabCover": "Cover",
+    "tabDisclaimer": "Disclaimer",
+    "tabContact": "Contact details",
+    "tabFinal": "End"
   },
   "success": {
     "created": "Questionnaire created successfully!",
     "diagnostic": "Your diagnostic is ready.",
     "saved": "Changes saved",
-    "body": "Share its link or keep working on it.",
+    "body": "Share it with your customers or assign it to an organization.",
     "copyLink": "Copy link",
     "view": "View questionnaire",
     "keepEditing": "Keep editing",
     "list": "Go to Questionnaires",
     "another": "Create another",
-    "linkCopied": "Link copied",
-    "linkNotCopied": "We couldn't copy the link."
+    "linkCopied": "Copied!",
+    "linkNotCopied": "We couldn't copy the link.",
+    "crumb": "Done"
   },
   "locked": {
     "badge": "Locked",
@@ -309,5 +375,56 @@
     "noColumns": "Question {{n}} needs at least one column.",
     "columnLabel": "All columns in question \"{{title}}\" must have a name.",
     "uniqueColumns": "The columns in question \"{{title}}\" must have different names."
+  },
+  "stepSubtitles": {
+    "regular": "Build what your customer sees when they finish the questionnaire.",
+    "diagnostic": "Define your levels and build the result page with the elements you want to show.",
+    "chaining": "Each prompt uses the answers so far to generate the next questionnaire.",
+    "generic": ""
+  },
+  "shopper": {
+    "untitled": "Untitled",
+    "untitledQuestion": "Untitled question",
+    "descriptionPlaceholder": "The description will show here.",
+    "landingEyebrow": "Get started",
+    "landingCta": "Start questionnaire",
+    "questionCount_one": "{{count}} question",
+    "questionCount_other": "{{count}} questions",
+    "disclaimerBrand": "Mappi",
+    "disclaimerBadge": "Private",
+    "disclaimerTitle": "Before you start",
+    "disclaimerPlaceholder": "The disclaimer text will show here.",
+    "disclaimerYes": "Accept and continue",
+    "disclaimerNo": "Not now, thanks",
+    "questionOf": "Question {{n}} of {{total}}",
+    "choiceN": "Option {{n}}",
+    "selectPlaceholder": "Select an option",
+    "rankingHint": "Drag the options to order them by preference",
+    "textPlaceholder": "Write your answer",
+    "followupHint": "If your answer is short, we'll ask you to expand on it.",
+    "audio": "Record an audio answer",
+    "file": "Choose a file",
+    "message": "Information screen: asks for no answer.",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Finish",
+    "contactEyebrow": "One last step",
+    "contactTitle": "Where should we send your results?",
+    "contactDescription": "Share your contact details so we can deliver your personalized recommendations.",
+    "contactCta": "See my results",
+    "contactPrivacy": "Your information is private and will only be used to deliver your results.",
+    "contactFields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "contactPlaceholders": {
+      "name": "Your full name",
+      "email": "you@email.com",
+      "phone": "Your phone number"
+    },
+    "defaultEndTitle": "Your answers have been sent successfully.",
+    "defaultEndMessage": "Thank you for completing the questionnaire. We saved your answers and the team can now review them."
   }
 }

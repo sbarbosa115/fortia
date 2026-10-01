@@ -10,6 +10,7 @@ import {CreationEditor} from './CreationEditor';
 import {GenericEditor} from './GenericEditor';
 import {LockedView} from './LockedView';
 import './editor.css';
+import './shell.css';
 
 const CREATE_KINDS: Record<string, EditorKind> = {
   regular: 'regular',

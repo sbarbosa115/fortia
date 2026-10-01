@@ -9,8 +9,8 @@ import {
 } from '../model/types';
 
 /**
- * Labelled answer choices; the scored types also carry a numeric score per choice (PRD §10.5). A table's columns are
- * edited the same way.
+ * Labelled answer choices, numbered as in the admin console; the scored types also carry a numeric score per choice
+ * (PRD §10.5). A table's columns are edited the same way.
  */
 export function OptionsEditor({
   question,
@@ -32,11 +32,17 @@ export function OptionsEditor({
           remove: 'questions.removeColumn',
         }
       : {
-          legend: 'questions.options',
+          legend: scored ? 'questions.scoredOptions' : 'questions.options',
           label: 'questions.optionLabel',
-          add: 'questions.addOption',
+          add: scored ? 'questions.addScoredOption' : 'questions.addOption',
           remove: 'questions.removeOption',
         };
+  const marker =
+    question.type === 'ranking'
+      ? 'grip'
+      : question.type === 'single_selection_with_score'
+        ? 'circle'
+        : 'square';
   const setOptions = (options: DraftOption[]) =>
     editor.updateQuestion(question.key, {options});
   const change = (key: string, patch: Partial<DraftOption>) =>
@@ -45,13 +51,30 @@ export function OptionsEditor({
     );
 
   return (
-    <fieldset className="options">
+    <fieldset className={scored ? 'options options--scored' : 'options'}>
       <legend className="field__label">{t(words.legend)}</legend>
+      {scored ? (
+        <div className="options__row options__head" aria-hidden>
+          <span />
+          <span>{t('questions.choiceLabel')}</span>
+          <span>{t('questions.score')}</span>
+          <span />
+        </div>
+      ) : null}
       {question.options.map((option, i) => (
         <div key={option.key} className="options__row">
+          {scored ? (
+            <span className="options__marker" aria-hidden>
+              <Icon name={marker} size={16} />
+            </span>
+          ) : (
+            <span className="options__index" aria-hidden>
+              {`${i + 1}.`}
+            </span>
+          )}
           <TextInput
             aria-label={`${t('questions.question', {n: number})} · ${t(words.label, {n: i + 1})}`}
-            placeholder={t(words.label, {n: i + 1})}
+            placeholder={t('questions.optionPlaceholder')}
             value={option.label}
             onChange={(e) => change(option.key, {label: e.target.value})}
           />
@@ -60,26 +83,31 @@ export function OptionsEditor({
               className="options__score"
               inputMode="decimal"
               aria-label={`${t('questions.question', {n: number})} · ${t('questions.optionScore', {n: i + 1})}`}
-              placeholder={t('questions.score')}
+              placeholder={t('questions.scorePlaceholder')}
               value={option.score}
               onChange={(e) => change(option.key, {score: e.target.value})}
             />
           ) : null}
-          <IconButton
-            size="sm"
-            label={t(words.remove, {n: i + 1})}
-            icon={<Icon name="close" />}
-            onClick={() =>
-              setOptions(question.options.filter((o) => o.key !== option.key))
-            }
-          />
+          {question.options.length > 1 ? (
+            <IconButton
+              size="sm"
+              label={t(words.remove, {n: i + 1})}
+              icon={<Icon name="trash" size={14} />}
+              className="options__remove"
+              onClick={() =>
+                setOptions(question.options.filter((o) => o.key !== option.key))
+              }
+            />
+          ) : (
+            <span className="options__remove-spacer" aria-hidden />
+          )}
         </div>
       ))}
-      <div>
+      <div className="options__add">
         <Button
           size="sm"
           variant="ghost"
-          icon={<Icon name="plus" />}
+          icon={<Icon name="plus" size={14} />}
           disabled={
             question.type === 'table' &&
             question.options.length >= MAX_TABLE_COLUMNS

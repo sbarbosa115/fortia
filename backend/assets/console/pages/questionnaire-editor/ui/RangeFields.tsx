@@ -8,7 +8,7 @@ export function RangeFields({question}: {question: DraftQuestion}) {
   const {t} = useTranslation('pages.questionnaire-editor');
   const editor = useEditorContext();
   return (
-    <div className="grid-2">
+    <div className="question__range">
       <Field label={t('questions.rangeMin')} required>
         <TextInput
           inputMode="decimal"
@@ -18,6 +18,9 @@ export function RangeFields({question}: {question: DraftQuestion}) {
           }
         />
       </Field>
+      <span className="question__range-to" aria-hidden>
+        {t('questions.rangeTo')}
+      </span>
       <Field label={t('questions.rangeMax')} required>
         <TextInput
           inputMode="decimal"
