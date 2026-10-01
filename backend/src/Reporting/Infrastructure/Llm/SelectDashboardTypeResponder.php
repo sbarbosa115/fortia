@@ -11,7 +11,8 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  * The offline choice of dashboard (LLM_PROVIDER=fake): a deterministic, sensible layout from the questions in the
  * request's context — the timeline, a gauge and a histogram for each numeric scale, a donut or bar for each choice
  * question, a heatmap when several choice questions share a scale, and the tiers of a diagnostic. The cleanup of
- * PRD §7.10 still runs over it (at most 2 per type, 10 in all).
+ * PRD §7.10 still runs over it (at most 2 per type, 10 in all). Charts without a question have no title, so the
+ * console shows the chart type in the viewer's language.
  */
 final class SelectDashboardTypeResponder implements FakeLlmResponder
 {
@@ -24,9 +25,9 @@ final class SelectDashboardTypeResponder implements FakeLlmResponder
     {
         $questions = array_values(array_filter((array) ($request->context['questions'] ?? []), 'is_array'));
         $diagnostic = true === ($request->context['diagnostic'] ?? false);
-        $charts = [['chart_type' => 'line', 'title' => 'Responses over time', 'question_ids' => []]];
+        $charts = [['chart_type' => 'line', 'title' => '', 'question_ids' => []]];
         if ($diagnostic) {
-            $charts[] = ['chart_type' => 'tier_distribution', 'title' => 'Tier distribution', 'question_ids' => []];
+            $charts[] = ['chart_type' => 'tier_distribution', 'title' => '', 'question_ids' => []];
         }
 
         $numeric = [];
@@ -55,12 +56,12 @@ final class SelectDashboardTypeResponder implements FakeLlmResponder
         }
         foreach ($scales as $ids) {
             if (\count($ids) >= 2) {
-                $charts[] = ['chart_type' => 'heatmap', 'title' => 'Answers compared', 'question_ids' => \array_slice($ids, 0, 8)];
+                $charts[] = ['chart_type' => 'heatmap', 'title' => '', 'question_ids' => \array_slice($ids, 0, 8)];
                 break;
             }
         }
         if (\count($numeric) >= 2) {
-            $charts[] = ['chart_type' => 'ranking_avg', 'title' => 'Average by question', 'question_ids' => \array_slice(array_column($numeric, 'id'), 0, 10)];
+            $charts[] = ['chart_type' => 'ranking_avg', 'title' => '', 'question_ids' => \array_slice(array_column($numeric, 'id'), 0, 10)];
         }
 
         return LlmResponse::json(['type' => $diagnostic ? 'knowledge' : ([] !== $numeric ? 'satisfaction' : 'profiling'), 'charts' => $charts]);
