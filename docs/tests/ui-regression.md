@@ -837,6 +837,61 @@ translation keys.
 
 <!-- BRD-01 – 10: branding. INT-01 – 12: integrations. DOC-01 – 08: docs. -->
 
+### Branding — BRD (item branding)
+
+The BRD cases use `/console/customization`. Dev reads websites with the offline fake (`BRAND_EXTRACTOR=fake`): the same
+host always gives the same palette and font, no logo is found, and any address containing `unreachable` fails like a
+site that does not answer. `{S}` is the RSP showcase (`/f/acme-respondent-showcase`). These cases change Acme's brand:
+run them after the RSP cases.
+
+**BRD-01 · The screen loads the account's brand and a live preview**
+Sign in as `owner@acme.test`, open Personalización. **Expected:** "URL del sitio web" with the hint "No te preocupes…",
+"URL del logo" with a preview box ("Sin logo" when empty), "Fuente" with Inter, Roboto, Poppins, Montserrat, Playfair
+Display and Lora, "Color de marca" with a colour picker, and on the right "Vista previa": a question screen. Without
+saved styles the preview has the respondent look (off-white page, black button, Montserrat).
+
+**BRD-02 · The preview follows every change before saving**
+Type `#8249DF` as the brand colour, pick "Playfair Display", paste a logo URL (e.g. `https://www.python.org/static/img/python-logo.png`).
+**Expected:** the preview's button and link turn violet with white text, the question title uses Playfair Display,
+the logo shows in the logo box and in the preview header. A light colour such as `#FDE047` gives dark button text.
+
+**BRD-03 · An invalid colour or URL blocks saving**
+Type `#12` as the colour and `logo` as the logo URL, press Guardar. **Expected:** "Revisa los campos marcados." and the
+two fields' messages; nothing is sent (no request in the network tab).
+
+**BRD-04 · Reset only restores the defaults on screen**
+Press Restablecer. **Expected:** toast "Valores predeterminados restablecidos"; logo empty, Montserrat, `#18181b`; the
+website stays. Reload: the saved values come back (nothing was saved).
+
+**BRD-05 · Saving without a website change merges the styles**
+Leave the website as it is, set `#8249DF` and Poppins, press Guardar. **Expected:** "Guardando tus estilos…" under the
+header, then "Estilos actualizados correctamente"; after a reload the form shows the saved values. Perfil → Plan y uso:
+"styles" went up by one.
+
+**BRD-06 · A new website is read and the styles are designed from it**
+Type `https://acme-brand.example` as the website. **Expected:** the note "Al guardar, leeremos este sitio web…" appears.
+Press Guardar: "Leyendo tu sitio web…" → "Eligiendo colores y fuentes…" → "Guardando tus estilos…", then the success
+toast; the colour and font change to the site's palette (the logo and colour typed before were not sent).
+
+**BRD-07 · An unreachable website fails without saving or counting**
+Type `https://unreachable.example`, press Guardar. **Expected:** a red toast "No pudimos leer ese sitio web…"; after a
+reload the old website and styles are still there and the "styles" usage did not change.
+
+**BRD-08 · The respondent app shows the saved brand**
+After BRD-05 or BRD-06, open `{S}` (or `/q/{id}`) in a private window. **Expected:** after the neutral skeleton, the
+page uses the saved colours (buttons, links), the heading font and the logo (when one is saved); with no logo the
+monogram shows. No console errors.
+
+**BRD-09 · Read-only users and exhausted plans cannot save**
+Sign in as `reader@acme.test` and open Personalización. **Expected:** every field disabled, Guardar and Restablecer
+disabled with "Tu rol de solo lectura no puede hacer cambios." on hover. As `owner@globex.test` (Starter, 2 styles a
+month) after two saves: Guardar is disabled with the plan-limit reason.
+
+**BRD-10 · Each account only sees and changes its own brand**
+As `owner@globex.test`, save `#059669`. **Expected:** Acme's Personalización and `{S}` are unchanged; Globex's website is
+never shown on Acme's screen. Switching the sidebar language to English translates the whole screen (titles, hints,
+stages, preview texts).
+
 ### Integrations — INT (item integrations)
 
 **INT-01 · Three tabs**
