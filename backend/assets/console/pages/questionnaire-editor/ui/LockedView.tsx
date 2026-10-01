@@ -2,7 +2,6 @@ import {
   QUESTIONNAIRES_QUERY_KEY,
   copyQuestionnaire,
 } from '@console/entities/questionnaire';
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {useDocumentTitle} from '@shared/lib';
 import {
   Badge,
@@ -41,7 +40,6 @@ export function LockedView({
     mutationFn: () => copyQuestionnaire(questionnaire.questionnaire_id),
     onSuccess: (created) => {
       void queryClient.invalidateQueries({queryKey: QUESTIONNAIRES_QUERY_KEY});
-      void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
       toast.success(t('locked.copied'));
       void navigate(`/questionnaires/${created.questionnaire_id}/edit`);
     },

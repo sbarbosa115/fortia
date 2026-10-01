@@ -14,13 +14,13 @@ final class DemoAccounts
     public const PLATFORM = 'MAPPI001';
     public const PLATFORM_ADMIN = 'admin@mappi.test';
 
-    /** A paying customer on the "pro" plan, onboarding done. */
+    /** A customer with onboarding done. */
     public const ACME = 'ACME0001';
     public const ACME_OWNER = 'owner@acme.test';
     public const ACME_ADMIN = 'admin@acme.test';
     public const ACME_READER = 'reader@acme.test';
 
-    /** Another tenant on the "starter" plan: its data must never show up for Acme. */
+    /** Another tenant: its data must never show up for Acme. */
     public const GLOBEX = 'GLOBEX01';
     public const GLOBEX_OWNER = 'owner@globex.test';
 
@@ -41,11 +41,5 @@ final class DemoAccounts
             ['customer_id' => self::GLOBEX, 'email' => self::GLOBEX_OWNER, 'name' => 'Gael Owner', 'root' => true, 'groups' => ['Customer-Admin'], 'language' => 'en-US', 'onboarding' => true],
             ['customer_id' => self::NEWCO, 'email' => self::NEWCO_OWNER, 'name' => 'Nora New', 'root' => true, 'groups' => ['Customer-Admin'], 'language' => 'en-US', 'onboarding' => false],
         ];
-    }
-
-    /** @return array<string, string> the plan of each demo account */
-    public static function plans(): array
-    {
-        return [self::PLATFORM => 'business', self::ACME => 'pro', self::GLOBEX => 'starter', self::NEWCO => 'starter'];
     }
 }

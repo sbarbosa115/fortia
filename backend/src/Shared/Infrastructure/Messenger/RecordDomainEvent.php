@@ -24,7 +24,6 @@ final class RecordDomainEvent
         $this->em->persist(new DomainEventRecord(
             $event->eventType(),
             $event->customerId(),
-            $event->feature(),
             $event->payload(),
             $occurredAt,
         ));

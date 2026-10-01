@@ -12,7 +12,7 @@ use App\Shared\Application\Seed\DemoSeeder;
 /**
  * Demo questionnaires for the listing (docs/tests/ui-regression.md QST): Acme has twelve of every kind (one inactive),
  * enough for two pages at 10 per page; Globex has one, which Acme must never see. Seeded through SaveFlow, like the
- * console, without counting usage. Skips a questionnaire whose slug already exists.
+ * console. Skips a questionnaire whose slug already exists.
  */
 final class QuestionnairesSeeder implements DemoSeeder
 {
@@ -59,7 +59,7 @@ final class QuestionnairesSeeder implements DemoSeeder
             return null;
         }
 
-        return (string) $this->commands->dispatch(new SaveFlow($customerId, $states, $slug, source: 'seed', countsUsage: false));
+        return (string) $this->commands->dispatch(new SaveFlow($customerId, $states, $slug, source: 'seed'));
     }
 
     /**

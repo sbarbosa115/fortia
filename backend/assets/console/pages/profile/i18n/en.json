@@ -1,8 +1,3 @@
 {
-  "title": "Profile",
-  "tabs": {
-    "label": "Profile sections",
-    "plan": "Plan & usage",
-    "settings": "Settings"
-  }
+  "title": "Profile"
 }

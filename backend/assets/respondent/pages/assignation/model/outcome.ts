@@ -3,7 +3,7 @@ import {isApiError} from '@shared/api';
 
 /** What a failed login shows (PRD §9.10 "Login outcomes"). */
 export type LoginOutcome =
-  'completed' | 'limit' | 'notInAudience' | 'userNotFound' | 'failed';
+  'completed' | 'notInAudience' | 'userNotFound' | 'failed';
 
 export function loginOutcome(error: unknown): LoginOutcome {
   if (!isApiError(error)) {
@@ -11,9 +11,6 @@ export function loginOutcome(error: unknown): LoginOutcome {
   }
   if (error.status === 409) {
     return 'completed';
-  }
-  if (error.status === 429 && error.isPlanLimit) {
-    return 'limit';
   }
   if (error.code === 'NOT_IN_AUDIENCE') {
     return 'notInAudience';

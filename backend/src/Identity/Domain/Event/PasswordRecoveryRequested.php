@@ -12,7 +12,7 @@ final class PasswordRecoveryRequested extends BaseDomainEvent
 {
     public static function of(string $customerId, string $email): self
     {
-        return new self($customerId, null, ['email' => $email]);
+        return new self($customerId, ['email' => $email]);
     }
 
     public function email(): string

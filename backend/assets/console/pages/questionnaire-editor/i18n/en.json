@@ -223,8 +223,7 @@
       "result": "Finish",
       "diagnostic": "Diagnostic",
       "quiz_funnel": "Quiz funnel"
-    },
-    "chainNotAllowed": "Your plan doesn't include chaining anymore, so this chain can't be saved."
+    }
   },
   "preview": {
     "title": "Preview",

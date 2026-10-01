@@ -2,8 +2,6 @@
 
 namespace App\Branding\UI\Http\Controller;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Branding\Application\Command\RequestStyles;
 use App\Branding\Application\Query\StylesQueries;
 use App\Branding\UI\Http\Input\StylesInput;
@@ -35,7 +33,6 @@ final class StylesController
         private readonly StylesQueries $styles,
         private readonly CommandBus $commands,
         private readonly JobQueries $jobs,
-        private readonly PlanGate $gate,
         #[Autowire(service: 'limiter.public_api')]
         private readonly RateLimiterFactoryInterface $publicApiLimiter,
     ) {
@@ -69,8 +66,7 @@ final class StylesController
     }
 
     /**
-     * AG, Cap(styles). 202 {job} (job_type "styles", stages reading_website → designing_styles → saving). The job
-     * counts one "styles" when it completes; a failed job counts nothing (§7.2).
+     * AG. 202 {job} (job_type "styles", stages reading_website → designing_styles → saving).
      */
     #[Route('/styles', name: 'api_styles_update', methods: ['POST'])]
     #[OA\RequestBody(content: new Model(type: StylesInput::class))]
@@ -78,13 +74,11 @@ final class StylesController
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR')]
     #[OA\Response(response: 401, description: 'UNAUTHORIZED')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function update(Caller $caller, #[Payload(allowExtraFields: false)] StylesInput $input): JsonResponse
     {
         if (!$caller->inAdminGroups()) {
             throw new NotAllowed('FORBIDDEN', 'Admin privileges are required.');
         }
-        $this->gate->capacity($caller, Features::STYLES);
         $jobId = (string) $this->commands->dispatch(new RequestStyles($caller->customerId, $input->website(), $input->styles));
 
         return ApiResponse::accepted(['job' => $this->jobs->find($jobId)], 'Updating styles');

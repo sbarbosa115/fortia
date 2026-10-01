@@ -19,7 +19,6 @@ import {ProjectsPage} from './ProjectsPage';
 
 const mocks = vi.hoisted(() => ({
   viewer: null as unknown as Viewer,
-  feature: {loading: false, allowed: true, included: true, verdict: null},
 }));
 
 vi.mock('@console/entities/project', async (original) => ({
@@ -29,9 +28,6 @@ vi.mock('@console/entities/project', async (original) => ({
   deleteProject: vi.fn(),
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
-vi.mock('@console/entities/plan-usage', () => ({
-  useFeature: () => mocks.feature,
-}));
 
 const fetchMock = vi.mocked(fetchProjects);
 
@@ -143,12 +139,6 @@ function renderPage() {
 describe('ProjectsPage', () => {
   beforeEach(() => {
     mocks.viewer = viewer(true);
-    mocks.feature = {
-      loading: false,
-      allowed: true,
-      included: true,
-      verdict: null,
-    };
     fetchMock.mockReset();
   });
 
@@ -388,23 +378,5 @@ describe('ProjectsPage', () => {
     expect(
       screen.getAllByText("Your read-only role can't make changes.").length,
     ).toBeGreaterThan(0);
-  });
-
-  it('disables "New project" when the plan does not include assignations', async () => {
-    mocks.feature = {
-      loading: false,
-      allowed: false,
-      included: false,
-      verdict: null,
-    };
-    fetchMock.mockResolvedValue(page([project()]));
-    renderPage();
-
-    expect(
-      await screen.findByRole('button', {name: 'New project'}),
-    ).toBeDisabled();
-    expect(
-      screen.getByText("Your plan doesn't include assignations."),
-    ).toBeInTheDocument();
   });
 });

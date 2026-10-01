@@ -91,6 +91,4 @@ when@test:
         App\Shared\Domain\Clock: '@App\Tests\Support\TestClock'
 
         # Services the tests call directly even where no controller uses them yet.
-        App\Billing\Application\PlanGate: ~
-        App\Billing\Application\Usage: ~
         App\Shared\Infrastructure\Llm\Fake\FakeLanguageModel: ~

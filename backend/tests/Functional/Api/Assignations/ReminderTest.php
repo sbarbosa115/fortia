@@ -93,7 +93,7 @@ final class ReminderTest extends ApiTestCase
     public function testOnlyTheOwnersAccountWithWritePermissionSendsReminders(): void
     {
         $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'));
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
 
         $this->assertApiError($this->api('POST', '/api/v1/assignations/'.$id.'/reminders', as: 'root@globex01.test'), 404, 'ASSIGNATION_NOT_FOUND');

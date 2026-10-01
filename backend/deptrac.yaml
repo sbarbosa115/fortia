@@ -40,26 +40,6 @@ deptrac:
       collectors:
         - type: classLike
           value: '^App\\Identity\\UI\\.*'
-    - name: Billing.Domain
-      collectors:
-        - type: classLike
-          value: '^App\\Billing\\Domain\\(?!Event\\).*'
-    - name: Billing.Event
-      collectors:
-        - type: classLike
-          value: '^App\\Billing\\Domain\\Event\\.*'
-    - name: Billing.Application
-      collectors:
-        - type: classLike
-          value: '^App\\Billing\\Application\\.*'
-    - name: Billing.Infrastructure
-      collectors:
-        - type: classLike
-          value: '^App\\Billing\\Infrastructure\\.*'
-    - name: Billing.UI
-      collectors:
-        - type: classLike
-          value: '^App\\Billing\\UI\\.*'
     - name: Platform.Domain
       collectors:
         - type: classLike
@@ -240,26 +220,6 @@ deptrac:
       collectors:
         - type: classLike
           value: '^App\\Commerce\\UI\\.*'
-    - name: Integrations.Domain
-      collectors:
-        - type: classLike
-          value: '^App\\Integrations\\Domain\\(?!Event\\).*'
-    - name: Integrations.Event
-      collectors:
-        - type: classLike
-          value: '^App\\Integrations\\Domain\\Event\\.*'
-    - name: Integrations.Application
-      collectors:
-        - type: classLike
-          value: '^App\\Integrations\\Application\\.*'
-    - name: Integrations.Infrastructure
-      collectors:
-        - type: classLike
-          value: '^App\\Integrations\\Infrastructure\\.*'
-    - name: Integrations.UI
-      collectors:
-        - type: classLike
-          value: '^App\\Integrations\\UI\\.*'
     - name: Content.Domain
       collectors:
         - type: classLike
@@ -340,7 +300,6 @@ deptrac:
       - Shared.Application
       - Identity.Domain
       - Identity.Event
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -350,11 +309,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -364,7 +321,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -375,7 +331,6 @@ deptrac:
       - Identity.Domain
       - Identity.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -385,11 +340,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -399,7 +352,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -410,7 +362,6 @@ deptrac:
       - Identity.Domain
       - Identity.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -420,101 +371,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
-      - Content.Application
-      - Generation.Application
-      - Chat.Application
-    Billing.Event:
-      - Shared.Domain
-    Billing.Domain:
-      - Shared.Domain
-      - Billing.Event
-    Billing.Application:
-      - Shared.Domain
-      - Shared.Application
-      - Billing.Domain
-      - Billing.Event
-      - Identity.Application
-      - Platform.Application
-      - Jobs.Application
-      - Questionnaires.Application
-      - Responses.Application
-      - Reporting.Application
-      - Organizations.Application
-      - Assignations.Application
-      - Branding.Application
-      - Commerce.Application
-      - Integrations.Application
-      - Content.Application
-      - Generation.Application
-      - Chat.Application
-      - Identity.Event
-      - Platform.Event
-      - Jobs.Event
-      - Questionnaires.Event
-      - Responses.Event
-      - Reporting.Event
-      - Organizations.Event
-      - Assignations.Event
-      - Branding.Event
-      - Commerce.Event
-      - Integrations.Event
-      - Content.Event
-      - Generation.Event
-      - Chat.Event
-    Billing.Infrastructure:
-      - Shared.Domain
-      - Shared.Application
-      - Shared.Infrastructure
-      - Billing.Domain
-      - Billing.Event
-      - Billing.Application
-      - Identity.Application
-      - Platform.Application
-      - Jobs.Application
-      - Questionnaires.Application
-      - Responses.Application
-      - Reporting.Application
-      - Organizations.Application
-      - Assignations.Application
-      - Branding.Application
-      - Commerce.Application
-      - Integrations.Application
-      - Content.Application
-      - Generation.Application
-      - Chat.Application
-      - Identity.Event
-      - Platform.Event
-      - Jobs.Event
-      - Questionnaires.Event
-      - Responses.Event
-      - Reporting.Event
-      - Organizations.Event
-      - Assignations.Event
-      - Branding.Event
-      - Commerce.Event
-      - Integrations.Event
-      - Content.Event
-      - Generation.Event
-      - Chat.Event
-    Billing.UI:
-      - Shared.Domain
-      - Shared.Application
-      - Shared.UI
-      - Billing.Domain
-      - Billing.Event
-      - Billing.Application
-      - Identity.Application
-      - Platform.Application
-      - Jobs.Application
-      - Questionnaires.Application
-      - Responses.Application
-      - Reporting.Application
-      - Organizations.Application
-      - Assignations.Application
-      - Branding.Application
-      - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -529,7 +385,6 @@ deptrac:
       - Platform.Domain
       - Platform.Event
       - Identity.Application
-      - Billing.Application
       - Jobs.Application
       - Questionnaires.Application
       - Responses.Application
@@ -538,12 +393,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Jobs.Event
       - Questionnaires.Event
       - Responses.Event
@@ -552,7 +405,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -564,7 +416,6 @@ deptrac:
       - Platform.Event
       - Platform.Application
       - Identity.Application
-      - Billing.Application
       - Jobs.Application
       - Questionnaires.Application
       - Responses.Application
@@ -573,12 +424,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Jobs.Event
       - Questionnaires.Event
       - Responses.Event
@@ -587,7 +436,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -599,7 +447,6 @@ deptrac:
       - Platform.Event
       - Platform.Application
       - Identity.Application
-      - Billing.Application
       - Jobs.Application
       - Questionnaires.Application
       - Responses.Application
@@ -608,7 +455,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -623,7 +469,6 @@ deptrac:
       - Jobs.Domain
       - Jobs.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Questionnaires.Application
       - Responses.Application
@@ -632,12 +477,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Questionnaires.Event
       - Responses.Event
@@ -646,7 +489,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -658,7 +500,6 @@ deptrac:
       - Jobs.Event
       - Jobs.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Questionnaires.Application
       - Responses.Application
@@ -667,12 +508,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Questionnaires.Event
       - Responses.Event
@@ -681,7 +520,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -693,7 +531,6 @@ deptrac:
       - Jobs.Event
       - Jobs.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Questionnaires.Application
       - Responses.Application
@@ -702,7 +539,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -717,7 +553,6 @@ deptrac:
       - Questionnaires.Domain
       - Questionnaires.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Responses.Application
@@ -726,12 +561,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Responses.Event
@@ -740,7 +573,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -752,7 +584,6 @@ deptrac:
       - Questionnaires.Event
       - Questionnaires.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Responses.Application
@@ -761,12 +592,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Responses.Event
@@ -775,7 +604,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -787,7 +615,6 @@ deptrac:
       - Questionnaires.Event
       - Questionnaires.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Responses.Application
@@ -796,7 +623,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -811,7 +637,6 @@ deptrac:
       - Responses.Domain
       - Responses.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -820,12 +645,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -834,7 +657,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -846,7 +668,6 @@ deptrac:
       - Responses.Event
       - Responses.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -855,12 +676,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -869,7 +688,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -881,7 +699,6 @@ deptrac:
       - Responses.Event
       - Responses.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -890,7 +707,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -905,7 +721,6 @@ deptrac:
       - Reporting.Domain
       - Reporting.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -914,12 +729,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -928,7 +741,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -940,7 +752,6 @@ deptrac:
       - Reporting.Event
       - Reporting.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -949,12 +760,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -963,7 +772,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -975,7 +783,6 @@ deptrac:
       - Reporting.Event
       - Reporting.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -984,7 +791,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -999,7 +805,6 @@ deptrac:
       - Organizations.Domain
       - Organizations.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1008,12 +813,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1022,7 +825,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1034,7 +836,6 @@ deptrac:
       - Organizations.Event
       - Organizations.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1043,12 +844,10 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1057,7 +856,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1069,7 +867,6 @@ deptrac:
       - Organizations.Event
       - Organizations.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1078,7 +875,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -1093,7 +889,6 @@ deptrac:
       - Assignations.Domain
       - Assignations.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1102,12 +897,10 @@ deptrac:
       - Organizations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1116,7 +909,6 @@ deptrac:
       - Organizations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1128,7 +920,6 @@ deptrac:
       - Assignations.Event
       - Assignations.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1137,12 +928,10 @@ deptrac:
       - Organizations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1151,7 +940,6 @@ deptrac:
       - Organizations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1163,7 +951,6 @@ deptrac:
       - Assignations.Event
       - Assignations.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1172,7 +959,6 @@ deptrac:
       - Organizations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -1187,7 +973,6 @@ deptrac:
       - Branding.Domain
       - Branding.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1196,12 +981,10 @@ deptrac:
       - Organizations.Application
       - Assignations.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1210,7 +993,6 @@ deptrac:
       - Organizations.Event
       - Assignations.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1222,7 +1004,6 @@ deptrac:
       - Branding.Event
       - Branding.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1231,12 +1012,10 @@ deptrac:
       - Organizations.Application
       - Assignations.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1245,7 +1024,6 @@ deptrac:
       - Organizations.Event
       - Assignations.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1257,7 +1035,6 @@ deptrac:
       - Branding.Event
       - Branding.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1266,7 +1043,6 @@ deptrac:
       - Organizations.Application
       - Assignations.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -1281,7 +1057,6 @@ deptrac:
       - Commerce.Domain
       - Commerce.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1290,12 +1065,10 @@ deptrac:
       - Organizations.Application
       - Assignations.Application
       - Branding.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1304,7 +1077,6 @@ deptrac:
       - Organizations.Event
       - Assignations.Event
       - Branding.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1316,7 +1088,6 @@ deptrac:
       - Commerce.Event
       - Commerce.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1325,12 +1096,10 @@ deptrac:
       - Organizations.Application
       - Assignations.Application
       - Branding.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1339,7 +1108,6 @@ deptrac:
       - Organizations.Event
       - Assignations.Event
       - Branding.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
       - Chat.Event
@@ -1351,7 +1119,6 @@ deptrac:
       - Commerce.Event
       - Commerce.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1360,101 +1127,6 @@ deptrac:
       - Organizations.Application
       - Assignations.Application
       - Branding.Application
-      - Integrations.Application
-      - Content.Application
-      - Generation.Application
-      - Chat.Application
-    Integrations.Event:
-      - Shared.Domain
-    Integrations.Domain:
-      - Shared.Domain
-      - Integrations.Event
-    Integrations.Application:
-      - Shared.Domain
-      - Shared.Application
-      - Integrations.Domain
-      - Integrations.Event
-      - Identity.Application
-      - Billing.Application
-      - Platform.Application
-      - Jobs.Application
-      - Questionnaires.Application
-      - Responses.Application
-      - Reporting.Application
-      - Organizations.Application
-      - Assignations.Application
-      - Branding.Application
-      - Commerce.Application
-      - Content.Application
-      - Generation.Application
-      - Chat.Application
-      - Identity.Event
-      - Billing.Event
-      - Platform.Event
-      - Jobs.Event
-      - Questionnaires.Event
-      - Responses.Event
-      - Reporting.Event
-      - Organizations.Event
-      - Assignations.Event
-      - Branding.Event
-      - Commerce.Event
-      - Content.Event
-      - Generation.Event
-      - Chat.Event
-    Integrations.Infrastructure:
-      - Shared.Domain
-      - Shared.Application
-      - Shared.Infrastructure
-      - Integrations.Domain
-      - Integrations.Event
-      - Integrations.Application
-      - Identity.Application
-      - Billing.Application
-      - Platform.Application
-      - Jobs.Application
-      - Questionnaires.Application
-      - Responses.Application
-      - Reporting.Application
-      - Organizations.Application
-      - Assignations.Application
-      - Branding.Application
-      - Commerce.Application
-      - Content.Application
-      - Generation.Application
-      - Chat.Application
-      - Identity.Event
-      - Billing.Event
-      - Platform.Event
-      - Jobs.Event
-      - Questionnaires.Event
-      - Responses.Event
-      - Reporting.Event
-      - Organizations.Event
-      - Assignations.Event
-      - Branding.Event
-      - Commerce.Event
-      - Content.Event
-      - Generation.Event
-      - Chat.Event
-    Integrations.UI:
-      - Shared.Domain
-      - Shared.Application
-      - Shared.UI
-      - Integrations.Domain
-      - Integrations.Event
-      - Integrations.Application
-      - Identity.Application
-      - Billing.Application
-      - Platform.Application
-      - Jobs.Application
-      - Questionnaires.Application
-      - Responses.Application
-      - Reporting.Application
-      - Organizations.Application
-      - Assignations.Application
-      - Branding.Application
-      - Commerce.Application
       - Content.Application
       - Generation.Application
       - Chat.Application
@@ -1469,7 +1141,6 @@ deptrac:
       - Content.Domain
       - Content.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1479,11 +1150,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1493,7 +1162,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Generation.Event
       - Chat.Event
     Content.Infrastructure:
@@ -1504,7 +1172,6 @@ deptrac:
       - Content.Event
       - Content.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1514,11 +1181,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Generation.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1528,7 +1193,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Generation.Event
       - Chat.Event
     Content.UI:
@@ -1539,7 +1203,6 @@ deptrac:
       - Content.Event
       - Content.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1549,7 +1212,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Generation.Application
       - Chat.Application
     Generation.Event:
@@ -1563,7 +1225,6 @@ deptrac:
       - Generation.Domain
       - Generation.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1573,11 +1234,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1587,7 +1246,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Chat.Event
     Generation.Infrastructure:
@@ -1598,7 +1256,6 @@ deptrac:
       - Generation.Event
       - Generation.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1608,11 +1265,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Chat.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1622,7 +1277,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Chat.Event
     Generation.UI:
@@ -1633,7 +1287,6 @@ deptrac:
       - Generation.Event
       - Generation.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1643,7 +1296,6 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Chat.Application
     Chat.Event:
@@ -1657,7 +1309,6 @@ deptrac:
       - Chat.Domain
       - Chat.Event
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1667,11 +1318,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1681,7 +1330,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
     Chat.Infrastructure:
@@ -1692,7 +1340,6 @@ deptrac:
       - Chat.Event
       - Chat.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1702,11 +1349,9 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application
       - Identity.Event
-      - Billing.Event
       - Platform.Event
       - Jobs.Event
       - Questionnaires.Event
@@ -1716,7 +1361,6 @@ deptrac:
       - Assignations.Event
       - Branding.Event
       - Commerce.Event
-      - Integrations.Event
       - Content.Event
       - Generation.Event
     Chat.UI:
@@ -1727,7 +1371,6 @@ deptrac:
       - Chat.Event
       - Chat.Application
       - Identity.Application
-      - Billing.Application
       - Platform.Application
       - Jobs.Application
       - Questionnaires.Application
@@ -1737,6 +1380,5 @@ deptrac:
       - Assignations.Application
       - Branding.Application
       - Commerce.Application
-      - Integrations.Application
       - Content.Application
       - Generation.Application

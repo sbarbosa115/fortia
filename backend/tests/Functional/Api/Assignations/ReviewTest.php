@@ -95,7 +95,7 @@ final class ReviewTest extends ApiTestCase
     public function testAnotherAccountGets404AndAReaderCannotReview(): void
     {
         $id = $this->completeFollowUp();
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
 
         $this->assertApiError($this->api('PUT', '/api/v1/assignations/'.$id.'/reviews/q1', ['status' => 'approved'], as: 'root@globex01.test'), 404, 'ASSIGNATION_NOT_FOUND', "PRD §8.8: another account's returns 404");

@@ -9,6 +9,6 @@ final class QuestionnaireSessionCreated extends BaseDomainEvent
 {
     public static function of(string $customerId, string $sessionId, string $questionnaireId): self
     {
-        return new self($customerId, null, ['session_id' => $sessionId, 'questionnaire_id' => $questionnaireId]);
+        return new self($customerId, ['session_id' => $sessionId, 'questionnaire_id' => $questionnaireId]);
     }
 }

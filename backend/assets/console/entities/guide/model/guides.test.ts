@@ -20,11 +20,11 @@ function guide(over: Partial<Guide>): Guide {
 }
 
 describe('the guide catalogue (PRD §10.18)', () => {
-  it('has 15 guides in both languages, with the same ids in the same order', () => {
+  it('has 13 guides in both languages, with the same ids in the same order', () => {
     const en = guidesFor('en');
     const es = guidesFor('es');
 
-    expect(en).toHaveLength(15);
+    expect(en).toHaveLength(13);
     expect(es.map((g) => g.id)).toEqual(en.map((g) => g.id));
     expect(es.map((g) => g.topic)).toEqual(en.map((g) => g.topic));
   });
@@ -134,7 +134,7 @@ describe('searchGuides', () => {
         .length,
     ).toBeGreaterThan(0);
     expect(
-      searchGuides(guidesFor('en'), {query: 'webhook', topic: null}).length,
+      searchGuides(guidesFor('en'), {query: 'dashboard', topic: null}).length,
     ).toBeGreaterThan(0);
   });
 });

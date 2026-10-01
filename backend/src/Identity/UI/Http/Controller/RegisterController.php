@@ -15,8 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * PRD §8.2 POST /register (public): the account, its root Customer-Admin, a month of the starter plan and the welcome
- * email (D20). No tokens: the console signs in with /auth/token next.
+ * PRD §8.2 POST /register (public): the account, its root Customer-Admin and the welcome email (D20). No tokens: the console signs in with /auth/token next.
  */
 #[OA\Tag(name: 'Auth')]
 final class RegisterController

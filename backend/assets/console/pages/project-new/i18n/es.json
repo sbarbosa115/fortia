@@ -31,7 +31,6 @@
     "greeting": "¡Hola! Pega aquí las preguntas que necesitas, adjunta un documento Word, PDF o Markdown que las tenga, o cuéntame de qué trata el cuestionario. Por ejemplo: «Mira estas 30 preguntas, crea un cuestionario».",
     "approved": "Listo, tu cuestionario **{{title}}** ha sido creado. Puedes continuar con el siguiente paso o [editarlo aquí]({{url}}).",
     "approvedNotSaved": "**{{title}}** quedó aprobado. Se guardará cuando pulses Crear.",
-    "chatNotInPlan": "El asistente no está incluido en tu plan. Usa un cuestionario existente.",
     "existingTitle": "Elige un cuestionario que ya tengas",
     "existingHint": "De cualquier tipo. Se usa tal cual: no se copia ni se cambia.",
     "existingLabel": "Cuestionario",
@@ -54,8 +53,7 @@
     "createHint": "Nombre, dominio y sus miembros. Vuelves aquí con ella elegida.",
     "assignationName": "Nombre de la asignación",
     "assignationNameHint": "Se arma con la organización y el cuestionario. Puedes cambiarlo.",
-    "copyWarning": "Este cuestionario ya está asignado a \"{{organization}}\". Se creará una copia del cuestionario y se asignará la copia.",
-    "notInPlan": "Crear organizaciones no está incluido en tu plan. Elige una existente."
+    "copyWarning": "Este cuestionario ya está asignado a \"{{organization}}\". Se creará una copia del cuestionario y se asignará la copia."
   },
   "audience": {
     "label": "¿Quién responde?",

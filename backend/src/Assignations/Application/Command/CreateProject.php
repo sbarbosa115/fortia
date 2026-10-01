@@ -11,8 +11,7 @@ use App\Shared\Application\Security\Caller;
  *     $id = $commands->dispatch(new CreateProject($caller, $organizationId, 'Q4 audits', null, '2026-12-15', [$a1, $a2]));
  *
  * The handler checks the organization (404 ORGANIZATION_NOT_FOUND, also another account's) and each assignation
- * (ProjectAssignationSet). It does NOT run the plan gate or the write-permission check: the caller does first —
- * PlanGate::feature($caller, Features::ASSIGNATIONS) and $caller->canWrite().
+ * (ProjectAssignationSet). It does NOT run the write-permission check: the caller does first ($caller->canWrite()).
  */
 final class CreateProject
 {

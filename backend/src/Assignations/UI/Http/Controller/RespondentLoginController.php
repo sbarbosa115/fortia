@@ -44,7 +44,7 @@ final class RespondentLoginController
     #[OA\Response(response: 403, description: 'USER_NOT_FOUND, NOT_IN_AUDIENCE')]
     #[OA\Response(response: 404, description: 'ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND')]
     #[OA\Response(response: 409, description: 'FOLLOW_UP_COMPLETED')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED (assignations, then responses), TOO_MANY_ATTEMPTS')]
+    #[OA\Response(response: 429, description: 'TOO_MANY_ATTEMPTS')]
     public function __invoke(string $id, Request $request, #[Payload(allowExtraFields: false)] RespondentLoginInput $input): JsonResponse
     {
         if (!$this->publicApiLimiter->create((string) $request->getClientIp())->consume()->isAccepted()) {

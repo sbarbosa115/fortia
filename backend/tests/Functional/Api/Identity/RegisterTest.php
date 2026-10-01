@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Identity;
 
-use App\Billing\Domain\Model\CustomerPlan;
 use App\Identity\Domain\Model\Customer;
 use App\Identity\Domain\Model\User;
 use App\Tests\Support\ApiTestCase;
@@ -26,10 +25,6 @@ final class RegisterTest extends ApiTestCase
         self::assertFalse($customer->onboardingCompleted(), 'PRD §7.3: a new account has onboarding pending');
         self::assertSame('en-US', $customer->language());
         self::assertSame('default', $customer->source(), 'PRD §8.2: source defaults to "default"');
-
-        $plan = $this->em()->find(CustomerPlan::class, $data['customer_id']);
-        self::assertNotNull($plan, 'PRD §7.3: every sign-up gets the starter plan');
-        self::assertSame(['starter', '2026-01-31', '2026-02-28'], [$plan->planId(), $plan->fromAt(), $plan->toAt()], 'PRD §7.3: from today until today + 1 calendar month, the day clamped to the month');
     }
 
     public function testTheNewUserCanSignInWithThePasswordRightAway(): void

@@ -11,7 +11,7 @@ export const GUIDE_TOPICS = [
 
 export type GuideTopic = (typeof GUIDE_TOPICS)[number];
 
-/** The ids of the 15 guides, in reading order (previous/next follow it). */
+/** The ids of the 13 guides, in reading order (previous/next follow it). */
 export const GUIDE_IDS = [
   'welcome',
   'first-questionnaire',
@@ -24,10 +24,8 @@ export const GUIDE_IDS = [
   'dashboard',
   'answers-and-exports',
   'brand-customization',
-  'api-and-webhooks',
   'store-quiz-funnel',
   'users-and-roles',
-  'plans-and-billing',
 ] as const;
 
 export type GuideId = (typeof GUIDE_IDS)[number];

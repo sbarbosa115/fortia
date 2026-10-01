@@ -20,17 +20,6 @@ export class ApiError extends Error {
     this.details = details;
   }
 
-  /** 429 PLAN_LIMIT_REACHED: shown in amber with the reason's text (PRD §10.21). */
-  get isPlanLimit(): boolean {
-    return this.code === 'PLAN_LIMIT_REACHED';
-  }
-
-  /** The plan-limit reason (NO_PLAN, FEATURE_LIMIT_REACHED…), when it is one. */
-  get planReason(): string | null {
-    const reason = this.details['reason'];
-    return typeof reason === 'string' ? reason : null;
-  }
-
   /** 4xx errors are not worth retrying (PRD §10.9). */
   get isClientError(): boolean {
     return this.status >= 400 && this.status < 500;

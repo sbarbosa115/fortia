@@ -1,4 +1,3 @@
-import {useFeature, USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {useViewer} from '@console/entities/viewer';
 import {api, type Job, pollJob, type Schema} from '@shared/api';
 import {useToast} from '@shared/ui';
@@ -37,7 +36,6 @@ export function useCustomization() {
   const viewer = useViewer();
   const toast = useToast();
   const queryClient = useQueryClient();
-  const styles = useFeature('styles', viewer.isAdmin);
   const key = stylesQueryKey(viewer.customerId);
   const stored = useQuery({
     queryKey: key,
@@ -87,10 +85,7 @@ export function useCustomization() {
     onSuccess: async () => {
       setStage(null);
       toast.success(t('saved'));
-      await Promise.all([
-        queryClient.invalidateQueries({queryKey: key}),
-        queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY}),
-      ]);
+      await queryClient.invalidateQueries({queryKey: key});
     },
     onError: (failure) => {
       setStage(null);
@@ -99,10 +94,6 @@ export function useCustomization() {
   });
 
   const readOnlyReason = viewer.canWrite ? null : tShared('readOnly.change');
-  const planReason =
-    styles.loading || styles.allowed
-      ? null
-      : tShared(`planLimit.${styles.verdict?.reason ?? 'FEATURE_NOT_IN_PLAN'}`);
 
   return {
     loading: stored.isPending,
@@ -113,7 +104,7 @@ export function useCustomization() {
     showErrors: attempted,
     theme,
     readOnly: !viewer.canWrite,
-    saveDisabledReason: readOnlyReason ?? planReason,
+    saveDisabledReason: readOnlyReason,
     readsWebsite: websiteChanged(current, stored.data?.website),
     saving: save.isPending,
     stage,

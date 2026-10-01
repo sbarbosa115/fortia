@@ -4,7 +4,7 @@ namespace App\Responses\Application\Command;
 
 /**
  * Starts a respondent's session on a questionnaire (PRD §8.4, §6.9) and returns its id. The public route and the
- * assignations' respondent login both use it; neither the plan gate nor "is it public" is checked here — the caller
+ * assignations' respondent login both use it; "is it public" is not checked here — the caller
  * does that, in its own order (§7.11).
  *
  * An assignation's session is bound to the assignation, the member (null for a follow-up's shared session), its type

@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * The analytics event log: every domain event (PRD §12), as the usage/analytics service received them (§13.8,
+ * The analytics event log: every domain event (PRD §12), as the analytics service received them (§13.8,
  * absorbed into the API). Append-only.
  */
 #[ORM\Entity]
@@ -27,8 +27,6 @@ class DomainEventRecord
         private string $eventType,
         #[ORM\Column(length: 16, nullable: true)]
         private ?string $customerId,
-        #[ORM\Column(length: 64, nullable: true)]
-        private ?string $feature,
         #[ORM\Column(type: Types::JSON)]
         private array $payload,
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
@@ -49,11 +47,6 @@ class DomainEventRecord
     public function customerId(): ?string
     {
         return $this->customerId;
-    }
-
-    public function feature(): ?string
-    {
-        return $this->feature;
     }
 
     /** @return array<string, mixed> */

@@ -45,7 +45,6 @@ final class AssignationApiTest extends ApiTestCase
         self::assertSame(['type' => 'members', 'values' => [$members['ana']]], $stored->audience(), 'member ids are stored lowercase');
         self::assertSame('registration-1', $stored->questions()[0]['id'], 'the registration slide gets an id');
         self::assertSame('user-capture-data', $stored->questions()[0]['category']);
-        self::assertSame(1, $this->usage('ACME0001')['assignations'] ?? 0, 'PRD §7.2: creating an assignation counts one "assignations"');
     }
 
     public function testCreatingValidatesTheFieldsAndAllowsNoExtraOnes(): void
@@ -76,20 +75,16 @@ final class AssignationApiTest extends ApiTestCase
         $this->data($post([...$valid, 'type' => 'follow_up', 'due_date' => '2026-02-28']), 201);
     }
 
-    public function testCreatingIsForAdminGroupsAndNeedsTheAssignationsCapacity(): void
+    public function testCreatingIsForAdminGroups(): void
     {
-        $owner = $this->account('ACME0001', plan: 'starter');
+        $owner = $this->account('ACME0001');
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
         [$org] = $this->organizationWith('ACME0001', 'Acme');
         $questionnaire = $this->questionnaireOf('ACME0001');
         $body = ['organization_id' => $org, 'questionnaire_id' => $questionnaire, 'name' => 'A', 'max_follow_ups' => 2, 'type' => 'default', 'questions' => [self::registration()]];
 
         $this->assertApiError($this->api('POST', self::URL, $body, as: 'reader@acme.test'), 403, 'FORBIDDEN', 'PRD §8.8: POST is AG');
-        static::getContainer()->get(\App\Billing\Application\Usage::class)->set('ACME0001', ['assignations' => 5]);
-        $this->em()->flush();
-        $response = $this->api('POST', self::URL, $body, as: $owner);
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', 'PRD §8.8: Cap(assignations), starter allows 5');
-        self::assertSame('assignations', $response['json']['error']['details']['feature']);
+        self::assertSame(201, $this->api('POST', self::URL, $body, as: $owner)['status']);
     }
 
     public function testAQuestionnaireIsAssignedToOneOrganizationOnly(): void
@@ -122,7 +117,7 @@ final class AssignationApiTest extends ApiTestCase
     public function testAnotherAccountsOrganizationOrQuestionnaireIsNotFound(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         [$org] = $this->organizationWith('ACME0001', 'Acme');
         [$globexOrg] = $this->organizationWith('GLOBEX01', 'Globex');
         $body = ['name' => 'A', 'max_follow_ups' => 2, 'type' => 'default', 'questions' => [self::registration()]];
@@ -138,7 +133,7 @@ final class AssignationApiTest extends ApiTestCase
     {
         $this->clock()->set('2026-10-01T09:00:00Z');
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $admin = $this->admin();
         [$org] = $this->organizationWith('ACME0001', 'Acme');
         $this->clock()->set('2026-10-01T10:00:00Z');
@@ -208,7 +203,7 @@ final class AssignationApiTest extends ApiTestCase
     public function testTheDetailIsPublicForTheRespondentPageWithoutTheInternalNote(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         [$org] = $this->organizationWith('ACME0001', 'Acme');
         $id = $this->createAssignation($owner, $org, $this->questionnaireOf('ACME0001'), ['description' => 'Internal note']);
 
@@ -219,18 +214,6 @@ final class AssignationApiTest extends ApiTestCase
         $this->assertApiError($this->api('GET', self::URL.'/'.$id, as: 'root@globex01.test'), 404, 'ASSIGNATION_NOT_FOUND', "another account's assignation is 404");
         $this->assertApiError($this->api('GET', self::URL.'/'.Ids::uuid4()), 404, 'ASSIGNATION_NOT_FOUND');
         $this->assertApiError($this->api('GET', self::URL.'/nope'), 400, 'INVALID_UUID');
-    }
-
-    public function testAnAnonymousReadNeedsTheOwnersPlanToIncludeAssignations(): void
-    {
-        $this->clock()->set('2026-09-01T00:00:00Z');
-        $owner = $this->account('ACME0001');
-        [$org] = $this->organizationWith('ACME0001', 'Acme');
-        $id = $this->createAssignation($owner, $org, $this->questionnaireOf('ACME0001'));
-        $this->clock()->set('2026-12-01T00:00:00Z');
-
-        $this->assertApiError($this->api('GET', self::URL.'/'.$id), 429, 'PLAN_LIMIT_REACHED', 'PRD §8.8: for anonymous callers only, Feat(assignations) → 429');
-        self::assertSame(200, $this->api('GET', self::URL.'/'.$id, as: $owner)['status'], 'the console owner reads it whatever the plan');
     }
 
     // ---- PUT /assignations/{id} ----
@@ -278,7 +261,7 @@ final class AssignationApiTest extends ApiTestCase
     public function testAReadOnlyUserOrAnotherAccountCannotChangeOrDelete(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
         [$org] = $this->organizationWith('ACME0001', 'Acme');
         $id = $this->createAssignation($owner, $org, $this->questionnaireOf('ACME0001'));
@@ -292,7 +275,7 @@ final class AssignationApiTest extends ApiTestCase
 
     // ---- DELETE /assignations/{id} ----
 
-    public function testDeletingRemovesItAndCountsUsage(): void
+    public function testDeletingRemovesItButKeepsTheAnswers(): void
     {
         $owner = $this->account('ACME0001');
         [$org] = $this->organizationWith('ACME0001', 'Acme', [['ana', 'ana@acme.test']]);
@@ -302,7 +285,6 @@ final class AssignationApiTest extends ApiTestCase
         self::assertSame(204, $this->api('DELETE', self::URL.'/'.$id, as: $owner)['status']);
 
         $this->assertApiError($this->api('GET', self::URL.'/'.$id, as: $owner), 404, 'ASSIGNATION_NOT_FOUND');
-        self::assertSame(2, $this->usage('ACME0001')['assignations'] ?? 0, 'PRD §7.2: creating and deleting each count one');
     }
 
     // ---- GET /assignations/{id}/respondents ----
@@ -310,7 +292,7 @@ final class AssignationApiTest extends ApiTestCase
     public function testTheRespondentsAreTheAudienceWithTheirStatusAndAttempts(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         [$org, $m] = $this->organizationWith('ACME0001', 'Acme', [['carla', 'carla@acme.test'], ['ana', 'ana@acme.test'], ['bruno', 'bruno@acme.test'], ['dario', 'dario@acme.test', null, null, 'Other']]);
         $id = $this->createAssignation($owner, $org, $this->questionnaireOf('ACME0001'), ['type' => 'default', 'audience' => ['type' => 'members', 'values' => [$m['ana'], $m['bruno'], $m['carla']]]]);
         $this->answerAs($id, 'ana@acme.test');

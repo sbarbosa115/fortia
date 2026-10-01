@@ -49,22 +49,23 @@ describe('api client', () => {
   it('turns the error envelope into an ApiError with code and details', async () => {
     vi.stubGlobal(
       'fetch',
-      respond(429, {
+      respond(409, {
         error: {
-          code: 'PLAN_LIMIT_REACHED',
-          message: 'Limit',
-          details: {reason: 'FEATURE_LIMIT_REACHED', feature: 'users'},
+          code: 'EMAIL_ALREADY_EXISTS',
+          message: 'Taken',
+          details: {field: 'email'},
         },
       }),
     );
-    const onPlanLimit = vi.fn();
-    configureApi({baseUrl: '/api/v1', onPlanLimit});
+    const onError = vi.fn();
+    configureApi({baseUrl: '/api/v1', onError});
 
     const error = await api.post('/users', {}).catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(ApiError);
-    expect((error as ApiError).planReason).toBe('FEATURE_LIMIT_REACHED');
-    expect(onPlanLimit).toHaveBeenCalledOnce();
+    expect((error as ApiError).code).toBe('EMAIL_ALREADY_EXISTS');
+    expect((error as ApiError).details).toEqual({field: 'email'});
+    expect(onError).toHaveBeenCalledOnce();
   });
 
   it('sends the bearer token and the assumed customer, but not to /admin', async () => {

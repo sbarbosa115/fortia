@@ -26,10 +26,8 @@ const TOPIC_OF: Record<GuideId, GuideTopic> = {
   'dashboard': 'analytics',
   'answers-and-exports': 'analytics',
   'brand-customization': 'brand-integrations',
-  'api-and-webhooks': 'brand-integrations',
   'store-quiz-funnel': 'brand-integrations',
   'users-and-roles': 'account',
-  'plans-and-billing': 'account',
 };
 
 const TEXTS: Record<Language, Record<GuideId, GuideText>> = {
@@ -37,7 +35,7 @@ const TEXTS: Record<Language, Record<GuideId, GuideText>> = {
   es: GUIDES_ES,
 };
 
-/** The 15 guides in one language, in reading order (PRD §10.18). */
+/** The 13 guides in one language, in reading order (PRD §10.18). */
 export function guidesFor(language: Language): Guide[] {
   return GUIDE_IDS.map((id) => ({
     id,

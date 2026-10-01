@@ -10,12 +10,10 @@ import {
   MAX_CHAT_MESSAGES,
   sendChatTurn,
 } from '@console/entities/chat';
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {
   sentFileCount,
   useChatAttachments,
 } from '@console/features/chat-attachments';
-import {isApiError} from '@shared/api';
 import {useQueryClient} from '@tanstack/react-query';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -41,15 +39,6 @@ export type ChatResultHandler = (
   result: ChatTurnResult,
   previousDraft: ChatDraft | null,
 ) => void | string | null | Promise<void | string | null>;
-
-/** Plan refusals: retrying only refuses again, so they have no Retry and show in amber (PRD §10.4, §10.21). */
-const PLAN_CODES = [
-  'PLAN_LIMIT_REACHED',
-  'FEATURE_NOT_IN_PLAN',
-  'NO_PLAN',
-  'PLAN_INACTIVE',
-  'PLAN_NOT_FOUND',
-];
 
 /** The composer shows its counter only this close to the limit. */
 const COUNTER_THRESHOLD = 0.9;
@@ -91,8 +80,8 @@ export function historyOf(entries: ChatEntry[]): ChatMessage[] {
 /**
  * One conversation with the assistant (PRD §7.19, §10.4), the same in the AI Experience (create mode) and in
  * /projects/new (draft mode): the client keeps the messages with their attached documents, the draft and the pending
- * writes, and sends them with every turn; each turn is a `chat` job polled every 2 s. A failed turn can be retried
- * (not a plan refusal); a conversation holds 40 messages. The author can type, paste their questions or attach Word,
+ * writes, and sends them with every turn; each turn is a `chat` job polled every 2 s. A failed turn can be retried;
+ * a conversation holds 40 messages. The author can type, paste their questions or attach Word,
  * PDF or Markdown documents; a message with only documents asks for the questionnaire from them. `closed` ends the
  * conversation (the screen got what it wanted).
  */
@@ -162,8 +151,6 @@ export function useChat({
           if (language) {
             void i18n.changeLanguage(language);
           }
-        } else {
-          void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
         }
         const answered = [...lines, entry('assistant', result.message)];
         setEntries(answered);
@@ -227,9 +214,6 @@ export function useChat({
     setQuickReplies([]);
   };
 
-  const planFailure =
-    isApiError(error) && (error.isPlanLimit || PLAN_CODES.includes(error.code));
-
   return {
     mode,
     entries,
@@ -238,8 +222,7 @@ export function useChat({
     quickReplies,
     status,
     error,
-    planFailure,
-    canRetry: status === 'error' && !planFailure,
+    canRetry: status === 'error',
     input,
     setInput,
     maxLength: MAX_CHAT_MESSAGE_LENGTH,

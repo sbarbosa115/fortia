@@ -59,15 +59,6 @@ vi.mock('@console/entities/questionnaire', async (original) => ({
   createQuestionnaire: vi.fn(),
   copyQuestionnaire: vi.fn(),
 }));
-vi.mock('@console/entities/plan-usage', () => ({
-  USAGE_QUERY_KEY: ['usage'],
-  useFeature: () => ({
-    loading: false,
-    allowed: true,
-    included: true,
-    verdict: null,
-  }),
-}));
 vi.mock('@console/entities/viewer', () => ({
   useViewer: () => ({canWrite: true, isAdmin: false}),
 }));

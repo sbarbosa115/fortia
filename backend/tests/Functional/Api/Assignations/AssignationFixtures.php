@@ -3,7 +3,6 @@
 namespace App\Tests\Functional\Api\Assignations;
 
 use App\Assignations\Domain\Model\Assignation;
-use App\Billing\Application\Usage;
 use App\Organizations\Domain\Model\Organization;
 use App\Organizations\Domain\Model\OrganizationUser;
 use App\Responses\Domain\Model\QuestionnaireSession;
@@ -165,11 +164,5 @@ trait AssignationFixtures
     protected function mailer(): SwitchableMailer
     {
         return static::getContainer()->get(SwitchableMailer::class);
-    }
-
-    /** @return array<string, int> the account's usage counters */
-    protected function usage(string $customerId): array
-    {
-        return static::getContainer()->get(Usage::class)->current($customerId);
     }
 }

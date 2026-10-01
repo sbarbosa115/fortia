@@ -102,7 +102,7 @@ final class DemoProjectsSeeder implements DemoSeeder
 
     private function followUp(string $id, string $organizationId, string $title, string $slug, ?string $dueDate): Assignation
     {
-        $questionnaireId = (string) $this->commands->dispatch(new SaveFlow(DemoAccounts::ACME, self::states($title), $slug, source: 'seed', countsUsage: false));
+        $questionnaireId = (string) $this->commands->dispatch(new SaveFlow(DemoAccounts::ACME, self::states($title), $slug, source: 'seed'));
         $now = $this->clock->now();
         $assignation = new Assignation($id, DemoAccounts::ACME, $organizationId, $questionnaireId, $title, Assignation::FOLLOW_UP, $now);
         $assignation->configure($organizationId, $questionnaireId, $title, null, 2, true, $dueDate, ['type' => 'all', 'values' => []], [self::registration()], $now);

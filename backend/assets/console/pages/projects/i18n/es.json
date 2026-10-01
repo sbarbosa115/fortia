@@ -2,7 +2,6 @@
   "title": "Proyectos",
   "subtitle": "Agrupa las asignaciones de una organización. Aquí ves qué va respondido y qué te toca revisar.",
   "new": "Nuevo proyecto",
-  "notInPlan": "Tu plan no incluye asignaciones.",
   "loading": "Cargando proyectos",
   "empty": "Todavía no hay proyectos. Crea uno para seguir juntas las asignaciones de seguimiento de una organización.",
   "emptyAction": "Crear el primer proyecto",

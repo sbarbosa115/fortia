@@ -93,10 +93,5 @@
     "low": "Low {{count}} ({{pct}}%)",
     "medium": "Medium {{count}} ({{pct}}%)",
     "high": "High {{count}} ({{pct}}%)"
-  },
-  "locked": {
-    "title": "AI dashboards are not in your plan",
-    "body": "Upgrade to get a dashboard designed for each questionnaire.",
-    "cta": "Get your dashboards"
   }
 }

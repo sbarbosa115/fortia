@@ -2,7 +2,6 @@
 
 namespace App\Commerce\Application\Job;
 
-use App\Billing\Application\Features;
 use App\Commerce\Application\Command\AttachCatalog;
 use App\Commerce\Application\Command\ReplaceCatalog;
 use App\Commerce\Application\Port\CatalogScraper;
@@ -35,7 +34,7 @@ use Psr\Log\LoggerInterface;
  * 3. The language model writes the questionnaire (type `ecommerce`) in the account's language, `experience` or
  *    `profiling`, up to 3 attempts. The catalog is store content: it goes in as data, never as instructions.
  * 4. Questionnaires' SaveFlow stores the 2-state flow (`questionnaire` → `quiz_funnel`) with a random lowercase slug
- *    and the store as its source_url; it counts one `quiz-funnel` (§7.2). The products are tied to the new
+ *    and the store as its source_url. The products are tied to the new
  *    questionnaire, so its respondents are recommended from them (§7.7).
  *
  * Result: {type: "create_quiz_funnel", flow: {id, slug, questionnaire_id}, questionnaire_url}.
@@ -167,7 +166,6 @@ final class QuizFunnelJob implements JobHandler
                     QuizFunnel::randomSlug(),
                     sourceUrl: $origin,
                     source: 'quiz_funnel',
-                    feature: Features::QUIZ_FUNNEL,
                 ));
             } catch (Conflict $e) {
                 // A random slug that is already taken (SLUG_ALREADY_IN_USE): draw another one.

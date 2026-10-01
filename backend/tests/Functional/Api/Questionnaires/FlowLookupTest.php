@@ -67,25 +67,21 @@ final class FlowLookupTest extends ApiTestCase
         $this->assertApiError($this->api('GET', '/api/v1/questionnaire/find'), 400, 'INVALID_REQUEST', 'PRD §8.4: 400 if url is missing');
     }
 
-    public function testSaveFlowCountsTheFeatureItIsToldAndCreatedStagesCountNothing(): void
+    public function testAGeneratedStageIsAChildOfItsRoot(): void
     {
         $owner = $this->account('ACME0001');
         $commands = static::getContainer()->get(CommandBus::class);
 
-        $root = $commands->dispatch(new SaveFlow('ACME0001', self::chainFlow()['states'], source: 'chat', feature: 'chat'));
+        $root = $commands->dispatch(new SaveFlow('ACME0001', self::chainFlow()['states'], source: 'chat'));
         $stage = $commands->dispatch(new CreateGeneratedStage($root, Ids::uuid4(), 'Stage 2', [['title' => 'Next?', 'options' => [['type' => 'text']]]], ['type' => 'diagnostic'], [
             'tiers' => [['id' => 'low', 'name' => 'Low', 'min' => 0, 'max' => 5]],
             'recommendations' => [['tier_id' => 'low', 'recommendation' => 'Keep going']],
             'action_plan' => [],
         ]));
 
-        $usage = $this->data($this->api('GET', '/api/v1/customer/usage', as: $owner));
-        self::assertSame(1, $usage['features']['chat']['used'], 'the chat counts as "chat" (PRD §7.2)');
-        self::assertSame(0, $usage['features']['chain']['used']);
         $child = $this->data($this->api('GET', "/api/v1/questionnaire/$stage", as: $owner));
         self::assertSame($root, $child['parent'], 'PRD §7.8: a stage points to its root');
         self::assertSame('ACME0001', $child['customer_id']);
         self::assertSame(['low'], array_column($child['on_completed']['tiers'], 'id'), 'the generated tiers are its diagnostic');
-        self::assertSame(1, $this->data($this->api('GET', '/api/v1/customer/usage', as: $owner))['features']['chat']['used'], 'a child stage counts no usage (PRD §7.1)');
     }
 }

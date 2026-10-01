@@ -1,4 +1,3 @@
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {
   COMMERCE_POLL,
   isShop,
@@ -115,16 +114,12 @@ export function useQuizFunnel() {
     onSuccess: async (done) => {
       setResult(done);
       await Promise.all([
-        queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY}),
         queryClient.invalidateQueries({queryKey: PRODUCTS_QUERY_KEY}),
         queryClient.invalidateQueries({queryKey: QUESTIONNAIRES_QUERY_KEY}),
       ]);
     },
     onError: (error) => {
-      if (
-        isApiError(error) &&
-        (error.isPlanLimit || OWN_TEXT.includes(error.code))
-      ) {
+      if (isApiError(error) && OWN_TEXT.includes(error.code)) {
         toast.apiError(error);
         return;
       }

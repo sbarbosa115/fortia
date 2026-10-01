@@ -145,16 +145,4 @@ describe('UsersPage (PRD §10.16)', () => {
       screen.getAllByText("Your read-only role can't create resources.").length,
     ).toBeGreaterThan(0);
   });
-
-  it('disables "New user" when the plan has no users left', async () => {
-    signInAs(['Customer-Admin'], true);
-    stubApi({message: 'OK', data: {users: []}}, 200, false);
-    renderPage();
-
-    expect(
-      await screen.findAllByText(
-        "You've reached your plan's limit for this feature.",
-      ),
-    ).not.toHaveLength(0);
-  });
 });

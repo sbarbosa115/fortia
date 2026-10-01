@@ -12,9 +12,8 @@ namespace App\Questionnaires\Application\Command;
  * parameters.questionnaire, a `prompt` state its text in parameters.text (uploaded here) or its storage key in
  * parameters.key, a diagnostic its scoring in the questionnaire's on_completed or the diagnostic state's parameters.
  *
- * Creating emits QuestionnaireCreated, which counts one unit of $feature (default: the feature of the flow's type,
- * Billing\Application\Features::forQuestionnaireType). The caller runs the plan gate first. Editing refuses a
- * questionnaire with responses (409 QUESTIONNAIRE_ALREADY_ANSWERED) and keeps the flow's id.
+ * Creating emits QuestionnaireCreated. Editing refuses a questionnaire with responses (409
+ * QUESTIONNAIRE_ALREADY_ANSWERED) and keeps the flow's id.
  */
 final class SaveFlow
 {
@@ -24,7 +23,6 @@ final class SaveFlow
      * @param list<string>|null         $layout
      * @param array<string, mixed>|null $resultCopy
      * @param string                    $source     console, copy, quiz_funnel, chat, linkedin (QuestionnaireCreated payload)
-     * @param string|null               $feature    the feature this creation counts against, when not the flow type's
      */
     public function __construct(
         public readonly string $customerId,
@@ -39,9 +37,6 @@ final class SaveFlow
         /** The store the flow belongs to (quiz funnel), matched by GET /questionnaire/find. */
         public readonly ?string $sourceUrl = null,
         public readonly string $source = 'console',
-        public readonly ?string $feature = null,
-        /** false for data that is not a customer's action (the demo seed): QuestionnaireCreated then counts nothing. */
-        public readonly bool $countsUsage = true,
     ) {
     }
 }

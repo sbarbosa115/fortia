@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-/** PRD §8.2 GET/PATCH /customer/onboarding. No plan gate. */
+/** PRD §8.2 GET/PATCH /customer/onboarding. */
 #[OA\Tag(name: 'Account')]
 final class OnboardingController
 {

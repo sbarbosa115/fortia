@@ -1,4 +1,3 @@
-import {usePlanUsage} from '@console/entities/plan-usage';
 import {useViewer} from '@console/entities/viewer';
 import {AssumeCustomer} from '@console/widgets/assume-customer';
 import {Icon, type IconName} from '@shared/ui';
@@ -35,7 +34,6 @@ const GROUPS: Array<{key: string; entries: Entry[]}> = [
     key: 'settings',
     entries: [
       {to: '/users', key: 'users', icon: 'user-plus'},
-      {to: '/integrations', key: 'integrations', icon: 'plug'},
       {to: '/profile', key: 'profile', icon: 'user-cog'},
       {to: '/documentation', key: 'documentation', icon: 'graduation-cap'},
     ],
@@ -144,7 +142,6 @@ function LanguageMenu() {
 export function Sidebar() {
   const {t} = useTranslation('app');
   const viewer = useViewer();
-  const {data: usage} = usePlanUsage(!viewer.isAdmin);
   const [open, setOpen] = useState(false);
   const displayName = nameFromEmail(viewer.email);
 
@@ -241,14 +238,6 @@ export function Sidebar() {
                   <span className="sidebar__account-display">
                     {displayName}
                   </span>
-                  {usage?.plan ? (
-                    <span
-                      className="sidebar__plan"
-                      title={t('account.currentPlan')}
-                    >
-                      {usage.plan.plan_name}
-                    </span>
-                  ) : null}
                 </span>
                 <span className="sidebar__account-email">{viewer.email}</span>
               </span>

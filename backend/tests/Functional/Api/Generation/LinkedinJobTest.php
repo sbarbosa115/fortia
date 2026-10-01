@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Generation;
 
-use App\Billing\Application\Usage;
 use App\Questionnaires\Application\Query\QuestionnaireQueries;
 use App\Tests\Support\ApiTestCase;
 
@@ -36,7 +35,6 @@ final class LinkedinJobTest extends ApiTestCase
         $diagnostic = $queries->diagnosticOf($questionnaire->id());
         self::assertNotNull($diagnostic);
         self::assertSame([[0, 7], [8, 15], [16, 24]], array_map(static fn (array $t): array => [$t['min'], $t['max']], $diagnostic['tiers']), '§7.8: tier bands computed on the server (8 questions × 3 = 24)');
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current(self::OWNER)['diagnostic'] ?? 0, '§7.2: LinkedIn counts as diagnostic');
 
         $request = $this->llm()->requests()[0];
         self::assertSame('linkedin--rules-to-create-diagnostic-questionnaires', $request->purpose);
@@ -52,13 +50,6 @@ final class LinkedinJobTest extends ApiTestCase
 
         $questionnaire = static::getContainer()->get(QuestionnaireQueries::class)->find($job['result']['questionnaire_id']);
         self::assertSame('Diagnóstico de liderazgo para Luis Gomez', $questionnaire?->title(), '§8.4: any other value becomes es');
-    }
-
-    public function testNoPlanGateApplies(): void
-    {
-        $this->account(self::OWNER, plan: null);
-
-        self::assertSame('COMPLETED', $this->generate(['linkedin_url' => 'https://www.linkedin.com/in/ana'])['status'], '§7.1: no gate applies to generation from LinkedIn');
     }
 
     public function testAProfileThatCannotBeReadFailsTheJobAndStoresNothing(): void

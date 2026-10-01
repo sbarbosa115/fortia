@@ -8,10 +8,6 @@ describe('login outcomes (PRD §9.10 step 4)', () => {
       loginOutcome(new ApiError(409, 'FOLLOW_UP_COMPLETED', 'x')),
       '409 → completed screen',
     ).toBe('completed');
-    expect(
-      loginOutcome(new ApiError(429, 'PLAN_LIMIT_REACHED', 'x')),
-      '429 → limit screen',
-    ).toBe('limit');
     expect(loginOutcome(new ApiError(403, 'NOT_IN_AUDIENCE', 'x'))).toBe(
       'notInAudience',
     );
@@ -26,7 +22,7 @@ describe('login outcomes (PRD §9.10 step 4)', () => {
     );
     expect(
       loginOutcome(new ApiError(429, 'TOO_MANY_ATTEMPTS', 'x')),
-      'the rate limit is not the plan limit: the respondent can try again',
+      'the rate limit: the respondent can try again',
     ).toBe('failed');
     expect(loginOutcome(new ApiError(0, 'TIMEOUT', 'x'))).toBe('failed');
     expect(loginOutcome(new Error('offline'))).toBe('failed');

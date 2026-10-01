@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Branding;
 
-use App\Billing\Application\Usage;
 use App\Branding\Application\Port\BrandSnapshot;
 use App\Branding\Domain\BrandStyles;
 use App\Branding\Domain\Contrast;
@@ -96,19 +95,16 @@ final class StylesJobTest extends ApiTestCase
         self::assertArrayHasKey('input', $styles, 'missing sections come from the defaults');
     }
 
-    public function testACompletedJobCountsOneStylesAndAFailedOneNothing(): void
+    public function testAFailedJobChangesNothing(): void
     {
         $owner = $this->account('ACME0001');
-
         $this->restyle($owner, ['website' => '']);
-        self::assertSame(1, $this->usage()['styles'] ?? 0, '§7.2: a completed styles job counts one "styles"');
 
         $this->extractor()->willFail();
         $failed = $this->restyle($owner, ['website' => 'https://down.example']);
 
         self::assertSame('FAILED', $failed['status']);
         self::assertSame('WEBSITE_UNREACHABLE', $failed['result']['error']['type']);
-        self::assertSame(1, $this->usage()['styles'] ?? 0, '§7.2: if it fails, it does not count');
         self::assertNull($this->stored('ACME0001')->website(), 'a failed job saves nothing');
     }
 
@@ -121,7 +117,6 @@ final class StylesJobTest extends ApiTestCase
 
         self::assertSame('FAILED', $job['status']);
         self::assertNull(static::getContainer()->get(\App\Branding\Domain\Repository\CustomerStylesRepository::class)->find('ACME0001'));
-        self::assertSame(0, $this->usage()['styles'] ?? 0);
     }
 
     public function testAnAccountOnlyEverRestylesItself(): void
@@ -159,12 +154,6 @@ final class StylesJobTest extends ApiTestCase
         self::assertNotNull($styles, 'the styles were saved');
 
         return $styles;
-    }
-
-    /** @return array<string, int> */
-    private function usage(): array
-    {
-        return static::getContainer()->get(Usage::class)->current('ACME0001');
     }
 
     private function extractor(): FakeBrandExtractor

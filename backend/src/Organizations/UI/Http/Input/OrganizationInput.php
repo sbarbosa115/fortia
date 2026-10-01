@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * POST /organizations (group "create") and PUT /organizations/{id} (group "update", partial), PRD §8.7. No extra
  * fields, in the organization or in its members. The domain's own rules (normalized name 1–120, domain shape,
- * member rules) run here too, so they answer before the plan gate.
+ * member rules) run here too.
  */
 final class OrganizationInput implements TracksProvidedFields
 {

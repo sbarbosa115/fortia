@@ -2,8 +2,6 @@
 
 namespace App\Commerce\UI\Http\Controller;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Commerce\Application\Command\CreateQuizFunnel;
 use App\Commerce\Application\Command\ScrapeProducts;
 use App\Commerce\UI\Http\Input\QuizFunnelInput;
@@ -29,7 +27,6 @@ final class QuizFunnelController
     public function __construct(
         private readonly CommandBus $commands,
         private readonly JobQueries $jobs,
-        private readonly PlanGate $gate,
     ) {
     }
 
@@ -50,7 +47,7 @@ final class QuizFunnelController
     }
 
     /**
-     * AG, Cap(quiz-funnel). Job `create_quiz_funnel` (stages loading_products → saving_products →
+     * AG. Job `create_quiz_funnel` (stages loading_products → saving_products →
      * generating_questionnaire → saving). Result {type: "create_quiz_funnel", flow: {id, slug, questionnaire_id},
      * questionnaire_url}. Without source_url the connected store is used (400 SHOPIFY_NOT_CONNECTED without one).
      */
@@ -60,13 +57,11 @@ final class QuizFunnelController
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR, SHOPIFY_NOT_CONNECTED')]
     #[OA\Response(response: 401, description: 'UNAUTHORIZED')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false)] QuizFunnelInput $input): JsonResponse
     {
         if (!$caller->inAdminGroups()) {
             throw new NotAllowed('FORBIDDEN', 'Admin privileges are required.');
         }
-        $this->gate->capacity($caller, Features::QUIZ_FUNNEL);
         $jobId = (string) $this->commands->dispatch(new CreateQuizFunnel($caller->customerId, (string) $input->type, $input->storeUrl(), $input->products()));
 
         return ApiResponse::accepted(['job' => $this->jobs->find($jobId)], 'Creating the quiz funnel');

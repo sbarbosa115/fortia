@@ -2,7 +2,6 @@
 
 namespace App\Generation\Application\Job;
 
-use App\Billing\Application\Features;
 use App\Generation\Application\GenerationSettings;
 use App\Generation\Application\Port\LinkedinProfiles;
 use App\Generation\Application\QuestionnaireWriter;
@@ -21,8 +20,7 @@ use App\Shared\Domain\Error\Unavailable;
  *
  * The profile is read through the LinkedinProfiles port, then the language model writes a scored questionnaire with
  * tiers (up to 3 attempts, bands computed on the server, §7.8). It is saved as a diagnostic flow owned by the
- * configured account (LINKEDIN_OWNER_CUSTOMER_ID, D8) and counts one `diagnostic` (§7.2: "LinkedIn counts as
- * diagnostic"); no plan gate applies. Result: {type: "linkedin_questionnaire", questionnaire_id}.
+ * configured account (LINKEDIN_OWNER_CUSTOMER_ID, D8). Result: {type: "linkedin_questionnaire", questionnaire_id}.
  */
 final class LinkedinQuestionnaireJob implements JobHandler
 {
@@ -94,7 +92,6 @@ final class LinkedinQuestionnaireJob implements JobHandler
                 ['state_id' => 'diagnostic', 'type' => 'diagnostic'],
             ],
             source: 'linkedin',
-            feature: Features::DIAGNOSTIC,
         ));
 
         return ['type' => self::TYPE, 'questionnaire_id' => $id];

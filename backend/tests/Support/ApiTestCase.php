@@ -2,14 +2,11 @@
 
 namespace App\Tests\Support;
 
-use App\Billing\Domain\Model\CustomerPlan;
-use App\Billing\Infrastructure\Seed\CatalogSeeder;
 use App\Identity\Domain\Model\Customer;
 use App\Identity\Domain\Model\User;
 use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Shared\Domain\Clock;
 use App\Shared\Domain\Ids;
-use App\Shared\Domain\Iso;
 use App\Shared\Infrastructure\Llm\Fake\FakeLanguageModel;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -18,11 +15,11 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
  * The base of every functional test of the API (tests/Functional/Api/<Context>/…). Each test runs in a transaction
- * that is rolled back (DAMA), starts with the feature and plan catalog, and builds the accounts it needs:
+ * that is rolled back (DAMA) and builds the accounts it needs:
  *
- *     $acme = $this->account('ACME0001', plan: 'pro');           // root user root@ACME0001.test
+ *     $acme = $this->account('ACME0001');           // root user root@ACME0001.test
  *     $reader = $this->user('ACME0001', 'reader@acme.test', groups: ['Customer-Read-Only']);
- *     $response = $this->api('GET', '/api/v1/customer/usage', as: 'root@ACME0001.test');
+ *     $response = $this->api('GET', '/api/v1/customer/ACME0001/settings', as: 'root@ACME0001.test');
  *     self::assertSame(200, $response['status']);
  *     $this->assertApiError($response, 404, 'QUESTIONNAIRE_NOT_FOUND');
  */
@@ -36,8 +33,6 @@ abstract class ApiTestCase extends WebTestCase
         $this->client = static::createClient();
         $this->client->disableReboot();
         $this->clock()->reset();
-        static::getContainer()->get(CatalogSeeder::class)->seed();
-        $this->em()->flush();
     }
 
     protected function em(): EntityManagerInterface
@@ -56,19 +51,11 @@ abstract class ApiTestCase extends WebTestCase
         return static::getContainer()->get(FakeLanguageModel::class);
     }
 
-    /**
-     * An account with its root user (root@{customerId}.test) and a plan valid from today for a month.
-     *
-     * @param string|null $plan null = no plan at all
-     */
-    protected function account(string $customerId, ?string $plan = 'pro', string $language = 'es-CO', bool $onboarding = true): string
+    /** An account with its root user (root@{customerId}.test). */
+    protected function account(string $customerId, string $language = 'es-CO', bool $onboarding = true): string
     {
         $now = $this->clock()->now();
         $this->em()->persist(new Customer($customerId, $language, 'default', $now, $onboarding));
-        if (null !== $plan) {
-            $today = $this->clock()->today();
-            $this->em()->persist(new CustomerPlan($customerId, $plan, $today, Iso::addMonths($today, 1), 'month', $now));
-        }
         $this->em()->flush();
         $this->user($customerId, 'root@'.strtolower($customerId).'.test', root: true);
 

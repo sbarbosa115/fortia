@@ -1,4 +1,3 @@
-import {useFeature} from '@console/entities/plan-usage';
 import {useViewer} from '@console/entities/viewer';
 import {api} from '@shared/api';
 import {LoadingState} from '@shared/ui';
@@ -52,22 +51,4 @@ export function RequireWrite({
 }) {
   const viewer = useViewer();
   return viewer.canWrite ? children : <Navigate to={fallback} replace />;
-}
-
-/** Waits for the plan verdict and sends to the listing when the plan does not allow the feature (PRD §10.1). */
-export function RequireFeature({
-  feature,
-  children,
-  fallback,
-}: {
-  feature: string;
-  children: ReactNode;
-  fallback: string;
-}) {
-  const viewer = useViewer();
-  const state = useFeature(feature, viewer.isAdmin);
-  if (state.loading) {
-    return <LoadingState />;
-  }
-  return state.allowed ? children : <Navigate to={fallback} replace />;
 }

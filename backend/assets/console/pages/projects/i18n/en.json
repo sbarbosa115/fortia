@@ -2,7 +2,6 @@
   "title": "Projects",
   "subtitle": "Group the assignations of one organization. See what has been answered and what is waiting for your review.",
   "new": "New project",
-  "notInPlan": "Your plan doesn't include assignations.",
   "loading": "Loading projects",
   "empty": "No projects yet. Create one to follow the follow-up assignations of an organization together.",
   "emptyAction": "Create the first project",

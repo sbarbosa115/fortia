@@ -7,7 +7,7 @@ use App\Shared\Application\Security\Caller;
 /**
  * One account tool the assistant can call (PRD §7.19 "account tools available to the chat").
  *
- * A read runs at once. A write is first checked ($guard: the same permission, plan-gate and ownership checks as its
+ * A read runs at once. A write is first checked ($guard: the same permission and ownership checks as its
  * HTTP endpoint, plus the shape of its input), queued with the label the user sees, and only run when the user says
  * yes — when $guard runs again, then $run.
  */

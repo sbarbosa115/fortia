@@ -2,13 +2,12 @@
 
 namespace App\Tests\Functional\Api\Identity;
 
-use App\Billing\Application\Usage;
 use App\Identity\Domain\Model\Customer;
 use App\Tests\Support\ApiTestCase;
 
 /**
  * PRD §8.3 GET/PATCH /customer/{customer_id}/settings: public to read (the respondent app, §9.9, §9.15, §9.16), AG to
- * change, Cap(profile) unless only the language changes.
+ * change.
  */
 final class SettingsTest extends ApiTestCase
 {
@@ -86,24 +85,14 @@ final class SettingsTest extends ApiTestCase
         $this->assertApiError($this->api('PATCH', '/api/v1/customer/ACME0001/settings', ['pixel_id' => str_repeat('9', 65)], as: $owner), 400, 'VALIDATION_ERROR', 'PRD §6.1: tracking ids ≤ 64');
     }
 
-    public function testChangingSettingsCountsAsProfileUsageButLanguageAloneDoesNot(): void
+    public function testEveryChangeOfSettingsPublishesProfileEdited(): void
     {
         $owner = $this->account('ACME0001');
 
         $this->data($this->api('PATCH', '/api/v1/customer/ACME0001/settings', ['language' => 'en-US'], as: $owner));
-        self::assertSame(0, $this->used('ACME0001'), 'PRD §7.2: changing the account language does not count');
 
         $this->data($this->api('PATCH', '/api/v1/customer/ACME0001/settings', ['language' => 'es-CO', 'max_files' => 3], as: $owner));
-        self::assertSame(1, $this->used('ACME0001'), 'PRD §7.2: editing account settings counts "profile"');
         self::assertSame(2, (int) $this->em()->getConnection()->fetchOne("SELECT COUNT(*) FROM domain_event_log WHERE event_type = 'ProfileEdited' AND customer_id = 'ACME0001'"), 'PRD §8.3: ProfileEdited');
-    }
-
-    public function testThePlanGateAppliesUnlessOnlyTheLanguageChanges(): void
-    {
-        $owner = $this->account('NOPLAN01', plan: null);
-
-        $this->assertApiError($this->api('PATCH', '/api/v1/customer/NOPLAN01/settings', ['max_files' => 3], as: $owner), 429, 'PLAN_LIMIT_REACHED', 'PRD §8.3: Cap(profile) when anything but the language changes');
-        self::assertSame('en-US', $this->data($this->api('PATCH', '/api/v1/customer/NOPLAN01/settings', ['language' => 'en-US'], as: $owner))['language'], 'PRD §7.1: no gate for changing the account language');
     }
 
     public function testOnlyAdminGroupsMayChangeSettings(): void
@@ -123,10 +112,5 @@ final class SettingsTest extends ApiTestCase
 
         $this->assertApiError($this->api('PATCH', '/api/v1/customer/ACME0001/settings', ['language' => 'en-US'], as: $globex), 404, 'CUSTOMER_NOT_FOUND', 'another tenant\'s account is 404, never 403');
         self::assertSame(7, $this->data($this->api('PATCH', '/api/v1/customer/ACME0001/settings', ['max_files' => 7], as: $admin))['max_files'], 'PRD §8.3: an Admin may change any account');
-    }
-
-    private function used(string $customerId): int
-    {
-        return static::getContainer()->get(Usage::class)->current($customerId)['profile'] ?? 0;
     }
 }

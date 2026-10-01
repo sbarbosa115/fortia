@@ -44,11 +44,11 @@ function renderPage(language: 'en' | 'es' = 'en', url = '/documentation') {
 describe('DocumentationPage guides (PRD §10.18)', () => {
   beforeEach(() => mocks.get.mockReset());
 
-  it('lists the 15 guides with their topic and reading time', () => {
+  it('lists the 13 guides with their topic and reading time', () => {
     renderPage();
 
-    expect(screen.getAllByRole('article')).toHaveLength(15);
-    expect(screen.getByText('15 guides')).toBeInTheDocument();
+    expect(screen.getAllByRole('article')).toHaveLength(13);
+    expect(screen.getByText('13 guides')).toBeInTheDocument();
     const welcome = screen.getByRole('article', {name: 'Welcome to Mappi'});
     expect(within(welcome).getByText('Getting started')).toBeInTheDocument();
     expect(within(welcome).getByText(/min read/)).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe('DocumentationPage guides (PRD §10.18)', () => {
     expect(
       screen.getByRole('article', {name: 'Bienvenido a Mappi'}),
     ).toBeInTheDocument();
-    expect(screen.getByText('15 guías')).toBeInTheDocument();
+    expect(screen.getByText('13 guías')).toBeInTheDocument();
   });
 
   it('searches ignoring case and accents', async () => {
@@ -112,7 +112,7 @@ describe('DocumentationPage guides (PRD §10.18)', () => {
     expect(screen.getByText('No guides match your search')).toBeInTheDocument();
     await user.click(screen.getByRole('button', {name: 'Clear filters'}));
 
-    expect(screen.getAllByRole('article')).toHaveLength(15);
+    expect(screen.getAllByRole('article')).toHaveLength(13);
     expect(screen.getByRole('searchbox', {name: 'Search guides'})).toHaveValue(
       '',
     );
@@ -169,7 +169,7 @@ describe('DocumentationPage videos (PRD §10.18)', () => {
       'aria-selected',
       'true',
     );
-    expect(screen.getAllByRole('article')).toHaveLength(15);
+    expect(screen.getAllByRole('article')).toHaveLength(13);
   });
 
   it('shows the error with a retry', async () => {

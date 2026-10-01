@@ -4,8 +4,7 @@ namespace App\Identity\Domain\Model;
 
 /**
  * A change to an account's settings (PRD §8.3 PATCH settings), already shape-checked: tracking ids that are empty or
- * null clear them, a null max_files goes back to the default, and only a change that is nothing but the language is
- * free of the plan gate (§7.1) and does not count as "profile" usage (§7.2).
+ * null clear them, and a null max_files goes back to the default.
  */
 final class SettingsChange
 {
@@ -43,10 +42,5 @@ final class SettingsChange
     public function fields(): array
     {
         return array_keys($this->changes);
-    }
-
-    public function onlyLanguage(): bool
-    {
-        return ['language'] === $this->fields();
     }
 }

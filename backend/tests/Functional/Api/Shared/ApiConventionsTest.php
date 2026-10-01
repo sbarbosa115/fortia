@@ -47,42 +47,42 @@ final class ApiConventionsTest extends ApiTestCase
     public function testAnAdminAssumesACustomerAndActsAsItsRootUser(): void
     {
         $admin = $this->admin();
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
 
-        $usage = $this->data($this->api('GET', '/api/v1/customer/usage', as: $admin, headers: ['X-Assume-Customer-Id' => 'GLOBEX01']));
+        $profile = $this->data($this->api('GET', '/api/v1/profile', as: $admin, headers: ['X-Assume-Customer-Id' => 'GLOBEX01']));
 
-        self::assertSame('starter', $usage['customer_plan']['plan_id'], 'PRD §4.4: the request runs as the assumed account');
+        self::assertSame('GLOBEX01', $profile['customer']['customer_id'], 'PRD §4.4: the request runs as the assumed account');
     }
 
     public function testTheAssumeHeaderNameIsCaseInsensitive(): void
     {
         $admin = $this->admin();
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
 
-        $usage = $this->data($this->api('GET', '/api/v1/customer/usage', as: $admin, headers: ['x-assume-customer-id' => 'GLOBEX01']));
+        $profile = $this->data($this->api('GET', '/api/v1/profile', as: $admin, headers: ['x-assume-customer-id' => 'GLOBEX01']));
 
-        self::assertSame('starter', $usage['customer_plan']['plan_id']);
+        self::assertSame('GLOBEX01', $profile['customer']['customer_id']);
     }
 
     public function testOnlyAnAdminMayAssume(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
 
-        $this->assertApiError($this->api('GET', '/api/v1/customer/usage', as: $owner, headers: ['X-Assume-Customer-Id' => 'GLOBEX01']), 403, 'ASSUME_NOT_ALLOWED');
+        $this->assertApiError($this->api('GET', '/api/v1/profile', as: $owner, headers: ['X-Assume-Customer-Id' => 'GLOBEX01']), 403, 'ASSUME_NOT_ALLOWED');
     }
 
     public function testAssumingAnUnknownAccountIs404(): void
     {
         $admin = $this->admin();
 
-        $this->assertApiError($this->api('GET', '/api/v1/customer/usage', as: $admin, headers: ['X-Assume-Customer-Id' => 'NOPE0000']), 404, 'ASSUMED_CUSTOMER_NOT_FOUND');
+        $this->assertApiError($this->api('GET', '/api/v1/profile', as: $admin, headers: ['X-Assume-Customer-Id' => 'NOPE0000']), 404, 'ASSUMED_CUSTOMER_NOT_FOUND');
     }
 
     public function testWritesWhileAssumingAreLogged(): void
     {
         $admin = $this->admin();
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
 
         $this->api('PATCH', '/api/v1/customer/onboarding', ['completed' => true], as: $admin, headers: ['X-Assume-Customer-Id' => 'GLOBEX01']);
 

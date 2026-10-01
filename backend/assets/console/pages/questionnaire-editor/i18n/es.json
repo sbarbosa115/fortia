@@ -223,8 +223,7 @@
       "result": "Terminar",
       "diagnostic": "Diagnóstico",
       "quiz_funnel": "Quiz funnel"
-    },
-    "chainNotAllowed": "Tu plan ya no incluye cuestionarios encadenados, así que esta cadena no se puede guardar."
+    }
   },
   "preview": {
     "title": "Vista previa",

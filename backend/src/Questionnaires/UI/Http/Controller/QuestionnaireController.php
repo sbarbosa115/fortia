@@ -2,8 +2,6 @@
 
 namespace App\Questionnaires\UI\Http\Controller;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Questionnaires\Application\Command\CopyQuestionnaire;
 use App\Questionnaires\Application\Command\SaveFlow;
 use App\Questionnaires\Application\Command\SetQuestionnaireActive;
@@ -36,7 +34,7 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * The console's questionnaires (PRD §8.4): the listing, creating and editing from a flow, reading one, the Active
  * toggle, copies and a chain's prompts. Order of every write (§5 A2): the caller → the payload and the flow rules →
- * the plan gate → the command. Another account's questionnaire is 404, never 403.
+ * the command. Another account's questionnaire is 404, never 403.
  */
 #[OA\Tag(name: 'Questionnaires')]
 final class QuestionnaireController
@@ -45,7 +43,6 @@ final class QuestionnaireController
         private readonly CommandBus $commands,
         private readonly QuestionnaireDetails $details,
         private readonly QuestionnaireListing $listing,
-        private readonly PlanGate $gate,
     ) {
     }
 
@@ -74,13 +71,11 @@ final class QuestionnaireController
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 409, description: 'SLUG_ALREADY_IN_USE')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false)] FlowInput $input): JsonResponse
     {
         self::requireAdminGroups($caller);
         $draft = self::draft($input);
         $draft->assertPromptKeysBelongTo($caller->customerId);
-        $this->gate->capacity($caller, Features::forQuestionnaireType($draft->usageType()));
 
         $id = (string) $this->commands->dispatch(new SaveFlow(
             $caller->customerId,
@@ -149,12 +144,10 @@ final class QuestionnaireController
     #[OA\Response(response: 201, description: 'The new questionnaire', content: new Model(type: QuestionnaireOutput::class))]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 404, description: 'QUESTIONNAIRE_NOT_FOUND')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function copy(Caller $caller, string $id): JsonResponse
     {
         self::requireAdminGroups($caller);
         $id = (string) $this->owned($caller, RouteId::uuid($id))['questionnaire_id'];
-        $this->gate->capacity($caller, $this->details->featureOf($id));
 
         $copyId = (string) $this->commands->dispatch(new CopyQuestionnaire($id));
 

@@ -5,7 +5,7 @@ import {Icon} from '@shared/ui';
 import {StatusScreen} from './RunnerFrame';
 
 /**
- * Why a questionnaire cannot be answered (PRD §9.3 rendering priority 1–2, §9.10, §9.11): the response limit (429)
+ * Why a questionnaire cannot be answered (PRD §9.3 rendering priority 1–2, §9.10, §9.11): too many attempts (429)
  * or "This questionnaire does not exist" with a way to create one in the console.
  */
 export function UnavailableScreen({
@@ -17,7 +17,7 @@ export function UnavailableScreen({
 }) {
   const {t} = useTranslation('widgets.questionnaire-runner');
   if (isApiError(error) && error.status === 429) {
-    return <StatusScreen mark title={t('unavailable.limit')} />;
+    return <StatusScreen mark title={t('unavailable.tooManyAttempts')} />;
   }
   if (notFound === 'flow') {
     return <StatusScreen title={t('unavailable.flow')} />;

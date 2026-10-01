@@ -6,7 +6,6 @@ import {
   type TokenResponse,
   validToken,
 } from '@console/entities/viewer';
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {api, configureApi} from '@shared/api';
 import {appConfig} from '@shared/config';
 import type {QueryClient} from '@tanstack/react-query';
@@ -19,13 +18,9 @@ const ASSUME_STOPPERS = [
 
 /**
  * Wires the shared API client to the console (PRD §10.1, §10.20, §10.21): the id token (refreshed when it expires
- * in < 2 min), the assumed customer, a 401 that ends the session, an assume error that stops assuming, and a plan
- * limit that refreshes the usage.
+ * in < 2 min), the assumed customer, a 401 that ends the session, and an assume error that stops assuming.
  */
-export function setupConsoleApi(
-  queryClient: QueryClient,
-  notifyPlanLimit: (error: unknown) => void,
-): void {
+export function setupConsoleApi(queryClient: QueryClient): void {
   setRefresher((refreshToken) =>
     api.post<TokenResponse>(
       '/auth/refresh',
@@ -40,10 +35,6 @@ export function setupConsoleApi(
     getAssumedCustomerId: () => getAssumed()?.id ?? null,
     onUnauthorized: () => {
       endSession();
-    },
-    onPlanLimit: (error) => {
-      notifyPlanLimit(error);
-      void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
     },
     onError: (error) => {
       if (getAssumed() && ASSUME_STOPPERS.includes(error.code)) {

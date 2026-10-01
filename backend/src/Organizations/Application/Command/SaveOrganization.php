@@ -16,8 +16,7 @@ use App\Shared\Application\Security\Caller;
  *
  * The handler checks the domain rules (400 VALIDATION_ERROR, 409 DOMAIN_EMAIL_CONFLICT) and ownership on update
  * (404 ORGANIZATION_NOT_FOUND for another account's organization, unless the caller is an Admin). It does NOT run the
- * plan gate or the role check: the caller does, before dispatching — PlanGate::capacity($caller,
- * Features::ORGANIZATIONS) on create, and write permission. A create publishes OrganizationCreated (counts usage).
+ * role check: the caller does, before dispatching (write permission). A create publishes OrganizationCreated.
  */
 final class SaveOrganization
 {

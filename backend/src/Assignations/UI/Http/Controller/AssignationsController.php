@@ -12,8 +12,6 @@ use App\Assignations\UI\Http\Output\AssignationCreatedOutput;
 use App\Assignations\UI\Http\Output\AssignationListOutput;
 use App\Assignations\UI\Http\Output\AssignationOutput;
 use App\Assignations\UI\Http\Output\ProjectPaginationOutput;
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\Caller;
 use App\Shared\Domain\Error\NotAllowed;
@@ -29,7 +27,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * PRD §8.8 assignations: list, create (AG, Cap(assignations)), read (public: the respondent page reads it), change and
+ * PRD §8.8 assignations: list, create (AG), read (public: the respondent page reads it), change and
  * delete (the owner's account or an Admin, with the console's write permission). Another account's assignation is 404.
  */
 #[OA\Tag(name: 'Assignations')]
@@ -40,7 +38,6 @@ final class AssignationsController
     public function __construct(
         private readonly CommandBus $commands,
         private readonly AssignationDetails $details,
-        private readonly PlanGate $gate,
         private readonly string $frontendUrl,
     ) {
     }
@@ -72,7 +69,7 @@ final class AssignationsController
         ));
     }
 
-    /** AG, Cap(assignations). Counts one "assignations" (AssignationCreated). */
+    /** AG. */
     #[Route('/assignations', name: 'api_assignations_create', methods: ['POST'])]
     #[OA\RequestBody(content: new Model(type: AssignationInput::class))]
     #[OA\Response(response: 201, description: 'The respondent link and the id', content: new Model(type: AssignationCreatedOutput::class))]
@@ -80,36 +77,29 @@ final class AssignationsController
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 404, description: 'ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND')]
     #[OA\Response(response: 409, description: 'QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name)')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false, groups: ['Default', 'create'])] AssignationInput $input): JsonResponse
     {
         if (!$caller->inAdminGroups()) {
             throw new NotAllowed('FORBIDDEN', 'Admin privileges are required.');
         }
-        $this->gate->capacity($caller, Features::ASSIGNATIONS);
         $id = (string) $this->commands->dispatch(new CreateAssignation($caller, $input->fields()));
 
         return ApiResponse::created(new AssignationCreatedOutput(rtrim($this->frontendUrl, '/').'/a/'.$id, $id));
     }
 
     /**
-     * Public (the respondent page). An anonymous caller needs the owner's plan to include assignations (429) and does
-     * not see the description nor the answers; a console user sees only their account's (another's is 404).
+     * Public (the respondent page). An anonymous caller does not see the description nor the answers; a console user sees only their account's (another's is 404).
      */
     #[Route('/assignations/{id}', name: 'api_assignations_get', methods: ['GET'])]
     #[OA\Response(response: 200, description: 'The enriched assignation', content: new Model(type: AssignationOutput::class))]
     #[OA\Response(response: 400, description: 'INVALID_UUID')]
     #[OA\Response(response: 404, description: 'ASSIGNATION_NOT_FOUND')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED (anonymous callers only)')]
     public function get(?Caller $caller, string $id): JsonResponse
     {
         $id = RouteId::uuid($id);
         $data = $this->details->find($id, null !== $caller);
         if (null === $data || (null !== $caller && !$caller->owns((string) $data['customer_id']))) {
             throw new AssignationNotFound($id);
-        }
-        if (null === $caller) {
-            $this->gate->featureForAccount((string) $data['customer_id'], Features::ASSIGNATIONS);
         }
 
         return ApiResponse::ok(AssignationOutput::of($data));
@@ -132,7 +122,7 @@ final class AssignationsController
         return ApiResponse::ok(AssignationOutput::of((array) $this->details->find($id, true)));
     }
 
-    /** 204. Counts one "assignations" (AssignationDeleted). The respondents' answers stay. */
+    /** 204. The respondents' answers stay. */
     #[Route('/assignations/{id}', name: 'api_assignations_delete', methods: ['DELETE'])]
     #[OA\Response(response: 204, description: 'Deleted')]
     #[OA\Response(response: 400, description: 'INVALID_UUID')]

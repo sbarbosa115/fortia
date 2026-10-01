@@ -1,4 +1,3 @@
-import {useFeature, USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {useViewer} from '@console/entities/viewer';
 import {api} from '@shared/api';
 import {
@@ -33,8 +32,8 @@ import './account-settings.css';
 const settingsKey = (customerId: string) => ['account-settings', customerId];
 
 /**
- * The "Settings" tab of /profile (PRD §10.14): account language, maximum files per question and the tracking ids.
- * Changing them needs write permission and the plan's "profile" feature; every disabled control says why.
+ * The settings of /profile (PRD §10.14): account language, maximum files per question and the tracking ids.
+ * Changing them needs write permission; every disabled control says why.
  */
 export function AccountSettings() {
   const viewer = useViewer();
@@ -63,7 +62,6 @@ function SettingsEditor({settings}: {settings: CustomerSettings}) {
   const viewer = useViewer();
   const toast = useToast();
   const queryClient = useQueryClient();
-  const feature = useFeature('profile', viewer.isAdmin);
   const [initial, setInitial] = useState<SettingsForm>(() =>
     formFrom(settings),
   );
@@ -77,7 +75,6 @@ function SettingsEditor({settings}: {settings: CustomerSettings}) {
       ),
     onSuccess: (saved) => {
       queryClient.setQueryData(settingsKey(viewer.customerId), saved);
-      void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
       const next = formFrom(saved);
       setInitial(next);
       setForm(next);
@@ -86,11 +83,7 @@ function SettingsEditor({settings}: {settings: CustomerSettings}) {
     onError: (error) => toast.apiError(error),
   });
 
-  const lockedReason = !viewer.canWrite
-    ? ts('readOnly.change')
-    : !feature.loading && !feature.included
-      ? ts(`planLimit.${feature.verdict?.reason ?? 'FEATURE_NOT_IN_PLAN'}`)
-      : null;
+  const lockedReason = viewer.canWrite ? null : ts('readOnly.change');
   const locked = lockedReason !== null;
   const maxFilesError = isValidMaxFiles(form.max_files)
     ? null

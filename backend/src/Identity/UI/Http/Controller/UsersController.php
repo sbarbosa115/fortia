@@ -2,8 +2,6 @@
 
 namespace App\Identity\UI\Http\Controller;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Identity\Application\Command\CreateTeamUser;
 use App\Identity\Application\Query\AccountQueries;
 use App\Identity\Domain\Error\InvalidRole;
@@ -28,7 +26,6 @@ final class UsersController
     public function __construct(
         private readonly CommandBus $commands,
         private readonly AccountQueries $accounts,
-        private readonly PlanGate $gate,
     ) {
     }
 
@@ -39,13 +36,12 @@ final class UsersController
         return ApiResponse::ok(new UserListOutput(array_map(UserOutput::of(...), $this->accounts->usersOf($caller->customerId))));
     }
 
-    /** AG, Cap(users): a user with a permanent password and an assignable role; counts "users" (UserCreated). */
+    /** AG: a user with a permanent password and an assignable role (UserCreated). */
     #[Route('/users', name: 'api_users_create', methods: ['POST'])]
     #[OA\Response(response: 201, description: 'The user was created', content: new Model(type: UserOutput::class))]
     #[OA\Response(response: 400, description: 'INVALID_ROLE, VALIDATION_ERROR')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 409, description: 'EMAIL_ALREADY_EXISTS')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false)] CreateUserInput $input): JsonResponse
     {
         if (!$caller->inAdminGroups()) {
@@ -54,7 +50,6 @@ final class UsersController
         if (!\in_array($input->role, Caller::ASSIGNABLE_ROLES, true)) {
             throw new InvalidRole();
         }
-        $this->gate->capacity($caller, Features::USERS);
 
         /** @var array{email: string, name: string, root: bool, role: string, customer_id: string} $user */
         $user = $this->commands->dispatch(new CreateTeamUser(

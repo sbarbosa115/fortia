@@ -7,7 +7,7 @@ namespace App\Shared\Application\Security;
  * signed-in console user (401 otherwise).
  *
  * While an Admin assumes a customer (X-Assume-Customer-Id, §4.4) the Caller is that account's root user: groups
- * [Customer-Admin], root = true, no admin bypass, and that customer's plan limits. $realEmail keeps who is really
+ * [Customer-Admin], root = true, and no admin bypass. $realEmail keeps who is really
  * behind the request, for the impersonation log.
  */
 final class Caller

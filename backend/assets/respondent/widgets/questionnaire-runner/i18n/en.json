@@ -67,7 +67,7 @@
   "submitFailed": "We couldn't send your answers. Check your connection and try again.",
   "empty": "This questionnaire has no questions.",
   "unavailable": {
-    "limit": "The response limit has been reached.",
+    "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
     "notFound": "This questionnaire does not exist.",
     "create": "Want to create this questionnaire?",
     "flow": "This flow could not be found."

@@ -177,12 +177,6 @@
   flex: none;
   margin-top: 2px;
 }
-.ai-chat__snack--plan {
-  border-color: #fde68a;
-  background: #fffbeb;
-  color: #92400e;
-}
-
 /* The assistant's Markdown */
 .ai-md {
   padding-top: 2px;

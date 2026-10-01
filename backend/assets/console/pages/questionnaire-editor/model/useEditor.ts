@@ -1,4 +1,3 @@
-import {USAGE_QUERY_KEY, fetchUsage} from '@console/entities/plan-usage';
 import {
   QUESTIONNAIRES_QUERY_KEY,
   createQuestionnaire,
@@ -38,13 +37,6 @@ export type SavedResult = {
   questionnaireId: string;
   slug: string | null;
 };
-
-const PLAN_OFF = [
-  'FEATURE_NOT_IN_PLAN',
-  'NO_PLAN',
-  'PLAN_INACTIVE',
-  'PLAN_NOT_FOUND',
-];
 
 /**
  * The creation container's state (PRD §10.5): the draft, the current step, the preview, the create confirmation,
@@ -148,27 +140,6 @@ export function useEditor({
     );
   }
 
-  /** The chain feature, checked live before a chain is saved (PRD §10.5 "On save"). */
-  async function chainAllowed(): Promise<boolean> {
-    if (viewer.isAdmin) {
-      return true;
-    }
-    try {
-      const usage = await queryClient.fetchQuery({
-        queryKey: USAGE_QUERY_KEY,
-        queryFn: fetchUsage,
-        staleTime: 0,
-      });
-      const verdict = usage.features['chain'];
-      if (mode === 'create') {
-        return verdict?.allowed ?? false;
-      }
-      return !PLAN_OFF.includes(verdict?.reason ?? 'FEATURE_NOT_IN_PLAN');
-    } catch {
-      return true;
-    }
-  }
-
   function handleError(error: unknown) {
     if (error instanceof ApiError && error.code === 'SLUG_ALREADY_IN_USE') {
       setSlugInUse(draft.slug);
@@ -194,10 +165,6 @@ export function useEditor({
     try {
       let promptKeys: string[] = [];
       if (draft.kind === 'chaining') {
-        if (!(await chainAllowed())) {
-          toast.error(t('prompts.chainNotAllowed'));
-          return;
-        }
         try {
           promptKeys = await uploadPrompts();
         } catch (error) {
@@ -212,7 +179,6 @@ export function useEditor({
       let id = questionnaireId;
       if (mode === 'create' || !id) {
         id = await createQuestionnaire(body);
-        void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
       } else {
         await updateQuestionnaire(id, body);
       }

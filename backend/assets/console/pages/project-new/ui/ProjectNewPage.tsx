@@ -1,5 +1,5 @@
 import {useDocumentTitle} from '@shared/lib';
-import {Icon, Tooltip} from '@shared/ui';
+import {Icon} from '@shared/ui';
 import {useEffect, useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router';
@@ -39,7 +39,7 @@ export function ProjectNewPage() {
       type="button"
       className="prj-new__btn prj-new__btn--primary"
       onClick={wizard.submit}
-      disabled={Boolean(wizard.createReason) || wizard.creating}
+      disabled={wizard.creating}
       aria-busy={wizard.creating || undefined}
     >
       <span className={wizard.creating ? 'prj-new__spin' : undefined}>
@@ -90,11 +90,7 @@ export function ProjectNewPage() {
             {step === 0 ? tShared('actions.cancel') : t('actions.back')}
           </button>
           {step === 2 ? (
-            wizard.createReason ? (
-              <Tooltip content={wizard.createReason}>{createButton}</Tooltip>
-            ) : (
-              createButton
-            )
+            createButton
           ) : (
             <button
               ref={continueRef}

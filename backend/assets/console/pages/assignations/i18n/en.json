@@ -4,7 +4,6 @@
   "count_one": "{{count}} assignation",
   "count_other": "{{count}} assignations",
   "new": "New assignation",
-  "notInPlan": "Your plan doesn't include assignations.",
   "tabs": {
     "label": "Assignations by type",
     "all": "All",

@@ -150,14 +150,6 @@ final class FlowDraft
     }
 
     /**
-     * The type a new questionnaire of this flow counts against (PRD §7.2): its flow type, else its own type.
-     */
-    public function usageType(): string
-    {
-        return 'default' !== $this->flowType ? $this->flowType : $this->type;
-    }
-
-    /**
      * A prompt key must be one of the account's prompt texts (`prompts/{customer_id}/…`).
      *
      * @throws InvalidFlow

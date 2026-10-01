@@ -67,7 +67,7 @@
   "submitFailed": "No pudimos enviar tus respuestas. Revisa tu conexión e inténtalo de nuevo.",
   "empty": "Este cuestionario no tiene preguntas.",
   "unavailable": {
-    "limit": "Se ha alcanzado el límite de respuestas.",
+    "tooManyAttempts": "Demasiados intentos. Inténtalo de nuevo en unos minutos.",
     "notFound": "Este cuestionario no existe.",
     "create": "¿Quieres crear este cuestionario?",
     "flow": "No se encontró este flujo."

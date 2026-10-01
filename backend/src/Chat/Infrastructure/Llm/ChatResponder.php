@@ -22,8 +22,8 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  *   instead of the three; with the questions under way, its questions are added;
  * - with the questions under way, "agrega una tabla" / "add a table" and "agrega un archivo con plantilla" / "add a
  *   file with a template" → add_questions (a table, a file question with a CSV template) and request_review;
- * - "mis cuestionarios / organizaciones / asignaciones / proyectos / videos / usuarios / webhooks / claves",
- *   "mi plan", "planes" → the list tools;
+ * - "mis cuestionarios / organizaciones / asignaciones / proyectos / videos / usuarios" → the list
+ *   tools;
  * - "crea la organización X" → create_organization (queued); "elimina/borra" + a selected organization →
  *   delete_organization; "desactiva" / "copia" / "edita" + a selected questionnaire → set_questionnaire_active,
  *   copy_questionnaire, load_questionnaire;
@@ -37,8 +37,8 @@ final class ChatResponder implements FakeLlmResponder
 {
     private const TEXTS = [
         'es' => [
-            'greeting' => '¡Hola! Puedo crear cuestionarios contigo y ayudarte con tu cuenta: organizaciones, asignaciones, proyectos, tu plan y más. ¿Qué quieres hacer?',
-            'replies' => ['Crear un cuestionario', 'Ver mis cuestionarios', 'Ver mi plan'],
+            'greeting' => '¡Hola! Puedo crear cuestionarios contigo y ayudarte con tu cuenta: organizaciones, asignaciones, proyectos y más. ¿Qué quieres hacer?',
+            'replies' => ['Crear un cuestionario', 'Ver mis cuestionarios', 'Ver mis organizaciones'],
             'basics' => "Estos son los datos básicos:\n\n- **Título:** %s\n- **Tipo:** %s\n- **Tema:** %s\n- **Página de inicio:** no\n- **Aviso legal:** no\n- **Captura de datos:** no\n\n¿Los confirmas?",
             'review' => "Este es el borrador completo de **%s** con %d preguntas:\n\n%s\n\n¿Lo creo?",
             'review_draft' => "Este es el borrador completo de **%s** con %d preguntas:\n\n%s\n\n¿Lo apruebas?",
@@ -63,8 +63,8 @@ final class ChatResponder implements FakeLlmResponder
             'file' => ['Sube tu presupuesto con la plantilla', 'plantilla-presupuesto.csv', ['Concepto', 'Cantidad', 'Costo'], ['Licencias', '10', '500']],
         ],
         'en' => [
-            'greeting' => 'Hi! I can build questionnaires with you and help with your account: organizations, assignations, projects, your plan and more. What would you like to do?',
-            'replies' => ['Create a questionnaire', 'See my questionnaires', 'See my plan'],
+            'greeting' => 'Hi! I can build questionnaires with you and help with your account: organizations, assignations, projects and more. What would you like to do?',
+            'replies' => ['Create a questionnaire', 'See my questionnaires', 'See my organizations'],
             'basics' => "These are the basics:\n\n- **Title:** %s\n- **Type:** %s\n- **Topic:** %s\n- **Landing page:** no\n- **Disclaimer:** no\n- **Data capture:** no\n\nDo you confirm them?",
             'review' => "Here is the complete draft of **%s** with %d questions:\n\n%s\n\nShall I create it?",
             'review_draft' => "Here is the complete draft of **%s** with %d questions:\n\n%s\n\nDo you approve it?",
@@ -97,10 +97,6 @@ final class ChatResponder implements FakeLlmResponder
         'list_projects' => ['proyectos', 'projects'],
         'list_videos' => ['videos', 'tutoriales', 'tutorials'],
         'list_team_users' => ['usuarios', 'users', 'equipo', 'team'],
-        'list_webhooks' => ['webhooks'],
-        'list_api_keys' => ['claves', 'keys'],
-        'list_plans' => ['planes', 'plans'],
-        'get_plan_and_usage' => ['plan', 'uso', 'usage', 'consumo'],
     ];
 
     private int $calls = 0;
@@ -243,7 +239,7 @@ final class ChatResponder implements FakeLlmResponder
                 if (1 === preg_match('/\b'.$word.'\b/', $text)) {
                     $offset = 1 === preg_match('/(ver|see) 5 (mas|more)/', $text) ? 5 : 0;
 
-                    return [[$tool, str_starts_with($tool, 'list_') && !\in_array($tool, ['list_plans', 'list_videos', 'list_webhooks', 'list_api_keys'], true) ? ['offset' => $offset] : []]];
+                    return [[$tool, str_starts_with($tool, 'list_') && !\in_array($tool, ['list_videos'], true) ? ['offset' => $offset] : []]];
                 }
             }
         }

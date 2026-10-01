@@ -25,7 +25,7 @@ final class ChangeSettingsHandler
         $customer = $this->customers->get($command->customerId);
         $change = SettingsChange::of($command->fields);
         $customer->changeSettings($change->changes(), $this->clock->now());
-        $this->events->publish(ProfileEdited::of($command->customerId, $change->fields(), !$change->onlyLanguage()));
+        $this->events->publish(ProfileEdited::of($command->customerId, $change->fields()));
 
         return $customer->settings();
     }

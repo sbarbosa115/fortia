@@ -33,7 +33,7 @@ final class SignInWithPasswordHandler
             throw new Unauthenticated('INVALID_CREDENTIALS', 'Invalid email or password.');
         }
         $user->recordSignIn($this->clock->now());
-        $this->events->publish(new UserSignedIn($user->customerId(), null, ['email' => $user->email()]));
+        $this->events->publish(new UserSignedIn($user->customerId(), ['email' => $user->email()]));
 
         return $this->tokens->issue($user);
     }

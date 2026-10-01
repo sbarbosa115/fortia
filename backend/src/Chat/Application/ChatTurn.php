@@ -2,8 +2,6 @@
 
 namespace App\Chat\Application;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Chat\Application\Tool\ChatTools;
 use App\Chat\Application\Tool\Permissions;
 use App\Chat\Domain\AttachedFile;
@@ -24,7 +22,6 @@ use App\Shared\Application\Llm\LlmUnavailable;
 use App\Shared\Application\Security\Caller;
 use App\Shared\Domain\Clock;
 use App\Shared\Domain\Error\DomainError;
-use App\Shared\Domain\Error\TooManyRequests;
 use App\Shared\Domain\Error\UpstreamFailed;
 use Psr\Log\LoggerInterface;
 
@@ -32,8 +29,8 @@ use Psr\Log\LoggerInterface;
  * One turn of the chat assistant (PRD §7.19, §10.4): the user's message in, the assistant's answer out.
  *
  * 1. The server reads the user's last message as a yes, a no or something else (Confirmation). On a yes to a draft
- *    in review it saves the questionnaire (create mode, the same SaveFlow as POST/PUT /questionnaire, after the
- *    `chat` plan gate; type `chat-questionnaire-created`) or hands it back approved (draft mode, nothing saved; type
+ *    in review it saves the questionnaire (create mode, the same SaveFlow as POST/PUT /questionnaire; type
+ *    `chat-questionnaire-created`) or hands it back approved (draft mode, nothing saved; type
  *    `chat-questionnaire-approved` with the flow to save). On a yes to queued changes it runs them; on a no it drops
  *    them.
  * 2. The language model answers, with up to 8 tool rounds and 90 s: reads run at once, writes are queued for the
@@ -77,7 +74,6 @@ final class ChatTurn
         private readonly SystemPrompts $prompts,
         private readonly ChatTools $tools,
         private readonly DraftTools $draftTools,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
         private readonly Clock $clock,
         private readonly LoggerInterface $logger,
@@ -107,8 +103,6 @@ final class ChatTurn
                 $id = $this->save($caller, $draft);
 
                 return $this->result('chat-questionnaire-created', \sprintf($texts[null === $draft->questionnaireId() ? 'created' : 'updated'], $draft->title()), [], null, [], $queue) + ['questionnaire_id' => $id];
-            } catch (TooManyRequests $e) {
-                throw $e; // A plan limit fails the turn: the console shows it without "Retry" (PRD §10.4).
             } catch (DomainError $e) {
                 return $this->result('chat', \sprintf($texts['save_failed'], $e->getMessage()), [], $draft->reopened(), [], $queue);
             }
@@ -206,16 +200,14 @@ final class ChatTurn
 
     /**
      * Creates (or, for a loaded questionnaire, updates) the questionnaire with the same flow-saving logic as
-     * POST/PUT /questionnaire: AG; creating passes the `chat` plan gate and counts one `chat` (PRD §7.2).
+     * POST/PUT /questionnaire: AG.
      */
     private function save(Caller $caller, ChatDraft $draft): string
     {
         Permissions::adminGroups($caller);
         $payload = DraftFlow::payload($draft);
         if (null === $draft->questionnaireId()) {
-            $this->gate->capacity($caller, Features::CHAT);
-
-            return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], source: 'chat', feature: Features::CHAT));
+            return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], source: 'chat'));
         }
 
         return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], questionnaireId: $draft->questionnaireId(), source: 'chat'));
@@ -283,7 +275,7 @@ final class ChatTurn
             '- When the draft is complete, call request_review, show the whole draft and ask whether to '.('draft' === $mode ? 'approve it' : 'create it').'. The platform '.('draft' === $mode ? 'hands it back' : 'creates it').' when the user says yes. Show its questions as one Markdown table with the columns '.('en' === $language ? '"# | Question | Type"' : '"# | Pregunta | Tipo"').': one row per question, every one of them, in order, its number, its title as it is, and its type in the user\'s language (single choice, multiple choice, dropdown, text, scale, table, file); never a plain list.',
             '- Link records as [Name](item:<kind>/<id>), kind = questionnaire, organization, assignation or project.',
             '- Show lists as Markdown tables of 5 or 10 rows; when there are more, offer "'.('en' === $language ? 'See 5 more' : 'Ver 5 más').'" as a quick reply.',
-            '- Never create API keys or invite users: tell the user where in the console to do it.',
+            '- Never invite users: tell the user where in the console to do it.',
             '- Your final answer is JSON: {"message": Markdown, "quick_replies": up to 4 short replies}.',
             '',
             UntrustedText::json('current_draft', $draft->isEmpty() ? null : $draft->toArray()),

@@ -99,7 +99,7 @@ describe('DocumentationGuidePage (PRD §10.18)', () => {
     expect(screen.queryByRole('link', {name: /Previous guide/})).toBeNull();
     unmount();
 
-    renderGuide('plans-and-billing');
+    renderGuide('users-and-roles');
     expect(screen.queryByRole('link', {name: /Next guide/})).toBeNull();
     expect(
       screen.getByRole('link', {name: /Previous guide/}),

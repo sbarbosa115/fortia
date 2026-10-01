@@ -11,8 +11,7 @@ use App\Shared\Domain\Clock;
 
 /**
  * The end of PRD §7.7 (step 3, in all cases): the result is stored (so /session/{id}/results can be reloaded),
- * status = completed, and QuestionnaireSessionCompleted is emitted — the questionnaire.completed webhook listens to
- * it, and it counts one response on the final stage only. Called inside a command handler.
+ * status = completed, and QuestionnaireSessionCompleted is emitted. Called inside a command handler.
  */
 final class SessionCompletion
 {

@@ -2,8 +2,6 @@
 
 namespace App\Organizations\UI\Http\Controller;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Organizations\Application\Command\DeleteOrganization;
 use App\Organizations\Application\Command\SaveOrganization;
 use App\Organizations\Application\Query\OrganizationQueries;
@@ -35,7 +33,6 @@ final class OrganizationsController
     public function __construct(
         private readonly CommandBus $commands,
         private readonly OrganizationQueries $organizations,
-        private readonly PlanGate $gate,
     ) {
     }
 
@@ -49,18 +46,16 @@ final class OrganizationsController
         return ApiResponse::bare(new OrganizationListOutput(array_map(OrganizationOutput::of(...), $rows)));
     }
 
-    /** AG, Cap(organizations). Counts one "organizations" (OrganizationCreated). */
+    /** AG. */
     #[Route('/organizations', name: 'api_organizations_create', methods: ['POST'])]
     #[OA\RequestBody(content: new Model(type: OrganizationInput::class))]
     #[OA\Response(response: 201, description: 'The organization with its members', content: new Model(type: OrganizationOutput::class))]
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 409, description: 'DOMAIN_EMAIL_CONFLICT')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false, groups: ['Default', 'create'])] OrganizationInput $input): JsonResponse
     {
         self::assertAdminGroups($caller);
-        $this->gate->capacity($caller, Features::ORGANIZATIONS);
         $id = (string) $this->commands->dispatch(SaveOrganization::create($caller, $input->fields()));
 
         return ApiResponse::created($this->present($id));
@@ -83,7 +78,7 @@ final class OrganizationsController
         return ApiResponse::ok($this->present($id));
     }
 
-    /** 204. Deletes the members too (D2). Counts one "organizations" (OrganizationDeleted). */
+    /** 204. Deletes the members too (D2). */
     #[Route('/organizations/{id}', name: 'api_organizations_delete', methods: ['DELETE'])]
     #[OA\Response(response: 204, description: 'Deleted')]
     #[OA\Response(response: 400, description: 'INVALID_UUID')]

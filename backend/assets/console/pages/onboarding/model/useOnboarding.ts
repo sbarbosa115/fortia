@@ -1,4 +1,3 @@
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {
   createQuestionnaire,
   QUESTIONNAIRES_QUERY_KEY,
@@ -133,7 +132,6 @@ export function useOnboarding(): Onboarding {
   }, [preview]);
 
   const afterWrite = useCallback(() => {
-    void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
     void queryClient.invalidateQueries({queryKey: QUESTIONNAIRES_QUERY_KEY});
   }, [queryClient]);
 

@@ -58,7 +58,6 @@ export function ProductsPage() {
       variant="primary"
       icon={<Icon name="sparkles" size={16} />}
       disabledReason={state.funnelReason}
-      disabled={state.funnelLoading}
       onClick={() => navigate('/questionnaires/create/quizfunnel')}
     >
       {t('createExperience')}

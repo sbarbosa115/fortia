@@ -2,8 +2,6 @@
 
 namespace App\Chat\UI\Http\Controller;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Chat\Application\Command\StartChatTurn;
 use App\Chat\UI\Http\Input\ChatInput;
 use App\Chat\UI\Http\Output\ChatJobEnvelopeOutput;
@@ -19,7 +17,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * The AI assistant (PRD §8.10, §7.19): AG, Cap(chat). Each message is a turn that runs as a `chat` job (202 {job});
+ * The AI assistant (PRD §8.10, §7.19): AG. Each message is a turn that runs as a `chat` job (202 {job});
  * the console polls it every 2 s for up to 5 min (§11).
  */
 #[OA\Tag(name: 'Chat')]
@@ -28,7 +26,6 @@ final class ChatController
     public function __construct(
         private readonly CommandBus $commands,
         private readonly JobQueries $jobs,
-        private readonly PlanGate $gate,
     ) {
     }
 
@@ -38,13 +35,11 @@ final class ChatController
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR')]
     #[OA\Response(response: 401, description: 'UNAUTHORIZED')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function __invoke(Caller $caller, #[Payload(allowExtraFields: false)] ChatInput $input): JsonResponse
     {
         if (!$caller->inAdminGroups()) {
             throw new NotAllowed('FORBIDDEN', 'Admin privileges are required.');
         }
-        $this->gate->capacity($caller, Features::CHAT);
 
         $jobId = (string) $this->commands->dispatch(new StartChatTurn(
             $caller,

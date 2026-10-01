@@ -1,5 +1,3 @@
-import {usePlanUsage} from '@console/entities/plan-usage';
-import {useViewer} from '@console/entities/viewer';
 import {ErrorState, LoadingState} from '@shared/ui';
 import {useState} from 'react';
 import {Navigate, useParams} from 'react-router';
@@ -13,10 +11,10 @@ import {GenericEditor} from './GenericEditor';
 import {LockedView} from './LockedView';
 import './editor.css';
 
-const CREATE_KINDS: Record<string, {kind: EditorKind; feature: string}> = {
-  regular: {kind: 'regular', feature: 'regular'},
-  diagnostic: {kind: 'diagnostic', feature: 'diagnostic'},
-  chaining: {kind: 'chaining', feature: 'chain'},
+const CREATE_KINDS: Record<string, EditorKind> = {
+  regular: 'regular',
+  diagnostic: 'diagnostic',
+  chaining: 'chaining',
 };
 
 /**
@@ -34,18 +32,9 @@ export function QuestionnaireEditorPage() {
 }
 
 function CreateNew({routeKind}: {routeKind: string}) {
-  const viewer = useViewer();
-  const usage = usePlanUsage(!viewer.isAdmin);
   const target = CREATE_KINDS[routeKind];
-  const [initial] = useState(() => (target ? emptyDraft(target.kind) : null));
+  const [initial] = useState(() => (target ? emptyDraft(target) : null));
   if (!target || !initial) {
-    return <Navigate to="/questionnaires/new" replace />;
-  }
-  if (!viewer.isAdmin && usage.isPending) {
-    return <LoadingState />;
-  }
-  const verdict = usage.data?.features[target.feature];
-  if (!viewer.isAdmin && usage.data && !verdict?.allowed) {
     return <Navigate to="/questionnaires/new" replace />;
   }
   return (

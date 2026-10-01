@@ -71,7 +71,7 @@ final class ProjectApiTest extends ApiTestCase
     public function testCreatingRefusesOrganizationsAndAssignationsThatDoNotFit(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $org = $this->organization('ACME0001', 'Acme');
         $otherOrg = $this->organization('ACME0001', 'Acme Two');
         $globexOrg = $this->organization('GLOBEX01', 'Globex');
@@ -90,17 +90,6 @@ final class ProjectApiTest extends ApiTestCase
         $taken = $this->followUp('ACME0001', $org, 'Taken');
         $this->data($this->api('POST', self::URL, $body($org, [$taken]), as: $owner), 201);
         $this->assertApiError($this->api('POST', self::URL, $body($org, [$taken]), as: $owner), 409, 'ASSIGNATION_IN_OTHER_PROJECT', 'PRD §7.12: an assignation belongs to only one project');
-    }
-
-    public function testCreatingNeedsTheAssignationsFeature(): void
-    {
-        $owner = $this->account('NEWCO001', plan: null);
-        $org = $this->organization('NEWCO001', 'Newco');
-
-        $response = $this->api('POST', self::URL, ['organization_id' => $org, 'name' => 'P', 'due_date' => '2026-12-01'], as: $owner);
-
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', 'PRD §8.9: Feat(assignations)');
-        self::assertSame('assignations', $response['json']['error']['details']['feature']);
     }
 
     public function testAReadOnlyUserCannotChangeProjects(): void
@@ -222,7 +211,7 @@ final class ProjectApiTest extends ApiTestCase
     public function testAnotherAccountsProjectIsNotFound(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $theirs = $this->project('GLOBEX01', $this->organization('GLOBEX01', 'Globex'), 'Secret', '2026-12-01', []);
 
         $this->assertApiError($this->api('GET', self::URL.'/'.$theirs, as: $owner), 404, 'PROJECT_NOT_FOUND', "another tenant's id is 404, never 403");
@@ -299,7 +288,7 @@ final class ProjectApiTest extends ApiTestCase
     public function testTheListShowsOnlyTheCallersAccountButEverythingToAnAdmin(): void
     {
         $owner = $this->account('ACME0001');
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $this->project('ACME0001', $this->organization('ACME0001', 'Acme'), 'Ours', '2026-12-01', []);
         $this->project('GLOBEX01', $this->organization('GLOBEX01', 'Globex'), 'Theirs', '2026-12-01', []);
 

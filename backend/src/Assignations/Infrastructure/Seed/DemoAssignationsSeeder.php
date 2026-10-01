@@ -93,7 +93,7 @@ final class DemoAssignationsSeeder implements DemoSeeder
     /** @param array{type: string, values: list<string>} $audience */
     private function assignation(string $id, string $type, string $title, string $slug, ?string $description, ?string $dueDate, array $audience): Assignation
     {
-        $questionnaireId = (string) $this->commands->dispatch(new SaveFlow(DemoAccounts::ACME, self::states($title), $slug, source: 'seed', countsUsage: false));
+        $questionnaireId = (string) $this->commands->dispatch(new SaveFlow(DemoAccounts::ACME, self::states($title), $slug, source: 'seed'));
         $now = $this->clock->now();
         $assignation = new Assignation($id, DemoAccounts::ACME, self::ACME_RETAIL, $questionnaireId, $title, $type, $now);
         $assignation->configure(self::ACME_RETAIL, $questionnaireId, $title, $description, 2, true, $dueDate, $audience, [self::registration()], $now);

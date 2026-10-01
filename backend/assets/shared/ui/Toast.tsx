@@ -19,7 +19,7 @@ type ToastApi = {
   show: (text: string, tone?: ToastTone) => void;
   success: (text: string) => void;
   error: (text: string) => void;
-  /** A failed request: amber for plan limits, red otherwise, the backend code's text first (PRD §10.21). */
+  /** A failed request, in red, the backend code's text first (PRD §10.21). */
   apiError: (error: unknown) => void;
 };
 
@@ -51,7 +51,7 @@ export function ToastProvider({children}: {children: ReactNode}) {
         if (error instanceof ApiError) {
           show(
             t(errorMessageKey(error), {defaultValue: error.message}),
-            error.isPlanLimit ? 'warning' : 'error',
+            'error',
           );
         } else {
           show(t('errors.INTERNAL_ERROR'), 'error');

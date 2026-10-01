@@ -270,17 +270,6 @@
   font-size: 13px;
   font-weight: 500;
 }
-.sidebar__plan {
-  flex: none;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: rgb(108 58 237 / 25%);
-  color: #c4b5fd;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
 .sidebar__account-email {
   overflow: hidden;
   text-overflow: ellipsis;

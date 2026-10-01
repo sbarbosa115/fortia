@@ -18,7 +18,6 @@ import {AssignationsPage} from './AssignationsPage';
 
 const mocks = vi.hoisted(() => ({
   viewer: null as unknown as Viewer,
-  feature: {loading: false, allowed: true, included: true, verdict: null},
 }));
 
 vi.mock('@console/entities/assignation', async (original) => ({
@@ -29,10 +28,6 @@ vi.mock('@console/entities/assignation', async (original) => ({
   updateAssignation: vi.fn(),
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
-vi.mock('@console/entities/plan-usage', () => ({
-  useFeature: () => mocks.feature,
-  USAGE_QUERY_KEY: ['usage'],
-}));
 
 const fetchMock = vi.mocked(fetchAssignations);
 
@@ -117,12 +112,6 @@ describe('AssignationsPage (PRD §10.11)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.viewer = viewer(true);
-    mocks.feature = {
-      loading: false,
-      allowed: true,
-      included: true,
-      verdict: null,
-    };
   });
 
   it('shows each assignation with its organization, audience, attempt and progress', async () => {

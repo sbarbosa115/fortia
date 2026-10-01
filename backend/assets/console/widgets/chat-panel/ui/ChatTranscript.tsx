@@ -1,5 +1,4 @@
 import {SentFiles} from '@console/features/chat-attachments';
-import {errorMessageKey, isApiError} from '@shared/api';
 import {joinClasses} from '@shared/lib';
 import {Button, Icon} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
@@ -21,7 +20,7 @@ function Timestamp({time, right = false}: {time?: string; right?: boolean}) {
 /**
  * The conversation, read like a chat with Claude: the assistant writes beside its mark (Markdown, tables included),
  * the author's turns sit in a soft bubble on the right with the documents they attached, the screen's notes in a
- * violet card; then "thinking…" or the failure with Retry (none for a plan refusal). The greeting is only shown,
+ * violet card; then "thinking…" or the failure with Retry. The greeting is only shown,
  * never sent.
  */
 export function ChatTranscript({
@@ -32,7 +31,7 @@ export function ChatTranscript({
   greeting: string;
 }) {
   const {t} = useTranslation('widgets.chat-panel');
-  const {entries, status, error} = chat;
+  const {entries, status} = chat;
   const lastAnswer = entries.findLastIndex((line) => line.role === 'assistant');
 
   return (
@@ -108,19 +107,9 @@ export function ChatTranscript({
 
       {status === 'error' ? (
         <div className="ai-chat__failure">
-          <div
-            role="alert"
-            className={joinClasses(
-              'ai-chat__snack',
-              chat.planFailure && 'ai-chat__snack--plan',
-            )}
-          >
+          <div role="alert" className="ai-chat__snack">
             <Icon name="alert" size={16} />
-            <span>
-              {chat.planFailure && isApiError(error)
-                ? t(errorMessageKey(error), {ns: 'shared'})
-                : t('error')}
-            </span>
+            <span>{t('error')}</span>
           </div>
           {chat.canRetry ? (
             <Button

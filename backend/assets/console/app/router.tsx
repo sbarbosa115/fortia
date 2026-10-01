@@ -1,12 +1,7 @@
 import {lazy, type ComponentType, type ReactNode, Suspense} from 'react';
 import {createBrowserRouter, Navigate, Outlet} from 'react-router';
 import {LoadingState} from '@shared/ui';
-import {
-  RequireAuth,
-  RequireFeature,
-  RequireOnboarding,
-  RequireWrite,
-} from './guards';
+import {RequireAuth, RequireOnboarding, RequireWrite} from './guards';
 import {AppLayout} from './layout/AppLayout';
 import {RouteError} from './RouteError';
 
@@ -28,17 +23,11 @@ function page<M extends Record<string, unknown>>(
 const write = (element: ReactNode, fallback: string) => (
   <RequireWrite fallback={fallback}>{element}</RequireWrite>
 );
-const feature = (name: string, element: ReactNode, fallback: string) => (
-  <RequireFeature feature={name} fallback={fallback}>
-    {element}
-  </RequireFeature>
-);
 
 /**
  * The console's routes (PRD §10), all of them from item 0 so no item edits this file: each page slice is owned by
  * one item of the split (docs/pdr/prd-mappi.md) and replaces its placeholder. Guards: RequireAuth → RequireOnboarding
- * → layout; write routes redirect read-only users; RequireFeature waits for the plan verdict. /profile/plans,
- * /projects and /assignations are never blocked by the plan.
+ * → layout; write routes redirect read-only users.
  */
 export const router = createBrowserRouter(
   [
@@ -96,13 +85,9 @@ export const router = createBrowserRouter(
                 {
                   path: '/ai-experience',
                   element: write(
-                    feature(
-                      'chat',
-                      page(
-                        () => import('@console/pages/ai-experience'),
-                        'AiExperiencePage',
-                      ),
-                      '/questionnaires',
+                    page(
+                      () => import('@console/pages/ai-experience'),
+                      'AiExperiencePage',
                     ),
                     '/questionnaires',
                   ),
@@ -135,13 +120,9 @@ export const router = createBrowserRouter(
                 {
                   path: '/questionnaires/create/quizfunnel',
                   element: write(
-                    feature(
-                      'quiz-funnel',
-                      page(
-                        () => import('@console/pages/quiz-funnel-create'),
-                        'QuizFunnelCreatePage',
-                      ),
-                      '/questionnaires/new',
+                    page(
+                      () => import('@console/pages/quiz-funnel-create'),
+                      'QuizFunnelCreatePage',
                     ),
                     '/questionnaires',
                   ),
@@ -192,13 +173,9 @@ export const router = createBrowserRouter(
                 },
                 {
                   path: '/questionnaires/:id/dashboard',
-                  element: feature(
-                    'analytics',
-                    page(
-                      () => import('@console/pages/questionnaire-dashboard'),
-                      'QuestionnaireDashboardPage',
-                    ),
-                    '/questionnaires',
+                  element: page(
+                    () => import('@console/pages/questionnaire-dashboard'),
+                    'QuestionnaireDashboardPage',
                   ),
                 },
                 {
@@ -211,13 +188,9 @@ export const router = createBrowserRouter(
                 {
                   path: '/organizations/new',
                   element: write(
-                    feature(
-                      'organizations',
-                      page(
-                        () => import('@console/pages/organization-form'),
-                        'OrganizationFormPage',
-                      ),
-                      '/organizations',
+                    page(
+                      () => import('@console/pages/organization-form'),
+                      'OrganizationFormPage',
                     ),
                     '/organizations',
                   ),
@@ -249,13 +222,9 @@ export const router = createBrowserRouter(
                 {
                   path: '/assignations/new',
                   element: write(
-                    feature(
-                      'assignations',
-                      page(
-                        () => import('@console/pages/assignation-form'),
-                        'AssignationFormPage',
-                      ),
-                      '/assignations',
+                    page(
+                      () => import('@console/pages/assignation-form'),
+                      'AssignationFormPage',
                     ),
                     '/assignations',
                   ),
@@ -287,13 +256,9 @@ export const router = createBrowserRouter(
                 {
                   path: '/projects/new',
                   element: write(
-                    feature(
-                      'assignations',
-                      page(
-                        () => import('@console/pages/project-new'),
-                        'ProjectNewPage',
-                      ),
-                      '/projects',
+                    page(
+                      () => import('@console/pages/project-new'),
+                      'ProjectNewPage',
                     ),
                     '/projects',
                   ),
@@ -313,13 +278,6 @@ export const router = createBrowserRouter(
                   ),
                 },
                 {
-                  path: '/profile/plans',
-                  element: page(
-                    () => import('@console/pages/plans'),
-                    'PlansPage',
-                  ),
-                },
-                {
                   path: '/users',
                   element: page(
                     () => import('@console/pages/users'),
@@ -329,22 +287,11 @@ export const router = createBrowserRouter(
                 {
                   path: '/users/new',
                   element: write(
-                    feature(
-                      'users',
-                      page(
-                        () => import('@console/pages/user-new'),
-                        'UserNewPage',
-                      ),
-                      '/users',
+                    page(
+                      () => import('@console/pages/user-new'),
+                      'UserNewPage',
                     ),
                     '/users',
-                  ),
-                },
-                {
-                  path: '/integrations',
-                  element: page(
-                    () => import('@console/pages/integrations'),
-                    'IntegrationsPage',
                   ),
                 },
                 {

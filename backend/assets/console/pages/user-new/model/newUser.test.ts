@@ -39,14 +39,4 @@ describe('createErrorKey', () => {
       'errors.generic',
     );
   });
-
-  it('leaves plan limits to the shared plan-limit texts', () => {
-    expect(
-      createErrorKey(
-        new ApiError(429, 'PLAN_LIMIT_REACHED', '', {
-          reason: 'FEATURE_LIMIT_REACHED',
-        }),
-      ),
-    ).toBeNull();
-  });
 });

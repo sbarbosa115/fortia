@@ -12,6 +12,6 @@ final class UserRootRegistered extends BaseDomainEvent
 {
     public static function of(string $customerId, string $email, string $name, string $language, string $via): self
     {
-        return new self($customerId, null, ['email' => $email, 'name' => $name, 'language' => $language, 'via' => $via]);
+        return new self($customerId, ['email' => $email, 'name' => $name, 'language' => $language, 'via' => $via]);
     }
 }

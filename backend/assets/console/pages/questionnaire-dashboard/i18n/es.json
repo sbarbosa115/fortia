@@ -93,10 +93,5 @@
     "low": "Bajo {{count}} ({{pct}}%)",
     "medium": "Medio {{count}} ({{pct}}%)",
     "high": "Alto {{count}} ({{pct}}%)"
-  },
-  "locked": {
-    "title": "Los tableros con IA no están en tu plan",
-    "body": "Mejora tu plan para tener un tablero diseñado para cada cuestionario.",
-    "cta": "Obtén tus tableros"
   }
 }

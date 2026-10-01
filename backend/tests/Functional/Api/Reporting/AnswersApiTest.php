@@ -158,7 +158,7 @@ final class AnswersApiTest extends ApiTestCase
     public function testAnotherTenantGetsNotFoundAndAnAdminSeesEveryAccount(): void
     {
         $this->account('ACME0001');
-        $globex = $this->account('GLOBEX01', plan: 'starter');
+        $globex = $this->account('GLOBEX01');
         $admin = $this->admin();
         $id = $this->questionnaire('ACME0001');
         $session = $this->session('ACME0001', $id, ['q-score' => '9']);

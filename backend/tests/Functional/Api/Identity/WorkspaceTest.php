@@ -9,7 +9,7 @@ final class WorkspaceTest extends ApiTestCase
 {
     public function testOnboardingStepTwoSavesTheWorkspace(): void
     {
-        $owner = $this->account('NEWCO001', plan: null, onboarding: false);
+        $owner = $this->account('NEWCO001', onboarding: false);
 
         $data = $this->data($this->api('PATCH', '/api/v1/customer/workspace', ['name' => 'Newco', 'language' => 'en-US', 'website' => 'https://newco.test'], as: $owner));
 
@@ -17,7 +17,7 @@ final class WorkspaceTest extends ApiTestCase
         $customer = $this->em()->find(Customer::class, 'NEWCO001');
         self::assertNotNull($customer);
         $this->em()->refresh($customer);
-        self::assertSame(['Newco', 'https://newco.test', 'en-US'], [$customer->workspaceName(), $customer->website(), $customer->settings()['language']], 'PRD §7.1: onboarding has no plan gate');
+        self::assertSame(['Newco', 'https://newco.test', 'en-US'], [$customer->workspaceName(), $customer->website(), $customer->settings()['language']], 'D15: the workspace is saved');
     }
 
     public function testFieldsNotSentKeepTheirValue(): void

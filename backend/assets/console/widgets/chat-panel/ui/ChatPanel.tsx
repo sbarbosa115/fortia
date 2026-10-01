@@ -8,7 +8,7 @@ import {ChatTranscript} from './ChatTranscript';
 /**
  * The chat with the assistant (PRD §10.4) inside another screen (/projects/new): the same transcript and composer as
  * the AI Experience, in a box that scrolls its own conversation. Documents dropped anywhere on it attach to the next
- * message. `disabledReason` closes the composer and says why (read-only role, plan).
+ * message. `disabledReason` closes the composer and says why (read-only role).
  */
 export function ChatPanel({
   chat,

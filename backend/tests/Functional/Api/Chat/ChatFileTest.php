@@ -43,14 +43,11 @@ final class ChatFileTest extends ApiTestCase
         $this->assertApiError($this->api('POST', '/api/v1/chat/files', as: 'root@acme0001.test'), 400, 'VALIDATION_ERROR', 'one file in "file"');
     }
 
-    public function testOnlyTheAdminGroupsAttachFilesAndWithTheChatInTheirPlan(): void
+    public function testOnlyTheAdminGroupsAttachFiles(): void
     {
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
         $this->assertApiError($this->upload('q.md', '1. ¿Edad?', null), 401, 'UNAUTHORIZED');
         $this->assertApiError($this->upload('q.md', '1. ¿Edad?', 'reader@acme.test'), 403, 'FORBIDDEN', 'AG, like POST /chat');
-
-        $this->account('NOPLAN01', plan: null);
-        $this->assertApiError($this->upload('q.md', '1. ¿Edad?', 'root@noplan01.test'), 429, 'PLAN_LIMIT_REACHED', 'the chat feature of the plan');
     }
 
     public function testTheDraftModeBuildsTheQuestionnaireFromTheFiftyQuestionsOfAWordDocument(): void

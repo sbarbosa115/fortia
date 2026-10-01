@@ -5,7 +5,7 @@ namespace App\Reporting\Domain\Model;
 use App\Shared\Domain\Document\Questions;
 
 /**
- * The dashboard data of a questionnaire (PRD §10.9), computed from its stored sessions — the usage/analytics
+ * The dashboard data of a questionnaire (PRD §10.9), computed from its stored sessions — the analytics
  * service is absorbed (§13.8):
  *
  *     sessions:  {total, completed, completion_rate, timeline: [{date, started, completed}], by_source,

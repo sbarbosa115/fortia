@@ -12,8 +12,6 @@ use App\Assignations\UI\Http\Input\ProjectInput;
 use App\Assignations\UI\Http\Output\ProjectListOutput;
 use App\Assignations\UI\Http\Output\ProjectOutput;
 use App\Assignations\UI\Http\Output\ProjectPaginationOutput;
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\Caller;
 use App\Shared\Domain\Error\NotAllowed;
@@ -38,7 +36,6 @@ final class ProjectsController
     public function __construct(
         private readonly CommandBus $commands,
         private readonly ProjectQueries $projects,
-        private readonly PlanGate $gate,
     ) {
     }
 
@@ -71,7 +68,6 @@ final class ProjectsController
         return ApiResponse::ok($this->present($caller, RouteId::uuid($id)));
     }
 
-    /** Feat(assignations). */
     #[Route('/projects', name: 'api_projects_create', methods: ['POST'])]
     #[OA\RequestBody(content: new Model(type: ProjectInput::class))]
     #[OA\Response(response: 201, description: 'The enriched project', content: new Model(type: ProjectOutput::class))]
@@ -79,11 +75,9 @@ final class ProjectsController
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 404, description: 'ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND')]
     #[OA\Response(response: 409, description: 'ASSIGNATION_IN_OTHER_PROJECT')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false, groups: ['Default', 'create'])] ProjectInput $input): JsonResponse
     {
         self::assertCanWrite($caller);
-        $this->gate->feature($caller, Features::ASSIGNATIONS);
         $id = (string) $this->commands->dispatch(new CreateProject(
             $caller,
             strtolower((string) $input->organization_id),

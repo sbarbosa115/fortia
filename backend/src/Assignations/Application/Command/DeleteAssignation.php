@@ -6,7 +6,7 @@ use App\Shared\Application\Security\Caller;
 
 /**
  * Deletes an assignation and its member → session index (PRD §8.8 DELETE). Its sessions are the respondents'
- * answers and stay. AssignationDeleted counts one "assignations" (§7.2).
+ * answers and stay.
  */
 final class DeleteAssignation
 {

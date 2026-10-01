@@ -1,4 +1,3 @@
-import {useFeature} from '@console/entities/plan-usage';
 import {useViewer} from '@console/entities/viewer';
 import {useDocumentTitle} from '@shared/lib';
 import {
@@ -25,29 +24,23 @@ import {
 import './users.css';
 
 /**
- * /users (PRD §10.16): the account's console users — User, Email, Role and Type. "New user" needs write permission
- * and the plan's "users" feature; when it is disabled it says why.
+ * /users (PRD §10.16): the account's console users — User, Email, Role and Type. "New user" needs write permission;
+ * when it is disabled it says why.
  */
 export function UsersPage() {
   const {t} = useTranslation('pages.users');
   const {t: ts} = useTranslation('shared');
   const navigate = useNavigate();
   const viewer = useViewer();
-  const feature = useFeature('users', viewer.isAdmin);
   const query = useQuery({queryKey: USERS_QUERY_KEY, queryFn: fetchUsers});
   useDocumentTitle(`Mappi - ${t('title')}`);
 
-  const disabledReason = !viewer.canWrite
-    ? ts('readOnly.create')
-    : !feature.loading && !feature.allowed
-      ? ts(`planLimit.${feature.verdict?.reason ?? 'FEATURE_NOT_IN_PLAN'}`)
-      : null;
+  const disabledReason = viewer.canWrite ? null : ts('readOnly.create');
   const newUser = (
     <Button
       variant="primary"
       icon={<Icon name="plus" />}
       disabledReason={disabledReason}
-      disabled={feature.loading}
       onClick={() => navigate('/users/new')}
     >
       {t('new')}

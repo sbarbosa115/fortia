@@ -9,7 +9,7 @@ import './documentation.css';
 type Section = 'guides' | 'videos';
 
 /**
- * /documentation (PRD §10.18): the 15 bilingual guides with search and a topic filter, and the videos of the UI
+ * /documentation (PRD §10.18): the 13 bilingual guides with search and a topic filter, and the videos of the UI
  * language. The open tab lives in the URL (?tab=videos) so it can be linked.
  */
 export function DocumentationPage() {

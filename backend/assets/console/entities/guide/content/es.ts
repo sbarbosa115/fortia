@@ -1,6 +1,6 @@
 import type {GuideId, GuideText} from '../model/types';
 
-/** Las 15 guías de la documentación en español (PRD §10.18). Mismos ids, orden y temas que content/en.ts. */
+/** Las 13 guías de la documentación en español (PRD §10.18). Mismos ids, orden y temas que content/en.ts. */
 export const GUIDES_ES: Record<GuideId, GuideText> = {
   'welcome': {
     title: 'Bienvenido a Mappi',
@@ -19,8 +19,8 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'menu',
         heading: 'El menú lateral',
         paragraphs: [
-          'El menú agrupa la consola en tres bloques. Diseño reúne Experiencia IA (la página de inicio), Experiencia de diseño, Cuestionarios y Personalización. Enviar y seguir reúne Organizaciones, Asignaciones y Proyectos. Configuración reúne Usuarios, Integraciones, Perfil y esta Documentación.',
-          'Abajo encuentras el selector de idioma, el bloque de tu cuenta con tu plan y Cerrar sesión. El selector de idioma solo cambia el idioma de la consola; el idioma de los correos y de las pantallas de quien responde es el idioma de tu cuenta, en Perfil.',
+          'El menú agrupa la consola en tres bloques. Diseño reúne Experiencia IA (la página de inicio), Experiencia de diseño, Cuestionarios y Personalización. Enviar y seguir reúne Organizaciones, Asignaciones y Proyectos. Configuración reúne Usuarios, Perfil y esta Documentación.',
+          'Abajo encuentras el selector de idioma, el bloque de tu cuenta y Cerrar sesión. El selector de idioma solo cambia el idioma de la consola; el idioma de los correos y de las pantallas de quien responde es el idioma de tu cuenta, en Perfil.',
         ],
         screenshot: {
           name: 'ai-experience',
@@ -44,7 +44,6 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         paragraphs: [
           'Si tu rol es de solo lectura puedes verlo todo, pero los botones que crean o cambian algo están deshabilitados. Pasa el cursor sobre un botón deshabilitado para leer el motivo.',
         ],
-        tip: 'Tu plan también define algunos límites: cuando una acción no está incluida, el botón lo indica y enlaza a los planes.',
       },
     ],
   },
@@ -58,7 +57,6 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         heading: 'Elige un tipo',
         paragraphs: [
           'Ve a Cuestionarios y haz clic en Nuevo cuestionario. Mappi ofrece cuatro tipos: Regular para encuestas clásicas que terminan con un mensaje de agradecimiento, Diagnóstico para puntuar a cada persona y ubicarla en niveles, Quiz Funnel para recomendar productos de tu tienda y Encadenado para generar un cuestionario a la medida a partir de las primeras respuestas y tus instrucciones.',
-          'Un tipo que tu plan no incluye aparece deshabilitado, con el motivo.',
         ],
         screenshot: {
           name: 'questionnaire-new',
@@ -120,7 +118,7 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         heading: 'Créalo',
         paragraphs: [
           'Cuando el borrador te guste, pídele al asistente que lo cree. Aparece una tarjeta «Cuestionario creado» con botones para editarlo o verlo. Desde ahí es un cuestionario normal: puedes editarlo, compartirlo y leer sus respuestas.',
-          'El asistente también puede hacer otras tareas por ti, como listar tus organizaciones o consultar el uso de tu plan. Cada turno cuenta para la función de chat de tu plan.',
+          'El asistente también puede hacer otras tareas por ti, como listar tus organizaciones o tus asignaciones.',
         ],
       },
     ],
@@ -351,7 +349,6 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         paragraphs: [
           'Cada pregunta tiene su propia gráfica: distribuciones para las opciones, histogramas e indicadores para las escalas, y un desglose NPS para escalas de 0 a 10 (detractores 0–6, pasivos 7–8, promotores 9–10).',
         ],
-        tip: 'El resumen es gratuito en todos los planes; las gráficas necesitan la función de tableros.',
       },
     ],
   },
@@ -384,7 +381,6 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         paragraphs: [
           'Usa Exportar a Google Sheets para enviar todas las respuestas a una hoja de cálculo nueva. En una asignación también puedes exportar a CSV la lista de personas con su estado.',
         ],
-        tip: 'La API externa entrega las mismas respuestas a tus propios sistemas; consulta la guía de claves de API y webhooks.',
       },
     ],
   },
@@ -417,40 +413,6 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         paragraphs: [
           'Haz clic en Guardar para aplicar los estilos a todos los cuestionarios de la cuenta. Restablecer solo vuelve a los valores por defecto en pantalla hasta que guardes.',
         ],
-        tip: 'Guardar estilos requiere la función de estilos de tu plan.',
-      },
-    ],
-  },
-  'api-and-webhooks': {
-    title: 'Claves de API y webhooks',
-    summary:
-      'Conecta Mappi con tus propios sistemas: lee cuestionarios y respuestas con la API y recibe cada respuesta completada con un webhook.',
-    sections: [
-      {
-        id: 'claves-de-api',
-        heading: 'Claves de API',
-        paragraphs: [
-          'En Integraciones → Claves de API, crea una clave con un nombre y una vigencia (7, 30, 60 o 90 días, o sin vencimiento). La clave se muestra una sola vez: cópiala y guárdala en un lugar seguro. Revócala cuando ya no la necesites.',
-        ],
-        screenshot: {
-          name: 'integrations',
-          alt: 'Integraciones con la pestaña de claves de API',
-        },
-      },
-      {
-        id: 'api-externa',
-        heading: 'La API externa',
-        paragraphs: [
-          'Envía la clave en el encabezado X-API-Key para listar tus cuestionarios y leer las respuestas de cada uno, de la más reciente a la más antigua. La pestaña de referencia de la API tiene ejemplos de curl listos para copiar.',
-        ],
-      },
-      {
-        id: 'webhooks',
-        heading: 'Webhooks',
-        paragraphs: [
-          'Un webhook llama a una URL tuya (solo https) cada vez que se completa una respuesta, con las respuestas en el cuerpo. Agrégalo en Integraciones → Webhooks; la referencia de entrega muestra los encabezados y un ejemplo del contenido para que verifiques cada llamada.',
-        ],
-        tip: 'La API y los webhooks son funciones del plan: sus pestañas te avisan cuando tu plan no las incluye.',
       },
     ],
   },
@@ -513,37 +475,6 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         paragraphs: [
           'En Perfil → Configuración, elige el idioma de la cuenta (cambia los correos y las pantallas de quien responde, no la consola), el máximo de archivos por pregunta y tus píxeles de seguimiento.',
         ],
-        tip: 'El número de usuarios depende de tu plan.',
-      },
-    ],
-  },
-  'plans-and-billing': {
-    title: 'Planes, uso y facturación',
-    summary:
-      'Mira cuánto de tu plan estás usando, cambia de plan y administra tu suscripción y tus facturas.',
-    sections: [
-      {
-        id: 'uso',
-        heading: 'Tu uso',
-        paragraphs: [
-          'Perfil → Plan y uso muestra tu plan y una barra por cada límite: cuestionarios, respuestas y cada función. Las barras se vuelven ámbar al 75 % y rojas al 90 %. Cuando llegas a la mitad de un límite, un aviso te lo recuerda en la parte superior de la consola.',
-        ],
-      },
-      {
-        id: 'cambiar',
-        heading: 'Cambia de plan',
-        paragraphs: [
-          'Abre Planes para compararlos. Suscríbete, mejora o cambia a un plan menor, mensual o anual; el precio anual muestra cuánto ahorras. Los códigos promocionales se aplican al pagar.',
-        ],
-        screenshot: {name: 'plans', alt: 'Las tarjetas de los planes'},
-      },
-      {
-        id: 'facturacion',
-        heading: 'Facturación',
-        paragraphs: [
-          'Administrar facturación abre el portal de pagos, donde actualizas tu tarjeta y descargas tus facturas. Puedes cancelar la suscripción cuando quieras y reanudarla antes de que termine.',
-        ],
-        tip: 'Planes nunca se bloquea: siempre puedes abrir Planes, Proyectos y Asignaciones, incluso cuando llegas a un límite.',
       },
     ],
   },

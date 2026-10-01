@@ -358,14 +358,14 @@ describe('after the login (PRD §9.10 step 5)', () => {
 });
 
 describe('loading the assignation (PRD §9.10 step 1)', () => {
-  it('shows the limit screen on 429', async () => {
+  it('says to try again later on 429', async () => {
     calls.fetchAssignation.mockRejectedValue(
-      new ApiError(429, 'PLAN_LIMIT_REACHED', 'x'),
+      new ApiError(429, 'TOO_MANY_ATTEMPTS', 'x'),
     );
     renderPage();
     expect(
       await screen.findByRole('heading', {
-        name: 'The response limit has been reached.',
+        name: 'Too many attempts. Please try again in a few minutes.',
       }),
     ).toBeInTheDocument();
   });

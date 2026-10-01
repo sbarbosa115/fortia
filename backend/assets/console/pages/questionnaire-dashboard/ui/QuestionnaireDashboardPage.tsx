@@ -20,7 +20,6 @@ import {
 } from '../model/useQuestionnaireDashboard';
 import {DashboardChartBody} from './charts/Charts';
 import {FunnelCard} from './FunnelCard';
-import {LockedDashboard} from './LockedDashboard';
 import {SummaryTiles} from './SummaryTiles';
 import './dashboard.css';
 
@@ -121,29 +120,25 @@ export function QuestionnaireDashboardPage() {
       {header}
       <SummaryTiles summary={summary(data.data, answerable)} />
       <FunnelCard steps={funnel(data.data, answerable)} titles={titles} />
-      {dashboard.locked ? (
-        <LockedDashboard reason={dashboard.locked.reason} />
-      ) : (
-        <div className="dash-grid">
-          {charts.map((chart) => (
-            <Card
-              key={chart.id}
-              className={`dash-chart dash-chart--${chart.chart_type}`}
-            >
-              <CardHeader
-                title={chart.title || t(`chartTypes.${chart.chart_type}`)}
+      <div className="dash-grid">
+        {charts.map((chart) => (
+          <Card
+            key={chart.id}
+            className={`dash-chart dash-chart--${chart.chart_type}`}
+          >
+            <CardHeader
+              title={chart.title || t(`chartTypes.${chart.chart_type}`)}
+            />
+            <CardBody>
+              <DashboardChartBody
+                chart={chart}
+                questions={dashboard.questions}
+                data={data.data}
               />
-              <CardBody>
-                <DashboardChartBody
-                  chart={chart}
-                  questions={dashboard.questions}
-                  data={data.data}
-                />
-              </CardBody>
-            </Card>
-          ))}
-        </div>
-      )}
+            </CardBody>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

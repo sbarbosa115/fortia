@@ -5,7 +5,6 @@ import {
   sendReminder,
   updateAssignation,
 } from '@console/entities/assignation';
-import {useFeature, USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {useViewer} from '@console/entities/viewer';
 import {useDocumentTitle} from '@shared/lib';
 import {
@@ -39,14 +38,13 @@ const TABS: TypeTab[] = ['all', 'default', 'follow_up'];
 /**
  * /assignations (PRD §10.11): the account's assignations by type, 10 per page, with their audience, progress and
  * due date, the Active toggle, and View / Edit / Copy link / Send reminder / Delete. "New assignation" needs write
- * permission and the plan's assignations feature.
+ * permission.
  */
 export function AssignationsPage() {
   const {t} = useTranslation('pages.assignations');
   const {t: tShared} = useTranslation('shared');
   useDocumentTitle(`Mappi - ${t('title')}`);
   const viewer = useViewer();
-  const feature = useFeature('assignations', viewer.isAdmin);
   const listing = useAssignationListing();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -61,7 +59,6 @@ export function AssignationsPage() {
     onSuccess: async (_, row) => {
       setToDelete(null);
       toast.success(t('delete.done', {name: row.name}));
-      await queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
       await refresh();
     },
     onError: (failure) => {
@@ -93,28 +90,22 @@ export function AssignationsPage() {
     onError: (failure) => toast.apiError(failure),
   });
 
-  const createReason = !viewer.canWrite
-    ? tShared('readOnly.create')
-    : !feature.loading && !feature.included
-      ? t('notInPlan')
-      : null;
+  const createReason = viewer.canWrite ? null : tShared('readOnly.create');
   const changeReason = viewer.canWrite ? null : tShared('readOnly.change');
-  const newAction =
-    createReason || feature.loading ? (
-      <Button
-        variant="primary"
-        icon={<Icon name="plus" size={16} />}
-        disabledReason={createReason}
-        disabled={feature.loading}
-      >
-        {t('new')}
-      </Button>
-    ) : (
-      <Link to="/assignations/new" className="btn btn--primary">
-        <Icon name="plus" size={16} />
-        {t('new')}
-      </Link>
-    );
+  const newAction = createReason ? (
+    <Button
+      variant="primary"
+      icon={<Icon name="plus" size={16} />}
+      disabledReason={createReason}
+    >
+      {t('new')}
+    </Button>
+  ) : (
+    <Link to="/assignations/new" className="btn btn--primary">
+      <Icon name="plus" size={16} />
+      {t('new')}
+    </Link>
+  );
 
   const {query} = listing;
   let body;

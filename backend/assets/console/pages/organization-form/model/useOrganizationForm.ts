@@ -5,7 +5,6 @@ import {
   updateOrganization,
   useOrganization,
 } from '@console/entities/organization';
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {useToast} from '@shared/ui';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {useMemo, useState} from 'react';
@@ -67,12 +66,7 @@ export function useOrganizationForm(id: string | undefined) {
     },
     onSuccess: async (organization) => {
       toast.success(editing ? t('updated') : t('created'));
-      await Promise.all([
-        queryClient.invalidateQueries({queryKey: ORGANIZATIONS_QUERY_KEY}),
-        editing
-          ? Promise.resolve()
-          : queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY}),
-      ]);
+      await queryClient.invalidateQueries({queryKey: ORGANIZATIONS_QUERY_KEY});
       navigate(`/organizations/${organization.organization_id}/view`);
     },
     onError: (failure) => {

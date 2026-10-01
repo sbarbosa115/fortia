@@ -22,15 +22,6 @@ vi.mock('@shared/api', async (original) => ({
   pollJob: mocks.pollJob,
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
-vi.mock('@console/entities/plan-usage', () => ({
-  USAGE_QUERY_KEY: ['customer-usage'],
-  useFeature: () => ({
-    loading: false,
-    allowed: true,
-    included: true,
-    verdict: null,
-  }),
-}));
 
 const SCRAPED = {
   type: 'scrape_products',

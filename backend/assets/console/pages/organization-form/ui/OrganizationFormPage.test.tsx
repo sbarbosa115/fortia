@@ -19,9 +19,6 @@ vi.mock('@shared/api', async (original) => ({
   ...(await original<typeof import('@shared/api')>()),
   api: {get: mocks.get, post: mocks.post, put: mocks.put, delete: vi.fn()},
 }));
-vi.mock('@console/entities/plan-usage', () => ({
-  USAGE_QUERY_KEY: ['customer-usage'],
-}));
 
 const STORED = {
   organization_id: 'org-1',

@@ -21,11 +21,6 @@ doctrine:
                 is_bundle: false
                 dir: '%kernel.project_dir%/src/Identity/Domain/Model'
                 prefix: 'App\Identity\Domain\Model'
-            Billing:
-                type: attribute
-                is_bundle: false
-                dir: '%kernel.project_dir%/src/Billing/Domain/Model'
-                prefix: 'App\Billing\Domain\Model'
             Platform:
                 type: attribute
                 is_bundle: false
@@ -71,11 +66,6 @@ doctrine:
                 is_bundle: false
                 dir: '%kernel.project_dir%/src/Commerce/Domain/Model'
                 prefix: 'App\Commerce\Domain\Model'
-            Integrations:
-                type: attribute
-                is_bundle: false
-                dir: '%kernel.project_dir%/src/Integrations/Domain/Model'
-                prefix: 'App\Integrations\Domain\Model'
             Content:
                 type: attribute
                 is_bundle: false

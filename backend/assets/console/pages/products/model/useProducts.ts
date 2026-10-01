@@ -1,4 +1,3 @@
-import {useFeature} from '@console/entities/plan-usage';
 import {
   type CatalogProduct,
   createProduct,
@@ -23,7 +22,7 @@ export const PAGE_SIZE = 20;
 
 /**
  * The state of the hidden /products screen (PRD §10.19): the catalog listing (paginated and searched in the
- * database, D16/D17), its CRUD, and whether "Create Experience" (a quiz funnel) is allowed.
+ * database, D16/D17), its CRUD, and whether "Create Experience" (a quiz funnel) is allowed (write permission).
  */
 export function useProducts() {
   const {t} = useTranslation('pages.products');
@@ -31,7 +30,6 @@ export function useProducts() {
   const viewer = useViewer();
   const toast = useToast();
   const queryClient = useQueryClient();
-  const quizFunnel = useFeature('quiz-funnel', viewer.isAdmin);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState<CatalogProduct | 'new' | null>(null);
@@ -83,13 +81,7 @@ export function useProducts() {
   });
 
   const readOnlyReason = viewer.canWrite ? null : tShared('readOnly.change');
-  const funnelReason = viewer.canWrite
-    ? !quizFunnel.loading && !quizFunnel.allowed
-      ? tShared(
-          `planLimit.${quizFunnel.verdict?.reason ?? 'FEATURE_NOT_IN_PLAN'}`,
-        )
-      : null
-    : tShared('readOnly.create');
+  const funnelReason = viewer.canWrite ? null : tShared('readOnly.create');
 
   return {
     listing,
@@ -104,7 +96,6 @@ export function useProducts() {
     },
     readOnlyReason,
     funnelReason,
-    funnelLoading: quizFunnel.loading,
     editing,
     startCreate: () => setEditing('new'),
     startEdit: (product: CatalogProduct) => setEditing(product),

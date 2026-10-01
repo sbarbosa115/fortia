@@ -235,7 +235,7 @@ final class PromptStageJobTest extends ApiTestCase
             'questions' => $questions ?? [['title' => 'What do you want to improve?', 'options' => [['type' => 'text']]]],
         ]]];
 
-        return (string) static::getContainer()->get(CommandBus::class)->dispatch(new SaveFlow($customerId, [$start, ...$states], $slug, countsUsage: false));
+        return (string) static::getContainer()->get(CommandBus::class)->dispatch(new SaveFlow($customerId, [$start, ...$states], $slug));
     }
 
     /** @return array<string, mixed> */

@@ -12,7 +12,6 @@ const mocks = vi.hoisted(() => ({
   post: vi.fn(),
   pollJob: vi.fn(),
   viewer: {customerId: 'ACME0001', canWrite: true, isAdmin: false},
-  feature: {loading: false, allowed: true, included: true, verdict: null},
 }));
 
 vi.mock('@shared/api', async (original) => ({
@@ -21,10 +20,6 @@ vi.mock('@shared/api', async (original) => ({
   pollJob: mocks.pollJob,
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
-vi.mock('@console/entities/plan-usage', () => ({
-  USAGE_QUERY_KEY: ['customer-usage'],
-  useFeature: () => mocks.feature,
-}));
 
 const STORED = {
   website: 'https://acme.test',
@@ -56,12 +51,6 @@ describe('CustomizationPage (PRD §10.13)', () => {
       .mockResolvedValue({job: {job_id: 'job-1', status: 'PENDING'}});
     mocks.pollJob.mockReset().mockResolvedValue({type: 'styles'});
     mocks.viewer.canWrite = true;
-    mocks.feature = {
-      loading: false,
-      allowed: true,
-      included: true,
-      verdict: null,
-    };
   });
 
   it('loads the stored brand into the form', async () => {
@@ -186,19 +175,6 @@ describe('CustomizationPage (PRD §10.13)', () => {
 
     expect(screen.getByRole('button', {name: 'Save'})).toBeDisabled();
     expect(screen.getByLabelText('Website URL')).toBeDisabled();
-  });
-
-  it('disables saving when the plan has no styles left', async () => {
-    mocks.feature = {
-      loading: false,
-      allowed: false,
-      included: true,
-      verdict: null,
-    };
-    renderPage();
-    await screen.findByLabelText('Website URL');
-
-    expect(screen.getByRole('button', {name: 'Save'})).toBeDisabled();
   });
 
   it('shows an error with a retry when the brand cannot be read', async () => {

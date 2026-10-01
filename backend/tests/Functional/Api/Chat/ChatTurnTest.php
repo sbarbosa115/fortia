@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Chat;
 
-use App\Billing\Application\Usage;
 use App\Identity\Application\Query\AccountQueries;
 use App\Jobs\Application\Query\JobQueries;
 use App\Organizations\Application\Query\OrganizationQueries;
@@ -73,7 +72,6 @@ final class ChatTurnTest extends ApiTestCase
         self::assertSame('Café de especialidad', $created['title']);
         self::assertCount(3, $created['questions']);
         self::assertSame($before + 1, $this->roots());
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current('ACME0001')['chat'] ?? 0, 'PRD §7.2: a questionnaire created by the chat counts as chat');
     }
 
     public function testTheChatAddsATableAndAFileQuestionWithATemplateItStoresAsACsv(): void
@@ -307,18 +305,11 @@ final class ChatTurnTest extends ApiTestCase
         $this->assertApiError($this->api('POST', '/api/v1/chat', ['messages' => self::conversation(['Hola']), 'extra' => 1], as: $owner), 400, 'VALIDATION_ERROR', 'no extra fields');
     }
 
-    public function testOnlyTheAdminGroupsChatAndWithinTheirPlan(): void
+    public function testOnlyTheAdminGroupsChat(): void
     {
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
         $this->assertApiError($this->api('POST', '/api/v1/chat', ['messages' => self::conversation(['Hola'])]), 401, 'UNAUTHORIZED');
         $this->assertApiError($this->api('POST', '/api/v1/chat', ['messages' => self::conversation(['Hola'])], as: 'reader@acme.test'), 403, 'FORBIDDEN', 'PRD §8.10: AG');
-
-        $this->account('GLOBEX01', plan: 'starter');
-        static::getContainer()->get(Usage::class)->set('GLOBEX01', ['chat' => 30]);
-        $this->em()->flush();
-        $response = $this->api('POST', '/api/v1/chat', ['messages' => self::conversation(['Hola'])], as: 'root@globex01.test');
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', 'PRD §8.10: Cap(chat)');
-        self::assertSame('chat', $response['json']['error']['details']['feature']);
     }
 
     public function testEditingAQuestionnaireWithResponsesIsRefusedSoTheAssistantOffersACopy(): void
@@ -349,7 +340,6 @@ final class ChatTurnTest extends ApiTestCase
         self::assertSame('chat-questionnaire-created', $saved['type']);
         self::assertSame($id, $saved['questionnaire_id'], 'the same questionnaire is updated');
         self::assertCount(2, static::getContainer()->get(QuestionnaireDetails::class)->find($id)['questions']);
-        self::assertSame(0, static::getContainer()->get(Usage::class)->current('ACME0001')['chat'] ?? 0, 'editing counts nothing');
     }
 
     private function roots(): int

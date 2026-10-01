@@ -1,4 +1,3 @@
-import {usePlanUsage} from '@console/entities/plan-usage';
 import {
   createQuestionnaire,
   fetchFlow,
@@ -26,10 +25,6 @@ vi.mock('@console/entities/questionnaire', async (original) => ({
   fetchFlow: vi.fn(),
   fetchHasAnswers: vi.fn(),
   fetchPrompts: vi.fn(),
-}));
-vi.mock('@console/entities/plan-usage', async (original) => ({
-  ...(await original<typeof import('@console/entities/plan-usage')>()),
-  usePlanUsage: vi.fn(),
 }));
 vi.mock('@console/entities/viewer', async (original) => ({
   ...(await original<typeof import('@console/entities/viewer')>()),
@@ -116,17 +111,6 @@ describe('QuestionnaireEditorPage', () => {
       customerId: 'ACME0001',
       canWrite: true,
     } as Viewer);
-    vi.mocked(usePlanUsage).mockReturnValue({
-      data: {
-        features: {
-          regular: {allowed: true},
-          diagnostic: {allowed: true},
-          chain: {allowed: true},
-        },
-      },
-      isPending: false,
-      isError: false,
-    } as unknown as ReturnType<typeof usePlanUsage>);
     vi.mocked(fetchQuestionnaire).mockResolvedValue(stored);
     vi.mocked(fetchFlow).mockResolvedValue({
       id: 'F1',

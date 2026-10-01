@@ -3,7 +3,6 @@
 namespace App\Questionnaires\Application\Query;
 
 use App\Assignations\Application\Query\AssignationQueries;
-use App\Billing\Application\Features;
 use App\Questionnaires\Domain\Flow\StoreUrl;
 use App\Questionnaires\Domain\Repository\DiagnosticRepository;
 use App\Questionnaires\Domain\Repository\FlowRepository;
@@ -14,7 +13,7 @@ use App\Shared\Application\Storage\ObjectStorage;
 
 /**
  * The reads behind the authoring endpoints (PRD §8.4): a questionnaire as the console reads it (the diagnostic merged
- * into on_completed), its prompts with their texts, the public flow lookups, and the feature a copy counts against.
+ * into on_completed), its prompts with their texts, and the public flow lookups.
  */
 final class QuestionnaireDetails
 {
@@ -79,18 +78,6 @@ final class QuestionnaireDetails
         }
 
         return $out;
-    }
-
-    /** The feature creating (or copying) this questionnaire counts against (PRD §7.2): its flow type, else its type. */
-    public function featureOf(string $questionnaireId): string
-    {
-        $flow = $this->flows->findByQuestionnaire($questionnaireId);
-        $type = null === $flow ? 'default' : $flow->displayedType();
-        if ('default' === $type) {
-            $type = $this->questionnaires->find($questionnaireId)?->type() ?? 'default';
-        }
-
-        return Features::forQuestionnaireType($type);
     }
 
     /**

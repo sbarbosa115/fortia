@@ -2,12 +2,9 @@
 
 namespace App\Identity\UI\Http\Controller;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Identity\Application\Command\ChangeSettings;
 use App\Identity\Application\Query\AccountQueries;
 use App\Identity\Domain\Error\CustomerNotFound;
-use App\Identity\Domain\Model\SettingsChange;
 use App\Identity\UI\Http\Input\SettingsInput;
 use App\Identity\UI\Http\Output\CustomerSettingsOutput;
 use App\Shared\Application\Bus\CommandBus;
@@ -34,7 +31,6 @@ final class SettingsController
     public function __construct(
         private readonly CommandBus $commands,
         private readonly AccountQueries $accounts,
-        private readonly PlanGate $gate,
         #[Autowire(service: 'limiter.public_api')]
         private readonly RateLimiterFactoryInterface $publicApiLimiter,
     ) {
@@ -55,15 +51,13 @@ final class SettingsController
     }
 
     /**
-     * AG; a non-Admin only on their own account (another account is 404). Cap(profile) unless only the language
-     * changes; ProfileEdited counts "profile" (§7.2).
+     * AG; a non-Admin only on their own account (another account is 404).
      */
     #[Route('/customer/{customer_id}/settings', name: 'api_settings_patch', requirements: ['customer_id' => '[A-Za-z0-9]{1,16}'], methods: ['PATCH'])]
     #[OA\Response(response: 200, description: 'CustomerSettings after the change', content: new Model(type: CustomerSettingsOutput::class))]
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 404, description: 'CUSTOMER_NOT_FOUND')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED')]
     public function patch(string $customer_id, Caller $caller, #[Payload(allowExtraFields: false)] SettingsInput $input): JsonResponse
     {
         if (!$caller->inAdminGroups()) {
@@ -73,9 +67,6 @@ final class SettingsController
             throw new CustomerNotFound();
         }
         $fields = $input->provided();
-        if (!SettingsChange::of($fields)->onlyLanguage()) {
-            $this->gate->capacity($caller, Features::PROFILE);
-        }
 
         /** @var array<string, mixed> $settings */
         $settings = $this->commands->dispatch(new ChangeSettings($customer_id, $fields));

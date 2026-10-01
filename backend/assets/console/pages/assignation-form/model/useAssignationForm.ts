@@ -7,7 +7,6 @@ import {
   updateAssignation,
 } from '@console/entities/assignation';
 import {useOrganizations} from '@console/entities/organization';
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {
   copyQuestionnaire,
   QUESTIONNAIRES_QUERY_KEY,
@@ -109,7 +108,6 @@ export function useAssignationForm(id: string | undefined) {
       toast.success(editing ? t('done.updated') : t('done.created'));
       await Promise.all([
         queryClient.invalidateQueries({queryKey: ASSIGNATIONS_QUERY_KEY}),
-        queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY}),
         queryClient.invalidateQueries({queryKey: QUESTIONNAIRES_QUERY_KEY}),
       ]);
     },

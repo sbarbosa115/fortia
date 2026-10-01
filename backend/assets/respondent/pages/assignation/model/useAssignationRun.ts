@@ -108,7 +108,6 @@ export function useAssignationRun(assignationId: string) {
   const entry = signedIn === undefined ? resumed : signedIn;
 
   const [loginError, setLoginError] = useState<LoginOutcome | null>(null);
-  const [limitError, setLimitError] = useState<unknown>(null);
   const [completedOnLogin, setCompletedOnLogin] = useState(false);
   const [round, setRound] = useState(0);
 
@@ -186,8 +185,6 @@ export function useAssignationRun(assignationId: string) {
         void queryClient.invalidateQueries({
           queryKey: assignationQueryKey(assignationId),
         });
-      } else if (outcome === 'limit') {
-        setLimitError(error);
       } else {
         setLoginError(outcome);
       }
@@ -305,7 +302,6 @@ export function useAssignationRun(assignationId: string) {
     round,
     login,
     loginError,
-    limitError,
     completedOnLogin,
     onSubmitted,
     onStageReady,

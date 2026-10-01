@@ -2,11 +2,10 @@
 
 namespace App\Tests\Functional\Api\Branding;
 
-use App\Billing\Application\Usage;
 use App\Branding\Domain\Model\CustomerStyles;
 use App\Tests\Support\ApiTestCase;
 
-/** PRD §8.5 POST /styles (AG, Cap(styles)) and the console's read of its own brand through GET /styles. */
+/** PRD §8.5 POST /styles (AG) and the console's read of its own brand through GET /styles. */
 final class StylesApiTest extends ApiTestCase
 {
     public function testAnAdminStartsTheStylesJobAndGets202WithTheJob(): void
@@ -43,25 +42,11 @@ final class StylesApiTest extends ApiTestCase
         $this->assertApiError($this->api('POST', '/api/v1/styles', ['website' => '']), 401, 'UNAUTHORIZED');
     }
 
-    public function testThePlanMustHaveStylesLeft(): void
+    public function testUnknownStyleSectionsAreRefused(): void
     {
-        $owner = $this->account('ACME0001', plan: 'starter');
-        static::getContainer()->get(Usage::class)->set('ACME0001', ['styles' => 2]);
-        $this->em()->flush();
+        $owner = $this->account('ACME0001');
 
-        $response = $this->api('POST', '/api/v1/styles', ['website' => ''], as: $owner);
-
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', '§8.5 Cap(styles): the starter plan allows 2 a month');
-        self::assertSame('styles', $response['json']['error']['details']['feature'] ?? null);
-    }
-
-    public function testValidationComesBeforeThePlanGate(): void
-    {
-        $owner = $this->account('ACME0001', plan: 'starter');
-        static::getContainer()->get(Usage::class)->set('ACME0001', ['styles' => 2]);
-        $this->em()->flush();
-
-        $this->assertApiError($this->api('POST', '/api/v1/styles', ['styles' => ['a' => ['color' => 'blue']]], as: $owner), 400, 'VALIDATION_ERROR', '§5 A2: validation → plan gate');
+        $this->assertApiError($this->api('POST', '/api/v1/styles', ['styles' => ['a' => ['color' => 'blue']]], as: $owner), 400, 'VALIDATION_ERROR', '§8.5: only the known sections');
     }
 
     public function testTheConsoleReadsItsOwnWebsiteButStrangersDoNot(): void

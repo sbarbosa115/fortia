@@ -8,8 +8,6 @@ use App\Assignations\Application\Command\ReminderOutcome;
 use App\Assignations\Application\Command\SendReminder;
 use App\Assignations\Application\Command\UpdateAssignation;
 use App\Assignations\Application\Query\AssignationDetails;
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Identity\Application\Query\AccountQueries;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\Caller;
@@ -17,7 +15,7 @@ use App\Shared\Domain\Error\NotFound;
 
 /**
  * PRD §7.19 "Assignations: assignation CRUD, respondents, send_follow_up_reminder", with the checks of PRD §8.8:
- * creating is AG and Cap(assignations); changing, deleting and reminding need write permission; another account's
+ * creating is AG; changing, deleting and reminding need write permission; another account's
  * assignation is 404. An assignation made in the chat gets the default registration slide (full name and email,
  * both required, PRD §10.11) unless the model sends one.
  */
@@ -29,7 +27,6 @@ final class AssignationTools implements ChatToolbox
     public function __construct(
         private readonly AssignationDetails $details,
         private readonly AccountQueries $accounts,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
     ) {
     }
@@ -79,12 +76,11 @@ final class AssignationTools implements ChatToolbox
                 'Sends a questionnaire to an organization\'s members.',
                 $fields,
                 ['organization_id', 'questionnaire_id', 'name', 'type'],
-                function (Caller $caller, ToolInput $input): string {
+                static function (Caller $caller, ToolInput $input): string {
                     Permissions::adminGroups($caller);
                     $input->uuid('organization_id');
                     $input->uuid('questionnaire_id');
                     $input->choice('type', ['default', 'follow_up']);
-                    $this->gate->capacity($caller, Features::ASSIGNATIONS);
 
                     return $input->string('name');
                 },

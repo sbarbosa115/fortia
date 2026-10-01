@@ -61,18 +61,6 @@ final class CopyTest extends ApiTestCase
         self::assertSame($chainCopy['questionnaire_id'], $copied['questionnaire_id']);
     }
 
-    public function testACopyCountsAgainstThePlanByTheOriginalsType(): void
-    {
-        $owner = $this->account('GLOBEX01', plan: 'starter');
-        $id = $this->createQuestionnaire($owner, self::diagnosticFlow('One'));
-        $this->data($this->api('POST', "/api/v1/questionnaire/$id/copy", as: $owner), 201);
-
-        $response = $this->api('POST', "/api/v1/questionnaire/$id/copy", as: $owner);
-
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', 'starter allows 2 diagnostics: the original and one copy');
-        self::assertSame('diagnostic', $response['json']['error']['details']['feature']);
-    }
-
     public function testAnAnsweredQuestionnaireCanBeCopiedButNotEdited(): void
     {
         $owner = $this->account('ACME0001');

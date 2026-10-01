@@ -5,8 +5,8 @@ namespace App\Chat\Application\Command;
 use App\Shared\Application\Security\Caller;
 
 /**
- * POST /chat (PRD §8.10): one turn of the assistant, as a `chat` job. The caller already passed the AG check and the
- * `chat` plan gate; the conversation, the draft and the queued changes come from the client, which keeps them (the
+ * POST /chat (PRD §8.10): one turn of the assistant, as a `chat` job. The caller already passed the AG check; the
+ * conversation, the draft and the queued changes come from the client, which keeps them (the
  * backend keeps no chat state, §7.19). Returns the job id.
  */
 final class StartChatTurn

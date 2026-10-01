@@ -86,7 +86,7 @@ final class RetryTest extends ApiTestCase
     public function testOnlyTheOwnersAccountMaySendForCorrection(): void
     {
         $id = $this->reviewed(['q1' => 'rejected', 'q2' => 'approved']);
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
         $admin = $this->admin();
 

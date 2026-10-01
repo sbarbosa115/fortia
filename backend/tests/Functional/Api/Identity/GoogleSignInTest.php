@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Identity;
 
-use App\Billing\Domain\Model\CustomerPlan;
 use App\Identity\Domain\Model\Customer;
 use App\Identity\Domain\Model\User;
 use App\Identity\Infrastructure\Google\FakeGoogleIdentity;
@@ -44,8 +43,6 @@ final class GoogleSignInTest extends ApiTestCase
         self::assertSame(['Customer-Admin'], $user->groups(), 'PRD §13.1: first Google login creates the root Customer-Admin');
         $customer = $this->em()->find(Customer::class, $user->customerId());
         self::assertSame(['en-US', false], [$customer?->language(), $customer?->onboardingCompleted()], 'PRD §13.1: language = Google\'s, onboarding pending');
-        $plan = $this->em()->find(CustomerPlan::class, $user->customerId());
-        self::assertSame(['starter', '2026-05-10', '2026-06-10'], [$plan?->planId(), $plan?->fromAt(), $plan?->toAt()], 'PRD §16.3 #1: a 1-month starter plan');
     }
 
     public function testAnyOtherGoogleLanguageGivesASpanishAccount(): void

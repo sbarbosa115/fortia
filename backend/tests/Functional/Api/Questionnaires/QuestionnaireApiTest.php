@@ -31,9 +31,6 @@ final class QuestionnaireApiTest extends ApiTestCase
         $flow = $this->api('GET', '/api/v1/flow/customer-survey');
         self::assertSame(200, $flow['status']);
         self::assertSame(['questionnaire_id' => $id], $flow['json']['data']['states'][0]['parameters'], 'the stored state points to the questionnaire');
-
-        $usage = $this->data($this->api('GET', '/api/v1/customer/usage', as: $owner));
-        self::assertSame(1, $usage['features']['regular']['used'], 'PRD §7.2: a regular questionnaire counts one "regular"');
     }
 
     public function testAnEmptySlugIsGeneratedFromTheTitle(): void
@@ -99,29 +96,6 @@ final class QuestionnaireApiTest extends ApiTestCase
         $this->assertApiError($this->api('PATCH', "/api/v1/questionnaire/$id", ['is_active' => false], as: 'reader@acme.test'), 403, 'FORBIDDEN');
         $this->assertApiError($this->api('GET', "/api/v1/questionnaire/$id/prompts", as: 'reader@acme.test'), 403, 'FORBIDDEN');
         self::assertSame(200, $this->api('GET', "/api/v1/questionnaire/$id", as: 'reader@acme.test')['status'], 'but they can read it');
-    }
-
-    public function testThePlanGateCountsTheQuestionnaireByItsType(): void
-    {
-        $owner = $this->account('GLOBEX01', plan: 'starter');
-
-        $this->createQuestionnaire($owner, self::diagnosticFlow('One'));
-        $this->createQuestionnaire($owner, self::diagnosticFlow('Two'));
-        $response = $this->api('POST', '/api/v1/questionnaire', self::diagnosticFlow('Three'), as: $owner);
-
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', 'starter allows 2 diagnostics');
-        self::assertSame('diagnostic', $response['json']['error']['details']['feature']);
-        self::assertSame(201, $this->api('POST', '/api/v1/questionnaire', self::regularFlow('Still regular'), as: $owner)['status'], 'other types still have room');
-    }
-
-    public function testValidationComesBeforeThePlanGate(): void
-    {
-        $owner = $this->account('NOPLAN01', plan: null);
-        $flow = self::regularFlow();
-        $flow['states'][0]['parameters']['questionnaire']['title'] = '';
-
-        $this->assertApiError($this->api('POST', '/api/v1/questionnaire', $flow, as: $owner), 400, 'VALIDATION_ERROR', 'PRD §5 A2: validation → plan gate');
-        $this->assertApiError($this->api('POST', '/api/v1/questionnaire', self::regularFlow(), as: $owner), 429, 'PLAN_LIMIT_REACHED');
     }
 
     public function testEditingReplacesTheQuestionnaireRebuildsTheDiagnosticAndKeepsTheFlowId(): void
@@ -202,8 +176,6 @@ final class QuestionnaireApiTest extends ApiTestCase
         self::assertSame($prompts[0]['s3_path'], $flow['states'][1]['parameters']['key'], 'prompt states carry the key');
         self::assertArrayNotHasKey('text', $flow['states'][1]['parameters']);
         self::assertTrue($this->data($this->api('GET', "/api/v1/questionnaire/$id", as: $owner))['is_chain']);
-        $usage = $this->data($this->api('GET', '/api/v1/customer/usage', as: $owner));
-        self::assertSame(1, $usage['features']['chain']['used'], 'a chain counts as "chain"');
     }
 
     public function testAPromptKeyMustBeAnUploadOfTheSameAccount(): void

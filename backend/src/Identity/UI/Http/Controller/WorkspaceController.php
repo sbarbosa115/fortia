@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-/** D15: onboarding step 2 saves the workspace (name, account language, website). No plan gate (PRD §7.1). */
+/** D15: onboarding step 2 saves the workspace (name, account language, website). */
 #[OA\Tag(name: 'Account')]
 final class WorkspaceController
 {

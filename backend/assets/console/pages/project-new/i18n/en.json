@@ -31,7 +31,6 @@
     "greeting": "Hi! Paste the questions you need here, attach a Word, PDF or Markdown document with them, or tell me what the questionnaire is about. For example: \"Here are 30 questions, make a questionnaire\".",
     "approved": "Done, your questionnaire **{{title}}** has been created. You can go on to the next step or [edit it here]({{url}}).",
     "approvedNotSaved": "**{{title}}** is approved. It will be saved when you press Create.",
-    "chatNotInPlan": "The assistant isn't included in your plan. Use an existing questionnaire instead.",
     "existingTitle": "Choose a questionnaire you already have",
     "existingHint": "Of any type. It is used as it is: nothing is copied or changed.",
     "existingLabel": "Questionnaire",
@@ -54,8 +53,7 @@
     "createHint": "Name, domain and its members. You come back here with it chosen.",
     "assignationName": "Assignation name",
     "assignationNameHint": "Built from the organization and the questionnaire. You can change it.",
-    "copyWarning": "This questionnaire is already assigned to \"{{organization}}\". A copy of the questionnaire will be created and the copy will be assigned instead.",
-    "notInPlan": "Creating organizations isn't included in your plan. Choose an existing one."
+    "copyWarning": "This questionnaire is already assigned to \"{{organization}}\". A copy of the questionnaire will be created and the copy will be assigned instead."
   },
   "audience": {
     "label": "Who responds?",

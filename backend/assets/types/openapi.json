@@ -109,7 +109,7 @@
                 "tags": [
                     "Assignations"
                 ],
-                "summary": "AG, Cap(assignations). Counts one \"assignations\" (AssignationCreated).",
+                "summary": "AG.",
                 "operationId": "post_api_assignations_create",
                 "requestBody": {
                     "content": {
@@ -142,9 +142,6 @@
                     },
                     "409": {
                         "description": "QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name)"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -154,7 +151,7 @@
                 "tags": [
                     "Assignations"
                 ],
-                "summary": "Public (the respondent page). An anonymous caller needs the owner's plan to include assignations (429) and does\nnot see the description nor the answers; a console user sees only their account's (another's is 404).",
+                "summary": "Public (the respondent page). An anonymous caller does not see the description nor the answers; a console user sees only their account's (another's is 404).",
                 "operationId": "get_api_assignations_get",
                 "parameters": [
                     {
@@ -182,9 +179,6 @@
                     },
                     "404": {
                         "description": "ASSIGNATION_NOT_FOUND"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED (anonymous callers only)"
                     }
                 }
             },
@@ -242,7 +236,7 @@
                 "tags": [
                     "Assignations"
                 ],
-                "summary": "204. Counts one \"assignations\" (AssignationDeleted). The respondents' answers stay.",
+                "summary": "204. The respondents' answers stay.",
                 "operationId": "delete_api_assignations_delete",
                 "parameters": [
                     {
@@ -548,7 +542,6 @@
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Feat(assignations).",
                 "operationId": "post_api_projects_create",
                 "requestBody": {
                     "content": {
@@ -581,9 +574,6 @@
                     },
                     "409": {
                         "description": "ASSIGNATION_IN_OTHER_PROJECT"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -755,275 +745,7 @@
                         "description": "FOLLOW_UP_COMPLETED"
                     },
                     "429": {
-                        "description": "PLAN_LIMIT_REACHED (assignations, then responses), TOO_MANY_ATTEMPTS"
-                    }
-                }
-            }
-        },
-        "/api/v1/checkout/session": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "operationId": "post_api_checkout_session",
-                "responses": {
-                    "200": {
-                        "description": "The hosted checkout page",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CheckoutSessionOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "PLAN_NOT_PURCHASABLE"
-                    },
-                    "404": {
-                        "description": "PLAN_NOT_FOUND"
-                    },
-                    "502": {
-                        "description": "STRIPE_UNAVAILABLE"
-                    }
-                }
-            }
-        },
-        "/api/v1/checkout/plan-change": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "operationId": "post_api_checkout_plan_change",
-                "responses": {
-                    "200": {
-                        "description": "Changed now (upgrade) or at the end of the period (downgrade), or a checkout",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PlanChangeOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "SAME_PLAN, PLAN_NOT_PURCHASABLE"
-                    },
-                    "404": {
-                        "description": "PLAN_NOT_FOUND"
-                    },
-                    "502": {
-                        "description": "STRIPE_UNAVAILABLE"
-                    }
-                }
-            }
-        },
-        "/api/v1/checkout/plan-change/revert": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "operationId": "post_api_checkout_plan_change_revert",
-                "responses": {
-                    "200": {
-                        "description": "The scheduled change is undone",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SubscriptionRenewalOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "NO_SUBSCRIPTION, NO_SCHEDULED_CHANGE"
-                    }
-                }
-            }
-        },
-        "/api/v1/checkout/cancel": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "operationId": "post_api_checkout_cancel",
-                "responses": {
-                    "200": {
-                        "description": "Canceled at the end of the period",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SubscriptionCancelOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "NO_SUBSCRIPTION"
-                    }
-                }
-            }
-        },
-        "/api/v1/checkout/resume": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "operationId": "post_api_checkout_resume",
-                "responses": {
-                    "200": {
-                        "description": "The cancellation is removed (idempotent)",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/SubscriptionRenewalOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "NO_SUBSCRIPTION"
-                    },
-                    "502": {
-                        "description": "The period has already expired"
-                    }
-                }
-            }
-        },
-        "/api/v1/checkout/portal": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "operationId": "post_api_checkout_portal",
-                "responses": {
-                    "200": {
-                        "description": "The gateway's billing portal",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PortalSessionOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "NO_STRIPE_CUSTOMER"
-                    }
-                }
-            }
-        },
-        "/api/v1/contact": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "summary": "\"Get in touch\" about a plan: emails the sales lead to SALES_LEAD_RECIPIENTS (PRD \u00a78.3, \u00a77.21, D8).",
-                "operationId": "post_api_contact",
-                "responses": {
-                    "200": {
-                        "description": "Request received",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        },
-                                        "data": {
-                                            "type": "object",
-                                            "nullable": true
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "PLAN_NOT_FOUND"
-                    },
-                    "502": {
-                        "description": "EMAIL_UNAVAILABLE"
-                    }
-                }
-            }
-        },
-        "/api/v1/customer/usage": {
-            "get": {
-                "tags": [
-                    "Billing"
-                ],
-                "summary": "The caller's plan, usage and feature verdicts; loaded once per account by the console (PRD \u00a710.21).",
-                "operationId": "get_api_customer_usage",
-                "responses": {
-                    "200": {
-                        "description": "Plan and usage",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/CustomerUsageOutput"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/checkout/webhook": {
-            "post": {
-                "tags": [
-                    "Billing"
-                ],
-                "operationId": "post_api_checkout_webhook",
-                "requestBody": {
-                    "description": "The gateway's event, signed in the Stripe-Signature header",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK (text/plain)",
-                        "content": {
-                            "text/plain": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Bad signature (text/plain)"
-                    },
-                    "500": {
-                        "description": "Not applied: the gateway retries (text/plain)"
-                    }
-                }
-            }
-        },
-        "/api/v1/plans": {
-            "get": {
-                "tags": [
-                    "Billing"
-                ],
-                "summary": "The plans the account can buy, its current plan and what is pending in the gateway (PRD \u00a78.3, \u00a710.15).",
-                "operationId": "get_api_plans",
-                "responses": {
-                    "200": {
-                        "description": "Plans and the account's subscription",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/PlansOutput"
-                                }
-                            }
-                        }
+                        "description": "TOO_MANY_ATTEMPTS"
                     }
                 }
             }
@@ -1077,7 +799,7 @@
                 "tags": [
                     "Styles"
                 ],
-                "summary": "AG, Cap(styles). 202 {job} (job_type \"styles\", stages reading_website \u2192 designing_styles \u2192 saving). The job\ncounts one \"styles\" when it completes; a failed job counts nothing (\u00a77.2).",
+                "summary": "AG. 202 {job} (job_type \"styles\", stages reading_website \u2192 designing_styles \u2192 saving).",
                 "operationId": "post_api_styles_update",
                 "requestBody": {
                     "content": {
@@ -1107,9 +829,6 @@
                     },
                     "403": {
                         "description": "FORBIDDEN"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -1148,9 +867,6 @@
                     },
                     "403": {
                         "description": "FORBIDDEN"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -1198,7 +914,7 @@
                         "description": "UNAUTHORIZED"
                     },
                     "403": {
-                        "description": "FORBIDDEN / FEATURE_NOT_IN_PLAN"
+                        "description": "FORBIDDEN"
                     },
                     "422": {
                         "description": "UNSUPPORTED_FILE_TYPE, FILE_TOO_LARGE, FILE_TOO_LONG, FILE_HAS_NO_TEXT, FILE_UNREADABLE"
@@ -1507,7 +1223,7 @@
                 "tags": [
                     "Quiz funnel"
                 ],
-                "summary": "AG, Cap(quiz-funnel). Job `create_quiz_funnel` (stages loading_products \u2192 saving_products \u2192\ngenerating_questionnaire \u2192 saving). Result {type: \"create_quiz_funnel\", flow: {id, slug, questionnaire_id},\nquestionnaire_url}. Without source_url the connected store is used (400 SHOPIFY_NOT_CONNECTED without one).",
+                "summary": "AG. Job `create_quiz_funnel` (stages loading_products \u2192 saving_products \u2192\ngenerating_questionnaire \u2192 saving). Result {type: \"create_quiz_funnel\", flow: {id, slug, questionnaire_id},\nquestionnaire_url}. Without source_url the connected store is used (400 SHOPIFY_NOT_CONNECTED without one).",
                 "operationId": "post_api_questionnaire_quiz_funnel",
                 "requestBody": {
                     "content": {
@@ -1537,9 +1253,6 @@
                     },
                     "403": {
                         "description": "FORBIDDEN"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -2281,7 +1994,7 @@
                 "tags": [
                     "Account"
                 ],
-                "summary": "AG; a non-Admin only on their own account (another account is 404). Cap(profile) unless only the language\nchanges; ProfileEdited counts \"profile\" (\u00a77.2).",
+                "summary": "AG; a non-Admin only on their own account (another account is 404).",
                 "operationId": "patch_api_settings_patch",
                 "parameters": [
                     {
@@ -2313,9 +2026,6 @@
                     },
                     "404": {
                         "description": "CUSTOMER_NOT_FOUND"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -2343,7 +2053,7 @@
                 "tags": [
                     "Account"
                 ],
-                "summary": "AG, Cap(users): a user with a permanent password and an assignable role; counts \"users\" (UserCreated).",
+                "summary": "AG: a user with a permanent password and an assignable role (UserCreated).",
                 "operationId": "post_api_users_create",
                 "responses": {
                     "201": {
@@ -2364,9 +2074,6 @@
                     },
                     "409": {
                         "description": "EMAIL_ALREADY_EXISTS"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -2396,404 +2103,6 @@
                     },
                     "404": {
                         "description": "CUSTOMER_NOT_FOUND"
-                    }
-                }
-            }
-        },
-        "/api/v1/api-keys": {
-            "get": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A. The account's active keys, newest first, without their secret.",
-                "operationId": "get_api_api_keys_list",
-                "responses": {
-                    "200": {
-                        "description": "Active keys",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/ApiKeyOutput"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A, write permission, Feat(api). The plaintext key is in this response only.",
-                "operationId": "post_api_api_keys_create",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ApiKeyInput"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "The new key, shown only once",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ApiKeyCreatedOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "VALIDATION_ERROR"
-                    },
-                    "403": {
-                        "description": "FORBIDDEN (read-only role)"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED (the plan does not include api)"
-                    }
-                }
-            }
-        },
-        "/api/v1/api-keys/{id}": {
-            "delete": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A, write permission, Own. Revokes (204); the key stops working at once.",
-                "operationId": "delete_api_api_keys_revoke",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Revoked"
-                    },
-                    "403": {
-                        "description": "FORBIDDEN (read-only role)"
-                    },
-                    "404": {
-                        "description": "API_KEY_NOT_FOUND (also another account's or an already revoked key)"
-                    }
-                }
-            }
-        },
-        "/api/v1/external/questionnaires": {
-            "get": {
-                "tags": [
-                    "External API"
-                ],
-                "summary": "X-API-Key, Cap(api). The account's questionnaires, newest first; page_size default 50, at most 50.",
-                "operationId": "get_api_external_questionnaires",
-                "parameters": [
-                    {
-                        "name": "X-API-Key",
-                        "in": "header",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 1
-                        }
-                    },
-                    {
-                        "name": "page_size",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "maximum": 50,
-                            "minimum": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Questionnaires",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ExternalQuestionnaireListOutput"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "INVALID_API_KEY"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED, TOO_MANY_ATTEMPTS"
-                    }
-                }
-            }
-        },
-        "/api/v1/external/questionnaires/{id}/answers": {
-            "get": {
-                "tags": [
-                    "External API"
-                ],
-                "summary": "X-API-Key, Cap(api). A questionnaire's sessions with their answers (\u00a77.14 format), newest first.",
-                "operationId": "get_api_external_answers",
-                "parameters": [
-                    {
-                        "name": "X-API-Key",
-                        "in": "header",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 1
-                        }
-                    },
-                    {
-                        "name": "page_size",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "maximum": 50,
-                            "minimum": 1
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Sessions and their answers",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ExternalAnswersOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "INVALID_UUID"
-                    },
-                    "401": {
-                        "description": "INVALID_API_KEY"
-                    },
-                    "404": {
-                        "description": "QUESTIONNAIRE_NOT_FOUND (also another account's)"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED, TOO_MANY_ATTEMPTS"
-                    }
-                }
-            }
-        },
-        "/api/v1/webhooks": {
-            "get": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A. The account's webhooks, oldest first.",
-                "operationId": "get_api_webhooks_list",
-                "responses": {
-                    "200": {
-                        "description": "Webhooks",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WebhookOutput"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A, write permission, Feat(webhook). event_type and method default to questionnaire.completed and POST.",
-                "operationId": "post_api_webhooks_create",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WebhookInput"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "The webhook",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WebhookOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "VALIDATION_ERROR (url not https, unknown event_type or method)"
-                    },
-                    "403": {
-                        "description": "FORBIDDEN (read-only role)"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED (the plan does not include webhook)"
-                    }
-                }
-            }
-        },
-        "/api/v1/webhooks/{id}": {
-            "put": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A, write permission, Own. Partial: only the fields sent change.",
-                "operationId": "put_api_webhooks_update",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WebhookInput"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "The webhook",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/WebhookOutput"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "VALIDATION_ERROR, INVALID_UUID"
-                    },
-                    "403": {
-                        "description": "FORBIDDEN (read-only role)"
-                    },
-                    "404": {
-                        "description": "WEBHOOK_NOT_FOUND (also another account's)"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A, write permission, Own. 204; its delivery log goes too.",
-                "operationId": "delete_api_webhooks_delete",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Deleted"
-                    },
-                    "400": {
-                        "description": "INVALID_UUID"
-                    },
-                    "403": {
-                        "description": "FORBIDDEN (read-only role)"
-                    },
-                    "404": {
-                        "description": "WEBHOOK_NOT_FOUND (also another account's)"
-                    }
-                }
-            }
-        },
-        "/api/v1/webhooks/{id}/deliveries": {
-            "get": {
-                "tags": [
-                    "Integrations"
-                ],
-                "summary": "A, Own. The latest 20 deliveries, newest first (D19: the delivery log).",
-                "operationId": "get_api_webhooks_deliveries",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Deliveries",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/WebhookDeliveryOutput"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "INVALID_UUID"
-                    },
-                    "404": {
-                        "description": "WEBHOOK_NOT_FOUND (also another account's)"
                     }
                 }
             }
@@ -2856,7 +2165,7 @@
                 "tags": [
                     "Organizations"
                 ],
-                "summary": "AG, Cap(organizations). Counts one \"organizations\" (OrganizationCreated).",
+                "summary": "AG.",
                 "operationId": "post_api_organizations_create",
                 "requestBody": {
                     "content": {
@@ -2886,9 +2195,6 @@
                     },
                     "409": {
                         "description": "DOMAIN_EMAIL_CONFLICT"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -2948,7 +2254,7 @@
                 "tags": [
                     "Organizations"
                 ],
-                "summary": "204. Deletes the members too (D2). Counts one \"organizations\" (OrganizationDeleted).",
+                "summary": "204. Deletes the members too (D2).",
                 "operationId": "delete_api_organizations_delete",
                 "parameters": [
                     {
@@ -3185,9 +2491,6 @@
                     },
                     "409": {
                         "description": "SLUG_ALREADY_IN_USE"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -3224,9 +2527,6 @@
                     },
                     "404": {
                         "description": "QUESTIONNAIRE_NOT_FOUND"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED"
                     }
                 }
             }
@@ -3404,7 +2704,7 @@
                 "tags": [
                     "Reporting"
                 ],
-                "summary": "The dashboard layout. The first request has the LLM choose it (once, stored forever; counts one \"dashboards\");\nwithout a stored dashboard and without dashboards capacity it answers 200 with locked and no charts.",
+                "summary": "The dashboard layout. The first request has the LLM choose it (once, stored forever).",
                 "operationId": "get_api_questionnaire_dashboard",
                 "parameters": [
                     {
@@ -3418,7 +2718,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "The dashboard, or locked",
+                        "description": "The dashboard",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3429,9 +2729,6 @@
                     },
                     "404": {
                         "description": "QUESTIONNAIRE_NOT_FOUND"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED (analytics)"
                     },
                     "502": {
                         "description": "DASHBOARD_GENERATION_FAILED: nothing was stored"
@@ -3444,7 +2741,7 @@
                 "tags": [
                     "Reporting"
                 ],
-                "summary": "The data behind the charts (PRD \u00a710.9), computed from the stored sessions. Counts one \"analytics\".",
+                "summary": "The data behind the charts (PRD \u00a710.9), computed from the stored sessions.",
                 "operationId": "get_api_questionnaire_dashboard_data",
                 "parameters": [
                     {
@@ -3470,9 +2767,6 @@
                     "404": {
                         "description": "QUESTIONNAIRE_NOT_FOUND"
                     },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED (analytics)"
-                    },
                     "502": {
                         "description": "ANALYTICS_UNAVAILABLE"
                     }
@@ -3484,7 +2778,7 @@
                 "tags": [
                     "Reporting"
                 ],
-                "summary": "The general analytics of a questionnaire (PRD \u00a78.4). Counts one \"analytics\" (AnalyticsFetched).",
+                "summary": "The general analytics of a questionnaire (PRD \u00a78.4).",
                 "operationId": "get_api_questionnaire_analytics",
                 "parameters": [
                     {
@@ -3509,9 +2803,6 @@
                     },
                     "404": {
                         "description": "QUESTIONNAIRE_NOT_FOUND"
-                    },
-                    "429": {
-                        "description": "PLAN_LIMIT_REACHED (analytics)"
                     },
                     "502": {
                         "description": "ANALYTICS_UNAVAILABLE"
@@ -3865,7 +3156,7 @@
                         "description": "QUESTIONNAIRE_NOT_FOUND"
                     },
                     "429": {
-                        "description": "PLAN_LIMIT_REACHED (responses), TOO_MANY_ATTEMPTS"
+                        "description": "TOO_MANY_ATTEMPTS"
                     }
                 }
             }
@@ -5998,481 +5289,6 @@
                 },
                 "type": "object"
             },
-            "CheckoutSessionOutput": {
-                "required": [
-                    "checkout_url"
-                ],
-                "properties": {
-                    "checkout_url": {
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "PlanChangeOutput": {
-                "required": [
-                    "type",
-                    "plan_id",
-                    "billing_interval"
-                ],
-                "properties": {
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "changed",
-                            "checkout"
-                        ]
-                    },
-                    "plan_id": {
-                        "type": "string"
-                    },
-                    "billing_interval": {
-                        "type": "string",
-                        "enum": [
-                            "month",
-                            "year"
-                        ]
-                    },
-                    "change": {
-                        "type": "string",
-                        "nullable": true,
-                        "default": null,
-                        "enum": [
-                            "upgrade",
-                            "downgrade"
-                        ]
-                    },
-                    "effective_at": {
-                        "type": "string",
-                        "nullable": true,
-                        "default": null
-                    },
-                    "checkout_url": {
-                        "type": "string",
-                        "nullable": true,
-                        "default": null
-                    }
-                },
-                "type": "object"
-            },
-            "SubscriptionRenewalOutput": {
-                "required": [
-                    "subscription_id"
-                ],
-                "properties": {
-                    "subscription_id": {
-                        "type": "string"
-                    },
-                    "plan_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "renews_at": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "SubscriptionCancelOutput": {
-                "required": [
-                    "subscription_id"
-                ],
-                "properties": {
-                    "subscription_id": {
-                        "type": "string"
-                    },
-                    "plan_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "active_until": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "PortalSessionOutput": {
-                "required": [
-                    "portal_url"
-                ],
-                "properties": {
-                    "portal_url": {
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "CustomerPlanOutput": {
-                "required": [
-                    "plan_id",
-                    "from_at",
-                    "to_at",
-                    "billing_interval"
-                ],
-                "properties": {
-                    "plan_id": {
-                        "type": "string"
-                    },
-                    "from_at": {
-                        "type": "string"
-                    },
-                    "to_at": {
-                        "type": "string"
-                    },
-                    "billing_interval": {
-                        "type": "string",
-                        "enum": [
-                            "month",
-                            "year"
-                        ]
-                    },
-                    "stripe_customer_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "stripe_subscription_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "trial_end": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "discount": {
-                        "type": "object",
-                        "nullable": true,
-                        "additionalProperties": true
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "PlanSummaryOutput": {
-                "required": [
-                    "id",
-                    "plan_name",
-                    "plan_description",
-                    "currency",
-                    "trial_days"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "plan_name": {
-                        "type": "string"
-                    },
-                    "plan_description": {
-                        "type": "string"
-                    },
-                    "max_questionnaires": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "max_responses": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "price_amount": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "currency": {
-                        "type": "string"
-                    },
-                    "yearly_price_amount": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "trial_days": {
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            },
-            "UsagePeriodOutput": {
-                "required": [
-                    "questionnaires_used",
-                    "from_at",
-                    "to_at"
-                ],
-                "properties": {
-                    "questionnaires_used": {
-                        "type": "integer"
-                    },
-                    "from_at": {
-                        "type": "string"
-                    },
-                    "to_at": {
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "FeatureVerdictOutput": {
-                "required": [
-                    "allowed",
-                    "used"
-                ],
-                "properties": {
-                    "allowed": {
-                        "type": "boolean"
-                    },
-                    "reason": {
-                        "type": "string",
-                        "nullable": true,
-                        "enum": [
-                            "NO_PLAN",
-                            "PLAN_INACTIVE",
-                            "PLAN_NOT_FOUND",
-                            "FEATURE_NOT_IN_PLAN",
-                            "FEATURE_LIMIT_REACHED",
-                            "RESPONSE_LIMIT_REACHED",
-                            "QUESTIONNAIRE_LIMIT_REACHED"
-                        ]
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "used": {
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            },
-            "CustomerUsageOutput": {
-                "required": [
-                    "plan_active",
-                    "features"
-                ],
-                "properties": {
-                    "customer_plan": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/CustomerPlanOutput"
-                            }
-                        ]
-                    },
-                    "plan": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/PlanSummaryOutput"
-                            }
-                        ]
-                    },
-                    "usage": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/UsagePeriodOutput"
-                            }
-                        ]
-                    },
-                    "plan_active": {
-                        "type": "boolean"
-                    },
-                    "features": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "$ref": "#/components/schemas/FeatureVerdictOutput"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "DiscountOutput": {
-                "required": [
-                    "coupon_id",
-                    "duration"
-                ],
-                "properties": {
-                    "coupon_id": {
-                        "type": "string"
-                    },
-                    "promotion_code": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "percent_off": {
-                        "type": "number",
-                        "format": "float",
-                        "nullable": true
-                    },
-                    "amount_off": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "currency": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "duration": {
-                        "type": "string",
-                        "enum": [
-                            "once",
-                            "repeating",
-                            "forever"
-                        ]
-                    },
-                    "ends_at": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "PlanFeatureLimitOutput": {
-                "required": [
-                    "feature_id",
-                    "feature_name",
-                    "limit"
-                ],
-                "properties": {
-                    "feature_id": {
-                        "type": "string"
-                    },
-                    "feature_name": {
-                        "type": "string"
-                    },
-                    "limit": {
-                        "type": "integer"
-                    }
-                },
-                "type": "object"
-            },
-            "CatalogPlanOutput": {
-                "required": [
-                    "id",
-                    "plan_name",
-                    "plan_description",
-                    "currency",
-                    "purchasable",
-                    "yearly_purchasable",
-                    "trial_days",
-                    "features"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "plan_name": {
-                        "type": "string"
-                    },
-                    "plan_description": {
-                        "type": "string"
-                    },
-                    "price_amount": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "currency": {
-                        "type": "string"
-                    },
-                    "purchasable": {
-                        "type": "boolean"
-                    },
-                    "yearly_price_amount": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "yearly_purchasable": {
-                        "type": "boolean"
-                    },
-                    "max_questionnaires": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "max_responses": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "trial_days": {
-                        "type": "integer"
-                    },
-                    "features": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/PlanFeatureLimitOutput"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "PlansOutput": {
-                "required": [
-                    "cancel_at_period_end",
-                    "trial_eligible",
-                    "plans"
-                ],
-                "properties": {
-                    "current_plan_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "current_billing_interval": {
-                        "type": "string",
-                        "nullable": true,
-                        "enum": [
-                            "month",
-                            "year"
-                        ]
-                    },
-                    "active_until": {
-                        "title": "The last day of the plan window (YYYY-MM-DD).",
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "scheduled_plan_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "scheduled_billing_interval": {
-                        "type": "string",
-                        "nullable": true,
-                        "enum": [
-                            "month",
-                            "year"
-                        ]
-                    },
-                    "cancel_at_period_end": {
-                        "type": "boolean"
-                    },
-                    "trial_eligible": {
-                        "type": "boolean"
-                    },
-                    "trial_end": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "discount": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/DiscountOutput"
-                            }
-                        ]
-                    },
-                    "plans": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/CatalogPlanOutput"
-                        }
-                    }
-                },
-                "type": "object"
-            },
             "StylesOutput": {
                 "properties": {
                     "styles": {
@@ -6816,6 +5632,7 @@
                 ],
                 "properties": {
                     "messages": {
+                        "title": "as sent (the callback reads it before it is validated); messages() returns it checked",
                         "type": "array",
                         "items": {
                             "required": [
@@ -7258,6 +6075,7 @@
                         "maxLength": 2048
                     },
                     "products": {
+                        "title": "as sent (the callback reads it before it is validated); products() returns it checked",
                         "type": "array",
                         "items": {
                             "properties": {
@@ -7284,6 +6102,7 @@
                             "type": "object"
                         },
                         "nullable": true,
+                        "default": null,
                         "maxItems": 250
                     }
                 },
@@ -7727,330 +6546,6 @@
                         ]
                     },
                     "website": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "ApiKeyOutput": {
-                "required": [
-                    "id",
-                    "name"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "name": {
-                        "type": "string"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "expires_at": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "last_used_at": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "ApiKeyInput": {
-                "required": [
-                    "name"
-                ],
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 100
-                    },
-                    "expiration_days": {
-                        "type": "integer",
-                        "nullable": true,
-                        "maximum": 3650,
-                        "minimum": 1
-                    }
-                },
-                "type": "object"
-            },
-            "ApiKeyCreatedOutput": {
-                "required": [
-                    "api_key"
-                ],
-                "properties": {
-                    "api_key": {
-                        "type": "string"
-                    }
-                },
-                "type": "object"
-            },
-            "ExternalQuestionnaireOutput": {
-                "required": [
-                    "id",
-                    "title",
-                    "is_active",
-                    "type"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "flow_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "slug": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "description": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "is_active": {
-                        "type": "boolean"
-                    },
-                    "type": {
-                        "type": "string"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "ExternalPaginationOutput": {
-                "required": [
-                    "page",
-                    "page_size",
-                    "total_items",
-                    "total_pages",
-                    "has_next",
-                    "has_previous"
-                ],
-                "properties": {
-                    "page": {
-                        "type": "integer"
-                    },
-                    "page_size": {
-                        "type": "integer"
-                    },
-                    "total_items": {
-                        "type": "integer"
-                    },
-                    "total_pages": {
-                        "type": "integer"
-                    },
-                    "has_next": {
-                        "type": "boolean"
-                    },
-                    "has_previous": {
-                        "type": "boolean"
-                    }
-                },
-                "type": "object"
-            },
-            "ExternalQuestionnaireListOutput": {
-                "required": [
-                    "questionnaires",
-                    "pagination"
-                ],
-                "properties": {
-                    "questionnaires": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ExternalQuestionnaireOutput"
-                        }
-                    },
-                    "pagination": {
-                        "$ref": "#/components/schemas/ExternalPaginationOutput"
-                    }
-                },
-                "type": "object"
-            },
-            "ExternalSessionOutput": {
-                "required": [
-                    "id",
-                    "answers"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "answers": {
-                        "type": "array",
-                        "items": {
-                            "required": [
-                                "title",
-                                "value"
-                            ],
-                            "properties": {
-                                "title": {
-                                    "type": "string"
-                                },
-                                "value": {
-                                    "description": "A string, a number or a list, by control type (PRD \u00a77.14)"
-                                },
-                                "min": {
-                                    "type": "number"
-                                },
-                                "max": {
-                                    "type": "number"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "ExternalAnswersOutput": {
-                "required": [
-                    "questionnaire_id",
-                    "sessions",
-                    "pagination"
-                ],
-                "properties": {
-                    "questionnaire_id": {
-                        "type": "string"
-                    },
-                    "sessions": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ExternalSessionOutput"
-                        }
-                    },
-                    "pagination": {
-                        "$ref": "#/components/schemas/ExternalPaginationOutput"
-                    }
-                },
-                "type": "object"
-            },
-            "WebhookOutput": {
-                "required": [
-                    "id",
-                    "customer_id",
-                    "url",
-                    "event_type",
-                    "method"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "customer_id": {
-                        "type": "string"
-                    },
-                    "url": {
-                        "type": "string"
-                    },
-                    "event_type": {
-                        "type": "string",
-                        "enum": [
-                            "questionnaire.completed"
-                        ]
-                    },
-                    "method": {
-                        "type": "string",
-                        "enum": [
-                            "POST"
-                        ]
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "WebhookInput": {
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 2048
-                    },
-                    "event_type": {
-                        "type": "string",
-                        "nullable": true,
-                        "enum": [
-                            "questionnaire.completed"
-                        ]
-                    },
-                    "method": {
-                        "type": "string",
-                        "nullable": true,
-                        "enum": [
-                            "POST"
-                        ]
-                    }
-                },
-                "type": "object"
-            },
-            "WebhookDeliveryOutput": {
-                "required": [
-                    "id",
-                    "webhook_id",
-                    "event_type",
-                    "status",
-                    "attempts"
-                ],
-                "properties": {
-                    "id": {
-                        "type": "string"
-                    },
-                    "webhook_id": {
-                        "type": "string"
-                    },
-                    "event_type": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string",
-                        "enum": [
-                            "pending",
-                            "delivered",
-                            "failed"
-                        ]
-                    },
-                    "attempts": {
-                        "type": "integer"
-                    },
-                    "last_status_code": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "last_error": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "next_attempt_at": {
-                        "title": "When the next retry is due (pending only).",
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "updated_at": {
                         "type": "string",
                         "nullable": true
                     }
@@ -8914,33 +7409,6 @@
                 },
                 "type": "object"
             },
-            "DashboardLockOutput": {
-                "required": [
-                    "feature",
-                    "reason"
-                ],
-                "properties": {
-                    "feature": {
-                        "type": "string",
-                        "enum": [
-                            "dashboards"
-                        ]
-                    },
-                    "reason": {
-                        "type": "string",
-                        "enum": [
-                            "NO_PLAN",
-                            "PLAN_INACTIVE",
-                            "PLAN_NOT_FOUND",
-                            "FEATURE_NOT_IN_PLAN",
-                            "FEATURE_LIMIT_REACHED",
-                            "RESPONSE_LIMIT_REACHED",
-                            "QUESTIONNAIRE_LIMIT_REACHED"
-                        ]
-                    }
-                },
-                "type": "object"
-            },
             "DashboardOutput": {
                 "required": [
                     "questionnaire_id",
@@ -8986,14 +7454,6 @@
                         "items": {
                             "$ref": "#/components/schemas/DashboardQuestionOutput"
                         }
-                    },
-                    "locked": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/DashboardLockOutput"
-                            }
-                        ]
                     }
                 },
                 "type": "object"
@@ -9397,9 +7857,6 @@
             "name": "Projects"
         },
         {
-            "name": "Billing"
-        },
-        {
             "name": "Styles"
         },
         {
@@ -9428,12 +7885,6 @@
         },
         {
             "name": "Account"
-        },
-        {
-            "name": "Integrations"
-        },
-        {
-            "name": "External API"
         },
         {
             "name": "Jobs"

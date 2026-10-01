@@ -56,7 +56,7 @@ final class SignInWithGoogleHandler
         }
 
         $user->recordSignIn($now);
-        $this->events->publish(new UserSignedIn($user->customerId(), null, ['email' => $user->email()]));
+        $this->events->publish(new UserSignedIn($user->customerId(), ['email' => $user->email()]));
 
         return GoogleSignInResult::signedIn($this->tokens->issue($user));
     }

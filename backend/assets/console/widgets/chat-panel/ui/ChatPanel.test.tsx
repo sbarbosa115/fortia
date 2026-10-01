@@ -143,25 +143,6 @@ describe('ChatPanel', () => {
     expect(await screen.findByText('Back again')).toBeInTheDocument();
   });
 
-  it('has no Retry when the plan refuses the turn', async () => {
-    vi.mocked(sendChatTurn).mockImplementationOnce(async () => {
-      throw new ApiError(429, 'PLAN_LIMIT_REACHED', 'limit', {
-        reason: 'FEATURE_LIMIT_REACHED',
-      });
-    });
-    renderPanel();
-    await userEvent.type(
-      screen.getByLabelText('Type your message…'),
-      'Hello{Enter}',
-    );
-    await screen.findByRole('alert');
-    expect(
-      screen.queryByRole('button', {name: 'Retry'}),
-      'PRD §10.4: no Retry on a plan limit',
-    ).toBeNull();
-    expect(sendChatTurn, 'one message, one turn').toHaveBeenCalledTimes(1);
-  });
-
   it('reads an attached Word document and sends its text with the message, which may be just the file', async () => {
     vi.mocked(uploadChatFile).mockResolvedValue({
       filename: 'questions.docx',

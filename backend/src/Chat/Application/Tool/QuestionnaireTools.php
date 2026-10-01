@@ -2,8 +2,6 @@
 
 namespace App\Chat\Application\Tool;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Questionnaires\Application\Command\CopyQuestionnaire;
 use App\Questionnaires\Application\Command\SetQuestionnaireActive;
 use App\Questionnaires\Application\Query\ListingCriteria;
@@ -25,8 +23,7 @@ use App\Shared\Domain\Text;
 /**
  * PRD §7.19 "Questionnaires": list_questionnaires, get_questionnaire, list_questionnaire_answers,
  * get_questionnaire_analytics, set_questionnaire_active and copy_questionnaire, with the checks of PRD §8.4: any
- * console user reads their account's (another account's is 404), the Active toggle and copies are AG, a copy passes
- * the plan gate of its type and analytics the `analytics` gate (and counts one, like GET …/analytics).
+ * console user reads their account's (another account's is 404), the Active toggle and copies are AG.
  */
 final class QuestionnaireTools implements ChatToolbox
 {
@@ -38,7 +35,6 @@ final class QuestionnaireTools implements ChatToolbox
         private readonly AnswersQueries $answers,
         private readonly DashboardQueries $dashboards,
         private readonly SessionQueries $sessions,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
         private readonly EventBus $events,
         private readonly string $frontendUrl,
@@ -71,7 +67,7 @@ final class QuestionnaireTools implements ChatToolbox
             ),
             ChatTool::read(
                 'get_questionnaire_analytics',
-                'The analytics of a questionnaire: sessions started and completed, and the answers per question. Counts one use of the analytics feature.',
+                'The analytics of a questionnaire: sessions started and completed, and the answers per question.',
                 ['questionnaire_id' => Schema::id('questionnaire')],
                 ['questionnaire_id'],
                 $this->analytics(...),
@@ -102,7 +98,6 @@ final class QuestionnaireTools implements ChatToolbox
                 function (Caller $caller, ToolInput $input): string {
                     Permissions::adminGroups($caller);
                     $questionnaire = $this->owned($caller, $input->uuid('questionnaire_id'));
-                    $this->gate->capacity($caller, $this->details->featureOf((string) $questionnaire['questionnaire_id']));
 
                     return (string) $questionnaire['title'];
                 },
@@ -201,7 +196,6 @@ final class QuestionnaireTools implements ChatToolbox
     private function analytics(Caller $caller, ToolInput $input): array
     {
         $questionnaire = $this->reported->get($caller, $input->uuid('questionnaire_id'));
-        $this->gate->capacity($caller, Features::ANALYTICS);
         $data = $this->dashboards->data($questionnaire);
         $this->events->publish(AnalyticsFetched::of($questionnaire->customerId(), $questionnaire->id(), 'analytics'));
 

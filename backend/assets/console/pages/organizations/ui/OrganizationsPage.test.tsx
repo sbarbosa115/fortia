@@ -12,7 +12,6 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   del: vi.fn(),
   viewer: {canWrite: true, isAdmin: false},
-  feature: {loading: false, allowed: true, included: true, verdict: null},
 }));
 
 vi.mock('@shared/api', async (original) => ({
@@ -20,10 +19,6 @@ vi.mock('@shared/api', async (original) => ({
   api: {get: mocks.get, delete: mocks.del, post: vi.fn(), put: vi.fn()},
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
-vi.mock('@console/entities/plan-usage', () => ({
-  useFeature: () => mocks.feature,
-  USAGE_QUERY_KEY: ['customer-usage'],
-}));
 
 const ACME = {
   organization_id: 'org-1',
@@ -66,12 +61,6 @@ function renderPage() {
 describe('OrganizationsPage (PRD §10.10)', () => {
   beforeEach(() => {
     mocks.viewer = {canWrite: true, isAdmin: false};
-    mocks.feature = {
-      loading: false,
-      allowed: true,
-      included: true,
-      verdict: null,
-    };
     mocks.get.mockReset();
     mocks.del.mockReset();
   });
@@ -113,25 +102,6 @@ describe('OrganizationsPage (PRD §10.10)', () => {
       screen.getByRole('button', {name: /New Organization/}),
     ).toBeDisabled();
     expect(screen.getByRole('button', {name: /Delete/})).toBeDisabled();
-  });
-
-  it('disables creating when the plan does not include organizations', async () => {
-    mocks.feature = {
-      loading: false,
-      allowed: false,
-      included: false,
-      verdict: null,
-    };
-    mocks.get.mockResolvedValue({organizations: []});
-
-    renderPage();
-
-    await screen.findByText('No organizations yet. Create your first one.');
-    for (const button of screen.getAllByRole('button', {
-      name: /New Organization/,
-    })) {
-      expect(button).toBeDisabled();
-    }
   });
 
   it('asks before deleting and then deletes', async () => {

@@ -2,7 +2,7 @@ import {ApiError} from './ApiError';
 
 /**
  * The one HTTP client of both apps. Each app configures it once at start-up (configureApi) with how to get its
- * bearer token, the assumed customer, and what to do on 401 or a plan limit; entities and features then call
+ * bearer token, the assumed customer, and what to do on 401; entities and features then call
  * api.get/post/… and receive the unwrapped "data" of the envelope (or the bare JSON of the older routes).
  */
 export type ApiOptions = {
@@ -12,7 +12,6 @@ export type ApiOptions = {
   /** The console's assumed customer (X-Assume-Customer-Id), never sent to /admin/*. */
   getAssumedCustomerId?: () => string | null;
   onUnauthorized?: (error: ApiError) => void;
-  onPlanLimit?: (error: ApiError) => void;
   /** Any other API error the app wants to know about (e.g. ASSUME_NOT_ALLOWED stops assuming). */
   onError?: (error: ApiError) => void;
   timeoutMs?: number;
@@ -137,8 +136,6 @@ async function request<T>(
     );
     if (response.status === 401) {
       options.onUnauthorized?.(error);
-    } else if (error.isPlanLimit) {
-      options.onPlanLimit?.(error);
     }
     options.onError?.(error);
     throw error;

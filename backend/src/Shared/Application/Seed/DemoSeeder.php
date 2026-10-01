@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 #[AutoconfigureTag('app.demo_seeder')]
 interface DemoSeeder
 {
-    /** Higher runs first: catalog 100, accounts 90, plans 80, then each context's data ≤ 50. */
+    /** Higher runs first: accounts 90, then each context's data ≤ 50. */
     public static function priority(): int;
 
     public function seed(): void;

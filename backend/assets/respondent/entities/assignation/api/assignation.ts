@@ -4,7 +4,7 @@ export type Assignation = Schema<'AssignationOutput'>;
 export type RespondentLogin = Schema<'RespondentLoginOutput'>;
 export type LoginBody = Schema<'RespondentLoginInput'>;
 
-/** GET /assignations/{id} (PRD §8.8), anonymous: no description nor answers; 429 when the plan lacks assignations. */
+/** GET /assignations/{id} (PRD §8.8), anonymous: no description nor answers. */
 export function fetchAssignation(assignationId: string): Promise<Assignation> {
   return api.get<Assignation>(`/assignations/${assignationId}`, {
     anonymous: true,

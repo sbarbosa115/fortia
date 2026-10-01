@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Identity;
 
-use App\Billing\Application\Usage;
 use App\Identity\Domain\Model\User;
 use App\Tests\Support\ApiTestCase;
 
@@ -20,13 +19,12 @@ final class UsersTest extends ApiTestCase
         $this->data($this->api('POST', '/api/v1/auth/token', ['email' => 'new.member@acme.test', 'password' => 'correct-horse']), 200);
     }
 
-    public function testCreatingAUserCountsAsUsersUsage(): void
+    public function testCreatingAUserPublishesUserCreated(): void
     {
         $owner = $this->account('ACME0001');
 
         $this->api('POST', '/api/v1/users', self::NEW_USER, as: $owner);
 
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current('ACME0001')['users'] ?? 0, 'PRD §7.2: creating a team user counts "users"');
         $count = (int) $this->em()->getConnection()->fetchOne("SELECT COUNT(*) FROM domain_event_log WHERE event_type = 'UserCreated' AND customer_id = 'ACME0001'");
         self::assertSame(1, $count, 'PRD §8.2: UserCreated event');
     }
@@ -37,18 +35,6 @@ final class UsersTest extends ApiTestCase
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
 
         $this->assertApiError($this->api('POST', '/api/v1/users', self::NEW_USER, as: 'reader@acme.test'), 403, 'FORBIDDEN', 'PRD §8.2: POST /users is AG');
-    }
-
-    public function testTheUsersQuotaIsEnforced(): void
-    {
-        $owner = $this->account('GLOBEX01', plan: 'starter');
-        static::getContainer()->get(Usage::class)->set('GLOBEX01', ['users' => 2]);
-        $this->em()->flush();
-
-        $response = $this->api('POST', '/api/v1/users', self::NEW_USER, as: $owner);
-
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', 'PRD §8.2: Cap(users)');
-        self::assertSame(['reason' => 'FEATURE_LIMIT_REACHED', 'feature' => 'users'], $response['json']['error']['details']);
     }
 
     public function testAnEmailInUseAnywhereIsAConflict(): void

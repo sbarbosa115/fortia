@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Commerce;
 
-use App\Billing\Application\Usage;
 use App\Commerce\Domain\Model\Product;
 use App\Commerce\Domain\Model\ShopifyConnection;
 use App\Commerce\Infrastructure\Scraper\FakeCatalogScraper;
@@ -12,7 +11,7 @@ use App\Shared\Domain\Ids;
 use App\Tests\Support\ApiTestCase;
 
 /**
- * PRD §7.17 quiz funnel creation, §8.4 POST /questionnaire/quiz-funnel (AG, Cap(quiz-funnel), 202 {job}), and the
+ * PRD §7.17 quiz funnel creation, §8.4 POST /questionnaire/quiz-funnel (AG, 202 {job}), and the
  * funnel it creates working end to end: a respondent answers it and is recommended products of its catalog (§7.7).
  */
 final class QuizFunnelJobTest extends ApiTestCase
@@ -54,7 +53,6 @@ final class QuizFunnelJobTest extends ApiTestCase
             self::assertSame($questionnaire->questionnaireId(), $product->questionnaireId(), 'the funnel recommends from its own products (§7.7)');
             self::assertStringNotContainsString('<script', $product->description(), 'D11: product HTML is sanitized when stored');
         }
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current('ACME0001')['quiz-funnel'] ?? 0, '§7.2: a quiz funnel counts one "quiz-funnel"');
         self::assertSame([], $this->scraper()->calls(), 'products were sent: nothing is scraped');
     }
 
@@ -108,7 +106,6 @@ final class QuizFunnelJobTest extends ApiTestCase
         self::assertSame('FAILED', $job['status']);
         self::assertSame('NO_PRODUCTS_FOUND', $job['result']['error']['type']);
         self::assertSame(0, $this->em()->getRepository(Questionnaire::class)->count(['customerId' => 'ACME0001']));
-        self::assertSame(0, static::getContainer()->get(Usage::class)->current('ACME0001')['quiz-funnel'] ?? 0);
     }
 
     public function testTheQuestionnaireIsWrittenInTheAccountsLanguageAndTheCatalogIsData(): void
@@ -142,7 +139,6 @@ final class QuizFunnelJobTest extends ApiTestCase
         self::assertSame('GENERATION_FAILED', $job['result']['error']['type'], '§10.5: "Generation failed. Please try again."');
         self::assertCount(3, $this->llm()->requests(), 'up to 3 attempts');
         self::assertSame(0, $this->em()->getRepository(Questionnaire::class)->count(['customerId' => 'ACME0001']), 'no questionnaire is created');
-        self::assertSame(0, static::getContainer()->get(Usage::class)->current('ACME0001')['quiz-funnel'] ?? 0, 'nothing is counted');
     }
 
     public function testWithoutAStoreUrlTheConnectedStoreIsUsed(): void
@@ -160,9 +156,9 @@ final class QuizFunnelJobTest extends ApiTestCase
         self::assertSame('https://acme-store.myshopify.com', $flow?->sourceUrl(), '§7.17 step 1: the connected store from the e-commerce platform');
     }
 
-    public function testOnlyAdminGroupsWithTheFeatureMayCreateAFunnel(): void
+    public function testOnlyAdminGroupsMayCreateAFunnel(): void
     {
-        $this->account('ACME0001', plan: 'starter');
+        $this->account('ACME0001');
         $this->user('ACME0001', 'reader@acme.test', ['Customer-Read-Only']);
         $body = ['type' => 'experience', 'source_url' => 'https://runners.example.com', 'products' => self::PRODUCTS];
 
@@ -172,10 +168,7 @@ final class QuizFunnelJobTest extends ApiTestCase
         $this->assertApiError($this->api('POST', '/api/v1/questionnaire/quiz-funnel', ['source_url' => 'localhost'] + $body, as: 'root@acme0001.test'), 400, 'VALIDATION_ERROR', '§10.5: "Please enter a valid store URL"');
         $this->assertApiError($this->api('POST', '/api/v1/questionnaire/quiz-funnel', ['products' => [['description' => 'no name']]] + $body, as: 'root@acme0001.test'), 400, 'VALIDATION_ERROR', 'every product needs a name');
 
-        self::assertSame('COMPLETED', $this->create('root@acme0001.test', $body)['status'], 'Starter allows one quiz funnel');
-        $refused = $this->api('POST', '/api/v1/questionnaire/quiz-funnel', $body, as: 'root@acme0001.test');
-        $this->assertApiError($refused, 429, 'PLAN_LIMIT_REACHED', '§7.1: Cap(quiz-funnel)');
-        self::assertSame('FEATURE_LIMIT_REACHED', $refused['json']['error']['details']['reason']);
+        self::assertSame('COMPLETED', $this->create('root@acme0001.test', $body)['status']);
     }
 
     public function testAGeneratedFunnelRecommendsItsProductsToARespondent(): void

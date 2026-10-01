@@ -21,15 +21,6 @@ vi.mock('@shared/api', async (original) => ({
   api: {get: mocks.get, post: mocks.post, put: mocks.put, delete: mocks.del},
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
-vi.mock('@console/entities/plan-usage', () => ({
-  USAGE_QUERY_KEY: ['customer-usage'],
-  useFeature: () => ({
-    loading: false,
-    allowed: true,
-    included: true,
-    verdict: null,
-  }),
-}));
 
 const MUG = {
   product_id: '7b0c1e9e-1111-4a4a-8a8a-000000000001',

@@ -2,8 +2,6 @@
 
 namespace App\Chat\Application\Tool;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Branding\Application\Command\RequestStyles;
 use App\Branding\Application\Query\StylesQueries;
 use App\Identity\Application\Command\ChangeSettings;
@@ -14,10 +12,10 @@ use App\Shared\Domain\Error\NotFound;
 
 /**
  * PRD §7.19 "Account": get_profile, get_account_settings, update_account_language, update_account_settings,
- * extract_brand_styles and list_team_users. Inviting users and creating API keys are deliberately not offered.
+ * extract_brand_styles and list_team_users. Inviting users is deliberately not offered.
  *
- * The checks are those of PRD §8.3/§8.5: changing settings is AG on the caller's own account, with Cap(profile)
- * unless only the language changes; the styles job is AG and Cap(styles), and it runs in the background (its job id
+ * The checks are those of PRD §8.3/§8.5: changing settings is AG on the caller's own account; the
+ * styles job is AG, and it runs in the background (its job id
  * goes back to the console, which follows it).
  */
 final class AccountTools implements ChatToolbox
@@ -28,7 +26,6 @@ final class AccountTools implements ChatToolbox
     public function __construct(
         private readonly AccountQueries $accounts,
         private readonly StylesQueries $styles,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
     ) {
     }
@@ -111,7 +108,6 @@ final class AccountTools implements ChatToolbox
                     Permissions::adminGroups($caller);
                     $this->account($caller);
                     $fields = self::settings($input);
-                    $this->gate->capacity($caller, Features::PROFILE);
 
                     return implode(', ', array_keys($fields));
                 },
@@ -126,9 +122,8 @@ final class AccountTools implements ChatToolbox
                 'Reads the brand (colors, font, logo) from a website and saves it as the account\'s styles, in the background (about a minute).',
                 ['website' => Schema::string('The website, starting with http:// or https://.', 2048)],
                 ['website'],
-                function (Caller $caller, ToolInput $input): string {
+                static function (Caller $caller, ToolInput $input): string {
                     Permissions::adminGroups($caller);
-                    $this->gate->capacity($caller, Features::STYLES);
 
                     return self::website($input);
                 },

@@ -17,7 +17,6 @@
     "assignations": "Asignaciones",
     "projects": "Proyectos",
     "users": "Usuarios",
-    "integrations": "Integraciones",
     "profile": "Perfil",
     "documentation": "Documentación",
     "logout": "Cerrar sesión",
@@ -30,8 +29,7 @@
     "en": "English"
   },
   "account": {
-    "label": "Tu cuenta",
-    "currentPlan": "Plan actual"
+    "label": "Tu cuenta"
   },
   "roles": {
     "Admin": "Administrador",

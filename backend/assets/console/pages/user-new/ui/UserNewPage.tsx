@@ -1,7 +1,6 @@
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {useViewer} from '@console/entities/viewer';
 import {PasswordStrength} from '@console/features/password-strength';
-import {api, errorMessageKey, isApiError, type Schema} from '@shared/api';
+import {api, type Schema} from '@shared/api';
 import {useDocumentTitle} from '@shared/lib';
 import {
   Button,
@@ -72,18 +71,10 @@ export function UserNewPage() {
         role,
       });
       void queryClient.invalidateQueries({queryKey: ['users']});
-      void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
       toast.success(t('created', {name: user.name}));
       navigate('/users');
     } catch (error) {
-      const key = createErrorKey(error);
-      setFailure(
-        key
-          ? t(key)
-          : isApiError(error)
-            ? ts(errorMessageKey(error))
-            : t('errors.generic'),
-      );
+      setFailure(t(createErrorKey(error)));
       setBusy(false);
     }
   };

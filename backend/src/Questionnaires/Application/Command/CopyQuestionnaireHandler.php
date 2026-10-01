@@ -3,7 +3,6 @@
 namespace App\Questionnaires\Application\Command;
 
 use App\Identity\Application\Query\AccountQueries;
-use App\Questionnaires\Application\Query\QuestionnaireDetails;
 use App\Questionnaires\Domain\Event\QuestionnaireCreated;
 use App\Questionnaires\Domain\Flow\CopyNaming;
 use App\Questionnaires\Domain\Model\Diagnostic;
@@ -30,7 +29,6 @@ final class CopyQuestionnaireHandler
         private readonly FlowRepository $flows,
         private readonly DiagnosticRepository $diagnostics,
         private readonly PromptRepository $prompts,
-        private readonly QuestionnaireDetails $details,
         private readonly AccountQueries $accounts,
         private readonly ObjectStorage $storage,
         private readonly EventBus $events,
@@ -91,7 +89,7 @@ final class CopyQuestionnaireHandler
         $this->flows->add($copiedFlow);
         $copy->syncFlowCopies($slug, $copiedFlow->isChain());
 
-        $this->events->publish(QuestionnaireCreated::of($customerId, $id, $this->details->featureOf($original->questionnaireId()), 'copy'));
+        $this->events->publish(QuestionnaireCreated::of($customerId, $id, 'copy'));
 
         return $id;
     }

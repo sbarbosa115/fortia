@@ -2,7 +2,6 @@
 
 namespace App\Questionnaires\Application\Command;
 
-use App\Billing\Application\Features;
 use App\Questionnaires\Domain\Error\QuestionnaireAlreadyAnswered;
 use App\Questionnaires\Domain\Error\QuestionnaireNotFound;
 use App\Questionnaires\Domain\Error\SlugAlreadyInUse;
@@ -64,10 +63,7 @@ final class SaveFlowHandler
         $this->flows->add($flow);
         $this->define($flow, $command, $draft, $id, $slug, $now);
 
-        $feature = $command->feature ?? Features::forQuestionnaireType($draft->usageType());
-        $this->events->publish($command->countsUsage
-            ? QuestionnaireCreated::of($command->customerId, $id, $feature, $command->source)
-            : new QuestionnaireCreated($command->customerId, null, ['questionnaire_id' => $id, 'source' => $command->source]));
+        $this->events->publish(QuestionnaireCreated::of($command->customerId, $id, $command->source));
 
         return $id;
     }

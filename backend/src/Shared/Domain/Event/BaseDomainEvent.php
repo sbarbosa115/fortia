@@ -7,9 +7,9 @@ namespace App\Shared\Domain\Event;
  *
  *     final class QuestionnaireCreated extends BaseDomainEvent
  *     {
- *         public static function of(string $customerId, string $questionnaireId, string $feature): self
+ *         public static function of(string $customerId, string $questionnaireId): self
  *         {
- *             return new self($customerId, $feature, ['questionnaire_id' => $questionnaireId]);
+ *             return new self($customerId, ['questionnaire_id' => $questionnaireId]);
  *         }
  *     }
  */
@@ -22,7 +22,6 @@ abstract class BaseDomainEvent implements DomainEvent
      */
     final public function __construct(
         private readonly ?string $customerId,
-        private readonly ?string $feature = null,
         private readonly array $payload = [],
     ) {
         $this->occurredAt = gmdate('Y-m-d\TH:i:s\Z');
@@ -38,11 +37,6 @@ abstract class BaseDomainEvent implements DomainEvent
     public function customerId(): ?string
     {
         return $this->customerId;
-    }
-
-    public function feature(): ?string
-    {
-        return $this->feature;
     }
 
     public function payload(): array

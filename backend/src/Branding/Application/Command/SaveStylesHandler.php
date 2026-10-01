@@ -9,7 +9,7 @@ use App\Shared\Application\Bus\EventBus;
 use App\Shared\Domain\Clock;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-/** Creates or replaces the account's styles and counts one "styles" (BrandStylesUpdated, PRD §7.2). */
+/** Creates or replaces the account's styles and publishes BrandStylesUpdated. */
 #[AsMessageHandler(bus: 'command.bus')]
 final class SaveStylesHandler
 {

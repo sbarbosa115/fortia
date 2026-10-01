@@ -2,8 +2,6 @@
 
 namespace App\Chat\Application\Tool;
 
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Organizations\Application\Command\DeleteOrganization;
 use App\Organizations\Application\Command\SaveOrganization;
 use App\Organizations\Application\Query\OrganizationQueries;
@@ -13,7 +11,7 @@ use App\Shared\Domain\Error\NotFound;
 use App\Shared\Domain\Text;
 
 /**
- * PRD §7.19 "Organizations: organization CRUD", with the checks of PRD §8.7: creating is AG and Cap(organizations);
+ * PRD §7.19 "Organizations: organization CRUD", with the checks of PRD §8.7: creating is AG;
  * changing and deleting need write permission and the caller's own organization (another account's is 404, D1).
  */
 final class OrganizationTools implements ChatToolbox
@@ -22,7 +20,6 @@ final class OrganizationTools implements ChatToolbox
 
     public function __construct(
         private readonly OrganizationQueries $organizations,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
     ) {
     }
@@ -65,9 +62,8 @@ final class OrganizationTools implements ChatToolbox
                 'Creates an organization (and its members).',
                 $fields,
                 ['name'],
-                function (Caller $caller, ToolInput $input): string {
+                static function (Caller $caller, ToolInput $input): string {
                     Permissions::adminGroups($caller);
-                    $this->gate->capacity($caller, Features::ORGANIZATIONS);
 
                     return $input->string('name');
                 },

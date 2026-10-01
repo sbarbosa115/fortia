@@ -13,7 +13,7 @@ export const PERMISSIONS: [string, boolean, boolean][] = [
   ['viewResponses', true, true],
   ['exportReports', true, true],
   ['inviteUsers', true, false],
-  ['editBilling', true, false],
+  ['editWorkspace', true, false],
 ];
 
 export function validateNewUser(values: NewUserValues): NewUserErrors {
@@ -30,16 +30,10 @@ export function validateNewUser(values: NewUserValues): NewUserErrors {
   return errors;
 }
 
-/**
- * The text (key in pages.user-new) of a failed creation; null for a plan limit, which the console already shows
- * with the shared plan-limit texts (PRD §10.21).
- */
-export function createErrorKey(error: unknown): string | null {
+/** The text (key in pages.user-new) of a failed creation. */
+export function createErrorKey(error: unknown): string {
   if (!isApiError(error)) {
     return 'errors.generic';
-  }
-  if (error.isPlanLimit) {
-    return null;
   }
   switch (error.code) {
     case 'EMAIL_ALREADY_EXISTS':

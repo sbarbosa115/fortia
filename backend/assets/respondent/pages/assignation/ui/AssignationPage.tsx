@@ -60,13 +60,6 @@ export function AssignationPage() {
   if (!assignation || !brand.ready) {
     return <Skeleton />;
   }
-  if (view.limitError) {
-    return (
-      <div className="respondent-page">
-        <UnavailableScreen error={view.limitError} />
-      </div>
-    );
-  }
   const frame = (content: ReactNode) => (
     <RunnerFrame logoUrl={brand.logoUrl} title={assignation.name}>
       {content}

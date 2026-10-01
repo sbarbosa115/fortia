@@ -7,22 +7,19 @@ use App\Assignations\Application\Command\DeleteProject;
 use App\Assignations\Application\Command\UpdateProject;
 use App\Assignations\Application\Query\ProjectListCriteria;
 use App\Assignations\Application\Query\ProjectQueries;
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\Caller;
 use App\Shared\Domain\Error\NotFound;
 use App\Shared\Domain\Text;
 
 /**
- * PRD §7.19 "Projects: project CRUD", with the checks of PRD §8.9: writes need write permission, creating also
- * Feat(assignations); another account's project is 404.
+ * PRD §7.19 "Projects: project CRUD", with the checks of PRD §8.9: writes need write permission; another account's
+ * project is 404.
  */
 final class ProjectTools implements ChatToolbox
 {
     public function __construct(
         private readonly ProjectQueries $projects,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
     ) {
     }
@@ -56,9 +53,8 @@ final class ProjectTools implements ChatToolbox
                 'Creates a project of one organization, with its follow-up assignations.',
                 ['organization_id' => Schema::id('organization')] + $fields,
                 ['organization_id', 'name', 'due_date'],
-                function (Caller $caller, ToolInput $input): string {
+                static function (Caller $caller, ToolInput $input): string {
                     Permissions::write($caller);
-                    $this->gate->feature($caller, Features::ASSIGNATIONS);
                     $input->uuid('organization_id');
                     $input->string('due_date', 10);
 

@@ -6,8 +6,8 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * The account, the tenant (PRD §6.1). Its users' identity lives in User; its plan in Billing's CustomerPlan; its
- * e-commerce connection in Commerce; its brand styles in Branding.
+ * The account, the tenant (PRD §6.1). Its users' identity lives in User; its e-commerce connection in Commerce;
+ * its brand styles in Branding.
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'customer')]

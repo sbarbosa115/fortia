@@ -1,4 +1,3 @@
-import {useFeature} from '@console/entities/plan-usage';
 import {
   deleteProject,
   type Project,
@@ -19,14 +18,13 @@ import './projects.css';
 /**
  * /projects (PRD §10.12): each organization's follow-ups followed together and what to do next on each — the
  * projects by status, searched on the server, 10 per page, each one's assignations on expand, the status legend,
- * and Edit / Delete. "New project" needs write permission and the plan's assignations feature.
+ * and Edit / Delete. "New project" needs write permission.
  */
 export function ProjectsPage() {
   const {t} = useTranslation('pages.projects');
   const {t: tShared} = useTranslation('shared');
   useDocumentTitle(`Mappi - ${t('title')}`);
   const viewer = useViewer();
-  const feature = useFeature('assignations', viewer.isAdmin);
   const listing = useProjectListing();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -47,18 +45,10 @@ export function ProjectsPage() {
     onError: (failure) => toast.apiError(failure),
   });
 
-  const createReason = !viewer.canWrite
-    ? tShared('readOnly.create')
-    : !feature.loading && !feature.included
-      ? t('notInPlan')
-      : null;
+  const createReason = viewer.canWrite ? null : tShared('readOnly.create');
   const changeReason = viewer.canWrite ? null : tShared('readOnly.change');
   const newAction = (label: string) => (
-    <NewProjectAction
-      label={label}
-      disabledReason={createReason}
-      loading={feature.loading}
-    />
+    <NewProjectAction label={label} disabledReason={createReason} />
   );
 
   return (

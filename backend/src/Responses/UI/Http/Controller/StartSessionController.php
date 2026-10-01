@@ -3,8 +3,6 @@
 namespace App\Responses\UI\Http\Controller;
 
 use App\Assignations\Application\Query\AssignationQueries;
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Questionnaires\Application\Query\QuestionnaireQueries;
 use App\Questionnaires\Application\Query\QuestionnaireView;
 use App\Responses\Application\ChainStages;
@@ -26,8 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * PRD §8.4 POST /questionnaire/{questionnaire_id}/session · P (optional respondent Bearer), Cap(responses) only on
- * root questionnaires. Bare. A questionnaire that is inactive, unknown or assigned to an organization is 404 — an
+ * PRD §8.4 POST /questionnaire/{questionnaire_id}/session · P (optional respondent Bearer). Bare. A questionnaire that is inactive, unknown or assigned to an organization is 404 — an
  * assigned one is answered through /a/{id}, whose respondent token lets it (and its chain's stages) start here.
  */
 #[OA\Tag(name: 'Respondent sessions')]
@@ -37,7 +34,6 @@ final class StartSessionController
         private readonly QuestionnaireQueries $questionnaires,
         private readonly AssignationQueries $assignations,
         private readonly SessionQueries $sessions,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
         private readonly RespondentBearer $bearer,
         private readonly PublicRateLimit $rateLimit,
@@ -49,7 +45,7 @@ final class StartSessionController
     #[OA\Response(response: 400, description: 'INVALID_UUID')]
     #[OA\Response(response: 401, description: 'UNAUTHORIZED (an invalid respondent token)')]
     #[OA\Response(response: 404, description: 'QUESTIONNAIRE_NOT_FOUND')]
-    #[OA\Response(response: 429, description: 'PLAN_LIMIT_REACHED (responses), TOO_MANY_ATTEMPTS')]
+    #[OA\Response(response: 429, description: 'TOO_MANY_ATTEMPTS')]
     public function __invoke(string $questionnaireId, Request $request): JsonResponse
     {
         $this->rateLimit->consume($request);
@@ -64,9 +60,6 @@ final class StartSessionController
         $assigned = $this->assignations->findByQuestionnaire($id);
         if (null !== $assigned && ($binding['assignations_id'] ?? null) !== $assigned['assignations_id']) {
             throw new NotFound('QUESTIONNAIRE_NOT_FOUND', 'The questionnaire does not exist.');
-        }
-        if ($questionnaire->isRoot() && null === $binding) {
-            $this->gate->capacityForAccount($questionnaire->customerId(), Features::RESPONSES);
         }
 
         $sessionId = (string) $this->commands->dispatch(null === $binding ? new StartSession($id) : new StartSession(

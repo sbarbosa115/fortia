@@ -143,14 +143,4 @@ describe('AccountSettings (PRD §10.14 Settings tab)', () => {
       "Your read-only role can't make changes.",
     );
   });
-
-  it('locks the form when the plan does not include account settings', async () => {
-    signInAs(['Customer-Admin'], true);
-    stubApi(false);
-    renderWidget();
-
-    expect(await screen.findByRole('note')).toHaveTextContent(
-      "Your plan doesn't include this feature.",
-    );
-  });
 });

@@ -1,7 +1,6 @@
-import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
 import {fetchDashboard, fetchDashboardData} from '@console/entities/dashboard';
 import {isApiError} from '@shared/api';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import {useQuery} from '@tanstack/react-query';
 import {useEffect, useState} from 'react';
 
 /** Retry server failures once; 4xx are never retried (PRD §10.9). */
@@ -11,10 +10,9 @@ function retryServerErrors(failures: number, error: unknown): boolean {
 
 /**
  * The dashboard screen's data (PRD §10.9): the answers data first; the layout only once there are answers (its
- * first request has the LLM choose it and counts one "dashboards", so an empty questionnaire never spends one).
+ * first request has the LLM choose it, so an empty questionnaire never spends one).
  */
 export function useQuestionnaireDashboard(questionnaireId: string) {
-  const queryClient = useQueryClient();
   const data = useQuery({
     queryKey: ['dashboard-data', questionnaireId],
     queryFn: () => fetchDashboardData(questionnaireId),
@@ -23,11 +21,7 @@ export function useQuestionnaireDashboard(questionnaireId: string) {
   const hasAnswers = (data.data?.sessions.total ?? 0) > 0;
   const layout = useQuery({
     queryKey: ['dashboard', questionnaireId],
-    queryFn: async () => {
-      const dashboard = await fetchDashboard(questionnaireId);
-      void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
-      return dashboard;
-    },
+    queryFn: () => fetchDashboard(questionnaireId),
     enabled: hasAnswers,
     retry: false,
     staleTime: Infinity,

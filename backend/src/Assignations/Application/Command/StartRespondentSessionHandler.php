@@ -12,8 +12,6 @@ use App\Assignations\Domain\Error\UserNotFound;
 use App\Assignations\Domain\Model\Assignation;
 use App\Assignations\Domain\Repository\AssignationRepository;
 use App\Assignations\Domain\RespondentLookup;
-use App\Billing\Application\Features;
-use App\Billing\Application\PlanGate;
 use App\Organizations\Application\Query\OrganizationQueries;
 use App\Responses\Application\Command\StartSession;
 use App\Responses\Application\Query\SessionQueries;
@@ -31,7 +29,6 @@ final class StartRespondentSessionHandler
         private readonly FollowUpStatus $followUps,
         private readonly OrganizationQueries $organizations,
         private readonly SessionQueries $sessions,
-        private readonly PlanGate $gate,
         private readonly CommandBus $commands,
         private readonly RespondentTokens $tokens,
         private readonly Clock $clock,
@@ -45,7 +42,6 @@ final class StartRespondentSessionHandler
         if (null === $assignation || !$assignation->isActive()) {
             throw new AssignationNotFound($command->assignationsId);
         }
-        $this->gate->featureForAccount($assignation->customerId(), Features::ASSIGNATIONS);
         if ($assignation->isFollowUp() && $this->followUps->of($assignation)->ended) {
             throw new FollowUpCompleted();
         }
@@ -57,7 +53,6 @@ final class StartRespondentSessionHandler
         if (!Audience::includes($assignation->audience(), $member)) {
             throw new NotInAudience();
         }
-        $this->gate->capacityForAccount($assignation->customerId(), Features::RESPONSES);
 
         $memberId = (string) $member['organization_user_id'];
         $sessionId = $assignation->isFollowUp() ? $this->sharedSession($assignation) : $this->ownSession($assignation, $memberId);

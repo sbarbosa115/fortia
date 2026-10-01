@@ -1,31 +1,10 @@
-import {usePlanUsage} from '@console/entities/plan-usage';
-import {useViewer, type Viewer} from '@console/entities/viewer';
 import {testI18n} from '@shared/i18n/testing';
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {I18nextProvider} from 'react-i18next';
 import {MemoryRouter, Route, Routes} from 'react-router';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {describe, expect, it} from 'vitest';
 import {QuestionnaireNewPage} from './QuestionnaireNewPage';
-
-vi.mock('@console/entities/plan-usage', async (original) => ({
-  ...(await original<typeof import('@console/entities/plan-usage')>()),
-  usePlanUsage: vi.fn(),
-}));
-vi.mock('@console/entities/viewer', async (original) => ({
-  ...(await original<typeof import('@console/entities/viewer')>()),
-  useViewer: vi.fn(),
-}));
-
-function usage(
-  features: Record<string, {allowed: boolean; reason?: string | null}>,
-) {
-  vi.mocked(usePlanUsage).mockReturnValue({
-    data: {features},
-    isPending: false,
-    isError: false,
-  } as unknown as ReturnType<typeof usePlanUsage>);
-}
 
 function renderPage() {
   return render(
@@ -44,17 +23,7 @@ function renderPage() {
 }
 
 describe('QuestionnaireNewPage', () => {
-  beforeEach(() => {
-    vi.mocked(useViewer).mockReturnValue({isAdmin: false} as Viewer);
-  });
-
   it('offers the four types with their descriptions and labels', () => {
-    usage({
-      'regular': {allowed: true},
-      'diagnostic': {allowed: true},
-      'quiz-funnel': {allowed: true},
-      'chain': {allowed: true},
-    });
     renderPage();
 
     expect(
@@ -76,45 +45,7 @@ describe('QuestionnaireNewPage', () => {
     );
   });
 
-  it('disables a type the plan does not allow, with the limit text', () => {
-    usage({
-      'regular': {allowed: true},
-      'diagnostic': {allowed: false, reason: 'FEATURE_NOT_IN_PLAN'},
-      'quiz-funnel': {allowed: false, reason: 'FEATURE_LIMIT_REACHED'},
-      'chain': {allowed: true},
-    });
-    renderPage();
-
-    const diagnostic = screen.getByRole('radio', {name: /Diagnostic/});
-    expect(diagnostic).toBeDisabled();
-    expect(diagnostic).toHaveTextContent(
-      "Your plan doesn't include this feature.",
-    );
-    expect(screen.getByRole('radio', {name: /Quiz Funnel/})).toHaveTextContent(
-      "You've reached your plan's limit for this feature.",
-    );
-    expect(screen.getByRole('radio', {name: /Regular/})).toBeEnabled();
-  });
-
-  it('selects the first type the plan allows', () => {
-    usage({
-      'regular': {allowed: false, reason: 'FEATURE_NOT_IN_PLAN'},
-      'diagnostic': {allowed: true},
-      'quiz-funnel': {allowed: true},
-      'chain': {allowed: true},
-    });
-    renderPage();
-
-    expect(screen.getByRole('radio', {name: /Diagnostic/})).toBeChecked();
-  });
-
   it('opens the editor of the chosen type on Continue', async () => {
-    usage({
-      'regular': {allowed: true},
-      'diagnostic': {allowed: true},
-      'quiz-funnel': {allowed: true},
-      'chain': {allowed: true},
-    });
     renderPage();
 
     await userEvent.click(screen.getByRole('radio', {name: /Chaining/}));
@@ -127,12 +58,6 @@ describe('QuestionnaireNewPage', () => {
   });
 
   it('clears the selection with Back, which disables Continue', async () => {
-    usage({
-      'regular': {allowed: true},
-      'diagnostic': {allowed: true},
-      'quiz-funnel': {allowed: true},
-      'chain': {allowed: true},
-    });
     renderPage();
 
     await userEvent.click(screen.getByRole('button', {name: /Back/}));

@@ -32,7 +32,7 @@
       "viewResponses": "View responses",
       "exportReports": "Export reports",
       "inviteUsers": "Invite users",
-      "editBilling": "Edit billing and workspace"
+      "editWorkspace": "Edit the workspace"
     }
   },
   "submit": "Create user",

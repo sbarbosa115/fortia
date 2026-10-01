@@ -30,7 +30,6 @@
       "userNotFound": "No te encontramos en esta organización. Revisa el nombre y el correo con los que te invitaron.",
       "failed": "No pudimos iniciar sesión. Inténtalo de nuevo.",
       "completed": "Este seguimiento ya se completó.",
-      "limit": "Se alcanzó el límite de respuestas.",
       "invalidEmail": "Ingresa un correo válido."
     },
     "form": "Formulario de inicio de sesión",

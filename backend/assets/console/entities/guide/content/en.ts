@@ -1,6 +1,6 @@
 import type {GuideId, GuideText} from '../model/types';
 
-/** The 15 documentation guides in English (PRD §10.18). Same ids, order and topics as content/es.ts. */
+/** The 13 documentation guides in English (PRD §10.18). Same ids, order and topics as content/es.ts. */
 export const GUIDES_EN: Record<GuideId, GuideText> = {
   'welcome': {
     title: 'Welcome to Mappi',
@@ -19,8 +19,8 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         id: 'sidebar',
         heading: 'The sidebar',
         paragraphs: [
-          'The sidebar groups the console in three blocks. Design holds AI Experience (the home page), Design Experience, Questionnaires and Customization. Send and track holds Organizations, Assignations and Projects. Settings holds Users, Integrations, Profile and this Documentation.',
-          'At the bottom you will find the language selector, your account block with your plan, and Log out. The language selector only changes the language of the console; the language of the emails and of the respondent screens is your account language, in Profile.',
+          'The sidebar groups the console in three blocks. Design holds AI Experience (the home page), Design Experience, Questionnaires and Customization. Send and track holds Organizations, Assignations and Projects. Settings holds Users, Profile and this Documentation.',
+          'At the bottom you will find the language selector, your account block, and Log out. The language selector only changes the language of the console; the language of the emails and of the respondent screens is your account language, in Profile.',
         ],
         screenshot: {
           name: 'ai-experience',
@@ -44,7 +44,6 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         paragraphs: [
           'If your role is read-only you can see everything, but buttons that create or change something are disabled. Hover over a disabled button to read why.',
         ],
-        tip: 'Your plan decides some limits too: when an action is not included, the button says so and links to the plans.',
       },
     ],
   },
@@ -58,7 +57,6 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         heading: 'Choose a type',
         paragraphs: [
           'Go to Questionnaires and click New Questionnaire. Mappi offers four types: Regular for classic surveys that end with a thank-you message, Diagnostic to score each respondent and place them in tiers, Quiz Funnel to recommend products from your store, and Chaining to generate a tailored questionnaire from the first answers and your prompts.',
-          'A type your plan does not include is shown disabled, with the reason.',
         ],
         screenshot: {
           name: 'questionnaire-new',
@@ -120,7 +118,7 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         heading: 'Create it',
         paragraphs: [
           'When you are happy with the draft, ask the assistant to create it. A "Questionnaire created" card appears with buttons to edit or view it. From there it is a normal questionnaire: you can edit it, share it and read its answers.',
-          'The assistant can also do other tasks for you, such as listing your organizations or reading your plan usage. Each turn counts towards the chat feature of your plan.',
+          'The assistant can also do other tasks for you, such as listing your organizations or your assignations.',
         ],
       },
     ],
@@ -348,7 +346,6 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         paragraphs: [
           'Each question has its own chart: distributions for options, histograms and gauges for scales, and an NPS breakdown for 0–10 scales (detractors 0–6, passives 7–8, promoters 9–10).',
         ],
-        tip: 'The summary is free on every plan; the charts need the dashboards feature.',
       },
     ],
   },
@@ -381,7 +378,6 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         paragraphs: [
           'Use Export to Google Sheets to send every answer to a new spreadsheet. In an assignation you can also export the list of respondents with their status to CSV.',
         ],
-        tip: 'The external API gives the same answers to your own systems; see the API keys and webhooks guide.',
       },
     ],
   },
@@ -414,40 +410,6 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         paragraphs: [
           'Click Save to apply the styles to every questionnaire of the account. Reset only restores the defaults on screen until you save.',
         ],
-        tip: 'Saving styles needs the styles feature of your plan.',
-      },
-    ],
-  },
-  'api-and-webhooks': {
-    title: 'API keys and webhooks',
-    summary:
-      'Connect Mappi to your own systems: read questionnaires and answers with the API, and get each completed response with a webhook.',
-    sections: [
-      {
-        id: 'api-keys',
-        heading: 'API keys',
-        paragraphs: [
-          'In Integrations → API keys, create a key with a name and an expiration (7, 30, 60 or 90 days, or never). The key is shown only once: copy it and keep it safe. Revoke it when you no longer need it.',
-        ],
-        screenshot: {
-          name: 'integrations',
-          alt: 'Integrations with the API keys tab',
-        },
-      },
-      {
-        id: 'external-api',
-        heading: 'The external API',
-        paragraphs: [
-          'Send the key in the X-API-Key header to list your questionnaires and read the answers of each one, newest first. The API reference tab has copyable curl examples.',
-        ],
-      },
-      {
-        id: 'webhooks',
-        heading: 'Webhooks',
-        paragraphs: [
-          'A webhook calls a URL of yours (https only) every time a response is completed, with the answers in the body. Add it in Integrations → Webhooks; the delivery reference shows the headers and a sample payload so you can verify each call.',
-        ],
-        tip: 'The API and webhooks are plan features: their tabs tell you when your plan does not include them.',
       },
     ],
   },
@@ -510,37 +472,6 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         paragraphs: [
           'In Profile → Settings, choose the account language (it changes the emails and the respondent screens, not the console), the maximum files per question and your tracking pixels.',
         ],
-        tip: 'The number of users depends on your plan.',
-      },
-    ],
-  },
-  'plans-and-billing': {
-    title: 'Plans, usage and billing',
-    summary:
-      'See how much of your plan you are using, change plans, and manage your subscription and invoices.',
-    sections: [
-      {
-        id: 'usage',
-        heading: 'Your usage',
-        paragraphs: [
-          'Profile → Plan & usage shows your plan and a bar for each limit: questionnaires, responses and every feature. Bars turn amber at 75 % and red at 90 %. When you reach half of a limit, a banner reminds you at the top of the console.',
-        ],
-      },
-      {
-        id: 'change',
-        heading: 'Change your plan',
-        paragraphs: [
-          'Open Plans to compare them. Subscribe, upgrade or switch to a smaller plan, monthly or yearly — the yearly price shows how much you save. Promo codes are applied at checkout.',
-        ],
-        screenshot: {name: 'plans', alt: 'The plan cards'},
-      },
-      {
-        id: 'billing',
-        heading: 'Billing',
-        paragraphs: [
-          'Manage billing opens the payment portal, where you update your card and download invoices. You can cancel the subscription at any time and resume it before it ends.',
-        ],
-        tip: 'Plans are never blocked: you can always open Plans, Projects and Assignations, even when a limit is reached.',
       },
     ],
   },

@@ -13,7 +13,6 @@ import {
   ORGANIZATIONS_QUERY_KEY,
   useOrganizations,
 } from '@console/entities/organization';
-import {USAGE_QUERY_KEY, useFeature} from '@console/entities/plan-usage';
 import {
   createProject,
   fetchAllProjects,
@@ -92,8 +91,6 @@ export function useProjectWizard() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const viewer = useViewer();
-  const chatFeature = useFeature('chat', viewer.isAdmin);
-  const organizationsFeature = useFeature('organizations', viewer.isAdmin);
 
   const [step, setStep] = useState<Step>(0);
   const [source, setSource] = useState<QuestionSource>('chat');
@@ -318,13 +315,6 @@ export function useProjectWizard() {
 
   // --- Create ----------------------------------------------------------------------------------------------
 
-  const createReason =
-    organization?.isNew &&
-    !organizationsFeature.loading &&
-    !organizationsFeature.allowed
-      ? t('organization.notInPlan')
-      : null;
-
   const create = useMutation({
     mutationFn: async () => {
       if (
@@ -375,7 +365,6 @@ export function useProjectWizard() {
           ASSIGNATIONS_QUERY_KEY,
           ORGANIZATIONS_QUERY_KEY,
           QUESTIONNAIRES_QUERY_KEY,
-          USAGE_QUERY_KEY,
         ].map((queryKey) => queryClient.invalidateQueries({queryKey})),
       );
       navigate('/projects');
@@ -396,7 +385,7 @@ export function useProjectWizard() {
   });
 
   const submit = () => {
-    if (create.isPending || createReason) {
+    if (create.isPending) {
       return;
     }
     if (errors.some((error) => error !== null)) {
@@ -416,11 +405,7 @@ export function useProjectWizard() {
     showMissing,
     // Step 1
     chat,
-    chatReason: !viewer.canWrite
-      ? tShared('readOnly.create')
-      : !chatFeature.loading && !chatFeature.allowed
-        ? t('questions.chatNotInPlan')
-        : null,
+    chatReason: viewer.canWrite ? null : tShared('readOnly.create'),
     source,
     chooseSource,
     draft,
@@ -461,7 +446,6 @@ export function useProjectWizard() {
     // Create
     submit,
     creating: create.isPending,
-    createReason,
   };
 }
 

@@ -198,14 +198,10 @@ describe('AiExperiencePage', () => {
     });
   });
 
-  it('shows a plan refusal without Retry, and any other failure with Retry', async () => {
-    vi.mocked(sendChatTurn)
-      .mockRejectedValueOnce(new ApiError(500, 'INTERNAL_ERROR', 'boom'))
-      .mockRejectedValueOnce(
-        new ApiError(429, 'PLAN_LIMIT_REACHED', 'limit', {
-          reason: 'FEATURE_LIMIT_REACHED',
-        }),
-      );
+  it('shows a failed turn with Retry', async () => {
+    vi.mocked(sendChatTurn).mockRejectedValueOnce(
+      new ApiError(500, 'INTERNAL_ERROR', 'boom'),
+    );
     renderPage();
 
     await userEvent.type(
@@ -215,13 +211,10 @@ describe('AiExperiencePage', () => {
     expect(
       await screen.findByText('Something went wrong processing your message.'),
     ).toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('button', {name: 'Retry'}));
-    expect(await screen.findByRole('alert')).toBeInTheDocument();
     expect(
-      screen.queryByRole('button', {name: 'Retry'}),
-      'PRD §10.4: retrying a plan refusal only refuses again',
-    ).not.toBeInTheDocument();
+      screen.getByRole('button', {name: 'Retry'}),
+      'PRD §10.4: a failed turn can be retried',
+    ).toBeInTheDocument();
   });
 
   it('offers to edit the questionnaire once the chat created it', async () => {

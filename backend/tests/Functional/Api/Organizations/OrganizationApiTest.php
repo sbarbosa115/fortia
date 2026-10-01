@@ -41,27 +41,13 @@ final class OrganizationApiTest extends ApiTestCase
         self::assertSame($org['organization_id'], $jose['organization_id']);
     }
 
-    public function testCreatingCountsOneOrganizationAndRecordsTheEvent(): void
+    public function testCreatingRecordsTheEvent(): void
     {
-        $owner = $this->account('GLOBEX01', plan: 'starter');
+        $owner = $this->account('GLOBEX01');
 
         $this->data($this->api('POST', self::URL, ['name' => 'One'], as: $owner), 201);
 
-        $usage = $this->data($this->api('GET', '/api/v1/customer/usage', as: $owner));
-        self::assertSame(1, $usage['features']['organizations']['used'], 'PRD §7.2: creating an organization counts as organizations');
         self::assertSame(1, $this->eventCount('OrganizationCreated', 'GLOBEX01'), 'PRD §12: OrganizationCreated');
-    }
-
-    public function testTheOrganizationsCapacityGateStopsTheThirdOnStarter(): void
-    {
-        $owner = $this->account('GLOBEX01', plan: 'starter');
-        $this->data($this->api('POST', self::URL, ['name' => 'One'], as: $owner), 201);
-        $this->data($this->api('POST', self::URL, ['name' => 'Two'], as: $owner), 201);
-
-        $response = $this->api('POST', self::URL, ['name' => 'Three'], as: $owner);
-
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', 'PRD §8.7: Cap(organizations), Starter allows 2');
-        self::assertSame('organizations', $response['json']['error']['details']['feature']);
     }
 
     public function testAReadOnlyUserCannotCreate(): void
@@ -103,7 +89,7 @@ final class OrganizationApiTest extends ApiTestCase
 
     public function testADomainUsedByAnotherOrganizationOfAnyAccountIsAConflict(): void
     {
-        $this->account('GLOBEX01', plan: 'starter');
+        $this->account('GLOBEX01');
         $acme = $this->account('ACME0001');
         $this->data($this->api('POST', self::URL, ['name' => 'Globex', 'domain_email' => 'shared.test'], as: 'root@globex01.test'), 201);
 
@@ -123,7 +109,7 @@ final class OrganizationApiTest extends ApiTestCase
     public function testTheListingIsBareAndOnlyShowsTheCallersOrganizationsWithTheirMembers(): void
     {
         $acme = $this->account('ACME0001');
-        $globex = $this->account('GLOBEX01', plan: 'starter');
+        $globex = $this->account('GLOBEX01');
         $this->data($this->api('POST', self::URL, ['name' => 'Acme A', 'organization_users' => [['name' => 'Ana', 'email' => 'ana@a.test']]], as: $acme), 201);
         $this->data($this->api('POST', self::URL, ['name' => 'Globex G'], as: $globex), 201);
 
@@ -150,7 +136,7 @@ final class OrganizationApiTest extends ApiTestCase
     {
         $admin = $this->admin();
         $this->data($this->api('POST', self::URL, ['name' => 'Acme A'], as: $this->account('ACME0001')), 201);
-        $this->data($this->api('POST', self::URL, ['name' => 'Globex G'], as: $this->account('GLOBEX01', plan: 'starter')), 201);
+        $this->data($this->api('POST', self::URL, ['name' => 'Globex G'], as: $this->account('GLOBEX01')), 201);
 
         $names = array_column($this->api('GET', self::URL, as: $admin)['json']['organizations'], 'name');
 
@@ -247,7 +233,7 @@ final class OrganizationApiTest extends ApiTestCase
 
     public function testAnotherTenantsOrganizationIs404ForUpdateAndDelete(): void
     {
-        $globex = $this->account('GLOBEX01', plan: 'starter');
+        $globex = $this->account('GLOBEX01');
         $acme = $this->account('ACME0001');
         $org = $this->data($this->api('POST', self::URL, ['name' => 'Globex'], as: $globex), 201);
 
@@ -299,8 +285,6 @@ final class OrganizationApiTest extends ApiTestCase
         $this->em()->clear();
         self::assertNull($this->em()->find(OrganizationUser::class, $memberId), 'D2: deleting an organization deletes its members');
         self::assertSame(1, $this->eventCount('OrganizationDeleted', 'ACME0001'), 'PRD §12: OrganizationDeleted');
-        $usage = $this->data($this->api('GET', '/api/v1/customer/usage', as: $owner));
-        self::assertSame(2, $usage['features']['organizations']['used'], 'PRD §7.2: create and delete both count');
     }
 
     public function testAnOrganizationWithAssignationsCannotBeDeleted(): void

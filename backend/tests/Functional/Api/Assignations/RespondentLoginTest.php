@@ -2,15 +2,13 @@
 
 namespace App\Tests\Functional\Api\Assignations;
 
-use App\Billing\Application\Usage;
 use App\Shared\Application\Security\RespondentTokens;
 use App\Shared\Domain\Ids;
 use App\Tests\Support\ApiTestCase;
 
 /**
- * PRD §7.11 the respondent login (POST /assignations/{id}/sessions), in its order: the assignations feature, a
- * completed follow-up, the identifier, the member lookup (by phone and/or email, never by name), the audience, the
- * responses capacity, then the token and the session. D6/D7: the token expires and an invalid one is 401.
+ * PRD §7.11 the respondent login (POST /assignations/{id}/sessions), in its order: a completed follow-up, the
+ * identifier, the member lookup (by phone and/or email, never by name), the audience, then the token and the session. D6/D7: the token expires and an invalid one is 401.
  */
 final class RespondentLoginTest extends ApiTestCase
 {
@@ -25,7 +23,7 @@ final class RespondentLoginTest extends ApiTestCase
     {
         parent::setUp();
         $this->clock()->set('2026-09-30T12:00:00Z');
-        $this->owner = $this->account('ACME0001', plan: 'starter');
+        $this->owner = $this->account('ACME0001');
         [$this->org, $this->members] = $this->organizationWith('ACME0001', 'Acme', [
             ['ana', 'ana@acme.test', '+57 300 111 2233', 'Manager', 'Sales'],
             ['luis', 'luis@acme.test', null, 'Driver', 'Logistics'],
@@ -107,29 +105,6 @@ final class RespondentLoginTest extends ApiTestCase
         $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['type' => 'default', 'active' => false]);
 
         $this->assertApiError($this->login($id, ['email' => 'ana@acme.test']), 404, 'ASSIGNATION_NOT_FOUND', 'an inactive assignation is not answered');
-    }
-
-    public function testTheAssignationsFeatureIsCheckedFirst(): void
-    {
-        $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['type' => 'default']);
-        $this->clock()->set('2026-12-01T00:00:00Z');
-
-        $response = $this->login($id, []);
-
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', '§7.11 step 1 comes before MISSING_IDENTIFIER');
-        self::assertSame('assignations', $response['json']['error']['details']['feature']);
-    }
-
-    public function testTheResponsesCapacityIsCheckedAfterTheLookup(): void
-    {
-        $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['type' => 'default']);
-        static::getContainer()->get(Usage::class)->set('ACME0001', ['responses' => 100]);
-        $this->em()->flush();
-
-        $this->assertApiError($this->login($id, ['email' => 'nobody@acme.test']), 403, 'USER_NOT_FOUND', '§7.11: the lookup (step 4–5) comes before the capacity (step 6)');
-        $response = $this->login($id, ['email' => 'ana@acme.test']);
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', '§7.11 step 6: responses capacity');
-        self::assertSame('responses', $response['json']['error']['details']['feature']);
     }
 
     public function testFollowUpMembersShareOneSessionUntilItIsCompleted(): void

@@ -10,7 +10,7 @@ const MAX_TEXTAREA_HEIGHT = 200;
 /**
  * Where the author writes to the assistant. Enter sends, Shift+Enter breaks the line; the paperclip attaches Word, PDF
  * or Markdown documents, listed above the box until the message takes them; the counter shows past 90 % of 20,000
- * characters. `disabledReason` closes it and says why (read-only role, plan).
+ * characters. `disabledReason` closes it and says why (read-only role).
  */
 export function ChatComposer({
   chat,

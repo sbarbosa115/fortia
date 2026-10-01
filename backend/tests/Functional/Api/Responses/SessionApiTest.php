@@ -2,7 +2,6 @@
 
 namespace App\Tests\Functional\Api\Responses;
 
-use App\Billing\Application\Usage;
 use App\Responses\Application\Command\RecordReview;
 use App\Responses\Domain\Model\QuestionnaireSession;
 use App\Shared\Application\Bus\CommandBus;
@@ -51,20 +50,6 @@ final class SessionApiTest extends ApiTestCase
         $this->assertApiError($this->api('POST', '/api/v1/questionnaire/'.$assigned.'/session', headers: ['Authorization' => 'Bearer rt.invalid']), 401, 'UNAUTHORIZED', 'D7: an invalid respondent token is 401, never ignored');
     }
 
-    public function testOnlyARootQuestionnaireNeedsResponseCapacity(): void
-    {
-        $this->account('ACME0001', plan: 'starter');
-        static::getContainer()->get(Usage::class)->set('ACME0001', ['responses' => 100]);
-        $root = $this->questionnaire('ACME0001');
-        $stage = $this->questionnaire('ACME0001', parent: $root, originSessionId: Ids::uuid4());
-
-        $response = $this->api('POST', '/api/v1/questionnaire/'.$root.'/session');
-        $this->assertApiError($response, 429, 'PLAN_LIMIT_REACHED', '§8.4: Cap(responses) on root questionnaires');
-        self::assertSame('RESPONSE_LIMIT_REACHED', $response['json']['error']['details']['reason']);
-
-        self::assertSame('filling', $this->startSession($stage)['status'], '…and never on a chain\'s generated stage');
-    }
-
     public function testSavingKeepsTheRespondentsValuesAndNothingElse(): void
     {
         $this->account('ACME0001');
@@ -89,7 +74,7 @@ final class SessionApiTest extends ApiTestCase
         $this->assertApiError($this->api('PUT', '/api/v1/questionnaire/session', ['questions' => []]), 400, 'VALIDATION_ERROR');
     }
 
-    public function testSubmittingADefaultQuestionnaireCompletesItWithTheFlowsResultTextsAndCountsOneResponse(): void
+    public function testSubmittingADefaultQuestionnaireCompletesItWithTheFlowsResultTexts(): void
     {
         $this->account('ACME0001');
         $questionnaireId = $this->questionnaire('ACME0001');
@@ -107,11 +92,10 @@ final class SessionApiTest extends ApiTestCase
         self::assertSame(QuestionnaireSession::COMPLETED, $stored->status());
         self::assertNotNull($stored->endedAt());
         self::assertSame('ana@acme.test', $stored->userData()['email'] ?? null);
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current('ACME0001')['responses'] ?? 0, '§7.2: completing a questionnaire counts one response');
         self::assertSame(1, $this->completedEvents($session['session_id']), '§7.7 step 3: QuestionnaireSessionCompleted is emitted');
     }
 
-    public function testSubmittingTwiceReturnsTheSameResultAndCountsOnce(): void
+    public function testSubmittingTwiceReturnsTheSameResult(): void
     {
         $this->account('ACME0001');
         $session = $this->startSession($this->questionnaire('ACME0001'));
@@ -121,7 +105,6 @@ final class SessionApiTest extends ApiTestCase
         $second = $this->data($this->api('POST', '/api/v1/questionnaire/session', $body));
 
         self::assertSame($first, $second);
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current('ACME0001')['responses'] ?? 0, 'a repeated submission is not a second response');
     }
 
     public function testADiagnosticIsScoredAndItsResultsCanBeReloaded(): void
@@ -162,7 +145,7 @@ final class SessionApiTest extends ApiTestCase
         $this->assertApiError($this->api('GET', '/api/v1/questionnaire/session/nope/results'), 400, 'INVALID_UUID');
     }
 
-    public function testAChainScoresEveryStageTogetherAndCountsOnlyItsFinalStage(): void
+    public function testAChainScoresEveryStageTogether(): void
     {
         $this->account('ACME0001');
         $root = $this->questionnaire('ACME0001', 'prompt', [self::radioQuestion('q1', 'Strategy')]);
@@ -172,7 +155,6 @@ final class SessionApiTest extends ApiTestCase
         $intermediate = $this->data($this->api('POST', '/api/v1/questionnaire/session', self::answered($first, ['q1' => '3'])));
 
         self::assertSame('default', $intermediate['type'], 'an intermediate stage just advances the flow');
-        self::assertSame(0, static::getContainer()->get(Usage::class)->current('ACME0001')['responses'] ?? 0, '§7.2: only the last stage of a chain counts');
 
         $stage = $this->questionnaire('ACME0001', 'diagnostic', [self::radioQuestion('q1', 'Strategy'), self::radioQuestion('q2', 'People')], ['type' => 'diagnostic'], $root, $first['session_id']);
         $this->diagnostic($stage, [['id' => 'all', 'name' => 'All', 'min' => 0, 'max' => 9, 'visible' => true]]);
@@ -182,7 +164,6 @@ final class SessionApiTest extends ApiTestCase
 
         self::assertEquals(['value' => 6, 'max' => 9], $final['score'], '§7.7, §16.3 #5: a diagnostic at the end of a chain scores all stages together');
         self::assertEquals([['id' => 'Strategy', 'name' => 'Strategy', 'score' => 4, 'max' => 6], ['id' => 'People', 'name' => 'People', 'score' => 2, 'max' => 3]], $final['categories']);
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current('ACME0001')['responses'] ?? 0);
 
         $chain = $this->data($this->api('GET', '/api/v1/questionnaire/session/'.$second['session_id'].'/chain', as: 'root@acme0001.test'));
         self::assertSame([$first['session_id'], $second['session_id']], array_column($chain['stages'], 'session_id'), 'every stage the respondent went through, in order');
@@ -221,7 +202,6 @@ final class SessionApiTest extends ApiTestCase
         $results = $this->data($this->api('GET', '/api/v1/questionnaire/session/'.$session['session_id'].'/results'));
         self::assertSame('Running shoes', $results['products'][0]['name']);
         self::assertSame(QuestionnaireSession::COMPLETED, $this->storedSession($session['session_id'])->status());
-        self::assertSame(1, static::getContainer()->get(Usage::class)->current('ACME0001')['responses'] ?? 0);
         $request = $this->llm()->requests()[0] ?? null;
         self::assertNotNull($request);
         self::assertSame('quiz-funnel--rules-to-recommend-products', $request->purpose);

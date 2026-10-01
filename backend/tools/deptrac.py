@@ -10,8 +10,8 @@ Application layer or its domain events (Domain/Event). Shared is the kernel ever
 from pathlib import Path
 
 CONTEXTS = [
-    'Identity', 'Billing', 'Platform', 'Jobs', 'Questionnaires', 'Responses', 'Reporting', 'Organizations',
-    'Assignations', 'Branding', 'Commerce', 'Integrations', 'Content', 'Generation', 'Chat',
+    'Identity', 'Platform', 'Jobs', 'Questionnaires', 'Responses', 'Reporting', 'Organizations',
+    'Assignations', 'Branding', 'Commerce', 'Content', 'Generation', 'Chat',
 ]
 
 lines = [

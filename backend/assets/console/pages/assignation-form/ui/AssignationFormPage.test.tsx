@@ -41,7 +41,6 @@ vi.mock('@console/entities/questionnaire', async (original) => ({
   fetchQuestionnaires: vi.fn(),
   copyQuestionnaire: vi.fn(),
 }));
-vi.mock('@console/entities/plan-usage', () => ({USAGE_QUERY_KEY: ['usage']}));
 
 const organizations = vi.hoisted(() => [
   {

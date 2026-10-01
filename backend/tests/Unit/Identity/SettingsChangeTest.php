@@ -20,13 +20,6 @@ final class SettingsChangeTest extends TestCase
         self::assertSame(['max_files' => Customer::DEFAULT_MAX_FILES], SettingsChange::of(['max_files' => null])->changes(), 'PRD §8.3: max_files null resets it');
     }
 
-    public function testOnlyALanguageChangeIsFreeOfThePlanGate(): void
-    {
-        self::assertTrue(SettingsChange::of(['language' => 'en-US'])->onlyLanguage(), 'PRD §7.1: no gate for changing the account language');
-        self::assertFalse(SettingsChange::of(['language' => 'en-US', 'max_files' => 3])->onlyLanguage());
-        self::assertFalse(SettingsChange::of(['pixel_id' => null])->onlyLanguage());
-    }
-
     public function testTheCustomerKeepsWhatWasNotChanged(): void
     {
         $customer = new Customer('ACME0001', 'es-CO', 'default', new \DateTimeImmutable());

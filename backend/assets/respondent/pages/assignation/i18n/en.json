@@ -30,7 +30,6 @@
       "userNotFound": "We can't find you in this organization. Check the name and email you were invited with.",
       "failed": "We could not sign you in. Please try again.",
       "completed": "This follow-up has already been completed.",
-      "limit": "The response limit has been reached.",
       "invalidEmail": "Enter a valid email address."
     },
     "form": "Sign in form",
