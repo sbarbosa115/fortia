@@ -1,0 +1,13 @@
+# Identity's wiring (item accounts). The JWT authenticator is in identity_security.yaml. Services themselves are
+# registered by services.yaml's App\ resource (loaded after this file), so arguments go in #[Autowire] attributes.
+parameters:
+    # Google sign-in (PRD §13.1): both empty = disabled, the API answers 503 PROVIDER_NOT_CONFIGURED.
+    env(GOOGLE_OAUTH_CLIENT_ID): ''
+    env(GOOGLE_OAUTH_CLIENT_SECRET): ''
+
+services:
+    App\Identity\Application\Port\GoogleIdentity: '@App\Identity\Infrastructure\Google\OAuthGoogleIdentity'
+
+when@test:
+    services:
+        App\Identity\Application\Port\GoogleIdentity: '@App\Identity\Infrastructure\Google\FakeGoogleIdentity'

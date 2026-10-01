@@ -1,0 +1,18 @@
+{# D20: the welcome email of every new account (PRD §7.21), BCC to support. Texts: emails_identity. #}
+{% extends 'emails/layout.html.twig' %}
+
+{% block title %}{{ 'welcome.subject'|trans({}, 'emails_identity', locale) }}{% endblock %}
+
+{% block content %}
+    <h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;">{{ 'welcome.title'|trans({name: name}, 'emails_identity', locale) }}</h1>
+    <p style="margin:0 0 12px;">{{ 'welcome.intro'|trans({}, 'emails_identity', locale) }}</p>
+    <ol style="margin:0 0 20px;padding-left:20px;">
+        <li>{{ 'welcome.step1'|trans({}, 'emails_identity', locale) }}</li>
+        <li>{{ 'welcome.step2'|trans({}, 'emails_identity', locale) }}</li>
+        <li>{{ 'welcome.step3'|trans({}, 'emails_identity', locale) }}</li>
+    </ol>
+    <p style="margin:0 0 24px;">
+        <a href="{{ console_url }}" style="display:inline-block;padding:10px 22px;border-radius:999px;background:#8249df;color:#ffffff;text-decoration:none;font-weight:600;">{{ 'welcome.cta'|trans({}, 'emails_identity', locale) }}</a>
+    </p>
+    <p style="margin:0;color:#5e5c6b;font-size:13px;">{{ 'welcome.help'|trans({email: support_email}, 'emails_identity', locale) }}</p>
+{% endblock %}

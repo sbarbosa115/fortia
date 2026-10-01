@@ -1,0 +1,17 @@
+# Identity emails (item accounts): templates/emails/identity/.
+welcome:
+    subject: 'Welcome to Mappi'
+    title: 'Welcome to Mappi, {name}!'
+    intro: 'Your account is ready, with a free month of the Starter plan. Here is how to get your first result in minutes:'
+    step1: 'Tell us what you want to achieve and describe your workspace.'
+    step2: 'Pick a template or let the AI draft your first questionnaire.'
+    step3: 'Publish it, answer it once yourself, and see the result.'
+    cta: 'Open Mappi'
+    help: 'Questions? Write to us at {email}.'
+recovery:
+    subject: 'Your Mappi password recovery code'
+    title: 'Reset your password'
+    intro: 'Use this code to choose a new password:'
+    cta: 'Choose a new password'
+    expires: 'The code expires in {minutes} minutes.'
+    ignore: "If you didn't ask to reset your password, you can ignore this email: your password stays the same."

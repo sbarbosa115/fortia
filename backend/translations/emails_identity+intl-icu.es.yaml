@@ -1,0 +1,17 @@
+# Correos de Identity (item accounts): templates/emails/identity/.
+welcome:
+    subject: 'Bienvenido a Mappi'
+    title: '¡Bienvenido a Mappi, {name}!'
+    intro: 'Tu cuenta está lista, con un mes gratis del plan Starter. Así obtienes tu primer resultado en minutos:'
+    step1: 'Cuéntanos qué quieres lograr y describe tu espacio de trabajo.'
+    step2: 'Elige una plantilla o deja que la IA redacte tu primer cuestionario.'
+    step3: 'Publícalo, respóndelo tú una vez y mira el resultado.'
+    cta: 'Abrir Mappi'
+    help: '¿Preguntas? Escríbenos a {email}.'
+recovery:
+    subject: 'Tu código para recuperar la contraseña de Mappi'
+    title: 'Restablece tu contraseña'
+    intro: 'Usa este código para elegir una contraseña nueva:'
+    cta: 'Elegir una contraseña nueva'
+    expires: 'El código vence en {minutes} minutos.'
+    ignore: 'Si no pediste restablecer tu contraseña, ignora este correo: tu contraseña sigue igual.'
