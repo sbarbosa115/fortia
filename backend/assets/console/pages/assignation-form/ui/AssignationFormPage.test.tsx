@@ -256,6 +256,43 @@ describe('AssignationFormPage (PRD §10.11)', () => {
     ).toBe('q-copy');
   });
 
+  it('still assigns a copy when the check of the questionnaire answers after Create is pressed (a slow API)', async () => {
+    let release: () => void = () => undefined;
+    const answered = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    vi.mocked(fetchAssignationOfQuestionnaire).mockImplementation(() =>
+      answered.then(
+        () =>
+          ({
+            organization_id: 'o-9',
+            organization_name: 'Globex Labs',
+            assignations_id: 'a-9',
+          }) as never,
+      ),
+    );
+    vi.mocked(copyQuestionnaire).mockResolvedValue({
+      questionnaire_id: 'q-copy',
+    } as QuestionnaireDetail);
+    vi.mocked(createAssignation).mockResolvedValue({
+      assignation_id: 'a-1',
+      questionnaire_url: 'http://localhost:8080/a/a-1',
+    });
+    renderPage();
+    await fillBasic();
+    await userEvent.click(screen.getByRole('button', {name: 'Next'}));
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Create assignation'}),
+    );
+    release();
+
+    await waitFor(() => expect(createAssignation).toHaveBeenCalled());
+    expect(
+      vi.mocked(createAssignation).mock.calls[0]![0].questionnaire_id,
+      'PRD §10.11: a questionnaire of another organization is never sent as is (409); its copy is',
+    ).toBe('q-copy');
+  });
+
   it('explains a race with another organization', async () => {
     vi.mocked(createAssignation).mockRejectedValue(
       new ApiError(409, 'QUESTIONNAIRE_ALREADY_ASSIGNED', 'taken'),

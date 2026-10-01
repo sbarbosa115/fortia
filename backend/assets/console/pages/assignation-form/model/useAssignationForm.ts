@@ -67,14 +67,14 @@ export function useAssignationForm(id: string | undefined) {
     queryFn: () => fetchAssignationOfQuestionnaire(questionnaireId ?? ''),
     enabled: questionnaireId !== null,
   });
-  const other = assigned.data;
-  const conflict =
+  const conflictWith = (other: typeof assigned.data): string | null =>
     other &&
     other.assignations_id !== id &&
     form.organizationId !== '' &&
     other.organization_id !== form.organizationId
       ? other.organization_name
       : null;
+  const conflict = conflictWith(assigned.data);
 
   const errors = useMemo(() => validateBasic(form), [form]);
   const registrationProblem = registrationError(form);
@@ -82,7 +82,12 @@ export function useAssignationForm(id: string | undefined) {
   const save = useMutation({
     mutationFn: async () => {
       let target = questionnaireId ?? '';
-      if (conflict) {
+      // The check of the questionnaire may still be on its way (a slow API): wait for it, or the 409 comes back.
+      const other =
+        questionnaireId !== null && (assigned.isFetching || !assigned.isSuccess)
+          ? (await assigned.refetch()).data
+          : assigned.data;
+      if (conflictWith(other)) {
         target = (await copyQuestionnaire(target)).questionnaire_id;
       }
       const payload = toPayload(
