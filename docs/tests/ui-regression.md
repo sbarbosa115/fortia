@@ -374,8 +374,8 @@ API writes them).
 **PRJ-01 · The list**
 As `owner@acme.test` (language English) open Projects. **Expected:** "2 projects", newest first: "Supplier audit" and
 "Store opening Q4", each with "AR" on a colour, the name, "Acme Retail · created {date}". Supplier audit: "Overdue",
-"0 of 1 approved" with an empty bar, its date with "overdue by 5 days" (red), next step "Open overdue". Store opening
-Q4: "Needs your review", "0 of 2 approved" with the bar at 75%, its date (30 days out) with "in 30 days", next step
+"0 of 1 approved" with an empty bar, its date (5 days before seeding, UTC) with "overdue by N days" (red), next step "Open overdue". Store opening
+Q4: "Needs your review", "0 of 2 approved" with the bar at 75%, its date (30 days after seeding) with "in N days", next step
 "Review answers". Never a Globex project.
 
 **PRJ-02 · Tabs**
@@ -425,7 +425,7 @@ with "Your plan doesn't include assignations.".
 
 **PRJ-12 · Español**
 Switch to Español. **Expected:** "Proyectos", "Nuevo proyecto", tabs "Todos, Por revisar, En progreso, En corrección,
-Vencidos, Completados", "Requiere tu revisión", "0 de 2 aprobadas", "en 30 días" / "vencido hace 5 días", "Revisar
+Vencidos, Completados", "Requiere tu revisión", "0 de 2 aprobadas", "en N días" / "vencido hace N días", "Revisar
 respuestas", "Pregunta 3 de 4", the legend, "¿Eliminar este proyecto?" and the edit dialog, all in Spanish; no raw
 translation keys.
 
