@@ -212,11 +212,9 @@ final class FakePaymentGateway implements PaymentGateway, SimulatedGateway
         $subscription['interval'] = $price->interval ?? 'month';
         $subscription['schedule'] = null;
         $subscription['metadata'] = $metadata;
-        if ('trialing' === $subscription['status']) {
-            $subscription['status'] = 'active';
-        }
+        // Like the gateway, a price change does not end a running trial (the Stripe adapter does not set trial_end).
         $this->save('subscription', $subscriptionId, $subscription);
-        $this->emitInvoice(GatewayEvent::INVOICE_PAID, $subscription, 'subscription_update', max(0, $proration));
+        $this->emitInvoice(GatewayEvent::INVOICE_PAID, $subscription, 'subscription_update', 'trialing' === $subscription['status'] ? 0 : max(0, $proration));
         $this->emit(GatewayEvent::SUBSCRIPTION_UPDATED, $subscription);
 
         return self::toSubscription($subscription);
