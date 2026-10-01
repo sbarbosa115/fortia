@@ -657,6 +657,59 @@ questions, 3 tiers 0–7 / 8–15 / 16–24), and its link `/q/{questionnaire_id
 Spanish one; `https://www.linkedin.com/company/acme` → 400 `VALIDATION_ERROR`; `…/in/unavailable` → the job `FAILED`
 with `LINKEDIN_PROFILE_UNAVAILABLE`.
 
+**ONB-01 · A new account lands on onboarding, with the time and the 7 steps**
+Sign in as `owner@newco.test` (or a fresh sign-up). **Expected:** `/console/onboarding`, never the console; "Welcome to
+Mappi · 8–12 minutes", "Explore on my own", a progress bar "Step 1 of 7" with Goal · Workspace · Template · Builder ·
+Publish · Test · Result. Run the ONB cases with the UI in English; switch to Español once to check every text is
+translated (no raw keys).
+
+**ONB-02 · Continue waits for a goal**
+**Expected:** four cards (Diagnose "Scoring + levels", Qualify or recommend "Segments + CTA", Capture processes
+"Evidence + follow-ups", Collect information "Regular survey"); "Continue" is disabled until one is chosen. Choose
+Diagnose › Continue.
+
+**ONB-03 · The workspace is saved (D15)**
+Type `Newco Labs`, Language `Spanish`, Website `newco` › the field says "Enter a valid website, like acme.com." and
+Continue is disabled; change it to `newco.test` › Continue. **Expected:** toast "Workspace saved."; the request
+`PATCH /api/v1/customer/workspace` sent `{name: "Newco Labs", language: "es-CO", website: "https://newco.test"}`;
+Profile › Settings now shows Spanish as the account language.
+
+**ONB-04 · The template follows the goal and the workspace language (D23)**
+**Expected:** "Recommended · 8 questions · Diagnóstico de Madurez en IA" with its eight questions in Spanish (the
+workspace language), whatever the UI language. Back, choose English in step 2, Continue: the same template in
+English, "AI Maturity Diagnostic". The other goals give Service Qualification (6), Process Discovery (7, mostly free
+text) and Customer Discovery (6).
+
+**ONB-05 · "Start from scratch →" finishes onboarding**
+On a fresh sign-up, at step 3 press "Start from scratch →". **Expected:** `/questionnaires/new`; reload: the console
+stays (no redirect to onboarding).
+
+**ONB-06 · The builder's checklist gates "Save and publish"**
+"Use template". **Expected:** "0 of 3 done" and "Save and publish" disabled ("Complete the checklist first." on
+hover). "Confirm title" › Done; edit Question 1 › the second item ticks (typing the original text back unticks it);
+questions 5–8 are read-only; "Looks good" under the three levels (0–7, 8–16, 17–24 points) › "3 of 3 done" and the
+button is enabled.
+
+**ONB-07 · Saving creates the questionnaire through the questionnaires API**
+"Save and publish" › "Create questionnaire" in the dialog. **Expected:** toast "Questionnaire created."; step 5 with
+the slug `diagnostico-de-madurez-en-ia-xxxx` (4 hex characters) after `…/f/`; Questionnaires lists it as a
+Diagnostic with 8 questions and the edited first question; the plan usage counts one more diagnostic.
+
+**ONB-08 · Publish with a custom slug opens the test**
+Change the slug to `acme-satisfaction` › "Publish and open test". **Expected:** "That custom link (slug) is already in
+use…" under the field, no new tab. Change it to `newco-ia-test` › the button. **Expected:** a new tab on
+`/f/newco-ia-test?test=1` with the questionnaire; step 6 "Waiting for your first answer…".
+
+**ONB-09 · The test answer is detected**
+Answer the questionnaire in the new tab to the end. **Expected:** within ~10 s step 6 reads "Processing your
+answer…", then "Your answer arrived. Everything works!" with Continue. ("Skip the test" goes to step 7 without
+waiting.) Reloading the page on step 5 or 6 keeps the step (same browser).
+
+**ONB-10 · Every exit sets the flag first**
+Step 7: "Share link" › toast "Link copied." with the public link in the clipboard; "Go to dashboard" ›
+`/ai-experience`, and signing in again goes straight to the console. With the network offline, any exit (or
+"Explore on my own") shows "We couldn't finish your setup. Please try again." and stays on the page.
+
 <!-- QST-01 – 15: authoring. EDT-01 – 25: editor. QF-01 – 15: commerce. GEN-01 – 05: generation.
      CHAT-01 – 15: chat. ONB-01 – 10: onboarding. -->
 
