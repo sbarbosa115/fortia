@@ -106,3 +106,63 @@
   font-size: 12px;
   color: var(--color-text-muted);
 }
+.chat-panel--dragging .chat-panel__log {
+  border-color: var(--color-primary);
+  border-style: dashed;
+  background: var(--color-primary-soft);
+}
+.chat-panel__sent-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.chat-panel__sent-files li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.18);
+  font-size: 12px;
+}
+.chat-panel__attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chat-panel__attachment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  background: var(--color-surface);
+  font-size: 13px;
+}
+.chat-panel__attachment--failed {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+.chat-panel__attachment-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.chat-panel__attachment-status {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text-muted);
+}
+.chat-panel__attachment--failed .chat-panel__attachment-status {
+  color: inherit;
+}

@@ -158,6 +158,11 @@
     "COUPON_NOT_FOUND": "Ese cupón no existe.",
     "UNKNOWN_PROMPT": "Ese prompt del sistema no existe.",
     "INVALID_PLACEHOLDERS": "Al texto le faltan marcadores obligatorios.",
-    "WEBSITE_UNREACHABLE": "No pudimos leer ese sitio web. Revisa la dirección e inténtalo de nuevo."
+    "WEBSITE_UNREACHABLE": "No pudimos leer ese sitio web. Revisa la dirección e inténtalo de nuevo.",
+    "UNSUPPORTED_FILE_TYPE": "Este tipo de archivo no se puede leer. Adjunta un Word (.docx), PDF, Markdown, texto o CSV.",
+    "FILE_TOO_LARGE": "El archivo pesa más de 10 MB.",
+    "FILE_TOO_LONG": "El archivo tiene más de 100.000 caracteres de texto.",
+    "FILE_HAS_NO_TEXT": "No se pudo leer texto del archivo. Si es un PDF escaneado, adjunta una versión con texto.",
+    "FILE_UNREADABLE": "No se pudo leer el archivo: puede estar dañado o protegido con contraseña."
   }
 }

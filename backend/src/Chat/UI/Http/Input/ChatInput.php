@@ -2,7 +2,9 @@
 
 namespace App\Chat\UI\Http\Input;
 
+use App\Chat\Domain\AttachedFile;
 use App\Chat\UI\Http\Output\ChatDraftOutput;
+use App\Chat\UI\Http\Output\ChatFileOutput;
 use App\Chat\UI\Http\Output\ChatPendingWriteOutput;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
@@ -10,18 +12,20 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
- * POST /chat (PRD §8.10): messages[] 1–40 {role: user|assistant, content 1–20000}, the last one the user's; mode
+ * POST /chat (PRD §8.10): messages[] 1–40 {role: user|assistant, content 1–20000, files?}, the last one the user's
+ * (files: the documents a user message attached, as POST /chat/files read them; up to 5 in the conversation); mode
  * create (default) | draft; the current draft; the record the user clicked (item); and the changes waiting for the
  * user's yes (pending_writes, at most 50: the client keeps them, like the draft).
  */
 final class ChatInput
 {
-    /** @var list<array{role: string, content: string}>|null */
+    /** @var array<mixed>|null as sent (the callback reads it before it is validated); messages() returns it checked */
     #[OA\Property(type: 'array', minItems: 1, maxItems: 40, items: new OA\Items(
         required: ['role', 'content'],
         properties: [
             new OA\Property(property: 'role', type: 'string', enum: ['user', 'assistant']),
             new OA\Property(property: 'content', type: 'string', maxLength: 20000, minLength: 1),
+            new OA\Property(property: 'files', type: 'array', maxItems: AttachedFile::MAX_FILES, items: new OA\Items(ref: new Model(type: ChatFileOutput::class))),
         ],
         type: 'object',
     ))]
@@ -31,6 +35,13 @@ final class ChatInput
         fields: [
             'role' => [new Assert\NotNull(), new Assert\Choice(choices: ['user', 'assistant'])],
             'content' => [new Assert\NotNull(), new Assert\Type('string'), new Assert\Length(min: 1, max: 20000)],
+            'files' => new Assert\Optional([new Assert\Type('array'), new Assert\Count(max: AttachedFile::MAX_FILES), new Assert\All([new Assert\Collection(
+                fields: [
+                    'filename' => [new Assert\NotNull(), new Assert\Type('string'), new Assert\Length(min: 1, max: AttachedFile::MAX_NAME)],
+                    'text' => [new Assert\NotNull(), new Assert\Type('string'), new Assert\Length(min: 1, max: AttachedFile::MAX_CHARS)],
+                ],
+                allowExtraFields: false,
+            )])]),
         ],
         allowExtraFields: false,
     )])]
@@ -77,11 +88,21 @@ final class ChatInput
         if (\is_array($last) && 'user' !== ($last['role'] ?? null)) {
             $context->buildViolation('The last message must be the user\'s.')->atPath('messages')->addViolation();
         }
+        $files = array_sum(array_map(static fn (mixed $m): int => \is_array($m) && \is_array($m['files'] ?? null) ? \count($m['files']) : 0, $messages));
+        if ($files > AttachedFile::MAX_FILES) {
+            $context->buildViolation('A conversation has at most {{ max }} attached files.', ['{{ max }}' => (string) AttachedFile::MAX_FILES])->atPath('messages')->addViolation();
+        }
     }
 
-    /** @return list<array{role: string, content: string}> */
+    /** @return list<array{role: string, content: string, files?: list<array{filename: string, text: string}>}> */
     public function messages(): array
     {
-        return array_values(array_map(static fn (array $m): array => ['role' => (string) $m['role'], 'content' => (string) $m['content']], (array) $this->messages));
+        return array_values(array_map(static function (mixed $m): array {
+            $m = (array) $m;
+            $message = ['role' => (string) ($m['role'] ?? ''), 'content' => (string) ($m['content'] ?? '')];
+            $files = array_map(static fn (AttachedFile $f): array => $f->toArray(), AttachedFile::listFromArray($m['files'] ?? null));
+
+            return [] === $files || 'user' !== $message['role'] ? $message : $message + ['files' => $files];
+        }, (array) $this->messages));
     }
 }

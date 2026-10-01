@@ -158,6 +158,11 @@
     "COUPON_NOT_FOUND": "That coupon does not exist.",
     "UNKNOWN_PROMPT": "That system prompt does not exist.",
     "INVALID_PLACEHOLDERS": "The text is missing required placeholders.",
-    "WEBSITE_UNREACHABLE": "We could not read that website. Check the address and try again."
+    "WEBSITE_UNREACHABLE": "We could not read that website. Check the address and try again.",
+    "UNSUPPORTED_FILE_TYPE": "This file type cannot be read. Attach a Word (.docx), PDF, Markdown, text or CSV file.",
+    "FILE_TOO_LARGE": "The file is over 10 MB.",
+    "FILE_TOO_LONG": "The file has more than 100,000 characters of text.",
+    "FILE_HAS_NO_TEXT": "No text could be read from the file. If it is a scanned PDF, attach a version with text.",
+    "FILE_UNREADABLE": "The file could not be read: it may be damaged or protected with a password."
   }
 }

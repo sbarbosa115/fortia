@@ -1155,6 +1155,57 @@
                 }
             }
         },
+        "/api/v1/chat/files": {
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "operationId": "post_api_chat_files",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "docx, pdf, md, markdown, txt or csv; up to 10 MB",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The text read from the file",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChatFileOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR (no file)"
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN / FEATURE_NOT_IN_PLAN"
+                    },
+                    "422": {
+                        "description": "UNSUPPORTED_FILE_TYPE, FILE_TOO_LARGE, FILE_TOO_LONG, FILE_HAS_NO_TEXT, FILE_UNREADABLE"
+                    }
+                }
+            }
+        },
         "/api/v1/customer/{customer_id}/products": {
             "get": {
                 "tags": [
@@ -6456,6 +6507,24 @@
                 },
                 "type": "object"
             },
+            "ChatFileOutput": {
+                "required": [
+                    "filename",
+                    "text"
+                ],
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "text": {
+                        "type": "string",
+                        "maxLength": 100000,
+                        "minLength": 1
+                    }
+                },
+                "type": "object"
+            },
             "ChatChoiceOutput": {
                 "required": [
                     "label"
@@ -6765,6 +6834,13 @@
                                     "type": "string",
                                     "maxLength": 20000,
                                     "minLength": 1
+                                },
+                                "files": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ChatFileOutput"
+                                    },
+                                    "maxItems": 5
                                 }
                             },
                             "type": "object"

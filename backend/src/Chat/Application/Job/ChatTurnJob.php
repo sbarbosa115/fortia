@@ -4,6 +4,7 @@ namespace App\Chat\Application\Job;
 
 use App\Chat\Application\CallerPayload;
 use App\Chat\Application\ChatTurn;
+use App\Chat\Domain\AttachedFile;
 use App\Chat\Domain\ChatDraft;
 use App\Chat\Domain\WriteQueue;
 use App\Identity\Application\Query\AccountQueries;
@@ -35,7 +36,8 @@ final class ChatTurnJob implements JobHandler
         $messages = [];
         foreach ((array) ($payload['messages'] ?? []) as $message) {
             if (\is_array($message) && \is_string($message['content'] ?? null)) {
-                $messages[] = ['role' => 'assistant' === ($message['role'] ?? null) ? 'assistant' : 'user', 'content' => $message['content']];
+                $role = 'assistant' === ($message['role'] ?? null) ? 'assistant' : 'user';
+                $messages[] = ['role' => $role, 'content' => $message['content'], 'files' => 'user' === $role ? AttachedFile::listFromArray($message['files'] ?? null) : []];
             }
         }
         $item = \is_array($payload['item'] ?? null) ? ['kind' => (string) ($payload['item']['kind'] ?? ''), 'id' => (string) ($payload['item']['id'] ?? '')] : null;

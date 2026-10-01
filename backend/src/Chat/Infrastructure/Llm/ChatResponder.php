@@ -17,6 +17,8 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  *
  * - "crea un cuestionario sobre X" / "create a questionnaire about X" (+ "diagnóstico"/"diagnostic", "cadena"/"chain")
  *   → update_draft with the basics; then "sí" → confirm_basics, three questions, the ending and request_review;
+ * - a message with an attached document → update_draft with its title; then "sí" → its questions (see questionsIn)
+ *   instead of the three; with the questions under way, its questions are added;
  * - with the questions under way, "agrega una tabla" / "add a table" and "agrega un archivo con plantilla" / "add a
  *   file with a template" → add_questions (a table, a file question with a CSV template) and request_review;
  * - "mis cuestionarios / organizaciones / asignaciones / proyectos / videos / usuarios / webhooks / claves",
@@ -136,11 +138,15 @@ final class ChatResponder implements FakeLlmResponder
         $create = 'create' === ($context['mode'] ?? 'create');
         $yes = 1 === preg_match('/^(si|yes|ok|dale|claro|confirmo)\b/', $text);
 
+        $files = array_values(array_filter(\is_array($context['files'] ?? null) ? $context['files'] : [], 'is_array'));
+        $fromFiles = array_merge(...array_map(static fn (array $f): array => self::questionsIn((string) ($f['text'] ?? '')), $files));
+        $attached = str_contains($original, '<attached_file>');
+
         // The basics are set and the user confirms them: questions, ending and review in one go.
         if ($yes && !($draft['basics_confirmed'] ?? false) && null !== ($draft['title'] ?? null)) {
             $topic = (string) ($draft['topic'] ?? $draft['title']);
             $scored = 'diagnostic' === ($draft['type'] ?? null);
-            $questions = array_map(static fn (string $q): array => [
+            $questions = [] !== $fromFiles ? \array_slice($fromFiles, 0, 100) : array_map(static fn (string $q): array => [
                 'title' => \sprintf($q, $topic),
                 'type' => 'radio',
                 'choices' => array_map(static fn (string $label, int $i): array => ['label' => $label, 'value' => $scored ? $i : null], $texts['choices'], array_keys($texts['choices'])),
@@ -152,6 +158,16 @@ final class ChatResponder implements FakeLlmResponder
             }
 
             return [['confirm_basics', []], ['set_questions', ['questions' => $questions]], ['set_ending', $ending], ['request_review', []]];
+        }
+        // A document attached: before the basics, they come from it; with the questions under way, its questions are
+        // added.
+        if ($attached && [] !== $files) {
+            if ($draft['basics_confirmed'] ?? false) {
+                return [] === $fromFiles ? [] : [['add_questions', ['questions' => \array_slice($fromFiles, 0, 100)]], ['request_review', []]];
+            }
+            $title = self::titleOf($files[\count($files) - 1]);
+
+            return [['update_draft', ['title' => $title, 'type' => 'regular', 'topic' => $title, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false]]];
         }
         // With the questions under way: "agrega una tabla" / "add a table", "agrega un archivo con plantilla" / "add a
         // file with a template".
@@ -269,6 +285,54 @@ final class ChatResponder implements FakeLlmResponder
         }
 
         return self::answer(implode("\n\n", $lines), $replies);
+    }
+
+    /**
+     * The questions of an attached document, the way a person would spot them: a line ending in "?" or numbered
+     * ("1.", "2)", "Q3:", "Pregunta 4:") is a question; the lines under it marked "a)", "-", "•", "( )" or "[ ]" are its
+     * choices (a radio with two or more, else free text).
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function questionsIn(string $text): array
+    {
+        /** @var list<array{title: string, choices: list<array{label: string, value: null}>}> $questions */
+        $questions = [];
+        $open = null;
+        foreach (preg_split('/\n/', $text) ?: [] as $line) {
+            $line = trim($line);
+            $numbered = 1 === preg_match('/^(?:(?:q|pregunta|question)\s*)?\d{1,3}\s*[.):-]\s*(.+)$/iu', $line, $n);
+            $body = $numbered ? trim($n[1]) : (string) preg_replace('/^(?:[-*•]\s+)/u', '', $line);
+            if ('' !== $body && ($numbered || str_ends_with($body, '?'))) {
+                $questions[] = ['title' => mb_substr($body, 0, 500), 'choices' => []];
+                $open = \count($questions) - 1;
+            } elseif (null !== $open && 1 === preg_match('/^(?:[a-h][.)]|\(\s?\)|\[\s?\]|[-*•○□☐])\s*(.+)$/iu', $line, $c)) {
+                $questions[$open]['choices'][] = ['label' => mb_substr(trim($c[1]), 0, 300), 'value' => null];
+            } elseif ('' === $line || str_starts_with($line, '#')) {
+                $open = null;
+            }
+        }
+
+        return array_map(static fn (array $q): array => \count($q['choices']) >= 2
+            ? ['title' => $q['title'], 'type' => 'radio', 'choices' => \array_slice($q['choices'], 0, 20)]
+            : ['title' => $q['title'], 'type' => 'text'], $questions);
+    }
+
+    /**
+     * A document's title: its first heading, else its first line that is not a question, else its file name.
+     *
+     * @param array<string, mixed> $file
+     */
+    private static function titleOf(array $file): string
+    {
+        foreach (preg_split('/\n/', (string) ($file['text'] ?? '')) ?: [] as $line) {
+            $line = trim((string) preg_replace('/^#+\s*/', '', trim($line)));
+            if ('' !== $line && !str_ends_with($line, '?') && 1 !== preg_match('/^\d{1,3}\s*[.)]/', $line)) {
+                return mb_substr($line, 0, 200);
+            }
+        }
+
+        return mb_substr(pathinfo((string) ($file['filename'] ?? ''), \PATHINFO_FILENAME) ?: 'Cuestionario', 0, 200);
     }
 
     /** @param list<string> $quickReplies */

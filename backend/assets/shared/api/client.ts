@@ -59,7 +59,9 @@ async function request<T>(
     Accept: 'application/json',
     ...opts.headers,
   };
-  if (body !== undefined) {
+  // A FormData body (a file upload) sets its own multipart Content-Type, with the boundary.
+  const multipart = body instanceof FormData;
+  if (body !== undefined && !multipart) {
     headers['Content-Type'] = 'application/json';
   }
   const token =
@@ -88,7 +90,10 @@ async function request<T>(
     response = await fetch(buildUrl(path, opts.query), {
       method,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body:
+        body === undefined || multipart
+          ? (body as FormData | undefined)
+          : JSON.stringify(body),
       signal: controller.signal,
     });
   } catch (cause) {

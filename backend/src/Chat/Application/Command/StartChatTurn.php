@@ -12,10 +12,10 @@ use App\Shared\Application\Security\Caller;
 final class StartChatTurn
 {
     /**
-     * @param list<array{role: string, content: string}> $messages
-     * @param array<string, mixed>|null                  $draft
-     * @param array{kind: string, id: string}|null       $item
-     * @param list<array<string, mixed>>|null            $pendingWrites
+     * @param list<array{role: string, content: string, files?: list<array{filename: string, text: string}>}> $messages
+     * @param array<string, mixed>|null                                                                       $draft
+     * @param array{kind: string, id: string}|null                                                            $item
+     * @param list<array<string, mixed>>|null                                                                 $pendingWrites
      */
     public function __construct(
         public readonly Caller $caller,

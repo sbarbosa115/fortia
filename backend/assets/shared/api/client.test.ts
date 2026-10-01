@@ -23,6 +23,22 @@ describe('api client', () => {
     await expect(api.get('/thing')).resolves.toEqual({id: 1});
   });
 
+  it('sends a FormData body as is, letting the browser set the multipart type', async () => {
+    const fetch = respond(200, {message: 'OK', data: {text: 'hi'}});
+    vi.stubGlobal('fetch', fetch);
+    const body = new FormData();
+    body.append('file', new File(['hi'], 'q.md'));
+
+    await api.post('/chat/files', body);
+
+    const init = fetch.mock.calls[0]?.[1] as RequestInit;
+    expect(init.body, 'not JSON-encoded').toBe(body);
+    expect(
+      (init.headers as Record<string, string>)['Content-Type'],
+      'the boundary comes from the browser',
+    ).toBeUndefined();
+  });
+
   it('returns bare JSON as is (older routes, PRD §8.1)', async () => {
     vi.stubGlobal('fetch', respond(200, {organizations: []}));
     await expect(api.get('/organizations')).resolves.toEqual({

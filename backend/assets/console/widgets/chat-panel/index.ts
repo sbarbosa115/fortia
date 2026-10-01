@@ -4,5 +4,6 @@ export type {
   ChatState,
   ChatEntry,
   ChatStatus,
+  ChatAttachment,
   ChatResultHandler,
 } from './model/useChat';

@@ -8,5 +8,13 @@
   "retry": "Reintentar",
   "full": "Esta conversación llegó a su límite de mensajes. Recarga la página para empezar de nuevo.",
   "quickReplies": "Respuestas rápidas",
-  "counter": "{{count}} / {{max}}"
+  "counter": "{{count}} / {{max}}",
+  "attach": "Adjuntar un documento (Word, PDF, Markdown, texto o CSV)",
+  "attachments": "Documentos para tu próximo mensaje",
+  "files": "Documentos adjuntos",
+  "reading": "Leyendo…",
+  "ready": "Listo para enviar",
+  "removeFile": "Quitar {{name}}",
+  "tooManyFiles": "Una conversación puede adjuntar hasta {{max}} documentos.",
+  "fromFiles": "Crea el cuestionario con las preguntas del documento adjunto."
 }

@@ -8,5 +8,13 @@
   "retry": "Retry",
   "full": "This conversation reached its message limit. Refresh the page to start over.",
   "quickReplies": "Quick replies",
-  "counter": "{{count}} / {{max}}"
+  "counter": "{{count}} / {{max}}",
+  "attach": "Attach a document (Word, PDF, Markdown, text or CSV)",
+  "attachments": "Documents for your next message",
+  "files": "Attached documents",
+  "reading": "Reading…",
+  "ready": "Ready to send",
+  "removeFile": "Remove {{name}}",
+  "tooManyFiles": "A conversation can attach up to {{max}} documents.",
+  "fromFiles": "Create the questionnaire with the questions of the attached document."
 }
