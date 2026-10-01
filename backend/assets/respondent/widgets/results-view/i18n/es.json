@@ -1,0 +1,129 @@
+{
+  "newTab": "(se abre en una pestaña nueva)",
+  "default": {
+    "title": "Tus respuestas se enviaron con éxito.",
+    "subtitle": "Gracias por completar el cuestionario. Guardamos tus respuestas y el equipo ya puede revisarlas."
+  },
+  "diagnostic": {
+    "eyebrow": "Completado con éxito",
+    "title": "Muchas gracias por tu apoyo",
+    "subtitle": "Así te fue en cada área.",
+    "tier_label": "Tu nivel",
+    "overall_score": "Puntaje general",
+    "categories_title": "Puntaje por área",
+    "categories_subtitle": "Cómo te fue en cada categoría.",
+    "chart_title": "Tu perfil por categoría",
+    "chart_subtitle": "Cada eje es el porcentaje del máximo de esa área.",
+    "chart_legend": "Tu puntaje (%)",
+    "recommendations": "Recomendaciones",
+    "action_plan": "Plan de acción",
+    "report_title": "Informe completo en PDF",
+    "report_subtitle": "Incluye el detalle por categoría y el plan de acción.",
+    "download": "Descargar"
+  },
+  "ecommerce": {
+    "title": "Tus productos recomendados",
+    "subtitle": "Según tus respuestas, seleccionamos estas opciones especialmente para tus necesidades.",
+    "topMatch": "Mejor opción",
+    "noDescription": "No hay descripción disponible.",
+    "viewInStore": "Ver en la tienda",
+    "empty": "No hay productos recomendados por ahora."
+  },
+  "profile": {
+    "eyebrow": "AI Growth · Resultado de madurez",
+    "score": "Puntaje de madurez",
+    "missing": "No pudimos generar tu perfil esta vez. Inténtalo de nuevo más tarde.",
+    "potential": "Potencial",
+    "percentile": "Percentil",
+    "quote": "Los equipos no se quedan atrás por falta de herramientas, sino de hábitos. Cada paso cuenta.",
+    "dimensionsTitle": "Tus 5 dimensiones",
+    "radarTitle": "Tú vs el promedio vs el 10 % superior",
+    "you": "Tú",
+    "average": "Promedio",
+    "top": "10 % superior",
+    "strengths": "Tus fortalezas",
+    "opportunity": "Tu mayor oportunidad",
+    "roadmapTitle": "Tu hoja de ruta de 90 días",
+    "days": "Días {{days}}:",
+    "download": "Descargar mi resultado (PDF)",
+    "anonymous": "Todas las respuestas son anónimas · Los resultados se analizan solo a nivel de grupo",
+    "stages": {
+      "no_usage": "Sin uso",
+      "exploration": "Exploración",
+      "adoption": "Adopción",
+      "integration": "Integración",
+      "transformation": "Transformación"
+    },
+    "stageState": {
+      "done": "(completada)",
+      "current": "(estás aquí)",
+      "pending": "(pendiente)"
+    },
+    "dimensions": {
+      "d1": "Estrategia y liderazgo",
+      "d2": "Uso diario",
+      "d3": "Procesos y datos",
+      "d4": "Habilidades",
+      "d5": "Gobierno"
+    },
+    "roadmap": {
+      "d1": "Acuerden dos objetivos de negocio para la IA y nombren un responsable para cada uno.",
+      "d2": "Convierte una tarea semanal por persona en una rutina asistida por IA.",
+      "d3": "Documenta un proceso de punta a punta y conecta sus datos a una herramienta de IA.",
+      "d4": "Hagan una sesión práctica para que todos practiquen con trabajo real.",
+      "d5": "Escribe una política de una página sobre datos, privacidad y revisión de lo que produce la IA."
+    }
+  },
+  "samurai8": {
+    "eyebrow": "Tu resultado · {{date}}",
+    "score": "Puntaje total",
+    "percentile": "Solo el {{percentile}} % de los equipos llega a este nivel o más.",
+    "dimensionsTitle": "Tus dimensiones",
+    "strengths": "Tus fortalezas",
+    "weakest": "Por dónde empezar",
+    "quickWins": "Victorias rápidas",
+    "roadmap": "Tu hoja de ruta de {{days}} días",
+    "roadmap30": "Dedica los próximos 30 días a lo básico: una herramienta, un caso de uso y un hábito semanal.",
+    "roadmap90": "En los próximos 90 días, fortalece tu dimensión más débil y escala lo que ya funciona.",
+    "tiers": {
+      "explorador": "Explorador",
+      "practicante": "Practicante",
+      "estratega": "Estratega",
+      "arquitecto": "Arquitecto",
+      "constructor": "Constructor",
+      "maestro": "Maestro"
+    },
+    "dimensions": {
+      "contexto": "Contexto",
+      "datos": "Datos",
+      "automatizacion": "Automatización",
+      "calidad": "Calidad",
+      "autonomia": "Autonomía"
+    },
+    "wins": {
+      "contexto": "Dale contexto a la IA: escribe quién eres, tus clientes y tu tono.",
+      "datos": "Reúne los datos que más usas en un lugar que la IA pueda leer.",
+      "automatizacion": "Automatiza una tarea repetitiva esta semana.",
+      "calidad": "Revisa cada resultado de la IA con una lista corta.",
+      "autonomia": "Deja que la IA termine una tarea pequeña de principio a fin."
+    }
+  },
+  "livingood": {
+    "eyebrow": "Tu perfil de salud",
+    "title": "Tus resultados",
+    "scores": "Tus puntajes",
+    "plan": "Tu plan de acción",
+    "areas": {
+      "fat_loss": "Pérdida de grasa",
+      "gut_health": "Salud intestinal",
+      "hormone_balance": "Equilibrio hormonal",
+      "energy_vitality": "Energía y vitalidad"
+    },
+    "actions": {
+      "fat_loss": "Arma tus comidas con proteína y verduras.",
+      "gut_health": "Suma fibra y alimentos fermentados cada día.",
+      "hormone_balance": "Cuida tu sueño y maneja el estrés.",
+      "energy_vitality": "Muévete todos los días y mantente hidratado."
+    }
+  }
+}

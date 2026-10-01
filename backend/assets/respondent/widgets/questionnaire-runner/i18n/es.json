@@ -1,0 +1,72 @@
+{
+  "processing": {
+    "eyebrow": "Un momento",
+    "title": "Estamos revisando tu respuesta",
+    "subtitle": "Solo toma unos segundos. Revisamos lo que escribiste para asegurarnos de tener todo lo que necesitamos."
+  },
+  "submitting": {
+    "title": "Procesando",
+    "subtitle": "Estamos terminando de documentar tus respuestas"
+  },
+  "disclaimer": {
+    "title": "Antes de empezar",
+    "private": "Privado",
+    "accept": "Aceptar y continuar",
+    "decline": "Ahora no, gracias",
+    "closed": "Ya puedes cerrar esta pestaña."
+  },
+  "landing": {
+    "eyebrow": "Comencemos",
+    "start": "Comenzar cuestionario",
+    "count_one": "{{count}} pregunta",
+    "count_other": "{{count}} preguntas"
+  },
+  "resume": {
+    "title": "Retoma donde lo dejaste",
+    "savedNow": "Guardado hace un momento",
+    "saved": {
+      "minute_one": "Guardado hace {{count}} minuto",
+      "minute_other": "Guardado hace {{count}} minutos",
+      "hour_one": "Guardado hace {{count}} hora",
+      "hour_other": "Guardado hace {{count}} horas",
+      "day_one": "Guardado hace {{count}} día",
+      "day_other": "Guardado hace {{count}} días"
+    },
+    "body": "Tienes un cuestionario sin terminar. Guardamos tus respuestas: puedes continuar desde la misma pregunta.",
+    "question": "Pregunta {{current}} de {{total}}",
+    "continue": "Continuar",
+    "startOver": "Empezar de nuevo",
+    "warning_one": "Se borrará tu {{count}} respuesta guardada",
+    "warning_other": "Se borrarán tus {{count}} respuestas guardadas"
+  },
+  "progress": {
+    "step": "Paso {{step}} de {{total}}",
+    "percent": "{{pct}} %",
+    "stage": "Etapa {{current}} de {{total}}"
+  },
+  "followUp": {
+    "attemptsLeft_one": "Te queda {{count}} intento",
+    "attemptsLeft_other": "Te quedan {{count}} intentos"
+  },
+  "review": {
+    "approved": "Aprobada",
+    "approvedBody": "Esta respuesta fue aprobada y no se puede cambiar.",
+    "rejected": "Requiere corrección",
+    "rejectedBody": "Tu revisor te pidió responder esta pregunta de nuevo."
+  },
+  "nav": {
+    "back": "Atrás",
+    "skip": "Omitir",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "saving": "Guardando…"
+  },
+  "submitFailed": "No pudimos enviar tus respuestas. Revisa tu conexión e inténtalo de nuevo.",
+  "empty": "Este cuestionario no tiene preguntas.",
+  "unavailable": {
+    "limit": "Se alcanzó el límite de respuestas.",
+    "notFound": "Este cuestionario no existe.",
+    "create": "¿Quieres crear este cuestionario?",
+    "flow": "No pudimos encontrar este flujo."
+  }
+}

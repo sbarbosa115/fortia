@@ -75,6 +75,7 @@ services:
                 clarityId: '%env(CLARITY_ID)%'
                 tiktokPixelId: '%env(TIKTOK_PIXEL_ID)%'
                 diagnosticTitleOverrides: '%env(json:DIAGNOSTIC_TITLE_OVERRIDES)%'
+                supportEmail: '%app.support_email%'
 
 when@test:
     services:

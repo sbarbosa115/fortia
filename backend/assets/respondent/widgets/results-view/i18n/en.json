@@ -1,0 +1,129 @@
+{
+  "newTab": "(opens in a new tab)",
+  "default": {
+    "title": "Your answers have been submitted successfully.",
+    "subtitle": "Thank you for completing the questionnaire. Your answers have been saved and the team can now review them."
+  },
+  "diagnostic": {
+    "eyebrow": "Successfully completed",
+    "title": "Thank you so much for your support",
+    "subtitle": "Here's how you scored across each area.",
+    "tier_label": "Your level",
+    "overall_score": "Overall score",
+    "categories_title": "Score by area",
+    "categories_subtitle": "How you performed in each category.",
+    "chart_title": "Your category profile",
+    "chart_subtitle": "Each axis is the percentage of that area's maximum.",
+    "chart_legend": "Your score (%)",
+    "recommendations": "Recommendations",
+    "action_plan": "Action plan",
+    "report_title": "Full report in PDF",
+    "report_subtitle": "Includes the detail by category and the action plan.",
+    "download": "Download"
+  },
+  "ecommerce": {
+    "title": "Your Recommended Products",
+    "subtitle": "Based on your answers, we have curated these selections specifically for your needs.",
+    "topMatch": "Top Match",
+    "noDescription": "No description available.",
+    "viewInStore": "View in Store",
+    "empty": "No products recommended at this time."
+  },
+  "profile": {
+    "eyebrow": "AI Growth · Maturity result",
+    "score": "Maturity score",
+    "missing": "We couldn't generate your profile this time. Please try again later.",
+    "potential": "Potential",
+    "percentile": "Percentile",
+    "quote": "Teams don't fall behind for lack of tools, but for lack of habits. Every step counts.",
+    "dimensionsTitle": "Your 5 dimensions",
+    "radarTitle": "You vs average vs top 10%",
+    "you": "You",
+    "average": "Average",
+    "top": "Top 10%",
+    "strengths": "Your strengths",
+    "opportunity": "Your biggest opportunity",
+    "roadmapTitle": "Your 90-day roadmap",
+    "days": "Days {{days}}:",
+    "download": "Download my result (PDF)",
+    "anonymous": "All answers are anonymous · Results are analyzed only at group level",
+    "stages": {
+      "no_usage": "No usage",
+      "exploration": "Exploration",
+      "adoption": "Adoption",
+      "integration": "Integration",
+      "transformation": "Transformation"
+    },
+    "stageState": {
+      "done": "(done)",
+      "current": "(you are here)",
+      "pending": "(pending)"
+    },
+    "dimensions": {
+      "d1": "Strategy and leadership",
+      "d2": "Daily use",
+      "d3": "Processes and data",
+      "d4": "Skills",
+      "d5": "Governance"
+    },
+    "roadmap": {
+      "d1": "Agree on two business goals for AI and name an owner for each.",
+      "d2": "Turn one weekly task per person into an AI-assisted routine.",
+      "d3": "Document one process end to end and connect its data to an AI tool.",
+      "d4": "Run a hands-on session so everyone practices with real work.",
+      "d5": "Write a one-page policy on data, privacy and review of AI output."
+    }
+  },
+  "samurai8": {
+    "eyebrow": "Your result · {{date}}",
+    "score": "Total score",
+    "percentile": "Only {{percentile}}% of teams reach this level or higher.",
+    "dimensionsTitle": "Your dimensions",
+    "strengths": "Your strengths",
+    "weakest": "Where to start",
+    "quickWins": "Quick wins",
+    "roadmap": "Your {{days}}-day roadmap",
+    "roadmap30": "Spend the next 30 days building the basics: one tool, one use case and a weekly habit.",
+    "roadmap90": "In the next 90 days, strengthen your weakest dimension and scale what already works.",
+    "tiers": {
+      "explorador": "Explorer",
+      "practicante": "Practitioner",
+      "estratega": "Strategist",
+      "arquitecto": "Architect",
+      "constructor": "Builder",
+      "maestro": "Master"
+    },
+    "dimensions": {
+      "contexto": "Context",
+      "datos": "Data",
+      "automatizacion": "Automation",
+      "calidad": "Quality",
+      "autonomia": "Autonomy"
+    },
+    "wins": {
+      "contexto": "Give the AI your context: write down who you are, your clients and your tone.",
+      "datos": "Gather the data you use most in one place the AI can read.",
+      "automatizacion": "Automate one repetitive task this week.",
+      "calidad": "Review every AI output with a short checklist.",
+      "autonomia": "Let the AI finish one small task from start to end."
+    }
+  },
+  "livingood": {
+    "eyebrow": "Your Health Profile",
+    "title": "Your results",
+    "scores": "Your scores",
+    "plan": "Your action plan",
+    "areas": {
+      "fat_loss": "Fat Loss",
+      "gut_health": "Gut Health",
+      "hormone_balance": "Hormone Balance",
+      "energy_vitality": "Energy & Vitality"
+    },
+    "actions": {
+      "fat_loss": "Build meals around protein and vegetables.",
+      "gut_health": "Add fiber and fermented foods every day.",
+      "hormone_balance": "Protect your sleep and manage stress.",
+      "energy_vitality": "Move every day and stay hydrated."
+    }
+  }
+}

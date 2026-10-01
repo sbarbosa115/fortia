@@ -1,3 +1,7 @@
 {
-  "title": "Resultados"
+  "documentTitle": "Mappi - Tus resultados",
+  "loading": {
+    "title": "Procesando",
+    "subtitle": "Estamos terminando de documentar tus respuestas"
+  }
 }

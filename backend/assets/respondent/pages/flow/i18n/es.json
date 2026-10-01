@@ -1,3 +1,16 @@
 {
-  "title": "Cuestionario"
+  "documentTitle": "Mappi - {{title}}",
+  "generating": {
+    "eyebrow": "Un momento",
+    "title": "Estamos preparando tus siguientes preguntas",
+    "messages": {
+      "0": "Estamos ajustando el siguiente paso a partir de tus respuestas.",
+      "1": "Revisando lo que nos has contado hasta ahora…",
+      "2": "Eligiendo las preguntas que más importan para ti.",
+      "3": "Ya casi: le damos los últimos toques.",
+      "4": "Gracias por tu paciencia, solo toma un momento."
+    },
+    "failed": "No pudimos preparar tus siguientes preguntas.",
+    "retry": "Intentar de nuevo"
+  }
 }

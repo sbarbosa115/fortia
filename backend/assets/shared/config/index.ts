@@ -14,6 +14,8 @@ export type AppConfig = {
   clarityId: string;
   tiktokPixelId: string;
   diagnosticTitleOverrides: Record<string, string>;
+  /** The support contact (privacy page, D21). */
+  supportEmail: string;
 };
 
 declare global {
@@ -35,6 +37,7 @@ const DEFAULTS: AppConfig = {
   clarityId: '',
   tiktokPixelId: '',
   diagnosticTitleOverrides: {},
+  supportEmail: '',
 };
 
 export function appConfig(): AppConfig {

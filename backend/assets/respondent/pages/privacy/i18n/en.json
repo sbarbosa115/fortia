@@ -1,3 +1,50 @@
 {
-  "title": "Privacy Policy"
+  "documentTitle": "Mappi - Privacy Policy",
+  "eyebrow": "Legal",
+  "title": "Privacy Policy",
+  "updated": "Last updated April 20, 2026",
+  "fallbackEmail": "info@getmappi.com",
+  "sections": {
+    "who": {
+      "title": "Who we are",
+      "body": "Mappi is a platform that companies use to create questionnaires, send them to the people they work with and turn the answers into results. When you answer a questionnaire, the company that sent it is responsible for your answers, and we process them on its behalf."
+    },
+    "collect": {
+      "title": "Information we collect",
+      "body": "The answers you give, including text, voice transcriptions and the files you attach; the contact details you choose to share (name, email and phone); and basic technical data such as your browser, language and the time of each answer. We do not ask you to create an account."
+    },
+    "use": {
+      "title": "How we use it",
+      "body": "To save your progress, deliver your results, let the company that sent the questionnaire review your answers, and keep the service secure and working. We never sell your information."
+    },
+    "ai": {
+      "title": "Use of AI",
+      "body": "Some questionnaires use artificial intelligence to check whether an answer is complete, to prepare the next questions or to recommend products. Your answers are sent to our AI provider only for that purpose, and they are not used to train its models."
+    },
+    "thirdParties": {
+      "title": "Third parties",
+      "body": "We rely on providers for hosting, file storage, email, speech transcription and AI. The company that sent you the questionnaire may also use measurement tools (such as analytics or advertising pixels) on its questionnaires. Each provider only receives what it needs to do its job."
+    },
+    "retention": {
+      "title": "Retention",
+      "body": "We keep your answers while the company that sent the questionnaire uses Mappi, and delete them within 90 days after it uninstalls or closes its account. Your progress saved in your browser expires after 24 hours."
+    },
+    "rights": {
+      "title": "Your rights",
+      "body": "You can ask to access, correct or delete your information, or object to its use. Write to us and we will answer, together with the company that sent you the questionnaire, within the time the law requires."
+    },
+    "security": {
+      "title": "Security",
+      "body": "Connections are encrypted, files are stored privately and shared only through links that expire, and access to answers is limited to the company that owns the questionnaire."
+    },
+    "changes": {
+      "title": "Changes",
+      "body": "If we change this policy, we will publish the new version on this page with its date. Important changes will be announced on the platform before they apply."
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "body": "Questions about this policy or your information:"
+  },
+  "footer": "© {{year}}. All rights reserved."
 }

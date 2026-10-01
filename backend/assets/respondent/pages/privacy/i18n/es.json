@@ -1,3 +1,50 @@
 {
-  "title": "Política de privacidad"
+  "documentTitle": "Mappi - Política de privacidad",
+  "eyebrow": "Legal",
+  "title": "Política de privacidad",
+  "updated": "Última actualización: 20 de abril de 2026",
+  "fallbackEmail": "info@getmappi.com",
+  "sections": {
+    "who": {
+      "title": "Quiénes somos",
+      "body": "Mappi es una plataforma que las empresas usan para crear cuestionarios, enviarlos a las personas con quienes trabajan y convertir las respuestas en resultados. Cuando respondes un cuestionario, la empresa que lo envió es responsable de tus respuestas y nosotros las tratamos por cuenta de ella."
+    },
+    "collect": {
+      "title": "Información que recopilamos",
+      "body": "Las respuestas que das, incluidos textos, transcripciones de voz y los archivos que adjuntas; los datos de contacto que decidas compartir (nombre, correo y teléfono); y datos técnicos básicos como tu navegador, idioma y la hora de cada respuesta. No te pedimos crear una cuenta."
+    },
+    "use": {
+      "title": "Cómo la usamos",
+      "body": "Para guardar tu avance, entregarte tus resultados, permitir que la empresa que envió el cuestionario revise tus respuestas y mantener el servicio seguro y funcionando. Nunca vendemos tu información."
+    },
+    "ai": {
+      "title": "Uso de IA",
+      "body": "Algunos cuestionarios usan inteligencia artificial para revisar si una respuesta está completa, preparar las siguientes preguntas o recomendar productos. Tus respuestas se envían a nuestro proveedor de IA solo con ese fin y no se usan para entrenar sus modelos."
+    },
+    "thirdParties": {
+      "title": "Terceros",
+      "body": "Nos apoyamos en proveedores de alojamiento, almacenamiento de archivos, correo, transcripción de voz e IA. La empresa que te envió el cuestionario también puede usar herramientas de medición (como analítica o píxeles publicitarios) en sus cuestionarios. Cada proveedor solo recibe lo que necesita para su tarea."
+    },
+    "retention": {
+      "title": "Conservación",
+      "body": "Conservamos tus respuestas mientras la empresa que envió el cuestionario use Mappi, y las eliminamos dentro de los 90 días posteriores a que la desinstale o cierre su cuenta. El avance guardado en tu navegador vence a las 24 horas."
+    },
+    "rights": {
+      "title": "Tus derechos",
+      "body": "Puedes pedir acceder, corregir o eliminar tu información, u oponerte a su uso. Escríbenos y te responderemos, junto con la empresa que te envió el cuestionario, en el plazo que exige la ley."
+    },
+    "security": {
+      "title": "Seguridad",
+      "body": "Las conexiones están cifradas, los archivos se guardan de forma privada y solo se comparten con enlaces que vencen, y el acceso a las respuestas se limita a la empresa dueña del cuestionario."
+    },
+    "changes": {
+      "title": "Cambios",
+      "body": "Si cambiamos esta política, publicaremos la nueva versión en esta página con su fecha. Los cambios importantes se anunciarán en la plataforma antes de aplicarse."
+    }
+  },
+  "contact": {
+    "title": "Contacto",
+    "body": "Preguntas sobre esta política o tu información:"
+  },
+  "footer": "© {{year}}. Todos los derechos reservados."
 }

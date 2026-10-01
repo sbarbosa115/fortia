@@ -1,0 +1,72 @@
+{
+  "processing": {
+    "eyebrow": "One moment",
+    "title": "We're reviewing your answer",
+    "subtitle": "This only takes a few seconds. We're reviewing what you wrote to make sure we have everything we need."
+  },
+  "submitting": {
+    "title": "Processing",
+    "subtitle": "We're finishing documenting your answers"
+  },
+  "disclaimer": {
+    "title": "Before you start",
+    "private": "Private",
+    "accept": "Accept and continue",
+    "decline": "Not now, thanks",
+    "closed": "You can now close this tab."
+  },
+  "landing": {
+    "eyebrow": "Get started",
+    "start": "Start questionnaire",
+    "count_one": "{{count}} question",
+    "count_other": "{{count}} questions"
+  },
+  "resume": {
+    "title": "Pick up where you left off",
+    "savedNow": "Saved just now",
+    "saved": {
+      "minute_one": "Saved {{count}} minute ago",
+      "minute_other": "Saved {{count}} minutes ago",
+      "hour_one": "Saved {{count}} hour ago",
+      "hour_other": "Saved {{count}} hours ago",
+      "day_one": "Saved {{count}} day ago",
+      "day_other": "Saved {{count}} days ago"
+    },
+    "body": "You have an unfinished questionnaire. We saved your answers — you can continue from the same question.",
+    "question": "Question {{current}} of {{total}}",
+    "continue": "Continue",
+    "startOver": "Start over",
+    "warning_one": "Your {{count}} saved answer will be deleted",
+    "warning_other": "Your {{count}} saved answers will be deleted"
+  },
+  "progress": {
+    "step": "Step {{step}} of {{total}}",
+    "percent": "{{pct}}%",
+    "stage": "Stage {{current}} of {{total}}"
+  },
+  "followUp": {
+    "attemptsLeft_one": "{{count}} attempt left",
+    "attemptsLeft_other": "{{count}} attempts left"
+  },
+  "review": {
+    "approved": "Approved",
+    "approvedBody": "This answer was approved and can't be changed.",
+    "rejected": "Needs correction",
+    "rejectedBody": "Your reviewer asked you to answer this question again."
+  },
+  "nav": {
+    "back": "Back",
+    "skip": "Skip",
+    "next": "Next",
+    "finish": "Finish",
+    "saving": "Saving…"
+  },
+  "submitFailed": "We couldn't send your answers. Check your connection and try again.",
+  "empty": "This questionnaire has no questions.",
+  "unavailable": {
+    "limit": "The response limit has been reached.",
+    "notFound": "This questionnaire does not exist.",
+    "create": "Want to create this questionnaire?",
+    "flow": "This flow could not be found."
+  }
+}
