@@ -28,14 +28,31 @@ export function answer(
     }
     return {
       ...question,
-      options: question.options.map(
-        (item): Control =>
-          item.name === control.name
-            ? {...item, value, timestamp: now.toISOString(), skipped: false}
-            : item,
+      options: question.options.map((item): Control =>
+        item.name === control.name
+          ? {...item, value, timestamp: now.toISOString(), skipped: false}
+          : item,
       ),
     };
   });
+}
+
+/** Writes one named control of a question (the special themes with several fields, PRD §9.5). */
+export function answerControl(
+  session: Session,
+  questionId: string,
+  controlName: string,
+  value: AnswerValue,
+  now: Date = new Date(),
+): Session {
+  return mapQuestion(session, questionId, (question) => ({
+    ...question,
+    options: question.options.map((item): Control =>
+      item.name === controlName && !item.locked
+        ? {...item, value, timestamp: now.toISOString(), skipped: false}
+        : item,
+    ),
+  }));
 }
 
 /** Skip marks every control skipped, with an empty value and a timestamp (§9.14). Locked controls are never written. */
@@ -46,11 +63,10 @@ export function skip(
 ): Session {
   return mapQuestion(session, questionId, (question) => ({
     ...question,
-    options: question.options.map(
-      (item): Control =>
-        item.locked
-          ? item
-          : {...item, value: null, skipped: true, timestamp: now.toISOString()},
+    options: question.options.map((item): Control =>
+      item.locked
+        ? item
+        : {...item, value: null, skipped: true, timestamp: now.toISOString()},
     ),
   }));
 }
@@ -63,11 +79,10 @@ export function markViewed(
 ): Session {
   return mapQuestion(session, questionId, (question) => ({
     ...question,
-    options: question.options.map(
-      (item): Control =>
-        item.type === 'message' && !item.locked
-          ? {...item, value: 'viewed', timestamp: now.toISOString()}
-          : item,
+    options: question.options.map((item): Control =>
+      item.type === 'message' && !item.locked
+        ? {...item, value: 'viewed', timestamp: now.toISOString()}
+        : item,
     ),
   }));
 }

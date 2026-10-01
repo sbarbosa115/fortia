@@ -260,7 +260,10 @@ export function inputModeOf(control: Control): 'numeric' | 'tel' | 'text' {
 }
 
 /** The email and phone controls (§9.4): the one email rule (D13); a phone of 7–15 digits with an optional +. */
-export function contactIssue(type: ControlType, value: AnswerValue): Issue | null {
+export function contactIssue(
+  type: ControlType,
+  value: AnswerValue,
+): Issue | null {
   const text = typeof value === 'string' ? value.trim() : '';
   if (text === '') {
     return null;
@@ -306,7 +309,10 @@ export function needsChange(question: Question, control: Control): boolean {
  * Whether the question's answer lets the respondent go on with Next (§9.4): a message always, a locked control
  * always, otherwise a valid, non-empty value that a follow-up does not flag.
  */
-export function hasAnswer(question: Question, control: Control | null): boolean {
+export function hasAnswer(
+  question: Question,
+  control: Control | null,
+): boolean {
   if (control === null || control.type === 'message' || control.locked) {
     return true;
   }

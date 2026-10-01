@@ -1,0 +1,24 @@
+{
+  "eyebrow": "One last step",
+  "title": "Where should we send your results?",
+  "description": "Share your contact details so we can deliver your personalized recommendations.",
+  "privacy": "Your information is private and will only be used to deliver your results.",
+  "name": "Name",
+  "namePlaceholder": "Your full name",
+  "email": "Email",
+  "emailPlaceholder": "you@email.com",
+  "phone": "Phone",
+  "phonePlaceholder": "Your phone number",
+  "submit": "See my results",
+  "errors": {
+    "name": "Enter your name.",
+    "email": "Enter a valid email address (e.g. name@example.com).",
+    "phone": "Enter a valid phone number: 7 to 15 digits, optional + prefix."
+  },
+  "done": {
+    "eyebrow": "You're Done!",
+    "title": "Your Personalized Health Profile Is Ready",
+    "name": "Your name (optional)",
+    "submit": "See My Results"
+  }
+}

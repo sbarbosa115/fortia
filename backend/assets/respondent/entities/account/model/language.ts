@@ -3,7 +3,9 @@ import type {Language} from '@shared/i18n';
 const PICKED_KEY = 'respondent_language_picked';
 
 /** The account's language (`es-CO` / `en-US`) as a UI language. */
-export function accountLanguage(language: string | null | undefined): Language | null {
+export function accountLanguage(
+  language: string | null | undefined,
+): Language | null {
   if (!language) {
     return null;
   }

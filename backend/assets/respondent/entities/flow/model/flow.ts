@@ -6,7 +6,9 @@ const MAX_STAGES = 12;
 
 /** The single `questionnaire` state the flow starts at (§9.11 step 2), or null when the flow is malformed. */
 export function entryState(flow: Flow): FlowState | null {
-  const targets = new Set(flow.states.map((state) => state.next).filter(Boolean));
+  const targets = new Set(
+    flow.states.map((state) => state.next).filter(Boolean),
+  );
   const questionnaires = flow.states.filter(
     (state) => state.type === 'questionnaire',
   );
@@ -83,13 +85,18 @@ export type FlowRun = {
   pendingJobId: string | null;
   pendingStateId: string | null;
   pendingSessionId: string | null;
+  /** The answers the stage is generated from (§9.11 step 3), kept so "Try again" works after a reload. */
+  pendingAnswers: {question: string; answer: string}[] | null;
   updatedAt: number;
 };
 
 const FLOW_RUN_KEY = 'flowRun';
 
 /** The saved run of this flow (by id, slug or the identifier it was opened with), or null. */
-export function readFlowRun(flow: Flow | null, identifier: string): FlowRun | null {
+export function readFlowRun(
+  flow: Flow | null,
+  identifier: string,
+): FlowRun | null {
   const run = readStored<FlowRun>(FLOW_RUN_KEY);
   if (!run) {
     return null;

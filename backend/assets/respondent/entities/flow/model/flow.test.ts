@@ -11,12 +11,12 @@ import {
 } from './flow';
 
 function state(
-  state_id: string,
+  stateId: string,
   type: FlowState['type'],
   next: string | null = null,
   parameters: Record<string, unknown> = {},
 ): FlowState {
-  return {state_id, type, next, parameters, outputs: {}};
+  return {state_id: stateId, type, next, parameters, outputs: {}};
 }
 
 function flow(states: FlowState[]): Flow {
@@ -56,9 +56,11 @@ describe('flows (PRD §9.11)', () => {
       state('three', 'questionnaire'),
     ]);
     expect(stepAfter(f, f.states[0]!).kind).toBe('prompt');
-    expect(stepAfter(f, f.states[4]!), 'a display state ends the flow').toEqual({
-      kind: 'end',
-    });
+    expect(stepAfter(f, f.states[4]!), 'a display state ends the flow').toEqual(
+      {
+        kind: 'end',
+      },
+    );
     expect(stepAfter(f, f.states[5]!).kind).toBe('questionnaire');
     expect(stepAfter(f, f.states[6]!), 'no next ends the flow').toEqual({
       kind: 'end',
@@ -103,6 +105,7 @@ describe('flows (PRD §9.11)', () => {
       pendingJobId: 'job_1',
       pendingStateId: 'p1',
       pendingSessionId: 's1',
+      pendingAnswers: [{question: 'Goal', answer: 'Grow'}],
     });
     expect(readFlowRun(f, 'acme-chain')?.pendingJobId).toBe('job_1');
     expect(readFlowRun(null, 'flow1')?.stage).toBe(1);

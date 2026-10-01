@@ -118,7 +118,9 @@ export function brandTheme(styles: unknown): BrandTheme {
   };
   const background = sanitizeColor(at(styles, ['body', 'background']));
   const text = sanitizeColor(at(styles, ['body', 'color']));
-  const primary = sanitizeColor(at(styles, ['button', 'primary', 'background']));
+  const primary = sanitizeColor(
+    at(styles, ['button', 'primary', 'background']),
+  );
   const inputBackground = sanitizeColor(at(styles, ['input', 'background']));
 
   set('--color-bg', background);
@@ -158,8 +160,10 @@ export function brandTheme(styles: unknown): BrandTheme {
   set('--color-surface', card);
   set('--color-input-bg', card);
   if (text || background) {
-    vars['--color-border'] = `color-mix(in srgb, ${textColor} 20%, ${pageColor})`;
-    vars['--color-hover'] = `color-mix(in srgb, ${textColor} 10%, ${pageColor})`;
+    vars['--color-border'] =
+      `color-mix(in srgb, ${textColor} 20%, ${pageColor})`;
+    vars['--color-hover'] =
+      `color-mix(in srgb, ${textColor} 10%, ${pageColor})`;
   }
 
   return {

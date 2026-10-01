@@ -1,0 +1,240 @@
+import {Button, Icon, IconButton, ProgressBar} from '@shared/ui';
+import {
+  type DragEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from 'react';
+import {useTranslation} from 'react-i18next';
+import {uploadAnswerFile} from '../api/upload';
+import {
+  acceptFiles,
+  keysOf,
+  namePasted,
+  type Upload,
+  uploadsFromKeys,
+} from '../model/files';
+
+type Notice = {key: string; count?: number} | null;
+
+/**
+ * A file answer (PRD §9.9): choose several files, drag and drop them, or paste a screenshot anywhere on the page.
+ * Each file uploads with its progress, can be retried or removed; the saved value is the list of object keys. Next
+ * waits until at least one file is uploaded and none is still uploading.
+ */
+export function FileControl({
+  label,
+  value,
+  max,
+  disabled,
+  target,
+  token = null,
+  onChange,
+  onBusyChange,
+}: {
+  label: string;
+  value: unknown;
+  max: number;
+  disabled: boolean;
+  target: {customerId: string; sessionId: string; questionId: string};
+  token?: string | null;
+  onChange: (keys: string[]) => void;
+  onBusyChange: (busy: boolean) => void;
+}) {
+  const {t} = useTranslation('features.upload-files');
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploads, setUploads] = useState<Upload[]>(() =>
+    uploadsFromKeys(value),
+  );
+  const [notice, setNotice] = useState<Notice>(null);
+  const [dragging, setDragging] = useState(false);
+  const busy = uploads.some((upload) => upload.status === 'uploading');
+  const full = uploads.length >= max;
+
+  useEffect(() => {
+    onBusyChange(busy);
+  }, [busy, onBusyChange]);
+
+  const saved = JSON.stringify(Array.isArray(value) ? value : []);
+  const keys = keysOf(uploads);
+  useEffect(() => {
+    if (JSON.stringify(keys) !== saved) {
+      onChange(keys);
+    }
+    // keys is derived from uploads: compare by content.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(keys), saved]);
+
+  const patch = (id: string, change: Partial<Upload>) =>
+    setUploads((list) =>
+      list.map((upload) =>
+        upload.id === id ? {...upload, ...change} : upload,
+      ),
+    );
+
+  const send = useCallback(
+    (upload: Upload) => {
+      if (!upload.file) {
+        return;
+      }
+      uploadAnswerFile(
+        upload.file,
+        target,
+        (progress) => patch(upload.id, {progress}),
+        token,
+      )
+        .then((key) => patch(upload.id, {status: 'done', key, progress: 100}))
+        .catch(() => patch(upload.id, {status: 'error'}));
+    },
+    [target, token],
+  );
+
+  const add = useCallback(
+    (files: File[]) => {
+      if (disabled || files.length === 0) {
+        return;
+      }
+      const {accepted, tooLarge, discarded} = acceptFiles(
+        uploads.length,
+        files,
+        max,
+      );
+      setNotice(
+        tooLarge > 0
+          ? {key: 'tooLarge'}
+          : discarded > 0
+            ? {key: 'discarded', count: discarded}
+            : null,
+      );
+      const added = accepted.map((file): Upload => ({
+        id: `${file.name}-${Math.random().toString(36).slice(2)}`,
+        name: file.name,
+        status: 'uploading',
+        progress: 0,
+        key: null,
+        file,
+      }));
+      setUploads((list) => [...list, ...added]);
+      added.forEach(send);
+    },
+    [disabled, max, send, uploads.length],
+  );
+
+  useEffect(() => {
+    const onPaste = (event: ClipboardEvent) => {
+      const files = Array.from(event.clipboardData?.files ?? []);
+      if (files.length > 0) {
+        event.preventDefault();
+        add(namePasted(files, new Date()));
+      }
+    };
+    document.addEventListener('paste', onPaste);
+    return () => document.removeEventListener('paste', onPaste);
+  }, [add]);
+
+  const onDrop = (event: DragEvent) => {
+    event.preventDefault();
+    setDragging(false);
+    add(Array.from(event.dataTransfer.files));
+  };
+
+  return (
+    <div className="files" role="group" aria-label={label}>
+      <div
+        className="files__drop"
+        data-dragging={dragging || undefined}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+      >
+        <Icon name="upload" size={28} />
+        <input
+          ref={inputRef}
+          id={inputId}
+          type="file"
+          multiple
+          className="visually-hidden"
+          disabled={disabled || full}
+          onChange={(event) => {
+            add(Array.from(event.target.files ?? []));
+            event.target.value = '';
+          }}
+        />
+        <Button
+          variant="primary"
+          disabled={disabled || full}
+          onClick={() => inputRef.current?.click()}
+        >
+          {t('choose')}
+        </Button>
+        <span className="muted">{t('paste')}</span>
+        <span className="files__help">{t('help')}</span>
+      </div>
+
+      <div className="files__meta">
+        <span>{t('counter', {count: uploads.length, max})}</span>
+        {full ? <span role="status">{t('limit', {max})}</span> : null}
+      </div>
+      {notice ? (
+        <p className="answer-error" role="alert">
+          {t(notice.key, {count: notice.count ?? 0, max})}
+        </p>
+      ) : null}
+
+      {uploads.length > 0 ? (
+        <ul className="files__list">
+          {uploads.map((upload) => (
+            <li key={upload.id} className="files__item">
+              <Icon name="file" />
+              <div className="files__item-body">
+                <span className="files__name">{upload.name}</span>
+                {upload.status === 'uploading' ? (
+                  <>
+                    <ProgressBar
+                      value={upload.progress}
+                      label={t('uploading', {progress: upload.progress})}
+                    />
+                    <span className="muted">
+                      {t('uploading', {progress: upload.progress})}
+                    </span>
+                  </>
+                ) : null}
+                {upload.status === 'error' ? (
+                  <span className="answer-error" role="alert">
+                    {t('failed')}
+                  </span>
+                ) : null}
+              </div>
+              {upload.status === 'error' ? (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    patch(upload.id, {status: 'uploading', progress: 0});
+                    send(upload);
+                  }}
+                >
+                  {t('retry')}
+                </Button>
+              ) : null}
+              <IconButton
+                size="sm"
+                label={t('remove', {name: upload.name})}
+                icon={<Icon name="close" />}
+                disabled={disabled || upload.status === 'uploading'}
+                onClick={() =>
+                  setUploads((list) => list.filter((u) => u.id !== upload.id))
+                }
+              />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}

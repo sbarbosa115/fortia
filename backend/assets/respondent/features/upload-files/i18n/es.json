@@ -1,0 +1,14 @@
+{
+  "choose": "Elegir archivos",
+  "paste": "…o pega una captura de pantalla con Ctrl+V",
+  "help": "Cualquier tipo de archivo, hasta 500 MB cada uno. Los archivos grandes pueden tardar en subir con conexiones lentas.",
+  "counter": "{{count}} / {{max}} archivos",
+  "limit": "Llegaste al límite de {{max}} archivos. Quita uno para agregar otro.",
+  "tooLarge": "Ese archivo pesa más de 500 MB. Elige uno más pequeño.",
+  "discarded_one": "{{count}} archivo no se agregó: puedes adjuntar hasta {{max}} archivos.",
+  "discarded_other": "{{count}} archivos no se agregaron: puedes adjuntar hasta {{max}} archivos.",
+  "uploading": "Subiendo... {{progress}}%",
+  "failed": "No pudimos subir tu archivo. Inténtalo de nuevo.",
+  "retry": "Intentar de nuevo",
+  "remove": "Quitar {{name}}"
+}

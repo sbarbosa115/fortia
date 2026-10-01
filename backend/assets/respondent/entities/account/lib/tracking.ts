@@ -72,7 +72,10 @@ function gtag(...args: unknown[]): void {
 
 function ensureGtag(id: string): void {
   if (!loaded.has(`gtag:${id}`)) {
-    loadScript(`gtag:${id}`, `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`);
+    loadScript(
+      `gtag:${id}`,
+      `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`,
+    );
     gtag('js', new Date());
     gtag('config', id, {send_page_view: false});
   }
@@ -96,12 +99,18 @@ export function configureTracking(settings: AccountTracking | null): void {
   const config = appConfig();
   if (config.clarityId && !window.clarity) {
     window.clarity = queue();
-    loadScript('clarity', `https://www.clarity.ms/tag/${encodeURIComponent(config.clarityId)}`);
+    loadScript(
+      'clarity',
+      `https://www.clarity.ms/tag/${encodeURIComponent(config.clarityId)}`,
+    );
   }
   if (account.linkedin_partner_id && !window.lintrk) {
     window._linkedin_partner_id = account.linkedin_partner_id;
     window.lintrk = queue();
-    loadScript('linkedin', 'https://snap.licdn.com/li.lms-analytics/insight.min.js');
+    loadScript(
+      'linkedin',
+      'https://snap.licdn.com/li.lms-analytics/insight.min.js',
+    );
   }
   if (account.google_ads_id) {
     ensureGtag(account.google_ads_id);

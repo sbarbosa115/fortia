@@ -1,0 +1,55 @@
+{
+  "select": {"placeholder": "Select an option"},
+  "range": {"hint": "Move or tap the slider to answer"},
+  "text": {
+    "placeholder": "Type your answer here...",
+    "example": {
+      "rfc": "E.g.: ABC680524P76",
+      "nit": "E.g.: 9001234568",
+      "phone": "E.g.: +52 55 0000 0000"
+    }
+  },
+  "contact": {
+    "emailPlaceholder": "you@email.com",
+    "phonePlaceholder": "Your phone number"
+  },
+  "ranking": {
+    "hint": "Drag the options to put them in your preferred order",
+    "drag": "Drag {{label}}",
+    "up": "Move {{label}} up",
+    "down": "Move {{label}} down"
+  },
+  "gender": {"male": "Male", "female": "Female"},
+  "quote": {"text": "We're finding the perfect product for your needs."},
+  "weight": {
+    "unit": "Weight unit",
+    "kg": "KG",
+    "lbs": "lbs",
+    "invalid": {
+      "kg": "Enter a weight between 20 and 635 kg",
+      "lbs": "Enter a weight between 44 and 1400 lbs"
+    }
+  },
+  "height": {
+    "unit": "Height unit",
+    "cm": "CM",
+    "ftIn": "ft/in",
+    "ft": "ft",
+    "in": "in",
+    "invalid": {
+      "cm": "Enter a height between 50 and 272 cm",
+      "ft": "Enter a height between 1.6 and 8.9 ft"
+    }
+  },
+  "composite": {
+    "current": "Current weight",
+    "goal": "Goal weight",
+    "height": "Current height"
+  },
+  "jeans": {
+    "system": "Size system",
+    "us-sizes": "US sizes",
+    "inches": "Inches",
+    "centimeters": "Centimeters"
+  }
+}

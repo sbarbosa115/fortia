@@ -1,0 +1,49 @@
+{
+  "tapToRecord": "Toca para grabar tu respuesta",
+  "connecting": "Preparando el micrófono...",
+  "listening": "Escuchando... {{time}}",
+  "stop": "Detener grabación",
+  "segment": "Grabación {{number}}",
+  "noTranscription": "No hay transcripción disponible.",
+  "remove": "Eliminar grabación",
+  "rerecord": "Grabar de nuevo",
+  "addMore": "Agregar a mi respuesta",
+  "fromScratch": "Grabar de nuevo desde cero",
+  "typeInstead": "¿No puedes grabar? Escribe tu respuesta",
+  "typeLabel": "Tu respuesta",
+  "typeAdd": "Agregar a mi respuesta",
+  "typeCancel": "Cancelar",
+  "errors": {
+    "insecure": "Grabar requiere una conexión segura (HTTPS).",
+    "unsupported": "Tu navegador no permite grabar audio.",
+    "noMicrophone": "No encontramos un micrófono en este dispositivo.",
+    "busy": "Otra aplicación ya está usando el micrófono.",
+    "access": "No pudimos acceder al micrófono.",
+    "denied": "El acceso al micrófono está bloqueado",
+    "connection": "No pudimos conectarnos para empezar a grabar. Revisa tu conexión a internet e inténtalo de nuevo."
+  },
+  "denied": {
+    "title": "El acceso al micrófono está bloqueado",
+    "body": "Es un permiso de tu navegador, no un problema de la plataforma.",
+    "step": "Abre el <lock></lock> en la barra de direcciones → activa <strong>Micrófono</strong> → inténtalo de nuevo.",
+    "retry": "Intentar de nuevo",
+    "note": "Solo usamos tu micrófono mientras grabas."
+  },
+  "tutorial": {
+    "eyebrow": "Prueba rápida del micrófono",
+    "title": "Probemos tu micrófono",
+    "body": "Vamos a revisar tu micrófono. Solo toma unos segundos.",
+    "readAloud": "Lee esto en voz alta:",
+    "sentence": "Hola, mi micrófono funciona muy bien.",
+    "prompt": "Toca aquí UNA VEZ y espera a que se ponga rojo; luego empieza a hablar",
+    "preparing": "Preparando tu micrófono...",
+    "listening": "Escuchando... lee la frase y luego toca para detener",
+    "success": "¡Tu micrófono funciona!",
+    "successBody": "Te escuchamos fuerte y claro…",
+    "heard": "Escuchamos",
+    "continue": "Continuar al cuestionario",
+    "empty": "No captamos nada. Toca el micrófono e inténtalo de nuevo.",
+    "failed": "No pudimos completar la prueba del micrófono",
+    "skip": "Omitir la prueba del micrófono"
+  }
+}

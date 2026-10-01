@@ -1,0 +1,14 @@
+{
+  "choose": "Choose files",
+  "paste": "…or paste a screenshot with Ctrl+V",
+  "help": "Any file type, up to 500 MB each. Large files may take a while to upload on slow connections.",
+  "counter": "{{count}} / {{max}} files",
+  "limit": "You've reached the limit of {{max}} files. Remove one to add another.",
+  "tooLarge": "That file is larger than 500 MB. Please choose a smaller one.",
+  "discarded_one": "{{count}} file was not added: you can attach up to {{max}} files.",
+  "discarded_other": "{{count}} files were not added: you can attach up to {{max}} files.",
+  "uploading": "Uploading... {{progress}}%",
+  "failed": "Could not upload your file. Please try again.",
+  "retry": "Try again",
+  "remove": "Remove {{name}}"
+}

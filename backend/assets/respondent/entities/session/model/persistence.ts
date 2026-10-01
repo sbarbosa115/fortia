@@ -105,21 +105,27 @@ export function savedAgo(timestamp: number, now: number): SavedAgo {
     : {unit: 'day', count: Math.floor(hours / 24)};
 }
 
-let lastResult: {sessionId: string; result: Record<string, unknown>} | null =
-  null;
+export type RememberedResult = {
+  sessionId: string;
+  customerId: string | null;
+  result: Record<string, unknown>;
+};
+
+let lastResult: RememberedResult | null = null;
 
 /** The result just submitted, kept in memory for the results page and the legacy /results (§9.12). */
-export function rememberResult(
-  sessionId: string,
-  result: Record<string, unknown>,
-): void {
-  lastResult = {sessionId, result};
+export function rememberResult(remembered: RememberedResult): void {
+  lastResult = remembered;
 }
 
+/** The result in memory: of that session, or the last one when no session is named (legacy /results). */
 export function recallResult(
   sessionId: string | null = null,
-): {sessionId: string; result: Record<string, unknown>} | null {
-  if (lastResult && (sessionId === null || lastResult.sessionId === sessionId)) {
+): RememberedResult | null {
+  if (
+    lastResult &&
+    (sessionId === null || lastResult.sessionId === sessionId)
+  ) {
     return lastResult;
   }
   return null;

@@ -11,9 +11,12 @@ import {
 } from './theme';
 
 describe('brand sanitization (PRD §9.15)', () => {
-  it.each(['#abc', '#abcd', '#aabbcc', '#aabbccdd'])('accepts the hex %s', (hex) => {
-    expect(sanitizeColor(hex)).toBe(hex);
-  });
+  it.each(['#abc', '#abcd', '#aabbcc', '#aabbccdd'])(
+    'accepts the hex %s',
+    (hex) => {
+      expect(sanitizeColor(hex)).toBe(hex);
+    },
+  );
 
   it.each(['red', '#ab', 'url(x)', '#aabbccd', 'rgb(0,0,0)', 42])(
     'refuses %s as a color',
@@ -42,16 +45,23 @@ describe('brand sanitization (PRD §9.15)', () => {
       sanitizeFontUrl('https://fonts.googleapis.com/css2?family=Inter'),
     ).toBe('https://fonts.googleapis.com/css2?family=Inter');
     expect(sanitizeFontUrl('https://evil.test/font.css')).toBeNull();
-    expect(sanitizeFontUrl('http://fonts.googleapis.com/css2?family=X')).toBeNull();
+    expect(
+      sanitizeFontUrl('http://fonts.googleapis.com/css2?family=X'),
+    ).toBeNull();
   });
 });
 
 describe('brand mapping', () => {
   const styles = {
     logoUrl: 'https://acme.test/logo.png',
-    font: {family: 'Inter', url: 'https://fonts.googleapis.com/css2?family=Inter'},
+    font: {
+      family: 'Inter',
+      url: 'https://fonts.googleapis.com/css2?family=Inter',
+    },
     body: {background: '#ffffff', color: '#111111'},
-    button: {primary: {background: '#0055ff', color: '#ffffff', borderRadius: '6px'}},
+    button: {
+      primary: {background: '#0055ff', color: '#ffffff', borderRadius: '6px'},
+    },
     a: {color: '#ff5500'},
     p: {color: '#555555'},
     input: {background: '#f4f4f4', borderRadius: '4px'},
@@ -71,7 +81,9 @@ describe('brand mapping', () => {
       '--font-heading': "'Inter', Georgia, serif",
     });
     expect(theme.logoUrl).toBe('https://acme.test/logo.png');
-    expect(theme.fontUrl).toBe('https://fonts.googleapis.com/css2?family=Inter');
+    expect(theme.fontUrl).toBe(
+      'https://fonts.googleapis.com/css2?family=Inter',
+    );
   });
 
   it('uses the input background for cards only with a contrast ≥ 2.5 with the text', () => {
@@ -110,12 +122,14 @@ describe('brand mapping', () => {
 
   it('applies the tokens to the document and resets them', () => {
     applyBrandTheme(brandTheme(styles));
-    expect(document.documentElement.style.getPropertyValue('--color-primary')).toBe(
-      '#0055ff',
-    );
+    expect(
+      document.documentElement.style.getPropertyValue('--color-primary'),
+    ).toBe('#0055ff');
     expect(document.getElementById('brand-font')).not.toBeNull();
     resetBrandTheme();
-    expect(document.documentElement.style.getPropertyValue('--color-primary')).toBe('');
+    expect(
+      document.documentElement.style.getPropertyValue('--color-primary'),
+    ).toBe('');
     expect(document.getElementById('brand-font')).toBeNull();
   });
 });

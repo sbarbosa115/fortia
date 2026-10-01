@@ -1,0 +1,49 @@
+{
+  "tapToRecord": "Tap to record your answer",
+  "connecting": "Preparing microphone...",
+  "listening": "Listening... {{time}}",
+  "stop": "Stop recording",
+  "segment": "Recording {{number}}",
+  "noTranscription": "No transcription available.",
+  "remove": "Remove recording",
+  "rerecord": "Record again",
+  "addMore": "Add to my answer",
+  "fromScratch": "Record again from scratch",
+  "typeInstead": "Can't record? Type your answer instead",
+  "typeLabel": "Your answer",
+  "typeAdd": "Add to my answer",
+  "typeCancel": "Cancel",
+  "errors": {
+    "insecure": "Recording requires a secure (HTTPS) connection.",
+    "unsupported": "Your browser does not support audio recording.",
+    "noMicrophone": "No microphone was found on this device.",
+    "busy": "The microphone is already in use by another application.",
+    "access": "Unable to access the microphone.",
+    "denied": "Microphone access is blocked",
+    "connection": "We couldn't connect to start recording. Check your internet connection and try again."
+  },
+  "denied": {
+    "title": "Microphone access is blocked",
+    "body": "This is a permission of your browser, not a problem with the platform.",
+    "step": "Open the <lock></lock> in the address bar → turn on <strong>Microphone</strong> → try again.",
+    "retry": "Try again",
+    "note": "We only use your microphone while you're recording."
+  },
+  "tutorial": {
+    "eyebrow": "Quick mic check",
+    "title": "Let's test your microphone",
+    "body": "Let's check your microphone. It only takes a few seconds.",
+    "readAloud": "Read this out loud:",
+    "sentence": "Hello, my microphone is working great.",
+    "prompt": "Tap here ONCE and wait until it turns red — then start talking",
+    "preparing": "Preparing your microphone...",
+    "listening": "Listening... read the sentence, then tap to stop",
+    "success": "Your microphone works!",
+    "successBody": "We heard you loud and clear…",
+    "heard": "We heard",
+    "continue": "Continue to the questionnaire",
+    "empty": "We didn't catch anything. Tap the microphone and try again.",
+    "failed": "We couldn't complete the mic check",
+    "skip": "Skip the mic check"
+  }
+}

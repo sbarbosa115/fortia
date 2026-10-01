@@ -1,0 +1,123 @@
+/* Voice answers and the mic check (PRD §9.7, §9.8). */
+.audio {
+  display: grid;
+  gap: var(--space-4);
+}
+.audio__idle,
+.audio__recording,
+.audio__status {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+.audio__mic {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  cursor: pointer;
+  box-shadow: var(--shadow-pop);
+}
+.audio__mic:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.audio__mic--stop {
+  background: var(--color-danger);
+  color: #fff;
+}
+.audio__bars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+}
+.audio__bars span {
+  display: block;
+  width: 6px;
+  height: 40px;
+  border-radius: 3px;
+  background: var(--color-danger);
+  transform-origin: center;
+  transition: transform 0.08s linear;
+}
+.audio__live {
+  min-height: 1.4em;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+.audio__segments {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.audio__segment {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+.audio__segment p {
+  margin: var(--space-2) 0;
+}
+.audio__segment-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.audio__actions {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.mic-help {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-card);
+  background: color-mix(
+    in srgb,
+    var(--color-warning) 10%,
+    var(--color-surface)
+  );
+}
+.mic-help p {
+  margin: 0;
+}
+.mic-help__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+.tutorial {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.tutorial__title {
+  margin: 0;
+  font-size: 28px;
+}
+.tutorial__quote {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-hover);
+  border-radius: var(--radius-input);
+  font-size: 18px;
+}
+.tutorial__success {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-success);
+  font-weight: 600;
+}

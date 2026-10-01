@@ -82,7 +82,11 @@ describe('savedAgo', () => {
 
 describe('the result in memory', () => {
   it('is recalled for its session only', () => {
-    rememberResult('s1', {type: 'default'});
+    rememberResult({
+      sessionId: 's1',
+      customerId: 'ACME0001',
+      result: {type: 'default'},
+    });
     expect(recallResult('s1')?.result).toEqual({type: 'default'});
     expect(recallResult('s2')).toBeNull();
     expect(recallResult()?.sessionId).toBe('s1');
