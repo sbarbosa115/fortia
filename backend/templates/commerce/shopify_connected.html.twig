@@ -1,0 +1,18 @@
+{% extends 'commerce/layout.html.twig' %}
+
+{% block title %}Store connected · Mappi{% endblock %}
+
+{% block body %}
+    <section class="card" aria-labelledby="connected-title">
+        <h1 id="connected-title">{{ cancelled ? 'Connection cancelled' : 'Your store is connected' }}</h1>
+        <p class="muted">{{ cancelled ? 'Nothing was changed.' : shop ~ ' is connected to Mappi.' }} You can close this window and go back to Mappi.</p>
+    </section>
+    <script>
+        try {
+            if (window.opener) {
+                window.opener.postMessage({type: 'mappi:shopify-{{ cancelled ? 'cancelled' : 'connected' }}'}, '*');
+            }
+        } catch (e) {}
+        window.close();
+    </script>
+{% endblock %}

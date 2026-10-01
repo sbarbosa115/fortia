@@ -58,6 +58,24 @@ final class AnswersQueries
     }
 
     /**
+     * A short page of the completed responses, newest first, from any offset: the chat assistant's tables of 5 or 10
+     * rows (PRD §7.19 list_questionnaire_answers), which the cursor pages of 20/50/100 do not fit.
+     *
+     * @return array{items: list<array{session: array<string, mixed>, member: array{organization_user_id: string, name: string, email: string|null, phone: string|null}|null}>, total: int}
+     */
+    public function completedSlice(QuestionnaireView $questionnaire, int $offset, int $limit): array
+    {
+        $statuses = ['completed'];
+        $members = [];
+        $items = [];
+        foreach ($this->sessions->page($questionnaire->id(), $statuses, null, max(0, $offset), max(1, min(100, $limit))) as $session) {
+            $items[] = ['session' => $session, 'member' => $this->memberOf($session, $members)];
+        }
+
+        return ['items' => $items, 'total' => $this->sessions->count($questionnaire->id(), $statuses, null)];
+    }
+
+    /**
      * One session of the questionnaire (or of one of its generated stages) with its results.
      *
      * @return array{session: array<string, mixed>, member: array{organization_user_id: string, name: string, email: string|null, phone: string|null}|null, results: array<string, mixed>|null, flow: array<string, mixed>|null}

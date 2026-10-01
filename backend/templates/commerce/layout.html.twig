@@ -1,0 +1,33 @@
+{# Commerce's own small pages: the OAuth callback's "connected" page and the fake e-commerce platform's authorization
+   page (dev and tests only, COMMERCE_PROVIDER=fake). Plain and self-contained, English only. #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>{% block title %}Mappi{% endblock %}</title>
+    <style>
+        :root { --bg: #f7f7fa; --card: #fff; --text: #1b1a23; --muted: #5e5c6b; --line: #e6e5ec; --accent: #8249df; --shop: #008060; }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Inter, "Segoe UI", Arial, sans-serif; }
+        main { max-width: 480px; margin: 48px auto; padding: 0 16px; }
+        .notice { background: #fff6db; border: 1px solid #f1d88a; border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+        h1 { font-size: 20px; margin: 0 0 8px; }
+        .muted { color: var(--muted); font-size: 14px; }
+        ul { padding-left: 20px; }
+        dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 16px 0; font-size: 14px; }
+        dt { color: var(--muted); }
+        dd { margin: 0; font-weight: 600; word-break: break-all; }
+        .actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .button { display: inline-flex; align-items: center; height: 40px; border-radius: 999px; padding: 0 20px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); background: #fff; color: var(--text); cursor: pointer; font: inherit; }
+        .button.primary { background: var(--shop); border-color: var(--shop); color: #fff; }
+    </style>
+</head>
+<body>
+<main>
+    {% block body %}{% endblock %}
+</main>
+</body>
+</html>

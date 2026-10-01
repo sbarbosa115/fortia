@@ -1,3 +1,46 @@
 {
-  "title": "Productos"
+  "title": "Productos",
+  "subtitle": "El catálogo del que recomiendan tus quiz funnels.",
+  "new": "Nuevo producto",
+  "createExperience": "Crear experiencia",
+  "search": "Buscar productos",
+  "searchPlaceholder": "Buscar por nombre",
+  "empty": "Aún no hay productos",
+  "emptyBody": "Agrega productos a mano, sincroniza tu tienda de Shopify o cárgalos desde tu sitio web al crear un quiz funnel.",
+  "noDescription": "Sin descripción disponible.",
+  "noPrice": "Sin precio",
+  "addedByHand": "Agregado a mano",
+  "openInStore": "Abrir {{name}} en la tienda",
+  "edit": "Editar {{name}}",
+  "delete": "Eliminar {{name}}",
+  "created": "Producto creado.",
+  "updated": "Producto guardado.",
+  "deleted": "{{name}} eliminado.",
+  "deleteTitle": "¿Eliminar este producto?",
+  "deleteBody": "¿Seguro que quieres eliminar tu producto?",
+  "columns": {
+    "product": "Producto",
+    "price": "Precio",
+    "source": "Origen",
+    "actions": "Acciones"
+  },
+  "form": {
+    "createTitle": "Nuevo producto",
+    "editTitle": "Editar producto",
+    "submitCreate": "Crear producto",
+    "submitEdit": "Guardar cambios",
+    "name": "Nombre",
+    "description": "Descripción",
+    "descriptionHint": "Se permite HTML básico; los scripts y estilos se eliminan.",
+    "price": "Precio (USD)",
+    "priceHint": "Déjalo vacío para ocultar el precio.",
+    "imageUrl": "URL de la imagen",
+    "productUrl": "URL de la página del producto",
+    "urlPlaceholder": "https://",
+    "errors": {
+      "required": "Escribe el nombre del producto.",
+      "price": "El precio debe ser un número igual o mayor que cero.",
+      "url": "Ingresa una URL completa que empiece por http:// o https://."
+    }
+  }
 }

@@ -79,6 +79,23 @@ final class AssignationDetails
     }
 
     /**
+     * The respondents of an assignation by its id, for callers outside this context (the chat assistant's
+     * list_assignation_respondents, PRD §7.19). Null when it does not exist; the caller checks ownership with
+     * customer_id.
+     *
+     * @return array{customer_id: string, respondents: list<array<string, mixed>>, next_offset: int|null}|null
+     */
+    public function respondentsOf(string $assignationsId, int $offset, int $limit): ?array
+    {
+        $assignation = $this->assignations->find($assignationsId);
+        if (null === $assignation) {
+            return null;
+        }
+
+        return ['customer_id' => $assignation->customerId()] + $this->respondents($assignation, $offset, $limit);
+    }
+
+    /**
      * GET /assignations/{id}/respondents: the audience by name, from $offset, with each member's status
      * (pending | in_progress | completed), session, stages and attempts.
      *

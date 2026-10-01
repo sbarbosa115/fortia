@@ -1,0 +1,16 @@
+{
+  "title": "Shopify",
+  "statusConnected": "Connected",
+  "statusNotConnected": "Not connected",
+  "connectedTo": "Your store {{shop}} is connected. Sync to bring its products into Mappi.",
+  "readyToAuthorize": "Authorize Mappi to read the products of {{shop}}. It opens Shopify in a new tab.",
+  "noStore": "Install the Mappi app from your Shopify admin: it opens this screen with your store, ready to authorize.",
+  "authorize": "Authorize",
+  "reconnect": "Reconnect",
+  "install": "Install",
+  "sync": "Sync Products Now",
+  "connected": "Your Shopify store is connected.",
+  "synced_one": "{{count}} product synced from Shopify.",
+  "synced_other": "{{count}} products synced from Shopify.",
+  "authorizeFailed": "We couldn't start the Shopify connection. Please try again."
+}

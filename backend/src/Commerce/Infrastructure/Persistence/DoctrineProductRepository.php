@@ -4,6 +4,7 @@ namespace App\Commerce\Infrastructure\Persistence;
 
 use App\Commerce\Domain\Model\Product;
 use App\Commerce\Domain\Repository\ProductRepository;
+use App\Shared\Domain\Text;
 use App\Shared\Infrastructure\Persistence\DoctrineRepository;
 
 /** @extends DoctrineRepository<Product> */
@@ -32,6 +33,20 @@ final class DoctrineProductRepository extends DoctrineRepository implements Prod
     public function listBySource(string $customerId, string $sourceUrl): array
     {
         return $this->repository()->findBy(['customerId' => $customerId, 'sourceUrl' => $sourceUrl], ['createdAt' => 'ASC']);
+    }
+
+    public function page(string $customerId, array $words, int $page, int $pageSize): array
+    {
+        $qb = $this->repository()->createQueryBuilder('p')->where('p.customerId = :customer')->setParameter('customer', $customerId);
+        foreach ($words as $i => $word) {
+            $qb->andWhere("p.name LIKE :word$i")->setParameter("word$i", '%'.Text::escapeLike($word).'%');
+        }
+        $total = (int) (clone $qb)->select('COUNT(p.productId)')->getQuery()->getSingleScalarResult();
+        /** @var list<Product> $items */
+        $items = $qb->orderBy('p.createdAt', 'DESC')->addOrderBy('p.name', 'ASC')
+            ->setFirstResult(($page - 1) * $pageSize)->setMaxResults($pageSize)->getQuery()->getResult();
+
+        return ['items' => $items, 'total' => $total];
     }
 
     public function add(Product $product): void

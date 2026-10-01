@@ -1,3 +1,95 @@
 {
-  "title": "Quiz Funnel"
+  "title": "Crear un quiz funnel",
+  "subtitle": "Convierte a los visitantes de tu tienda en compradores con un quiz guiado que recomienda el producto ideal al final.",
+  "breadcrumb": "Ruta de navegación",
+  "crumbNew": "Nuevo cuestionario",
+  "back": "Atrás",
+  "continue": "Continuar",
+  "steps": {
+    "label": "Pasos",
+    "store": "Tienda",
+    "products": "Productos",
+    "generate": "Generar",
+    "locked": "Primero elige tu tienda."
+  },
+  "store": {
+    "sourceLabel": "De dónde vienen tus productos",
+    "website": {
+      "title": "Desde el sitio web",
+      "body": "Leemos los productos del sitio web de tu tienda."
+    },
+    "shopify": {
+      "title": "Desde Shopify",
+      "body": "Sincronizamos los productos de tu tienda de Shopify conectada."
+    },
+    "url": "URL de la tienda",
+    "urlHint": "La dirección pública de tu tienda, por ejemplo mitienda.com.",
+    "urlPlaceholder": "https://mitienda.com",
+    "limit": "Número de productos",
+    "limitOption_one": "{{count}} producto",
+    "limitOption_other": "{{count}} productos",
+    "connectFirst": "Primero conecta tu tienda de Shopify."
+  },
+  "products": {
+    "title": "Productos",
+    "count_one": "{{count}} producto",
+    "count_other": "{{count}} productos",
+    "load": "Cargar productos",
+    "reload": "Cargar de nuevo",
+    "wait": "Espera a que terminen de cargar los productos.",
+    "none": "Aún no hay productos cargados",
+    "allRemoved": "Quitaste todos los productos",
+    "optional": "Cargar productos es opcional: si lo omites, Generar los carga por ti.",
+    "noDescription": "Sin descripción disponible.",
+    "remove": "Quitar {{name}}",
+    "removeTitle": "¿Quitar este producto?",
+    "removeBody": "¿Seguro que quieres eliminar tu producto?"
+  },
+  "loading": {
+    "analyzingWebsite": "Analizando el sitio web...",
+    "analyzingStore": "Analizando la tienda en línea...",
+    "polishing": "Puliendo tu catálogo...",
+    "fixing": "Ajustando algunos detalles...",
+    "organizing": "Organizando toda la información..."
+  },
+  "generate": {
+    "typeLabel": "Tipo de quiz",
+    "experience": {
+      "title": "Diseñar experiencia",
+      "body": "Una experiencia de compra guiada: cada respuesta acota qué producto encaja mejor."
+    },
+    "profiling": {
+      "title": "Perfilamiento",
+      "body": "Un quiz corto sobre las necesidades, hábitos y presupuesto del visitante."
+    },
+    "withProducts_one": "El quiz recomendará entre {{count}} producto.",
+    "withProducts_other": "El quiz recomendará entre {{count}} productos.",
+    "willScrape": "No hay productos cargados: los leeremos de tu tienda al generar.",
+    "withStored": "No hay productos cargados: el quiz usará los productos sincronizados de tu tienda.",
+    "working": "Creando tu quiz funnel. Puede tardar un minuto.",
+    "submit": "Generar quiz"
+  },
+  "errors": {
+    "invalidUrl": "Ingresa una URL de tienda válida",
+    "unreachable": "No pudimos acceder a la URL. Asegúrate de que sea una tienda pública.",
+    "noProducts": "No encontramos ningún producto en esta tienda.",
+    "generation": "La generación falló. Intenta de nuevo."
+  },
+  "success": {
+    "title": "¡Tu quiz funnel está listo!",
+    "body": "Comparte su enlace o agrégalo a tu tienda.",
+    "copyLink": "Copiar enlace",
+    "linkCopied": "Enlace copiado.",
+    "linkNotCopied": "No pudimos copiar el enlace. Cópialo desde la página.",
+    "view": "Ver cuestionario",
+    "edit": "Editar cuestionario",
+    "list": "Ir a Cuestionarios"
+  },
+  "embed": {
+    "title": "Muéstralo en tu tienda de Shopify",
+    "open": "Abre el editor de temas y activa el app embed de Mappi:",
+    "openLink": "abrir el editor de temas",
+    "save": "Guarda el tema.",
+    "visit": "Visita tu tienda para ver el quiz:"
+  }
 }

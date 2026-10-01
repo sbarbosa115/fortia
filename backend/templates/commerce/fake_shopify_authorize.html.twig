@@ -1,0 +1,21 @@
+{% extends 'commerce/layout.html.twig' %}
+
+{% block title %}Install Mappi · Test e-commerce platform{% endblock %}
+
+{% block body %}
+    <p class="notice" role="note">Test e-commerce platform — this page simulates Shopify's app authorization. No real store is involved.</p>
+    <section class="card" aria-labelledby="authorize-title">
+        <h1 id="authorize-title">Install Mappi on {{ shop }}</h1>
+        <p class="muted">Mappi is asking for permission to:</p>
+        <ul>
+            <li>Read your products ({{ scope }})</li>
+        </ul>
+        <dl>
+            <dt>Store</dt><dd>{{ shop }}</dd>
+        </dl>
+        <div class="actions">
+            <a class="button primary" href="{{ install_url }}">Install app</a>
+            <a class="button" href="{{ cancel_url }}">Cancel</a>
+        </div>
+    </section>
+{% endblock %}

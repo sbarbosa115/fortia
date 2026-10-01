@@ -1,0 +1,18 @@
+# Commerce (products, scraping, the e-commerce platform, PRD §7.17, §8.6): the ports → adapters by env.
+# SCRAPER_PROVIDER=http reads real stores (schema.org data); fake (dev, tests) answers a catalog per host.
+# COMMERCE_PROVIDER=shopify talks to Shopify (SHOPIFY_API_KEY/SECRET); fake serves its own OAuth page and catalog.
+services:
+    App\Commerce\Application\Port\CatalogScraper:
+        factory: ['@App\Commerce\Infrastructure\Scraper\CatalogScraperFactory', 'create']
+        arguments: ['%env(SCRAPER_PROVIDER)%']
+
+    App\Commerce\Application\Port\CommercePlatform:
+        factory: ['@App\Commerce\Infrastructure\Platform\CommercePlatformFactory', 'create']
+        arguments: ['%env(COMMERCE_PROVIDER)%']
+
+when@test:
+    services:
+        App\Commerce\Infrastructure\Scraper\FakeCatalogScraper:
+            public: true
+        App\Commerce\Infrastructure\Platform\FakeCommercePlatform:
+            public: true

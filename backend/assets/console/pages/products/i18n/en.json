@@ -1,3 +1,46 @@
 {
-  "title": "Products"
+  "title": "Products",
+  "subtitle": "The catalog your quiz funnels recommend from.",
+  "new": "New product",
+  "createExperience": "Create Experience",
+  "search": "Search products",
+  "searchPlaceholder": "Search by name",
+  "empty": "No products yet",
+  "emptyBody": "Add products by hand, sync your Shopify store, or load them from your website when you create a quiz funnel.",
+  "noDescription": "No description available.",
+  "noPrice": "No price",
+  "addedByHand": "Added by hand",
+  "openInStore": "Open {{name}} in the store",
+  "edit": "Edit {{name}}",
+  "delete": "Delete {{name}}",
+  "created": "Product created.",
+  "updated": "Product saved.",
+  "deleted": "{{name}} deleted.",
+  "deleteTitle": "Delete this product?",
+  "deleteBody": "Are you sure you want to delete your product?",
+  "columns": {
+    "product": "Product",
+    "price": "Price",
+    "source": "Source",
+    "actions": "Actions"
+  },
+  "form": {
+    "createTitle": "New product",
+    "editTitle": "Edit product",
+    "submitCreate": "Create product",
+    "submitEdit": "Save changes",
+    "name": "Name",
+    "description": "Description",
+    "descriptionHint": "Basic HTML is allowed; scripts and styles are removed.",
+    "price": "Price (USD)",
+    "priceHint": "Leave it empty to hide the price.",
+    "imageUrl": "Image URL",
+    "productUrl": "Product page URL",
+    "urlPlaceholder": "https://",
+    "errors": {
+      "required": "Write the product name.",
+      "price": "The price must be a number of zero or more.",
+      "url": "Enter a full URL starting with http:// or https://."
+    }
+  }
 }

@@ -1,3 +1,95 @@
 {
-  "title": "Quiz Funnel"
+  "title": "Create a quiz funnel",
+  "subtitle": "Turn store visitors into buyers with a guided quiz that recommends the right product at the end.",
+  "breadcrumb": "Breadcrumb",
+  "crumbNew": "New questionnaire",
+  "back": "Back",
+  "continue": "Continue",
+  "steps": {
+    "label": "Steps",
+    "store": "Store",
+    "products": "Products",
+    "generate": "Generate",
+    "locked": "Choose your store first."
+  },
+  "store": {
+    "sourceLabel": "Where your products come from",
+    "website": {
+      "title": "Via website",
+      "body": "We read the products from your store's website."
+    },
+    "shopify": {
+      "title": "Via Shopify",
+      "body": "We sync the products of your connected Shopify store."
+    },
+    "url": "Store URL",
+    "urlHint": "Your store's public address, for example mystore.com.",
+    "urlPlaceholder": "https://mystore.com",
+    "limit": "Number of products",
+    "limitOption_one": "{{count}} product",
+    "limitOption_other": "{{count}} products",
+    "connectFirst": "Connect your Shopify store first."
+  },
+  "products": {
+    "title": "Products",
+    "count_one": "{{count}} product",
+    "count_other": "{{count}} products",
+    "load": "Load products",
+    "reload": "Load again",
+    "wait": "Wait until the products are loaded.",
+    "none": "No products loaded yet",
+    "allRemoved": "You removed every product",
+    "optional": "Loading products is optional: if you skip it, Generate loads them for you.",
+    "noDescription": "No description available.",
+    "remove": "Remove {{name}}",
+    "removeTitle": "Remove this product?",
+    "removeBody": "Are you sure you want to delete your product?"
+  },
+  "loading": {
+    "analyzingWebsite": "Analyzing the website...",
+    "analyzingStore": "Analyzing the online store...",
+    "polishing": "Polishing your catalog...",
+    "fixing": "Fixing some details...",
+    "organizing": "Organizing all the information..."
+  },
+  "generate": {
+    "typeLabel": "Type of quiz",
+    "experience": {
+      "title": "Design Experience",
+      "body": "A guided buying experience: every answer narrows down which product fits best."
+    },
+    "profiling": {
+      "title": "Profiling",
+      "body": "A short quiz about the visitor's needs, habits and budget."
+    },
+    "withProducts_one": "The quiz will recommend from {{count}} product.",
+    "withProducts_other": "The quiz will recommend from {{count}} products.",
+    "willScrape": "No products loaded: we will read them from your store when generating.",
+    "withStored": "No products loaded: the quiz will use your store's synced products.",
+    "working": "Creating your quiz funnel. This can take a minute.",
+    "submit": "Generate quiz"
+  },
+  "errors": {
+    "invalidUrl": "Please enter a valid store URL",
+    "unreachable": "Could not access URL. Please ensure it is a public store.",
+    "noProducts": "We couldn't find any product on this store.",
+    "generation": "Generation failed. Please try again."
+  },
+  "success": {
+    "title": "Your quiz funnel is ready!",
+    "body": "Share its link, or add it to your store.",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied.",
+    "linkNotCopied": "We couldn't copy the link. Copy it from the page.",
+    "view": "View questionnaire",
+    "edit": "Edit questionnaire",
+    "list": "Go to Questionnaires"
+  },
+  "embed": {
+    "title": "Show it in your Shopify store",
+    "open": "Open the theme editor and turn on the Mappi app embed:",
+    "openLink": "open the theme editor",
+    "save": "Save the theme.",
+    "visit": "Visit your store to see the quiz:"
+  }
 }
