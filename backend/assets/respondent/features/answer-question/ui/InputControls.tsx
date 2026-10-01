@@ -87,6 +87,7 @@ export function ContactControl({
     <div className="answer-text">
       <input
         className="input answer-input"
+        autoFocus
         type={isEmail ? 'email' : 'tel'}
         inputMode={isEmail ? 'email' : 'tel'}
         autoComplete={isEmail ? 'email' : 'tel'}

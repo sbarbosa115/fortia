@@ -2,7 +2,6 @@ import {
   DownloadPdfButton,
   type PdfReport,
 } from '@respondent/features/download-pdf';
-import {LanguageSwitcher} from '@respondent/features/switch-language';
 import {appConfig} from '@shared/config';
 import {Badge, Icon} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
@@ -157,9 +156,6 @@ export function DiagnosticResults({
 
   return (
     <div className="results stack">
-      <div className="results__toolbar">
-        <LanguageSwitcher />
-      </div>
       <header className="results__hero">
         <Badge tone="success">
           <Icon name="check" size={14} /> {copy('eyebrow')}

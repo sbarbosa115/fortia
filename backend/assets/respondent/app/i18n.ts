@@ -1,3 +1,4 @@
+import {pickedLanguage} from '@respondent/entities/account';
 import {
   browserLanguage,
   createI18n,
@@ -32,7 +33,7 @@ export function createRespondentI18n() {
       'i18n/',
     ),
   });
-  const i18n = createI18n(resources, browserLanguage());
+  const i18n = createI18n(resources, pickedLanguage() ?? browserLanguage());
   syncHtmlLang(i18n);
   return i18n;
 }

@@ -130,6 +130,11 @@ export function useRunner({
     return () => window.removeEventListener('beforeunload', save);
   }, [storageKey, index]);
 
+  // Each step starts at the top of the page.
+  useEffect(() => {
+    window.scrollTo?.({top: 0});
+  }, [index, phase]);
+
   // The URL hash reflects the current question (§9.3).
   useEffect(() => {
     if (phase === 'questions' && question && !submitting) {
