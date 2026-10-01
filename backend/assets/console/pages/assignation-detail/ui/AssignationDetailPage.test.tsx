@@ -390,7 +390,10 @@ describe('AssignationDetailPage (PRD §10.11)', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole('link', {name: 'View the answers of ana'}),
-    ).toHaveAttribute('href', '/questionnaires/q-1/answers/s-ana');
+    ).toHaveAttribute(
+      'href',
+      '/questionnaires/q-1/answers/s-ana?from=/assignations/a-1',
+    );
     await userEvent.type(
       screen.getByRole('searchbox', {name: 'Search respondents'}),
       'luis',

@@ -1,5 +1,7 @@
+import {fetchAllAnswers} from '@console/entities/answer';
 import {type Assignation} from '@console/entities/assignation';
-import {matchesAllWords} from '@shared/lib';
+import {ExportToSheetsButton} from '@console/features/export-to-sheets';
+import {exportKey, matchesAllWords} from '@shared/lib';
 import {
   Button,
   Card,
@@ -22,7 +24,7 @@ import {RespondentsTable} from './RespondentsTable';
 /**
  * /assignations/:id for a default assignation (PRD §10.11): the header with the loaded counts ("+" while pages
  * remain), the respondents in batches of 20 with "Load more", a search over what is loaded, Completed and Pending,
- * and the CSV export (every page first).
+ * the CSV export (every page first) and the Google Sheets export (the questionnaire's sessions of this assignation).
  */
 export function DefaultDetail({assignation}: {assignation: Assignation}) {
   const {t} = useTranslation('pages.assignation-detail');
@@ -131,6 +133,7 @@ export function DefaultDetail({assignation}: {assignation: Assignation}) {
             <RespondentsTable
               rows={completed}
               questionnaireId={assignation.questionnaire_id}
+              assignationId={assignation.assignations_id}
               caption={t('respondents.completed', {count: completed.length})}
             />
           ) : (
@@ -147,6 +150,7 @@ export function DefaultDetail({assignation}: {assignation: Assignation}) {
             <RespondentsTable
               rows={pending}
               questionnaireId={assignation.questionnaire_id}
+              assignationId={assignation.assignations_id}
               caption={t('respondents.pending', {count: pending.length})}
             />
           ) : (
@@ -165,14 +169,29 @@ export function DefaultDetail({assignation}: {assignation: Assignation}) {
         assignation={assignation}
         subtitle={summary}
         actions={
-          <Button
-            icon={<Icon name="download" size={16} />}
-            loading={exporting}
-            disabled={rows.length === 0}
-            onClick={() => void exportCsv()}
-          >
-            {t('respondents.exportCsv')}
-          </Button>
+          <>
+            <Button
+              icon={<Icon name="download" size={16} />}
+              loading={exporting}
+              disabled={rows.length === 0}
+              onClick={() => void exportCsv()}
+            >
+              {t('respondents.exportCsv')}
+            </Button>
+            <ExportToSheetsButton
+              title={assignation.name}
+              exportKey={exportKey(
+                assignation.questionnaire_id,
+                assignation.assignations_id,
+              )}
+              loadSessions={() =>
+                fetchAllAnswers(assignation.questionnaire_id, {
+                  status: 'all',
+                  assignationId: assignation.assignations_id,
+                })
+              }
+            />
+          </>
         }
       />
       <FilterBar>

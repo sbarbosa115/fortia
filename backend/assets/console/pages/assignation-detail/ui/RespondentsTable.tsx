@@ -38,10 +38,13 @@ export function RespondentStatus({row}: {row: Respondent}) {
 export function RespondentsTable({
   rows,
   questionnaireId,
+  assignationId,
   caption,
 }: {
   rows: Respondent[];
   questionnaireId: string;
+  /** The answer detail's back link returns here (PRD §10.8). */
+  assignationId: string;
   caption: string;
 }) {
   const {t, i18n} = useTranslation('pages.assignation-detail');
@@ -122,7 +125,7 @@ export function RespondentsTable({
                       {row.session_id ? (
                         <Link
                           className="btn btn--ghost btn--sm"
-                          to={`/questionnaires/${questionnaireId}/answers/${row.session_id}`}
+                          to={`/questionnaires/${questionnaireId}/answers/${row.session_id}?from=/assignations/${assignationId}`}
                           aria-label={t('respondents.viewAnswersOf', {name})}
                         >
                           {t('respondents.viewAnswers')}
@@ -159,7 +162,7 @@ export function RespondentsTable({
                               </span>
                             ) : null}
                             <Link
-                              to={`/questionnaires/${questionnaireId}/answers/${attempt.session_id}`}
+                              to={`/questionnaires/${questionnaireId}/answers/${attempt.session_id}?from=/assignations/${assignationId}`}
                             >
                               {t('respondents.viewAnswers')}
                             </Link>
