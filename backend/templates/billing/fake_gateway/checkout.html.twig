@@ -1,0 +1,38 @@
+{% extends 'billing/fake_gateway/layout.html.twig' %}
+
+{% block title %}Subscribe to {{ session.plan_name }} · Test payment gateway{% endblock %}
+
+{% block body %}
+    <section class="card" aria-labelledby="checkout-title">
+        <h1 id="checkout-title">Subscribe to {{ session.plan_name }}</h1>
+        <p class="muted">{{ session.interval == 'year' ? 'Billed yearly' : 'Billed monthly' }}</p>
+        <p class="price">{{ (session.amount / 100)|number_format(session.amount % 100 == 0 ? 0 : 2) }} {{ session.currency|upper }}<span class="muted"> / {{ session.interval }}</span></p>
+        {% if session.trial_days > 0 %}
+            <p><strong>{{ session.trial_days }} days free</strong> <span class="muted">— you are charged when the trial ends.</span></p>
+        {% endif %}
+        <dl>
+            {% if session.customer_email %}<dt>Email</dt><dd>{{ session.customer_email }}</dd>{% endif %}
+            <dt>Checkout</dt><dd>{{ session.id }}</dd>
+            <dt>Status</dt><dd>{{ session.status }}</dd>
+        </dl>
+
+        {% if session.status == 'open' %}
+            <form method="post" action="/fake-gateway/checkout/{{ session.id|url_encode }}/pay">
+                <label for="promotion_code">Promotion code (optional)</label>
+                <input type="text" id="promotion_code" name="promotion_code" value="{{ promotion_code }}" autocomplete="off" maxlength="32">
+                {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+                <div class="actions">
+                    <button type="submit" class="primary">Pay</button>
+                </div>
+            </form>
+            <form method="post" action="/fake-gateway/checkout/{{ session.id|url_encode }}/cancel">
+                <div class="actions">
+                    <button type="submit">Cancel</button>
+                </div>
+            </form>
+        {% else %}
+            <p class="muted">This checkout is {{ session.status }}.</p>
+            <p><a href="{{ session.cancel_url }}">Return to Mappi</a></p>
+        {% endif %}
+    </section>
+{% endblock %}

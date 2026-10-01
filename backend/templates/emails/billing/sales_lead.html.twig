@@ -1,0 +1,24 @@
+{# PRD §7.21 "Sales lead" (POST /contact): to SALES_LEAD_RECIPIENTS, in Spanish. #}
+{% extends 'emails/layout.html.twig' %}
+{% trans_default_domain 'emails_billing' %}
+
+{% block title %}{{ 'sales_lead.title'|trans }}{% endblock %}
+
+{% block content %}
+    <h1 style="margin:0 0 12px;font-size:20px;">{{ 'sales_lead.title'|trans }}</h1>
+    <p style="margin:0 0 16px;">{{ 'sales_lead.intro'|trans({name: lead.user_name, plan: lead.plan_name ?? lead.plan_id ?? ''}) }}</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;font-size:14px;">
+        {% for label, value in {
+            ('sales_lead.plan'|trans): (lead.plan_name ?? '') ~ (lead.plan_id ? ' (' ~ lead.plan_id ~ ')' : ''),
+            ('sales_lead.contact_email'|trans): lead.contact_email,
+            ('sales_lead.phone'|trans): lead.phone,
+            ('sales_lead.user'|trans): lead.user_name ~ ' <' ~ lead.user_email ~ '>',
+            ('sales_lead.account'|trans): lead.customer_id,
+        } %}
+            <tr>
+                <td style="padding:6px 12px 6px 0;color:#5e5c6b;white-space:nowrap;vertical-align:top;">{{ label }}</td>
+                <td style="padding:6px 0;font-weight:600;">{{ value }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
