@@ -1,0 +1,10 @@
+{
+  "attach": "Adjuntar un documento (Word, PDF, Markdown, texto o CSV)",
+  "list": "Documentos para tu próximo mensaje",
+  "sent": "Documentos adjuntos",
+  "reading": "Leyendo…",
+  "ready": "Listo para enviar",
+  "remove": "Quitar {{name}}",
+  "tooMany": "Una conversación puede adjuntar hasta {{max}} documentos.",
+  "fromFiles": "Crea el cuestionario con las preguntas del documento adjunto."
+}

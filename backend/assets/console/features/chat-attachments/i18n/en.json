@@ -1,0 +1,10 @@
+{
+  "attach": "Attach a document (Word, PDF, Markdown, text or CSV)",
+  "list": "Documents for your next message",
+  "sent": "Attached documents",
+  "reading": "Reading…",
+  "ready": "Ready to send",
+  "remove": "Remove {{name}}",
+  "tooMany": "A conversation can attach up to {{max}} documents.",
+  "fromFiles": "Create the questionnaire with the questions of the attached document."
+}

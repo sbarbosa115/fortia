@@ -1,26 +1,10 @@
 {
   "title": "¿Qué quieres crear hoy?",
   "eyebrow": "Asistente IA",
-  "subtitle": "Descríbeme el tema, cuántas preguntas quieres y el estilo — yo lo redacto por ti.",
+  "subtitle": "Descríbeme el tema, pega las preguntas que ya tienes o adjunta un documento Word, PDF o Markdown que las tenga — yo lo armo por ti.",
   "back": "Volver",
   "newChat": "Nuevo chat",
-  "conversation": "Conversación",
-  "greeting": "¡Hola! ¿En qué te ayudo hoy? ✨",
-  "hintSend": "enviar",
-  "hintNewline": "nueva línea",
-  "placeholder": "Escribe tu mensaje…",
-  "send": "Enviar",
-  "typing": "Pensando…",
-  "error": "Algo salió mal al procesar tu mensaje.",
-  "retry": "Reintentar",
-  "quickReplies": "Respuestas rápidas",
-  "limitReached": "Esta conversación alcanzó su límite de mensajes. Recarga la página para empezar de nuevo.",
-  "askDetails": {
-    "questionnaire": "Dame detalles del cuestionario {{name}}",
-    "organization": "Dame detalles de la organización {{name}}",
-    "assignation": "Dame detalles de la asignación {{name}}",
-    "project": "Dame detalles del proyecto {{name}}"
-  },
+  "greeting": "¡Hola! Cuéntame de qué trata el cuestionario, pega aquí tus preguntas o adjunta un documento Word, PDF o Markdown que las tenga (con el clip o arrastrándolo aquí). ✨",
   "created": {
     "title": "Cuestionario creado",
     "edit": "Editar cuestionario",

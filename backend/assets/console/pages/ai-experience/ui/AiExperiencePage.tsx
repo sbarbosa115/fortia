@@ -1,10 +1,14 @@
+import {useFileDrop} from '@console/features/chat-attachments';
+import {joinClasses} from '@shared/lib';
 import {Button, Icon} from '@shared/ui';
+import {
+  AssistantMark,
+  ChatComposer,
+  ChatTranscript,
+} from '@console/widgets/chat-panel';
 import {useEffect, useRef} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useAiExperience} from '../model/useAiExperience';
-import {AssistantMark} from './AssistantMark';
-import {ChatComposer} from './ChatComposer';
-import {ChatTranscript} from './ChatTranscript';
 import {CreatedCard} from './CreatedCard';
 import {PreviewPanel} from './PreviewPanel';
 import './ai-experience.css';
@@ -15,25 +19,37 @@ import './ai-experience.css';
  */
 export function AiExperiencePage() {
   const {t} = useTranslation('pages.ai-experience');
-  const chat = useAiExperience();
+  const page = useAiExperience();
+  const {chat} = page;
   const scroller = useRef<HTMLDivElement>(null);
-  const {messages, status} = chat;
+  const {entries, status} = chat;
+  // Documents dropped anywhere on the conversation attach to the next message.
+  const {dragging, dropHandlers} = useFileDrop(
+    chat.attachments,
+    !chat.disabled,
+  );
 
   // Each turn scrolls the conversation (never the window) to its end.
   useEffect(() => {
     const box = scroller.current;
     box?.scrollTo?.({top: box.scrollHeight, behavior: 'smooth'});
-  }, [messages, status]);
+  }, [entries, status]);
 
   return (
     <div className="ai-page">
-      <div className="ai-page__chat">
+      <div
+        className={joinClasses(
+          'ai-page__chat',
+          dragging && 'ai-page__chat--dragging',
+        )}
+        {...dropHandlers}
+      >
         <div className="ai-page__toolbar">
           <Button
             variant="ghost"
             className="ai-tool"
             icon={<Icon name="arrow-left" size={16} />}
-            onClick={chat.back}
+            onClick={page.back}
           >
             {t('back')}
           </Button>
@@ -42,20 +58,20 @@ export function AiExperiencePage() {
               variant="ghost"
               className="ai-tool"
               icon={<Icon name="refresh" size={16} />}
-              onClick={chat.newChat}
+              onClick={page.newChat}
             >
               {t('newChat')}
             </Button>
-            {chat.hasPreview ? (
+            {page.hasPreview ? (
               <button
                 type="button"
                 className="ai-preview-toggle"
-                aria-pressed={chat.previewOpen}
+                aria-pressed={page.previewOpen}
                 aria-label={t('preview.toggle')}
                 title={t('preview.toggleHint')}
-                onClick={chat.togglePreview}
+                onClick={page.togglePreview}
               >
-                <Icon name={chat.previewOpen ? 'eye' : 'eye-off'} size={16} />
+                <Icon name={page.previewOpen ? 'eye' : 'eye-off'} size={16} />
               </button>
             ) : null}
           </div>
@@ -63,7 +79,7 @@ export function AiExperiencePage() {
 
         <div ref={scroller} className="ai-page__scroll">
           <div className="ai-page__column">
-            {chat.messages.length === 0 ? (
+            {entries.length === 0 ? (
               <div className="ai-hero">
                 <span className="ai-hero__mark">
                   <AssistantMark size="lg" />
@@ -73,17 +89,17 @@ export function AiExperiencePage() {
                 <p className="ai-hero__subtitle">{t('subtitle')}</p>
               </div>
             ) : null}
-            <ChatTranscript chat={chat} />
-            {chat.created ? <CreatedCard chat={chat} /> : null}
+            <ChatTranscript chat={chat} greeting={page.greeting} />
+            {page.created ? <CreatedCard chat={page} /> : null}
           </div>
         </div>
 
         <div className="ai-page__composer">
-          <ChatComposer chat={chat} />
+          <ChatComposer chat={chat} autoFocus />
         </div>
       </div>
 
-      {chat.previewOpen ? <PreviewPanel chat={chat} /> : null}
+      {page.previewOpen ? <PreviewPanel chat={page} /> : null}
     </div>
   );
 }

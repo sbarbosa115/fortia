@@ -1,18 +1,24 @@
 import {
-  CHAT_FILE_TYPES,
   type ChatDraft,
   type ChatFile,
+  type ChatItem,
   type ChatMessage,
   type ChatMode,
+  type ChatPendingWrite,
   type ChatTurnResult,
-  MAX_CHAT_FILE_BYTES,
-  MAX_CHAT_FILES,
+  MAX_CHAT_MESSAGE_LENGTH,
   MAX_CHAT_MESSAGES,
   sendChatTurn,
-  uploadChatFile,
 } from '@console/entities/chat';
-import {errorMessageKey, isApiError} from '@shared/api';
+import {USAGE_QUERY_KEY} from '@console/entities/plan-usage';
+import {
+  sentFileCount,
+  useChatAttachments,
+} from '@console/features/chat-attachments';
+import {isApiError} from '@shared/api';
+import {useQueryClient} from '@tanstack/react-query';
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 
 /** A line of the conversation as shown: the messages, plus notes the screen adds (never sent to the assistant). */
 export type ChatEntry = {
@@ -21,28 +27,22 @@ export type ChatEntry = {
   content: string;
   /** The documents a user message attached. */
   files?: ChatFile[];
+  /** When it was written, for display. */
+  time: string;
 };
 
-export type ChatStatus = 'idle' | 'thinking' | 'failed' | 'full';
+export type ChatStatus = 'idle' | 'sending' | 'error';
 
 /**
- * A document attached to the next message: being read by the server (uploading), ready to go with it, or refused
- * (`errorKey`, a key of the "shared" namespace).
+ * What the screen does with a finished turn (it gets the draft the turn started from); a returned text is shown as a
+ * note under the answer.
  */
-export type ChatAttachment = {
-  id: number;
-  name: string;
-  status: 'uploading' | 'ready' | 'failed';
-  file: ChatFile | null;
-  errorKey: string | null;
-};
-
-/** What the screen does with a finished turn; a returned text is shown as a note under the answer. */
 export type ChatResultHandler = (
   result: ChatTurnResult,
+  previousDraft: ChatDraft | null,
 ) => void | string | null | Promise<void | string | null>;
 
-/** Plan refusals: retrying cannot help, so the failure has no Retry (PRD §10.4). */
+/** Plan refusals: retrying only refuses again, so they have no Retry and show in amber (PRD §10.4, §10.21). */
 const PLAN_CODES = [
   'PLAN_LIMIT_REACHED',
   'FEATURE_NOT_IN_PLAN',
@@ -51,13 +51,16 @@ const PLAN_CODES = [
   'PLAN_NOT_FOUND',
 ];
 
-const READABLE = CHAT_FILE_TYPES.split(',');
+/** The composer shows its counter only this close to the limit. */
+const COUNTER_THRESHOLD = 0.9;
 
 let lastEntryId = 0;
 
-function nextId(): number {
-  lastEntryId += 1;
-  return lastEntryId;
+function now(): string {
+  return new Date().toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 function entry(
@@ -65,223 +68,200 @@ function entry(
   content: string,
   files: ChatFile[] = [],
 ): ChatEntry {
-  const id = nextId();
-  return files.length > 0 ? {id, role, content, files} : {id, role, content};
+  lastEntryId += 1;
+  const line = {id: lastEntryId, role, content, time: now()};
+  return files.length > 0 ? {...line, files} : line;
 }
 
 /** The messages the assistant reads: the conversation without the screen's notes, each with its files. */
 export function historyOf(entries: ChatEntry[]): ChatMessage[] {
   return entries
-    .filter((entry) => entry.role !== 'note')
-    .map((entry) => {
+    .filter((line) => line.role !== 'note')
+    .map((line) => {
       const message: ChatMessage = {
-        role: entry.role as ChatMessage['role'],
-        content: entry.content,
+        role: line.role as ChatMessage['role'],
+        content: line.content,
       };
-      return entry.files && entry.files.length > 0
-        ? {...message, files: entry.files}
+      return line.files && line.files.length > 0
+        ? {...message, files: line.files}
         : message;
     });
 }
 
-/** The files the conversation already sent. */
-function sentFiles(entries: ChatEntry[]): number {
-  return entries.reduce(
-    (count, entry) => count + (entry.files?.length ?? 0),
-    0,
-  );
-}
-
-/** A file the server cannot read, refused before it is sent (with the code the server would answer). */
-function localRefusal(file: File): string | null {
-  const dot = file.name.lastIndexOf('.');
-  const extension = dot < 0 ? '' : file.name.slice(dot).toLowerCase();
-  if (!READABLE.includes(extension)) {
-    return 'errors.UNSUPPORTED_FILE_TYPE';
-  }
-  if (file.size > MAX_CHAT_FILE_BYTES) {
-    return 'errors.FILE_TOO_LARGE';
-  }
-  return null;
-}
-
 /**
- * One conversation with the assistant (PRD §7.19, §10.4): the client keeps the messages, their attached documents and
- * the draft, and sends them with every turn; each turn is a `chat` job polled every 2 s. A failed turn can be retried
- * (not a plan refusal); past 40 messages the conversation is full. A document (Word, PDF, Markdown…) is read by the
- * server as soon as it is attached and goes with the next message; a conversation attaches up to 5.
+ * One conversation with the assistant (PRD §7.19, §10.4), the same in the AI Experience (create mode) and in
+ * /projects/new (draft mode): the client keeps the messages with their attached documents, the draft and the pending
+ * writes, and sends them with every turn; each turn is a `chat` job polled every 2 s. A failed turn can be retried
+ * (not a plan refusal); a conversation holds 40 messages. The author can type, paste their questions or attach Word,
+ * PDF or Markdown documents; a message with only documents asks for the questionnaire from them. `closed` ends the
+ * conversation (the screen got what it wanted).
  */
 export function useChat({
   mode,
   onResult,
+  closed = false,
 }: {
   mode: ChatMode;
   onResult?: ChatResultHandler;
+  closed?: boolean;
 }) {
+  const {t, i18n} = useTranslation('widgets.chat-panel');
+  const {t: tFiles} = useTranslation('features.chat-attachments');
+  const queryClient = useQueryClient();
+
   const [entries, setEntries] = useState<ChatEntry[]>([]);
-  const [draft, setDraft] = useState<ChatDraft | null>(null);
+  const [greetingTime, setGreetingTime] = useState(now);
+  const [input, setInput] = useState('');
   const [status, setStatus] = useState<ChatStatus>('idle');
-  const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [error, setError] = useState<unknown>(null);
-  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
-  const [tooManyFiles, setTooManyFiles] = useState(false);
+  const [draft, setDraft] = useState<ChatDraft | null>(null);
+  const [pendingWrites, setPendingWrites] = useState<ChatPendingWrite[]>([]);
+  const [quickReplies, setQuickReplies] = useState<string[]>([]);
+  const attachments = useChatAttachments(sentFileCount(entries));
+
+  // The item the last user turn points at (a clicked name); a retry re-sends it with the turn.
+  const turnItem = useRef<ChatItem | null>(null);
+  // Bumped by a new chat, so the reply of a turn sent before it is dropped.
+  const conversation = useRef(0);
   const abort = useRef<AbortController | null>(null);
-  const uploads = useRef(new Map<number, AbortController>());
   const handler = useRef(onResult);
 
   useEffect(() => {
     handler.current = onResult;
   });
-  useEffect(() => {
-    const pending = uploads.current;
-    return () => {
-      abort.current?.abort();
-      pending.forEach((controller) => controller.abort());
-    };
-  }, []);
+  useEffect(() => () => abort.current?.abort(), []);
 
   const run = useCallback(
-    async (conversation: ChatEntry[], currentDraft: ChatDraft | null) => {
+    async (lines: ChatEntry[]) => {
+      const turn = conversation.current;
       abort.current?.abort();
       const controller = new AbortController();
       abort.current = controller;
-      setStatus('thinking');
+      setStatus('sending');
       setError(null);
-      setQuickReplies([]);
       try {
         const result = await sendChatTurn(
-          {messages: historyOf(conversation), mode, draft: currentDraft},
+          {
+            messages: historyOf(lines),
+            mode,
+            draft,
+            item: turnItem.current,
+            pending_writes: pendingWrites,
+          },
           controller.signal,
         );
-        const answered = [...conversation, entry('assistant', result.message)];
+        if (turn !== conversation.current) {
+          return;
+        }
+        if (result.actions.length > 0) {
+          // The chat changed the account: whatever the other screens cached may be stale.
+          void queryClient.invalidateQueries();
+          const language = result.actions.find(
+            (action) => action.language,
+          )?.language;
+          if (language) {
+            void i18n.changeLanguage(language);
+          }
+        } else {
+          void queryClient.invalidateQueries({queryKey: USAGE_QUERY_KEY});
+        }
+        const answered = [...lines, entry('assistant', result.message)];
         setEntries(answered);
-        setDraft(result.draft ?? null);
+        // A turn without a draft keeps the last one (the questionnaire it created is still shown).
+        if (result.draft) {
+          setDraft(result.draft);
+        }
+        setPendingWrites(result.pending_writes);
         setQuickReplies(result.quick_replies);
-        const note = await handler.current?.(result);
-        if (note) {
+        setStatus('idle');
+        const note = await handler.current?.(result, draft);
+        if (note && turn === conversation.current) {
           setEntries([...answered, entry('note', note)]);
         }
-        setStatus(
-          historyOf(answered).length >= MAX_CHAT_MESSAGES ? 'full' : 'idle',
-        );
       } catch (failure) {
-        if (controller.signal.aborted) {
+        if (turn !== conversation.current || controller.signal.aborted) {
           return;
         }
         setError(failure);
-        setStatus('failed');
+        setStatus('error');
       }
     },
-    [mode],
+    [mode, draft, pendingWrites, queryClient, i18n],
   );
 
-  const kept = attachments.filter((a) => a.status !== 'failed').length;
-  const room = Math.max(0, MAX_CHAT_FILES - sentFiles(entries) - kept);
+  const limitReached = historyOf(entries).length >= MAX_CHAT_MESSAGES - 1;
+  const disabled = status === 'sending' || limitReached || closed;
+  const canSend =
+    !disabled &&
+    !attachments.uploading &&
+    (input.trim().length > 0 || attachments.hasFiles);
 
-  /** Attaches documents to the next message; past 5 in the conversation the rest are left out. */
-  const attach = useCallback(
-    (files: File[]) => {
-      const update = (id: number, change: Partial<ChatAttachment>) =>
-        setAttachments((current) =>
-          current.map((a) => (a.id === id ? {...a, ...change} : a)),
-        );
-      setTooManyFiles(files.length > room);
-      const added = files.slice(0, room).map((file): ChatAttachment => {
-        const id = nextId();
-        const refusal = localRefusal(file);
-        if (!refusal) {
-          const controller = new AbortController();
-          uploads.current.set(id, controller);
-          uploadChatFile(file, controller.signal)
-            .then((read) => update(id, {status: 'ready', file: read}))
-            .catch((failure: unknown) => {
-              if (!controller.signal.aborted) {
-                update(id, {
-                  status: 'failed',
-                  errorKey: isApiError(failure)
-                    ? errorMessageKey(failure)
-                    : 'errors.NETWORK',
-                });
-              }
-            })
-            .finally(() => uploads.current.delete(id));
-        }
-        return {
-          id,
-          name: file.name,
-          status: refusal ? 'failed' : 'uploading',
-          file: null,
-          errorKey: refusal,
-        };
-      });
-      setAttachments((current) => [...current, ...added]);
-    },
-    [room],
-  );
-
-  const removeAttachment = useCallback((id: number) => {
-    uploads.current.get(id)?.abort();
-    setAttachments((current) => current.filter((a) => a.id !== id));
-    setTooManyFiles(false);
-  }, []);
-
-  const uploading = attachments.some((a) => a.status === 'uploading');
-  const ready = attachments.flatMap((a) =>
-    a.status === 'ready' && a.file ? [a.file] : [],
-  );
-
-  /** Sends the user's message with the documents ready to go (a refused one is left behind). */
-  const send = useCallback(
-    (text: string) => {
-      const content = text.trim();
-      if (
-        content === '' ||
-        status === 'thinking' ||
-        status === 'full' ||
-        uploading
-      ) {
-        return;
-      }
-      if (historyOf(entries).length + 1 > MAX_CHAT_MESSAGES) {
-        setStatus('full');
-        return;
-      }
-      const conversation = [...entries, entry('user', content, ready)];
-      setEntries(conversation);
-      setAttachments([]);
-      setTooManyFiles(false);
-      void run(conversation, draft);
-    },
-    [entries, draft, status, run, uploading, ready],
-  );
-
-  const retry = useCallback(() => {
-    if (status === 'failed') {
-      void run(entries, draft);
+  /** Sends the author's message with the documents ready to go (a refused one is left behind). */
+  const sendText = (text: string, item: ChatItem | null = null) => {
+    const content =
+      text.trim() || (attachments.hasFiles ? tFiles('fromFiles') : '');
+    if (disabled || attachments.uploading || !content) {
+      return;
     }
-  }, [status, entries, draft, run]);
+    turnItem.current = item;
+    const lines = [...entries, entry('user', content, attachments.ready)];
+    setQuickReplies([]);
+    setEntries(lines);
+    setInput('');
+    attachments.clear();
+    void run(lines);
+  };
+
+  const reset = () => {
+    conversation.current += 1;
+    abort.current?.abort();
+    turnItem.current = null;
+    setEntries([]);
+    setGreetingTime(now());
+    setInput('');
+    attachments.clear();
+    setStatus('idle');
+    setError(null);
+    setDraft(null);
+    setPendingWrites([]);
+    setQuickReplies([]);
+  };
+
+  const planFailure =
+    isApiError(error) && (error.isPlanLimit || PLAN_CODES.includes(error.code));
 
   return {
+    mode,
     entries,
+    greetingTime,
     draft,
-    status,
     quickReplies,
+    status,
     error,
-    canRetry:
-      status === 'failed' &&
-      !(isApiError(error) && PLAN_CODES.includes(error.code)),
-    send,
-    retry,
+    planFailure,
+    canRetry: status === 'error' && !planFailure,
+    input,
+    setInput,
+    maxLength: MAX_CHAT_MESSAGE_LENGTH,
+    showCounter: input.length >= MAX_CHAT_MESSAGE_LENGTH * COUNTER_THRESHOLD,
+    canSend,
+    /** The composer is closed: a turn is under way, the conversation is full or over. */
+    disabled,
+    limitReached: limitReached && !closed,
+    /** The documents for the next message. */
     attachments,
-    attach,
-    removeAttachment,
-    /** Documents are being read: the message waits for them. */
-    uploading,
-    /** Documents ready to go with the next message. */
-    hasFiles: ready.length > 0,
-    /** Room for another document in this conversation. */
-    canAttach: room > 0,
-    tooManyFiles,
+    send: () => sendText(input),
+    sendText,
+    pickReply: (reply: string) => sendText(reply),
+    askItem: (item: ChatItem, name: string) =>
+      sendText(t(`askDetails.${item.kind}`, {name}), item),
+    retry: () => {
+      if (status === 'error') {
+        void run(entries);
+      }
+    },
+    /** Starts over: a new conversation, with nothing of the last one. */
+    reset,
   };
 }
 

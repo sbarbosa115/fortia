@@ -1,26 +1,10 @@
 {
   "title": "What do you want to create today?",
   "eyebrow": "AI Assistant",
-  "subtitle": "Tell me the topic, how many questions you want and the style — I will write it for you.",
+  "subtitle": "Tell me the topic, paste the questions you already have, or attach a Word, PDF or Markdown document with them — I will build it for you.",
   "back": "Back",
   "newChat": "New chat",
-  "conversation": "Conversation",
-  "greeting": "Hi! How can I help you today? ✨",
-  "hintSend": "send",
-  "hintNewline": "new line",
-  "placeholder": "Type your message…",
-  "send": "Send",
-  "typing": "Thinking…",
-  "error": "Something went wrong processing your message.",
-  "retry": "Retry",
-  "quickReplies": "Quick replies",
-  "limitReached": "This conversation reached its message limit. Refresh the page to start over.",
-  "askDetails": {
-    "questionnaire": "Show me the details of the questionnaire {{name}}",
-    "organization": "Show me the details of the organization {{name}}",
-    "assignation": "Show me the details of the assignation {{name}}",
-    "project": "Show me the details of the project {{name}}"
-  },
+  "greeting": "Hi! Tell me what the questionnaire is about, paste your questions here, or attach a Word, PDF or Markdown document with them (paperclip or drag it here). ✨",
   "created": {
     "title": "Questionnaire created",
     "edit": "Edit questionnaire",

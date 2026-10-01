@@ -1,4 +1,8 @@
-import {type ChatDraft, sendChatTurn} from '@console/entities/chat';
+import {
+  type ChatDraft,
+  sendChatTurn,
+  uploadChatFile,
+} from '@console/entities/chat';
 import {fetchQuestionnaire} from '@console/entities/questionnaire';
 import {ApiError} from '@shared/api';
 import {testI18n} from '@shared/i18n/testing';
@@ -13,6 +17,7 @@ import {AiExperiencePage} from './AiExperiencePage';
 vi.mock('@console/entities/chat', async (original) => ({
   ...(await original<typeof import('@console/entities/chat')>()),
   sendChatTurn: vi.fn(),
+  uploadChatFile: vi.fn(),
 }));
 vi.mock('@console/entities/questionnaire', async (original) => ({
   ...(await original<typeof import('@console/entities/questionnaire')>()),
@@ -95,6 +100,7 @@ function renderPage() {
 describe('AiExperiencePage', () => {
   beforeEach(() => {
     vi.mocked(sendChatTurn).mockReset();
+    vi.mocked(uploadChatFile).mockReset();
     vi.mocked(fetchQuestionnaire).mockReset();
   });
 
@@ -105,7 +111,7 @@ describe('AiExperiencePage', () => {
       screen.getByRole('heading', {name: 'What do you want to create today?'}),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Hi! How can I help you today? ✨'),
+      screen.getByText(/Hi! Tell me what the questionnaire is about/),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('complementary', {name: 'Live preview'}),
@@ -255,5 +261,39 @@ describe('AiExperiencePage', () => {
       screen.getByRole('button', {name: /Edit questionnaire/}),
     );
     expect(await screen.findByText('Editor')).toBeInTheDocument();
+  });
+
+  it('attaches a Word document like /projects/new and sends its text with the message, which may be just the file', async () => {
+    vi.mocked(uploadChatFile).mockResolvedValue({
+      filename: 'questions.docx',
+      text: '1. How old are you?',
+    });
+    vi.mocked(sendChatTurn).mockResolvedValueOnce(
+      turn({message: 'These are the basics'}),
+    );
+    renderPage();
+    const input =
+      document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input, 'the paperclip opens a file picker').not.toBeNull();
+    await userEvent.upload(
+      input as HTMLInputElement,
+      new File(['x'], 'questions.docx'),
+    );
+
+    expect(await screen.findByText('Ready to send')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: 'Send'}));
+
+    expect(await screen.findByText('These are the basics')).toBeInTheDocument();
+    expect(vi.mocked(sendChatTurn).mock.calls[0]?.[0].messages).toEqual([
+      {
+        role: 'user',
+        content:
+          'Create the questionnaire with the questions of the attached document.',
+        files: [{filename: 'questions.docx', text: '1. How old are you?'}],
+      },
+    ]);
+    expect(
+      screen.getByRole('list', {name: 'Attached documents'}),
+    ).toHaveTextContent('questions.docx');
   });
 });

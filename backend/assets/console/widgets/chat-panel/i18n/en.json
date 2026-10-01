@@ -1,20 +1,19 @@
 {
   "log": "Conversation with the assistant",
-  "label": "Your message",
   "placeholder": "Type your message…",
   "send": "Send",
-  "thinking": "Thinking…",
-  "failed": "Something went wrong processing your message.",
+  "typing": "Thinking…",
+  "error": "Something went wrong processing your message.",
   "retry": "Retry",
-  "full": "This conversation reached its message limit. Refresh the page to start over.",
   "quickReplies": "Quick replies",
+  "limitReached": "This conversation reached its message limit. Start a new chat or refresh the page to start over.",
+  "hintSend": "send",
+  "hintNewline": "new line",
   "counter": "{{count}} / {{max}}",
-  "attach": "Attach a document (Word, PDF, Markdown, text or CSV)",
-  "attachments": "Documents for your next message",
-  "files": "Attached documents",
-  "reading": "Reading…",
-  "ready": "Ready to send",
-  "removeFile": "Remove {{name}}",
-  "tooManyFiles": "A conversation can attach up to {{max}} documents.",
-  "fromFiles": "Create the questionnaire with the questions of the attached document."
+  "askDetails": {
+    "questionnaire": "Show me the details of the questionnaire {{name}}",
+    "organization": "Show me the details of the organization {{name}}",
+    "assignation": "Show me the details of the assignation {{name}}",
+    "project": "Show me the details of the project {{name}}"
+  }
 }

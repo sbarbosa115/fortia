@@ -1,20 +1,19 @@
 {
   "log": "Conversación con el asistente",
-  "label": "Tu mensaje",
   "placeholder": "Escribe tu mensaje…",
   "send": "Enviar",
-  "thinking": "Pensando…",
-  "failed": "Algo salió mal al procesar tu mensaje.",
+  "typing": "Pensando…",
+  "error": "Algo salió mal al procesar tu mensaje.",
   "retry": "Reintentar",
-  "full": "Esta conversación llegó a su límite de mensajes. Recarga la página para empezar de nuevo.",
   "quickReplies": "Respuestas rápidas",
+  "limitReached": "Esta conversación llegó a su límite de mensajes. Empieza un chat nuevo o recarga la página para empezar de nuevo.",
+  "hintSend": "enviar",
+  "hintNewline": "nueva línea",
   "counter": "{{count}} / {{max}}",
-  "attach": "Adjuntar un documento (Word, PDF, Markdown, texto o CSV)",
-  "attachments": "Documentos para tu próximo mensaje",
-  "files": "Documentos adjuntos",
-  "reading": "Leyendo…",
-  "ready": "Listo para enviar",
-  "removeFile": "Quitar {{name}}",
-  "tooManyFiles": "Una conversación puede adjuntar hasta {{max}} documentos.",
-  "fromFiles": "Crea el cuestionario con las preguntas del documento adjunto."
+  "askDetails": {
+    "questionnaire": "Dame detalles del cuestionario {{name}}",
+    "organization": "Dame detalles de la organización {{name}}",
+    "assignation": "Dame detalles de la asignación {{name}}",
+    "project": "Dame detalles del proyecto {{name}}"
+  }
 }

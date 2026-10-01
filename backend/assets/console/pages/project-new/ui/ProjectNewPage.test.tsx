@@ -175,7 +175,7 @@ describe('ProjectNewPage', () => {
     renderPage();
 
     await userEvent.type(
-      screen.getByLabelText('Your message'),
+      screen.getByLabelText('Type your message…'),
       'Create a questionnaire about onboarding{Enter}',
     );
     expect(
@@ -188,7 +188,10 @@ describe('ProjectNewPage', () => {
       'a later step stays closed',
     ).toBeDisabled();
 
-    await userEvent.type(screen.getByLabelText('Your message'), 'Yes{Enter}');
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Yes{Enter}',
+    );
     expect(await screen.findByText(/has been created/)).toBeInTheDocument();
     const body = vi.mocked(createQuestionnaire).mock.calls[0]?.[0];
     expect(body?.slug, 'PRD §10.12: slugify(title) + 6 hex').toMatch(

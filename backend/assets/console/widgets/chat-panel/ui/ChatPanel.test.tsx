@@ -1,7 +1,8 @@
 import {sendChatTurn, uploadChatFile} from '@console/entities/chat';
 import {ApiError} from '@shared/api';
 import {testI18n} from '@shared/i18n/testing';
-import {render, screen} from '@testing-library/react';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {I18nextProvider} from 'react-i18next';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
@@ -21,9 +22,11 @@ function Harness({onResult}: {onResult?: () => string | null}) {
 
 function renderPanel(onResult?: () => string | null) {
   return render(
-    <I18nextProvider i18n={testI18n('console')}>
-      <Harness onResult={onResult} />
-    </I18nextProvider>,
+    <QueryClientProvider client={new QueryClient()}>
+      <I18nextProvider i18n={testI18n('console')}>
+        <Harness onResult={onResult} />
+      </I18nextProvider>
+    </QueryClientProvider>,
   );
 }
 
@@ -59,7 +62,7 @@ describe('ChatPanel', () => {
     );
     renderPanel();
     await userEvent.type(
-      screen.getByLabelText('Your message'),
+      screen.getByLabelText('Type your message…'),
       'Create a survey{Enter}',
     );
 
@@ -69,17 +72,49 @@ describe('ChatPanel', () => {
       "PRD §14: the assistant's text is never injected as HTML",
     ).toBeInTheDocument();
     expect(document.querySelector('img')).toBeNull();
-    expect(vi.mocked(sendChatTurn).mock.calls[0]?.[0]).toEqual({
+    expect(vi.mocked(sendChatTurn).mock.calls[0]?.[0]).toMatchObject({
       messages: [{role: 'user', content: 'Create a survey'}],
       mode: 'draft',
       draft: null,
     });
   });
 
+  it('shows the tables of the assistant, like the review of the draft (# | question | type)', async () => {
+    vi.mocked(sendChatTurn).mockResolvedValue(
+      answer(
+        [
+          'The draft:',
+          '',
+          '| # | Question | Type |',
+          '| --- | --- | --- |',
+          '| 1 | How old are you? | Text |',
+        ].join('\n'),
+      ),
+    );
+    renderPanel();
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Hello{Enter}',
+    );
+
+    const table = await screen.findByRole('table');
+    expect(
+      within(table)
+        .getAllByRole('columnheader')
+        .map((cell) => cell.textContent),
+    ).toEqual(['#', 'Question', 'Type']);
+    expect(
+      within(table).getByRole('row', {name: '1 How old are you? Text'}),
+    ).toBeInTheDocument();
+  });
+
   it('offers the quick replies and a note from the screen', async () => {
     vi.mocked(sendChatTurn).mockResolvedValue(answer('Shall I?'));
     renderPanel(() => 'Saved it.');
-    await userEvent.type(screen.getByLabelText('Your message'), 'Hello{Enter}');
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Hello{Enter}',
+    );
 
     expect(await screen.findByText('Saved it.')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', {name: 'Yes'}));
@@ -96,7 +131,10 @@ describe('ChatPanel', () => {
       .mockRejectedValueOnce(new ApiError(0, 'TIMEOUT', 'slow'))
       .mockResolvedValueOnce(answer('Back again'));
     renderPanel();
-    await userEvent.type(screen.getByLabelText('Your message'), 'Hello{Enter}');
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Hello{Enter}',
+    );
     expect(
       await screen.findByText('Something went wrong processing your message.'),
       'PRD §10.4',
@@ -112,7 +150,10 @@ describe('ChatPanel', () => {
       });
     });
     renderPanel();
-    await userEvent.type(screen.getByLabelText('Your message'), 'Hello{Enter}');
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Hello{Enter}',
+    );
     await screen.findByRole('alert');
     expect(
       screen.queryByRole('button', {name: 'Retry'}),

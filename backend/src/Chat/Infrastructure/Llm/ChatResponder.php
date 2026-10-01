@@ -17,7 +17,8 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  *
  * - "crea un cuestionario sobre X" / "create a questionnaire about X" (+ "diagnóstico"/"diagnostic", "cadena"/"chain")
  *   → update_draft with the basics; then "sí" → confirm_basics, three questions, the ending and request_review;
- * - a message with an attached document → update_draft with its title; then "sí" → its questions (see questionsIn)
+ * - a message with an attached document, or with three or more questions pasted → update_draft with its title; then
+ *   "sí" → its questions (see DocumentQuestions)
  *   instead of the three; with the questions under way, its questions are added;
  * - with the questions under way, "agrega una tabla" / "add a table" and "agrega un archivo con plantilla" / "add a
  *   file with a template" → add_questions (a table, a file question with a CSV template) and request_review;
@@ -54,6 +55,8 @@ final class ChatResponder implements FakeLlmResponder
             'thanks' => '¡Gracias por responder!',
             'tiers' => [['Inicial', 'Hay mucho por mejorar.', 'Define tus objetivos.'], ['Avanzado', 'Vas por buen camino.', 'Comparte tus prácticas.']],
             'types' => ['regular' => 'regular', 'diagnostic' => 'diagnóstico', 'chain' => 'cadena'],
+            'columns' => ['#', 'Pregunta', 'Tipo'],
+            'controls' => ['radio' => 'Opción única', 'checkbox' => 'Opción múltiple', 'select' => 'Lista desplegable', 'text' => 'Texto', 'range' => 'Escala', 'table' => 'Tabla', 'file' => 'Archivo'],
             'untitled' => 'Mi cuestionario',
             'chain_prompt' => 'Genera tres preguntas de seguimiento a partir de las respuestas.',
             'table' => ['¿Quiénes integran tu equipo?', ['Nombre', 'Cargo', 'Correo']],
@@ -78,6 +81,8 @@ final class ChatResponder implements FakeLlmResponder
             'thanks' => 'Thanks for answering!',
             'tiers' => [['Starting', 'There is a lot to improve.', 'Set your goals.'], ['Advanced', 'You are on the right track.', 'Share your practices.']],
             'types' => ['regular' => 'regular', 'diagnostic' => 'diagnostic', 'chain' => 'chain'],
+            'columns' => ['#', 'Question', 'Type'],
+            'controls' => ['radio' => 'Single choice', 'checkbox' => 'Multiple choice', 'select' => 'Dropdown', 'text' => 'Text', 'range' => 'Scale', 'table' => 'Table', 'file' => 'File'],
             'untitled' => 'My questionnaire',
             'chain_prompt' => 'Generate three follow-up questions from the answers.',
             'table' => ['Who is on your team?', ['Name', 'Role', 'Email']],
@@ -115,7 +120,9 @@ final class ChatResponder implements FakeLlmResponder
             return $this->afterTools($last, $draft, $request->context, $texts);
         }
 
-        $calls = $this->script(Text::fold($last->content), $last->content, $draft, $request->context, $texts);
+        // What the user typed in every message (without the attached documents), for the questions they pasted.
+        $typed = array_values(array_map(static fn (LlmMessage $m): string => self::withoutFiles($m->content), array_filter($request->messages, static fn (LlmMessage $m): bool => 'user' === $m->role && [] === $m->toolResults)));
+        $calls = $this->script(Text::fold($last->content), $last->content, $draft, $request->context + ['typed' => $typed], $texts);
         if ([] === $calls) {
             return self::answer($texts['greeting'], $texts['replies']);
         }
@@ -139,8 +146,14 @@ final class ChatResponder implements FakeLlmResponder
         $yes = 1 === preg_match('/^(si|yes|ok|dale|claro|confirmo)\b/', $text);
 
         $files = array_values(array_filter(\is_array($context['files'] ?? null) ? $context['files'] : [], 'is_array'));
-        $fromFiles = array_merge(...array_map(static fn (array $f): array => self::questionsIn((string) ($f['text'] ?? '')), $files));
+        $fromFiles = array_merge(...array_map(static fn (array $f): array => DocumentQuestions::in((string) ($f['text'] ?? '')), $files));
         $attached = str_contains($original, '<attached_file>');
+        // Questions pasted in the message: three or more lines that read as questions.
+        $pastedNow = DocumentQuestions::in(self::withoutFiles($original));
+        $pasted = \count($pastedNow) >= 3;
+        if ([] === $fromFiles) {
+            $fromFiles = array_merge(...array_map(static fn (string $typed): array => \count(DocumentQuestions::in($typed)) >= 3 ? DocumentQuestions::in($typed) : [], (array) ($context['typed'] ?? [])));
+        }
 
         // The basics are set and the user confirms them: questions, ending and review in one go.
         if ($yes && !($draft['basics_confirmed'] ?? false) && null !== ($draft['title'] ?? null)) {
@@ -159,13 +172,15 @@ final class ChatResponder implements FakeLlmResponder
 
             return [['confirm_basics', []], ['set_questions', ['questions' => $questions]], ['set_ending', $ending], ['request_review', []]];
         }
-        // A document attached: before the basics, they come from it; with the questions under way, its questions are
-        // added.
-        if ($attached && [] !== $files) {
+        // A document attached, or questions pasted: before the basics, they come from it; with the questions under way,
+        // its questions are added.
+        if (($attached && [] !== $files) || $pasted) {
             if ($draft['basics_confirmed'] ?? false) {
-                return [] === $fromFiles ? [] : [['add_questions', ['questions' => \array_slice($fromFiles, 0, 100)]], ['request_review', []]];
+                $added = $pasted ? $pastedNow : $fromFiles;
+
+                return [] === $added ? [] : [['add_questions', ['questions' => \array_slice($added, 0, 100)]], ['request_review', []]];
             }
-            $title = self::titleOf($files[\count($files) - 1]);
+            $title = self::titleOf($attached && [] !== $files ? $files[\count($files) - 1] : ['text' => self::withoutFiles($original)]);
 
             return [['update_draft', ['title' => $title, 'type' => 'regular', 'topic' => $title, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false]]];
         }
@@ -273,8 +288,8 @@ final class ChatResponder implements FakeLlmResponder
         if ([] === $lines) {
             $title = (string) ($draft['title'] ?? '');
             if ('review' === ($draft['phase'] ?? null)) {
-                $questions = array_map(static fn (array $q, int $i): string => ($i + 1).'. '.$q['title'], (array) $draft['questions'], array_keys((array) $draft['questions']));
-                $lines[] = \sprintf('draft' === ($context['mode'] ?? null) ? $texts['review_draft'] : $texts['review'], $title, \count($questions), implode("\n", $questions));
+                $questions = array_values((array) $draft['questions']);
+                $lines[] = \sprintf('draft' === ($context['mode'] ?? null) ? $texts['review_draft'] : $texts['review'], $title, \count($questions), self::questionTable($questions, $texts));
                 $replies = [$texts['yes'], $texts['no']];
             } elseif (null !== ($draft['title'] ?? null) && !($draft['basics_confirmed'] ?? false)) {
                 $lines[] = \sprintf($texts['basics'], $title, $texts['types'][(string) ($draft['type'] ?? 'regular')] ?? '', (string) ($draft['topic'] ?? ''));
@@ -288,34 +303,21 @@ final class ChatResponder implements FakeLlmResponder
     }
 
     /**
-     * The questions of an attached document, the way a person would spot them: a line ending in "?" or numbered
-     * ("1.", "2)", "Q3:", "Pregunta 4:") is a question; the lines under it marked "a)", "-", "•", "( )" or "[ ]" are its
-     * choices (a radio with two or more, else free text).
+     * The draft's questions as the review shows them: a Markdown table # | Question | Type.
      *
-     * @return list<array<string, mixed>>
+     * @param list<mixed>          $questions
+     * @param array<string, mixed> $texts
      */
-    private static function questionsIn(string $text): array
+    private static function questionTable(array $questions, array $texts): string
     {
-        /** @var list<array{title: string, choices: list<array{label: string, value: null}>}> $questions */
-        $questions = [];
-        $open = null;
-        foreach (preg_split('/\n/', $text) ?: [] as $line) {
-            $line = trim($line);
-            $numbered = 1 === preg_match('/^(?:(?:q|pregunta|question)\s*)?\d{1,3}\s*[.):-]\s*(.+)$/iu', $line, $n);
-            $body = $numbered ? trim($n[1]) : (string) preg_replace('/^(?:[-*•]\s+)/u', '', $line);
-            if ('' !== $body && ($numbered || str_ends_with($body, '?'))) {
-                $questions[] = ['title' => mb_substr($body, 0, 500), 'choices' => []];
-                $open = \count($questions) - 1;
-            } elseif (null !== $open && 1 === preg_match('/^(?:[a-h][.)]|\(\s?\)|\[\s?\]|[-*•○□☐])\s*(.+)$/iu', $line, $c)) {
-                $questions[$open]['choices'][] = ['label' => mb_substr(trim($c[1]), 0, 300), 'value' => null];
-            } elseif ('' === $line || str_starts_with($line, '#')) {
-                $open = null;
-            }
+        $out = '| '.implode(' | ', $texts['columns'])." |\n| --- | --- | --- |";
+        foreach ($questions as $i => $question) {
+            $question = \is_array($question) ? $question : [];
+            $type = (string) ($question['type'] ?? '');
+            $out .= "\n| ".($i + 1).' | '.str_replace(['|', "\n"], ['/', ' '], (string) ($question['title'] ?? '')).' | '.($texts['controls'][$type] ?? $type).' |';
         }
 
-        return array_map(static fn (array $q): array => \count($q['choices']) >= 2
-            ? ['title' => $q['title'], 'type' => 'radio', 'choices' => \array_slice($q['choices'], 0, 20)]
-            : ['title' => $q['title'], 'type' => 'text'], $questions);
+        return $out;
     }
 
     /**
@@ -328,11 +330,17 @@ final class ChatResponder implements FakeLlmResponder
         foreach (preg_split('/\n/', (string) ($file['text'] ?? '')) ?: [] as $line) {
             $line = trim((string) preg_replace('/^#+\s*/', '', trim($line)));
             if ('' !== $line && !str_ends_with($line, '?') && 1 !== preg_match('/^\d{1,3}\s*[.)]/', $line)) {
-                return mb_substr($line, 0, 200);
+                return mb_substr(rtrim($line, ' :'), 0, 200);
             }
         }
 
         return mb_substr(pathinfo((string) ($file['filename'] ?? ''), \PATHINFO_FILENAME) ?: 'Cuestionario', 0, 200);
+    }
+
+    /** A user message without the <attached_file> blocks in front of it: what the user typed. */
+    private static function withoutFiles(string $content): string
+    {
+        return trim((string) preg_replace('#<attached_file>.*?</attached_file>#su', '', $content));
     }
 
     /** @param list<string> $quickReplies */

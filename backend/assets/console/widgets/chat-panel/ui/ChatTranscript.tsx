@@ -1,9 +1,11 @@
+import {SentFiles} from '@console/features/chat-attachments';
 import {errorMessageKey, isApiError} from '@shared/api';
 import {joinClasses} from '@shared/lib';
 import {Button, Icon} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {renderMarkdown} from '../lib/markdown';
-import type {AiExperience} from '../model/useAiExperience';
+import type {ChatState} from '../model/useChat';
+import './chat-panel.css';
 import {AssistantMark} from './AssistantMark';
 
 function Timestamp({time, right = false}: {time?: string; right?: boolean}) {
@@ -17,38 +19,55 @@ function Timestamp({time, right = false}: {time?: string; right?: boolean}) {
 }
 
 /**
- * The conversation, read like a chat with Claude: the assistant writes plain text beside its mark, the author's turns
- * sit in a soft bubble on the right; then "thinking…" or the failure with Retry.
+ * The conversation, read like a chat with Claude: the assistant writes beside its mark (Markdown, tables included),
+ * the author's turns sit in a soft bubble on the right with the documents they attached, the screen's notes in a
+ * violet card; then "thinking…" or the failure with Retry (none for a plan refusal). The greeting is only shown,
+ * never sent.
  */
-export function ChatTranscript({chat}: {chat: AiExperience}) {
-  const {t} = useTranslation('pages.ai-experience');
-  const {messages, times, status, failure} = chat;
+export function ChatTranscript({
+  chat,
+  greeting,
+}: {
+  chat: ChatState;
+  greeting: string;
+}) {
+  const {t} = useTranslation('widgets.chat-panel');
+  const {entries, status, error} = chat;
+  const lastAnswer = entries.findLastIndex((line) => line.role === 'assistant');
 
   return (
-    <div
-      className="ai-chat__transcript"
-      role="log"
-      aria-label={t('conversation')}
-    >
-      {/* The greeting is only shown, never sent. */}
+    <div className="ai-chat__transcript" role="log" aria-label={t('log')}>
       <div className="ai-chat__turn ai-chat__turn--assistant">
         <AssistantMark />
         <div className="ai-chat__body">
-          <div className="ai-chat__text">{t('greeting')}</div>
+          <div className="ai-md">{renderMarkdown(greeting)}</div>
           <Timestamp time={chat.greetingTime} />
         </div>
       </div>
 
-      {messages.map((message, index) =>
-        message.role === 'assistant' ? (
-          <div key={index} className="ai-chat__turn ai-chat__turn--assistant">
+      {entries.map((line, index) =>
+        line.role === 'user' ? (
+          <div key={line.id} className="ai-chat__turn ai-chat__turn--user">
+            <div className="ai-chat__bubble">
+              {line.content}
+              <SentFiles files={line.files} />
+            </div>
+            <Timestamp time={line.time} right />
+          </div>
+        ) : line.role === 'note' ? (
+          <div key={line.id} className="ai-chat__note ai-md">
+            {renderMarkdown(line.content)}
+          </div>
+        ) : (
+          <div key={line.id} className="ai-chat__turn ai-chat__turn--assistant">
             <AssistantMark />
             <div className="ai-chat__body">
               <div className="ai-md">
-                {renderMarkdown(message.content, chat.askItem)}
+                {renderMarkdown(line.content, chat.askItem)}
               </div>
-              {index === messages.length - 1 &&
+              {index === lastAnswer &&
               status === 'idle' &&
+              !chat.disabled &&
               chat.quickReplies.length > 0 ? (
                 <div
                   className="ai-chat__replies"
@@ -66,13 +85,8 @@ export function ChatTranscript({chat}: {chat: AiExperience}) {
                   ))}
                 </div>
               ) : null}
-              <Timestamp time={times[index]} />
+              <Timestamp time={line.time} />
             </div>
-          </div>
-        ) : (
-          <div key={index} className="ai-chat__turn ai-chat__turn--user">
-            <div className="ai-chat__bubble">{message.content}</div>
-            <Timestamp time={times[index]} right />
           </div>
         ),
       )}
@@ -103,8 +117,8 @@ export function ChatTranscript({chat}: {chat: AiExperience}) {
           >
             <Icon name="alert" size={16} />
             <span>
-              {chat.planFailure && isApiError(failure)
-                ? t(errorMessageKey(failure), {ns: 'shared'})
+              {chat.planFailure && isApiError(error)
+                ? t(errorMessageKey(error), {ns: 'shared'})
                 : t('error')}
             </span>
           </div>
