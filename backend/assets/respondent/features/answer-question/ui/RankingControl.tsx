@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {visibleOptions, type VisibleOption} from '@respondent/entities/session';
-import {Icon, IconButton} from '@shared/ui';
+import {Icon} from '@shared/ui';
 import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {ControlProps} from '../model/types';
@@ -53,43 +53,52 @@ function RankingItem({
   const {t} = useTranslation('features.answer-question');
   const {attributes, listeners, setNodeRef, transform, transition, isDragging} =
     useSortable({id: option.value, disabled});
+  // The whole card is the drag handle (mouse, touch, and Space + arrows from the keyboard). The move buttons stay
+  // for keyboard users: hidden until they get the focus.
   return (
     <li
       ref={setNodeRef}
       className="answer-rank"
       data-dragging={isDragging || undefined}
+      data-disabled={disabled || undefined}
       style={{transform: CSS.Transform.toString(transform), transition}}
+      {...attributes}
+      {...listeners}
+      aria-label={t('ranking.drag', {label: option.label})}
     >
       <span className="answer-rank__number" aria-hidden="true">
         {position + 1}
       </span>
-      <button
-        type="button"
-        className="answer-rank__handle"
-        disabled={disabled}
-        aria-label={t('ranking.drag', {label: option.label})}
-        {...attributes}
-        {...listeners}
-      >
-        <Icon name="grip" />
-      </button>
       <span className="answer-rank__label">{option.label}</span>
       <span className="answer-rank__moves">
-        <IconButton
-          size="sm"
-          label={t('ranking.up', {label: option.label})}
-          icon={<Icon name="chevron-up" />}
+        <button
+          type="button"
+          className="answer-rank__move"
+          aria-label={t('ranking.up', {label: option.label})}
           disabled={disabled || position === 0}
+          onPointerDown={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
           onClick={() => onMove(position, position - 1)}
-        />
-        <IconButton
-          size="sm"
-          label={t('ranking.down', {label: option.label})}
-          icon={<Icon name="chevron-down" />}
+        >
+          <Icon name="chevron-up" size={16} />
+        </button>
+        <button
+          type="button"
+          className="answer-rank__move"
+          aria-label={t('ranking.down', {label: option.label})}
           disabled={disabled || position === count - 1}
+          onPointerDown={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
           onClick={() => onMove(position, position + 1)}
-        />
+        >
+          <Icon name="chevron-down" size={16} />
+        </button>
       </span>
+      {disabled ? null : (
+        <span className="answer-rank__grip" aria-hidden="true">
+          <Icon name="grip" size={20} />
+        </span>
+      )}
     </li>
   );
 }
@@ -137,7 +146,9 @@ export function RankingControl({
 
   return (
     <div className="answer-ranking">
-      <p className="answer-hint">{t('ranking.hint')}</p>
+      {disabled ? null : (
+        <p className="answer-ranking__hint">{t('ranking.hint')}</p>
+      )}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

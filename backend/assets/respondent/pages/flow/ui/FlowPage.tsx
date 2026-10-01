@@ -23,12 +23,11 @@ import {
 } from '@respondent/entities/session';
 import {
   QuestionnaireRunner,
-  RunnerFrame,
+  RunnerSkeleton,
   UnavailableScreen,
   GeneratingStage,
 } from '@respondent/widgets/questionnaire-runner';
 import {useDocumentTitle} from '@shared/lib';
-import {LoadingState} from '@shared/ui';
 import {useQuery} from '@tanstack/react-query';
 import {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -142,22 +141,14 @@ export function FlowPage() {
     );
   }
   if (!flow || !brand.ready) {
-    return (
-      <div className="boot-skeleton">
-        <LoadingState />
-      </div>
-    );
+    return <RunnerSkeleton />;
   }
 
   if (generating) {
     if (!run?.pendingStateId) {
       return <Navigate to={`/f/${id}`} replace />;
     }
-    return (
-      <RunnerFrame logoUrl={brand.logoUrl} title={flow.slug}>
-        <GeneratingStage flow={flow} run={run} onReady={onReady} />
-      </RunnerFrame>
-    );
+    return <GeneratingStage flow={flow} run={run} onReady={onReady} />;
   }
 
   if (started.query.isError) {
@@ -169,11 +160,7 @@ export function FlowPage() {
   }
   const data = started.query.data;
   if (!data) {
-    return (
-      <div className="boot-skeleton">
-        <LoadingState />
-      </div>
-    );
+    return <RunnerSkeleton />;
   }
   return (
     <QuestionnaireRunner

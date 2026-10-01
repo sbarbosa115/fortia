@@ -9,7 +9,7 @@ import {
   progressPercent,
   type Session,
 } from '@respondent/entities/session';
-import {Badge, Button, Icon} from '@shared/ui';
+import {Icon} from '@shared/ui';
 import {type ReactNode, useCallback, useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useRunner} from '../model/useRunner';
@@ -97,12 +97,14 @@ export function QuestionnaireRunner(props: QuestionnaireRunnerProps) {
     children: ReactNode,
     progress?: ReactNode,
     footer?: ReactNode,
+    variant: 'page' | 'landing' = 'page',
   ) => (
     <RunnerFrame
       logoUrl={props.logoUrl}
       title={session.title}
       progress={progress}
       footer={footer}
+      variant={variant}
     >
       {children}
     </RunnerFrame>
@@ -112,34 +114,36 @@ export function QuestionnaireRunner(props: QuestionnaireRunnerProps) {
     return frame(props.intro);
   }
   if (runner.evaluating) {
-    return frame(
+    return (
       <StatusScreen
         busy
         eyebrow={t('processing.eyebrow')}
         title={t('processing.title')}
         subtitle={t('processing.subtitle')}
-      />,
+      />
     );
   }
   if (runner.submitting) {
-    return frame(
+    return (
       <StatusScreen
         busy
+        eyebrow={t('submitting.eyebrow')}
         title={t('submitting.title')}
-        subtitle={t('submitting.subtitle')}
-      />,
+      />
     );
   }
   if (runner.declined) {
-    return frame(<StatusScreen title={t('disclaimer.closed')} />);
+    return <StatusScreen title={t('disclaimer.closed')} />;
   }
   if (!runner.disclaimerAccepted) {
-    return frame(
+    return (
       <DisclaimerModal
         text={session.disclaimer ?? ''}
+        logoUrl={props.logoUrl}
+        brand={session.title}
         onAccept={runner.acceptDisclaimer}
         onDecline={runner.declineDisclaimer}
-      />,
+      />
     );
   }
   if (!runner.tutorialDone) {
@@ -155,6 +159,7 @@ export function QuestionnaireRunner(props: QuestionnaireRunnerProps) {
     resumeOpen && props.savedAt ? (
       <ResumeModal
         session={session}
+        logoUrl={props.logoUrl}
         position={index}
         total={total}
         savedAt={props.savedAt}
@@ -168,30 +173,42 @@ export function QuestionnaireRunner(props: QuestionnaireRunnerProps) {
 
   if (runner.phase === 'landing') {
     return frame(
-      <div className="landing">
-        <span className="eyebrow">{t('landing.eyebrow')}</span>
-        <h1 className="serif-heading landing__title">{session.title}</h1>
+      <article className="landing">
+        <span className="landing__eyebrow">{t('landing.eyebrow')}</span>
+        <h1 className="landing__title">{session.title}</h1>
         {session.description ? (
           <p className="landing__description">{session.description}</p>
         ) : null}
-        <Button variant="primary" onClick={runner.start}>
-          {t('landing.start')}
-        </Button>
-        <p className="muted">{t('landing.count', {count: total})}</p>
+        <div className="landing__actions">
+          <button
+            type="button"
+            className="landing__start"
+            onClick={runner.start}
+          >
+            <span>{t('landing.start')}</span>
+            <Icon name="arrow-right" size={16} />
+          </button>
+        </div>
+        {total > 0 ? (
+          <p className="landing__count">{t('landing.count', {count: total})}</p>
+        ) : null}
         {resume}
-      </div>,
+      </article>,
+      undefined,
+      undefined,
+      'landing',
     );
   }
 
   if (runner.phase === 'capture') {
-    return frame(
-      <>
+    return (
+      <div className="capture-page">
         <ContactCapture
           submitting={runner.submitting}
           onSubmit={(contact) => void runner.finish(contact)}
         />
         {resume}
-      </>,
+      </div>
     );
   }
 
@@ -201,41 +218,48 @@ export function QuestionnaireRunner(props: QuestionnaireRunnerProps) {
 
   const step = index + 1;
   const pct = progressPercent(step, total);
+  // The dotted stepper's hairline fills up to the current dot; the bar and the percentage count the current step.
+  const fill = total > 1 ? (index / (total - 1)) * 100 : 100;
+  const stepLabel = t('progress.step', {step, total});
   const progress = (
-    <div className="runner__progress">
-      <div className="runner__progress-meta">
-        <span>{t('progress.step', {step, total})}</span>
-        {props.stage && props.stage.total > 1 ? (
-          <Badge tone="accent">
-            {t('progress.stage', {
-              current: props.stage.current,
-              total: props.stage.total,
-            })}
-          </Badge>
-        ) : null}
-        <span>{t('progress.percent', {pct})}</span>
-      </div>
+    <>
       <div
-        className="runner__progress-bar"
+        className="runner__track"
         role="progressbar"
-        aria-label={t('progress.step', {step, total})}
+        aria-label={stepLabel}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={pct}
       >
-        <div style={{width: `${pct}%`}} />
+        <div className="runner__track-bar">
+          <span style={{width: `${pct}%`}} />
+        </div>
+        <div className="runner__dots" data-testid="header-step-dots">
+          <span className="runner__dots-line" />
+          <span className="runner__dots-fill" style={{width: `${fill}%`}} />
+          <ol>
+            {runner.questions.map((item, dot) => (
+              <li key={item.id} data-reached={dot <= index || undefined} />
+            ))}
+          </ol>
+        </div>
       </div>
-      <ol className="runner__dots" aria-hidden="true">
-        {runner.questions.map((item, dot) => (
-          <li
-            key={item.id}
-            data-state={
-              dot < index ? 'done' : dot === index ? 'current' : 'pending'
-            }
-          />
-        ))}
-      </ol>
-    </div>
+      <div className="runner__meta">
+        {props.stage && props.stage.total > 1 ? (
+          <span className="runner__stage">
+            {t('progress.stage', {
+              current: props.stage.current,
+              total: props.stage.total,
+            })}
+          </span>
+        ) : null}
+        <span className="runner__step" aria-hidden="true">
+          {t('progress.stepWord')} <strong>{step}</strong> {t('progress.of')}{' '}
+          {total}
+        </span>
+        <span className="runner__percent">{t('progress.percent', {pct})}</span>
+      </div>
+    </>
   );
 
   const theme = question.theme_name ?? '';
@@ -271,34 +295,52 @@ export function QuestionnaireRunner(props: QuestionnaireRunnerProps) {
     );
   }
 
+  const nextLabel = runner.saving
+    ? t('nav.saving')
+    : runner.isLast && !session.capture_user_data
+      ? t('nav.finish')
+      : t('nav.next');
   const footer = NO_FOOTER.includes(theme) ? null : (
     <div className="runner__nav">
-      <Button
-        variant="ghost"
-        icon={<Icon name="chevron-left" />}
+      <button
+        type="button"
+        className="nav-btn nav-btn--outline"
         disabled={index === 0}
         onClick={runner.goBack}
       >
+        <Icon name="arrow-left" size={16} />
         {t('nav.back')}
-      </Button>
-      <div className="row">
+      </button>
+      <div className="runner__nav-end">
         {runner.canSkip ? (
-          <Button variant="ghost" onClick={() => void runner.goSkip()}>
+          <button
+            type="button"
+            className="nav-btn nav-btn--outline"
+            disabled={runner.saving}
+            onClick={() => void runner.goSkip()}
+          >
             {t('nav.skip')}
-          </Button>
+          </button>
         ) : null}
-        <Button
-          variant="primary"
-          loading={runner.saving}
+        <button
+          type="button"
+          className="nav-btn nav-btn--primary"
           disabled={!runner.canGoNext}
+          aria-busy={runner.saving || undefined}
           onClick={() => void runner.goNext()}
         >
-          {runner.saving
-            ? t('nav.saving')
-            : runner.isLast && !session.capture_user_data
-              ? t('nav.finish')
-              : t('nav.next')}
-        </Button>
+          {runner.saving ? (
+            <span className="nav-btn__spinner" aria-hidden="true">
+              <Icon name="loader" size={16} />
+            </span>
+          ) : null}
+          {nextLabel}
+          {runner.saving ? null : (
+            <span className="nav-btn__arrow" aria-hidden="true">
+              <Icon name="arrow-right" size={16} />
+            </span>
+          )}
+        </button>
       </div>
     </div>
   );

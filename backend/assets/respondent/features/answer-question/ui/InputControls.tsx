@@ -40,7 +40,7 @@ export function TextControl({
   return (
     <div className="answer-text">
       <textarea
-        className="textarea answer-text__area"
+        className="answer-field answer-text__area"
         rows={3}
         // The question is the only thing on the screen: its answer takes the focus (§9.4).
         autoFocus
@@ -86,7 +86,7 @@ export function ContactControl({
   return (
     <div className="answer-text">
       <input
-        className="input answer-input"
+        className="answer-field answer-input"
         autoFocus
         type={isEmail ? 'email' : 'tel'}
         inputMode={isEmail ? 'email' : 'tel'}
@@ -138,11 +138,9 @@ export function RangeControl({
   const answered = typeof control.value === 'string' && control.value !== '';
   const position = answered ? Number(control.value) : rangeStart(control);
   const error = issueText(rangeIssue(control.value, control));
+  const percent = answered ? ((position - min) / (max - min || 1)) * 100 : 0;
   return (
     <div className="answer-range">
-      <div className="answer-range__value" aria-hidden="true">
-        {answered ? position : '–'}
-      </div>
       <input
         type="range"
         className="answer-range__input"
@@ -154,6 +152,9 @@ export function RangeControl({
         aria-label={question.title}
         aria-valuetext={answered ? String(position) : t('range.hint')}
         data-untouched={answered ? undefined : true}
+        style={{
+          background: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${percent}%, var(--color-muted) ${percent}%, var(--color-muted) 100%)`,
+        }}
         onChange={(event) => onChange(event.target.value)}
         onPointerUp={(event) =>
           onChange((event.target as HTMLInputElement).value)
@@ -164,20 +165,32 @@ export function RangeControl({
           }
         }}
       />
-      <div className="answer-range__scale" aria-hidden="true">
-        <span>{min}</span>
-        <span>{max}</span>
+      <div className="answer-range__scale">
+        <span className="answer-range__bound">{formatNumber(min)}</span>
+        {answered ? (
+          <span className="answer-range__value">{formatNumber(position)}</span>
+        ) : (
+          <span className="answer-range__hint" aria-live="polite">
+            {disabled ? '—' : t('range.hint')}
+          </span>
+        )}
+        <span className="answer-range__bound">{formatNumber(max)}</span>
       </div>
-      {answered ? null : (
-        <p className="answer-hint" aria-live="polite">
-          {t('range.hint')}
-        </p>
-      )}
       {error ? (
-        <p className="answer-error" role="alert">
+        <p className="answer-error answer-error--center" role="alert">
           {error}
         </p>
       ) : null}
     </div>
   );
+}
+
+/** Display only: dots for thousands and a comma for decimals (4000 → "4.000", 1234.5 → "1.234,5"). */
+function formatNumber(value: number): string {
+  if (!Number.isFinite(value)) {
+    return String(value);
+  }
+  const [integer = '', decimals] = String(Math.abs(value)).split('.');
+  const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${value < 0 ? '-' : ''}${grouped}${decimals ? `,${decimals}` : ''}`;
 }

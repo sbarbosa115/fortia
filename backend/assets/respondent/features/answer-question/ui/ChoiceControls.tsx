@@ -1,12 +1,15 @@
 import {toggleChoice, visibleOptions} from '@respondent/entities/session';
-import {Select} from '@shared/ui';
+import {Icon} from '@shared/ui';
 import {useId} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {ControlProps} from '../model/types';
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-/** Radio: cards with a letter (A, B, C…); selecting unlocks Next (PRD §9.4). */
+/**
+ * Radio: cards with a round indicator and a letter (A, B, C…); the chosen card fills with the primary colour and shows
+ * the Enter hint. Selecting unlocks Next (PRD §9.4).
+ */
 export function RadioControl({
   question,
   control,
@@ -22,26 +25,37 @@ export function RadioControl({
       role="radiogroup"
       aria-label={question.title}
     >
-      {visibleOptions(control, gender).map((option, index) => (
-        <label
-          key={option.value}
-          className="answer-choice"
-          data-checked={selected === option.value || undefined}
-        >
-          <input
-            type="radio"
-            name={name}
-            value={option.value}
-            checked={selected === option.value}
-            disabled={disabled}
-            onChange={() => onChange(option.value)}
-          />
-          <span className="answer-choice__letter" aria-hidden="true">
-            {LETTERS[index % LETTERS.length]}
-          </span>
-          <span className="answer-choice__label">{option.label}</span>
-        </label>
-      ))}
+      {visibleOptions(control, gender).map((option, index) => {
+        const checked = selected === option.value;
+        return (
+          <label
+            key={option.value}
+            className="answer-choice"
+            data-checked={checked || undefined}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={option.value}
+              checked={checked}
+              disabled={disabled}
+              onChange={() => onChange(option.value)}
+            />
+            <span className="answer-choice__radio" aria-hidden="true" />
+            <span className="answer-choice__text">
+              <span className="answer-choice__letter" aria-hidden="true">
+                {LETTERS[index % LETTERS.length]}
+              </span>
+              <span className="answer-choice__label">{option.label}</span>
+            </span>
+            {checked ? (
+              <span className="answer-choice__enter" aria-hidden="true">
+                <Icon name="corner-down-left" size={16} />
+              </span>
+            ) : null}
+          </label>
+        );
+      })}
     </div>
   );
 }
@@ -57,25 +71,33 @@ export function CheckboxControl({
   const selected = Array.isArray(control.value) ? control.value : [];
   return (
     <div className="answer-choices" role="group" aria-label={question.title}>
-      {visibleOptions(control, gender).map((option, index) => (
-        <label
-          key={option.value}
-          className="answer-choice"
-          data-checked={selected.includes(option.value) || undefined}
-        >
-          <input
-            type="checkbox"
-            value={option.value}
-            checked={selected.includes(option.value)}
-            disabled={disabled}
-            onChange={() => onChange(toggleChoice(selected, option.value))}
-          />
-          <span className="answer-choice__letter" aria-hidden="true">
-            {LETTERS[index % LETTERS.length]}
-          </span>
-          <span className="answer-choice__label">{option.label}</span>
-        </label>
-      ))}
+      {visibleOptions(control, gender).map((option, index) => {
+        const checked = selected.includes(option.value);
+        return (
+          <label
+            key={option.value}
+            className="answer-choice answer-choice--multiple"
+            data-checked={checked || undefined}
+          >
+            <input
+              type="checkbox"
+              value={option.value}
+              checked={checked}
+              disabled={disabled}
+              onChange={() => onChange(toggleChoice(selected, option.value))}
+            />
+            <span className="answer-choice__box" aria-hidden="true">
+              <Icon name="check" size={14} />
+            </span>
+            <span className="answer-choice__text">
+              <span className="answer-choice__letter" aria-hidden="true">
+                {LETTERS[index % LETTERS.length]}
+              </span>
+              <span className="answer-choice__label">{option.label}</span>
+            </span>
+          </label>
+        );
+      })}
     </div>
   );
 }
@@ -91,16 +113,21 @@ export function SelectControl({
   const {t} = useTranslation('features.answer-question');
   const value = typeof control.value === 'string' ? control.value : '';
   return (
-    <Select
+    <select
       aria-label={question.title}
       className="answer-select"
       value={value}
       disabled={disabled}
       onChange={(event) => onChange(event.target.value || null)}
-      options={[
-        {value: '', label: t('select.placeholder'), disabled: true},
-        ...visibleOptions(control, gender),
-      ]}
-    />
+    >
+      <option value="" disabled>
+        {t('select.placeholder')}
+      </option>
+      {visibleOptions(control, gender).map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
   );
 }

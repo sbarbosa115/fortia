@@ -1,25 +1,32 @@
 {
-  "select": {"placeholder": "Selecciona una opción"},
-  "range": {"hint": "Mueve o toca el control deslizante para responder"},
+  "select": {
+    "placeholder": "Selecciona una opción"
+  },
+  "range": {
+    "hint": "Mueve o toca el control para responder"
+  },
   "text": {
     "placeholder": "Escribe tu respuesta aquí...",
     "example": {
-      "rfc": "Ej.: ABC680524P76",
-      "nit": "Ej.: 9001234568",
-      "phone": "Ej.: +52 55 0000 0000"
+      "rfc": "Ej. ABC680524P76",
+      "nit": "Ej. 9001234568",
+      "phone": "+52 55 0000 0000"
     }
   },
   "contact": {
-    "emailPlaceholder": "tu@correo.com",
+    "emailPlaceholder": "tu@email.com",
     "phonePlaceholder": "Tu número de teléfono"
   },
   "ranking": {
     "hint": "Arrastra las opciones para ordenarlas según tu preferencia",
-    "drag": "Arrastrar {{label}}",
+    "drag": "Reordenar {{label}}",
     "up": "Subir {{label}}",
     "down": "Bajar {{label}}"
   },
-  "gender": {"male": "Hombre", "female": "Mujer"},
+  "gender": {
+    "male": "Hombre",
+    "female": "Mujer"
+  },
   "quote": {
     "text": "Estamos encontrando el producto perfecto para tus necesidades."
   },

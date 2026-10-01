@@ -1,9 +1,6 @@
 import {useAccountBrand, usePageViews} from '@respondent/entities/account';
 import {fetchResults, recallResult} from '@respondent/entities/session';
-import {
-  RunnerFrame,
-  StatusScreen,
-} from '@respondent/widgets/questionnaire-runner';
+import {StatusScreen} from '@respondent/widgets/questionnaire-runner';
 import {
   fromResults,
   fromSubmission,
@@ -60,8 +57,8 @@ export function ResultsPage() {
     );
   }
   return (
-    <RunnerFrame logoUrl={brand.logoUrl} title={t('documentTitle')}>
+    <div className="results-page">
       <ResultsView data={data} />
-    </RunnerFrame>
+    </div>
   );
 }

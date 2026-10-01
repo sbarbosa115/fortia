@@ -7,8 +7,7 @@ import {
 } from '@respondent/entities/flow';
 import {pollJob} from '@shared/api';
 import {RESPONDENT_POLL} from '../model/useRunner';
-import {StatusScreen} from './RunnerFrame';
-import {Button} from '@shared/ui';
+import {StatusAction, StatusScreen} from './RunnerFrame';
 import {useEffect, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
@@ -103,15 +102,14 @@ export function GeneratingStage({
       <StatusScreen
         title={t('generating.failed')}
         action={
-          <Button
-            variant="primary"
+          <StatusAction
             onClick={() => {
               setFailed(false);
               setAttempt((current) => current + 1);
             }}
           >
             {t('generating.retry')}
-          </Button>
+          </StatusAction>
         }
       />
     );

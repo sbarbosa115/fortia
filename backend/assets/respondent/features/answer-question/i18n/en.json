@@ -1,12 +1,16 @@
 {
-  "select": {"placeholder": "Select an option"},
-  "range": {"hint": "Move or tap the slider to answer"},
+  "select": {
+    "placeholder": "Select an option"
+  },
+  "range": {
+    "hint": "Move or tap the slider to answer"
+  },
   "text": {
     "placeholder": "Type your answer here...",
     "example": {
-      "rfc": "E.g.: ABC680524P76",
-      "nit": "E.g.: 9001234568",
-      "phone": "E.g.: +52 55 0000 0000"
+      "rfc": "E.g. ABC680524P76",
+      "nit": "E.g. 9001234568",
+      "phone": "+52 55 0000 0000"
     }
   },
   "contact": {
@@ -15,12 +19,17 @@
   },
   "ranking": {
     "hint": "Drag the options to put them in your preferred order",
-    "drag": "Drag {{label}}",
+    "drag": "Reorder {{label}}",
     "up": "Move {{label}} up",
     "down": "Move {{label}} down"
   },
-  "gender": {"male": "Male", "female": "Female"},
-  "quote": {"text": "We're finding the perfect product for your needs."},
+  "gender": {
+    "male": "Male",
+    "female": "Female"
+  },
+  "quote": {
+    "text": "We're finding the perfect product for your needs."
+  },
   "weight": {
     "unit": "Weight unit",
     "kg": "KG",

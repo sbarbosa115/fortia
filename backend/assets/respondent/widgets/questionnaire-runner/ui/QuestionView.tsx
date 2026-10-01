@@ -6,7 +6,7 @@ import {
   type Question,
   type Session,
 } from '@respondent/entities/session';
-import {Badge, Icon} from '@shared/ui';
+import {Icon} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import type {Runner} from '../model/useRunner';
 
@@ -18,21 +18,23 @@ function ReviewBanner({question}: {question: Question}) {
   }
   if (review.status === 'approved') {
     return (
-      <div className="banner banner--success" role="status">
-        <Icon name="check" />
-        <div>
-          <strong>{t('review.approved')}</strong>
-          <p>{t('review.approvedBody')}</p>
+      <div className="banner" role="status">
+        <Icon name="lock" size={20} />
+        <div className="banner__body">
+          <p className="banner__title">{t('review.approved')}</p>
+          <p className="banner__text">{t('review.approvedBody')}</p>
         </div>
       </div>
     );
   }
   return (
-    <div className="banner banner--warning" role="status">
-      <Icon name="alert" />
-      <div>
-        <strong>{t('review.rejected')}</strong>
-        <p>{review.comment?.trim() || t('review.rejectedBody')}</p>
+    <div className="banner banner--danger" role="status">
+      <Icon name="alert-circle" size={20} />
+      <div className="banner__body">
+        <p className="banner__title">{t('review.rejected')}</p>
+        <p className="banner__text">
+          {review.comment?.trim() || t('review.rejectedBody')}
+        </p>
       </div>
     </div>
   );
@@ -104,12 +106,20 @@ export function QuestionView({
     );
   }
 
+  // The attempts left show on a follow-up of a free answer (text, audio) with follow-ups configured.
+  const followUp = Boolean(question.improvement_message);
+  const attempts = Number(question.max_followups ?? 0);
+  const showAttempts =
+    followUp &&
+    (control?.type === 'text' || control?.type === 'audio') &&
+    attempts > 0;
+
   return (
     <section className="question" aria-labelledby={titleId}>
-      <span className="eyebrow">
+      <p className="question__eyebrow">
         {String(question.order + 1).padStart(2, '0')}
-      </span>
-      <h1 id={titleId} className="serif-heading question__title">
+      </p>
+      <h1 id={titleId} className="question__title">
         {question.title}
       </h1>
       {question.description ? (
@@ -118,19 +128,29 @@ export function QuestionView({
       {question.disclaimer ? (
         <p className="question__disclaimer">{question.disclaimer}</p>
       ) : null}
-      <ReviewBanner question={question} />
-      {question.improvement_message ? (
-        <div className="banner banner--warning" role="status">
-          <Icon name="info" />
-          <div className="stack">
-            <Badge tone="warning">
-              {t('followUp.attemptsLeft', {count: question.max_followups ?? 0})}
-            </Badge>
-            <p>{question.improvement_message}</p>
-          </div>
+      {showAttempts ? (
+        <div className="question__attempts">
+          <span>
+            <Icon name="rotate-ccw" size={12} />
+            {t('followUp.attemptsLeft', {count: attempts})}
+          </span>
         </div>
       ) : null}
-      {body ? <div className="question__answer">{body}</div> : null}
+      <ReviewBanner question={question} />
+      {body || followUp ? (
+        <div className="question__answer">
+          {followUp ? (
+            <div className="banner" role="status" aria-live="polite">
+              <Icon name="alert-circle" size={20} />
+              <div className="banner__body">
+                <p className="banner__title">{t('followUp.improve')}</p>
+                <p className="banner__text">{question.improvement_message}</p>
+              </div>
+            </div>
+          ) : null}
+          {body}
+        </div>
+      ) : null}
     </section>
   );
 }

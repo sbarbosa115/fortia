@@ -129,21 +129,21 @@ export function EcommerceResults({
 export function DefaultResults({data}: {data: ResultsData}) {
   const {t} = useTranslation('widgets.results-view');
   return (
-    <div className="results stack">
-      <ResultCard>
-        <div className="results__done">
-          <span className="results__done-icon" aria-hidden="true">
-            <Icon name="check" size={28} />
+    <div className="results-done">
+      <div className="results-done__card">
+        <div className="results-done__body">
+          <span className="results-done__icon" aria-hidden="true">
+            <Icon name="circle-check" size={32} />
           </span>
-          <h1 className="serif-heading results__title">
+          <h1 className="results-done__title">
             {data.resultCopy?.['title']?.trim() || t('default.title')}
           </h1>
-          <p className="muted">
+          <p className="results-done__subtitle">
             {data.resultCopy?.['subtitle']?.trim() || t('default.subtitle')}
           </p>
         </div>
         <CtaBlock cta={data.cta} newTabLabel={t('newTab')} />
-      </ResultCard>
+      </div>
     </div>
   );
 }

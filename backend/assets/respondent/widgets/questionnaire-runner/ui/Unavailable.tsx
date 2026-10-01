@@ -1,6 +1,7 @@
 import {isApiError} from '@shared/api';
 import {appConfig} from '@shared/config';
 import {useTranslation} from 'react-i18next';
+import {Icon} from '@shared/ui';
 import {StatusScreen} from './RunnerFrame';
 
 /**
@@ -16,17 +17,19 @@ export function UnavailableScreen({
 }) {
   const {t} = useTranslation('widgets.questionnaire-runner');
   if (isApiError(error) && error.status === 429) {
-    return <StatusScreen title={t('unavailable.limit')} />;
+    return <StatusScreen mark title={t('unavailable.limit')} />;
   }
   if (notFound === 'flow') {
     return <StatusScreen title={t('unavailable.flow')} />;
   }
   return (
     <StatusScreen
+      mark
       title={t('unavailable.notFound')}
       action={
-        <a className="btn btn--secondary" href={appConfig().consoleUrl}>
+        <a className="status-cta" href={appConfig().consoleUrl}>
           {t('unavailable.create')}
+          <Icon name="arrow-right" size={18} />
         </a>
       }
     />

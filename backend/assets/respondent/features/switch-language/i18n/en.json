@@ -1,5 +1,6 @@
 {
   "label": "Language",
+  "select": "Change language",
   "short": {"es": "ES", "en": "EN"},
   "names": {"es": "Español", "en": "English"}
 }

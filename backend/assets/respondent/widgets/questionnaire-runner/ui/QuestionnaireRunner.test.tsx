@@ -97,7 +97,9 @@ describe('QuestionnaireRunner (PRD §9.3)', () => {
     expect(
       screen.getByRole('heading', {name: 'How was it?'}),
     ).toBeInTheDocument();
-    expect(screen.getByText('Step 1 of 2')).toBeInTheDocument();
+    expect(
+      screen.getByRole('progressbar', {name: 'Step 1 of 2'}),
+    ).toHaveAttribute('aria-valuenow', '50');
     expect(screen.getByText('50%')).toBeInTheDocument();
     expect(screen.getByText('01')).toBeInTheDocument();
   });
@@ -178,7 +180,7 @@ describe('QuestionnaireRunner (PRD §9.3)', () => {
     expect(screen.getByText('Saved 5 minutes ago')).toBeInTheDocument();
     expect(screen.getByText('Question 2 of 2')).toBeInTheDocument();
     expect(
-      screen.getByText('Your 1 saved answer will be deleted'),
+      screen.getByText('Your saved answer will be deleted'),
     ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', {name: 'Start over'}));
     expect(onStartOver).toHaveBeenCalled();

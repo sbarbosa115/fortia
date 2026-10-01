@@ -1,5 +1,5 @@
-import {Button, Field, Icon, TextInput} from '@shared/ui';
-import {type FormEvent, useState} from 'react';
+import {Icon, type IconName} from '@shared/ui';
+import {type FormEvent, useId, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
   type Contact,
@@ -49,56 +49,121 @@ export function ContactCapture({
   };
 
   return (
-    <form className="capture stack" onSubmit={submit} noValidate>
-      <span className="eyebrow">{t('eyebrow')}</span>
-      <h1 className="serif-heading capture__title">{t('title')}</h1>
-      <p className="muted">{t('description')}</p>
-      <Field
-        label={t('name')}
-        required
-        error={errors.name ? t(errors.name) : null}
-      >
-        <TextInput
+    <form
+      className="capture-card"
+      onSubmit={submit}
+      noValidate
+      aria-label={t('ariaForm')}
+    >
+      <header className="capture-card__head">
+        <span className="capture-card__eyebrow">{t('eyebrow')}</span>
+        <h1 className="capture-card__title">{t('title')}</h1>
+        <p className="capture-card__description">{t('description')}</p>
+      </header>
+      <div className="capture-card__fields">
+        <CaptureField
+          label={t('name')}
+          icon="user"
           autoComplete="name"
           placeholder={t('namePlaceholder')}
           value={contact.name}
-          onChange={(event) => edit('name', event.target.value)}
+          error={errors.name ? t(errors.name) : null}
+          onChange={(value) => edit('name', value)}
         />
-      </Field>
-      <Field
-        label={t('email')}
-        required
-        error={errors.email ? t(errors.email) : null}
-      >
-        <TextInput
+        <CaptureField
+          label={t('email')}
+          icon="mail"
           type="email"
           autoComplete="email"
           placeholder={t('emailPlaceholder')}
           value={contact.email}
-          onChange={(event) => edit('email', event.target.value)}
+          error={errors.email ? t(errors.email) : null}
+          onChange={(value) => edit('email', value)}
         />
-      </Field>
-      <Field
-        label={t('phone')}
-        required
-        error={errors.phone ? t(errors.phone) : null}
-      >
-        <TextInput
+        <CaptureField
+          label={t('phone')}
+          icon="phone"
           type="tel"
-          inputMode="tel"
           autoComplete="tel"
           placeholder={t('phonePlaceholder')}
           value={contact.phone}
-          onChange={(event) => edit('phone', phoneInput(event.target.value))}
+          error={errors.phone ? t(errors.phone) : null}
+          onChange={(value) => edit('phone', phoneInput(value))}
         />
-      </Field>
-      <p className="capture__privacy">
-        <Icon name="lock" size={14} /> {t('privacy')}
+      </div>
+      <button
+        type="submit"
+        className="capture-card__submit"
+        disabled={submitting}
+        aria-busy={submitting || undefined}
+      >
+        {submitting ? (
+          <span className="spin" aria-hidden="true">
+            <Icon name="loader" size={16} />
+          </span>
+        ) : (
+          <Icon name="arrow-right" size={16} />
+        )}
+        <span>{t('submit')}</span>
+      </button>
+      <p className="capture-card__privacy">
+        <Icon name="lock" size={16} />
+        <span>{t('privacy')}</span>
       </p>
-      <Button type="submit" variant="primary" loading={submitting}>
-        {t('submit')}
-      </Button>
     </form>
+  );
+}
+
+/** A labelled field of the capture card: the icon inside the input, the error under it. */
+function CaptureField({
+  label,
+  icon,
+  type = 'text',
+  autoComplete,
+  placeholder,
+  value,
+  error,
+  required = true,
+  onChange,
+}: {
+  label: string;
+  required?: boolean;
+  icon: IconName;
+  type?: 'text' | 'email' | 'tel';
+  autoComplete: string;
+  placeholder?: string;
+  value: string;
+  error?: string | null;
+  onChange: (value: string) => void;
+}) {
+  const id = useId();
+  const errorId = `${id}-error`;
+  return (
+    <div className="capture-field">
+      <label htmlFor={id} className="capture-field__label">
+        {label}
+      </label>
+      <div className="capture-field__control">
+        <Icon name={icon} size={16} />
+        <input
+          id={id}
+          type={type}
+          inputMode={type === 'tel' ? 'tel' : undefined}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      </div>
+      {error ? (
+        <p id={errorId} className="capture-field__error" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -132,35 +197,51 @@ export function EmailCapture({
     }
   };
   return (
-    <form className="capture stack" onSubmit={submit} noValidate>
-      <span className="eyebrow">{t('done.eyebrow')}</span>
-      <h1 className="serif-heading capture__title">{t('done.title')}</h1>
-      <Field label={t('done.name')}>
-        <TextInput
+    <form
+      className="capture-card capture-card--flat"
+      onSubmit={submit}
+      noValidate
+    >
+      <header className="capture-card__head capture-card__head--center">
+        <h1 className="capture-card__done">{t('done.eyebrow')}</h1>
+        <p className="capture-card__ready">{t('done.title')}</p>
+      </header>
+      <div className="capture-card__fields">
+        <CaptureField
+          label={t('done.name')}
+          icon="user"
           autoComplete="name"
+          required={false}
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={setName}
         />
-      </Field>
-      <Field
-        label={t('email')}
-        required
-        error={errors.email ? t(errors.email) : null}
-      >
-        <TextInput
+        <CaptureField
+          label={t('email')}
+          icon="mail"
           type="email"
           autoComplete="email"
           placeholder={t('emailPlaceholder')}
           value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
+          error={errors.email ? t(errors.email) : null}
+          onChange={(value) => {
+            setEmail(value);
             setErrors({});
           }}
         />
-      </Field>
-      <Button type="submit" variant="primary" loading={submitting}>
-        {t('done.submit')}
-      </Button>
+      </div>
+      <button
+        type="submit"
+        className="capture-card__submit"
+        disabled={submitting}
+        aria-busy={submitting || undefined}
+      >
+        {submitting ? (
+          <span className="spin" aria-hidden="true">
+            <Icon name="loader" size={16} />
+          </span>
+        ) : null}
+        <span>{t('done.submit')}</span>
+      </button>
     </form>
   );
 }

@@ -1,18 +1,18 @@
 {
-  "eyebrow": "Un último paso",
+  "eyebrow": "Último paso",
   "title": "¿A dónde te enviamos tus resultados?",
   "description": "Comparte tus datos de contacto para enviarte tus recomendaciones personalizadas.",
-  "privacy": "Tu información es privada y solo se usará para entregarte tus resultados.",
+  "privacy": "Tu información es privada y solo la usaremos para enviarte tus resultados.",
   "name": "Nombre",
   "namePlaceholder": "Tu nombre completo",
-  "email": "Correo",
-  "emailPlaceholder": "tu@correo.com",
+  "email": "Email",
+  "emailPlaceholder": "tu@email.com",
   "phone": "Teléfono",
   "phonePlaceholder": "Tu número de teléfono",
   "submit": "Ver mis resultados",
   "errors": {
     "name": "Ingresa tu nombre.",
-    "email": "Ingresa un correo válido (p. ej. nombre@ejemplo.com).",
+    "email": "Ingresa un correo válido (ej. nombre@ejemplo.com).",
     "phone": "Ingresa un teléfono válido: de 7 a 15 dígitos, prefijo + opcional."
   },
   "done": {
@@ -20,5 +20,6 @@
     "title": "Tu perfil de salud personalizado está listo",
     "name": "Tu nombre (opcional)",
     "submit": "Ver mis resultados"
-  }
+  },
+  "ariaForm": "Formulario de datos de contacto"
 }

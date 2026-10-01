@@ -212,3 +212,86 @@
 .stage-track__step[data-state='pending'] {
   color: var(--color-text-muted);
 }
+
+/* The results page: no header; the result centred in the viewport (long results simply grow). */
+.results-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 24px 16px;
+  background: var(--color-bg);
+}
+
+/* Default result: a borderless white card with the check in a soft primary halo. */
+.results-done {
+  width: 100%;
+  padding: 40px 0;
+}
+.results-done__card {
+  width: 100%;
+  max-width: 576px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+.results-done__body {
+  padding: 40px 24px;
+  text-align: center;
+}
+.results-done__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 24px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-primary) 5%, transparent);
+  color: var(--color-primary);
+}
+.results-done__icon svg {
+  stroke-width: 2;
+}
+.results-done__title {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.results-done__subtitle {
+  max-width: 448px;
+  margin: 12px auto 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.625;
+  white-space: pre-line;
+}
+.results-done .result-cta {
+  margin: 0 24px 40px;
+}
+@media (min-width: 640px) {
+  .results-page {
+    padding: 24px;
+  }
+}
+@media (min-width: 768px) {
+  .results-done__body {
+    padding: 48px 40px;
+  }
+  .results-done__title {
+    font-size: 30px;
+  }
+  .results-done__subtitle {
+    font-size: 16px;
+  }
+  .results-done .result-cta {
+    margin: 0 40px 48px;
+  }
+}

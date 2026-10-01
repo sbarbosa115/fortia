@@ -1,0 +1,226 @@
+/* The data capture card (PRD §9.6): a white card with a small uppercase kicker, the fields with an icon inside. */
+.capture-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 448px;
+  margin: 0 auto;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+.capture-card--flat {
+  max-width: 560px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.capture-card__head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+.capture-card__head--center {
+  text-align: center;
+}
+.capture-card__eyebrow {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.capture-card__title {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.capture-card__description {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.625;
+}
+.capture-card__done {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.capture-card__ready {
+  margin: 8px 0 0;
+  background: linear-gradient(
+    to right,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 60%, transparent)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+.capture-card__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.capture-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.capture-field__label {
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.capture-field__control {
+  position: relative;
+}
+.capture-field__control > svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  stroke-width: 2;
+  transform: translateY(-50%);
+}
+.capture-field__control input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px 0 40px;
+  border: 0;
+  border-radius: var(--radius-input);
+  background: color-mix(in srgb, var(--color-muted) 70%, transparent);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: box-shadow 0.15s;
+}
+.capture-field__control input::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 60%, transparent);
+}
+.capture-field__control input:focus {
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--color-primary) 60%, transparent);
+}
+.capture-field__control input[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 1px var(--color-danger);
+}
+.capture-field__error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 12px;
+}
+.capture-card__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: var(--radius-input);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color 0.15s,
+    transform 0.15s;
+}
+.capture-card__submit:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+.capture-card__submit:active {
+  transform: scale(0.99);
+}
+.capture-card__submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.capture-card__submit:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-primary);
+}
+.capture-card__submit svg {
+  stroke-width: 2;
+}
+.capture-card__privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: color-mix(in srgb, var(--color-text-muted) 80%, transparent);
+  font-size: 12px;
+}
+.capture-card__privacy svg {
+  flex: none;
+  margin-top: 2px;
+  stroke-width: 2;
+}
+@media (min-width: 640px) {
+  .capture-card {
+    padding: 40px;
+  }
+  .capture-card--flat {
+    padding: 0;
+  }
+  .capture-card__eyebrow,
+  .capture-field__label,
+  .capture-field__error,
+  .capture-card__privacy {
+    font-size: 14px;
+  }
+  .capture-card__title {
+    font-size: 30px;
+  }
+  .capture-card__description,
+  .capture-field__control input,
+  .capture-card__submit {
+    font-size: 16px;
+  }
+  .capture-field__control input {
+    height: 48px;
+  }
+  .capture-card__submit {
+    height: 56px;
+  }
+  .capture-card__done {
+    font-size: 36px;
+  }
+  .capture-card__ready {
+    font-size: 30px;
+  }
+}
+@media (min-width: 1024px) {
+  .capture-card__done {
+    font-size: 48px;
+  }
+  .capture-card__ready {
+    font-size: 36px;
+  }
+}

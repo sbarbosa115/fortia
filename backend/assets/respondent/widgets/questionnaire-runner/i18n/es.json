@@ -2,11 +2,11 @@
   "processing": {
     "eyebrow": "Un momento",
     "title": "Estamos revisando tu respuesta",
-    "subtitle": "Solo toma unos segundos. Revisamos lo que escribiste para asegurarnos de tener todo lo que necesitamos."
+    "subtitle": "Esto toma solo unos segundos. Procesamos lo que escribiste para asegurarnos de que tenemos todo lo necesario."
   },
   "submitting": {
-    "title": "Procesando",
-    "subtitle": "Estamos terminando de documentar tus respuestas"
+    "eyebrow": "Procesando",
+    "title": "Estamos terminando de documentar tus respuestas"
   },
   "disclaimer": {
     "title": "Antes de empezar",
@@ -16,7 +16,7 @@
     "closed": "Ya puedes cerrar esta pestaña."
   },
   "landing": {
-    "eyebrow": "Comencemos",
+    "eyebrow": "Comenzamos",
     "start": "Comenzar cuestionario",
     "count_one": "{{count}} pregunta",
     "count_other": "{{count}} preguntas"
@@ -32,31 +32,34 @@
       "day_one": "Guardado hace {{count}} día",
       "day_other": "Guardado hace {{count}} días"
     },
-    "body": "Tienes un cuestionario sin terminar. Guardamos tus respuestas: puedes continuar desde la misma pregunta.",
+    "body": "Tienes un cuestionario sin terminar. Guardamos tus respuestas — puedes seguir desde la misma pregunta.",
     "question": "Pregunta {{current}} de {{total}}",
     "continue": "Continuar",
     "startOver": "Empezar de nuevo",
-    "warning_one": "Se borrará tu {{count}} respuesta guardada",
-    "warning_other": "Se borrarán tus {{count}} respuestas guardadas"
+    "warning_one": "Se borrará la respuesta guardada",
+    "warning_other": "Se borrarán las {{count}} respuestas guardadas"
   },
   "progress": {
     "step": "Paso {{step}} de {{total}}",
-    "percent": "{{pct}} %",
+    "stepWord": "Paso",
+    "of": "de",
+    "percent": "{{pct}}%",
     "stage": "Etapa {{current}} de {{total}}"
   },
   "followUp": {
-    "attemptsLeft_one": "Te queda {{count}} intento",
-    "attemptsLeft_other": "Te quedan {{count}} intentos"
+    "attemptsLeft_one": "Te queda 1 intento",
+    "attemptsLeft_other": "Te quedan {{count}} intentos",
+    "improve": "Mejora tu respuesta"
   },
   "review": {
     "approved": "Aprobada",
     "approvedBody": "Esta respuesta fue aprobada y no se puede cambiar.",
     "rejected": "Requiere corrección",
-    "rejectedBody": "Tu revisor te pidió responder esta pregunta de nuevo."
+    "rejectedBody": "Quien revisó tus respuestas pidió que respondas esta pregunta de nuevo."
   },
   "nav": {
     "back": "Atrás",
-    "skip": "Omitir",
+    "skip": "Saltar",
     "next": "Siguiente",
     "finish": "Finalizar",
     "saving": "Guardando…"
@@ -64,22 +67,22 @@
   "submitFailed": "No pudimos enviar tus respuestas. Revisa tu conexión e inténtalo de nuevo.",
   "empty": "Este cuestionario no tiene preguntas.",
   "unavailable": {
-    "limit": "Se alcanzó el límite de respuestas.",
+    "limit": "Se ha alcanzado el límite de respuestas.",
     "notFound": "Este cuestionario no existe.",
     "create": "¿Quieres crear este cuestionario?",
-    "flow": "No pudimos encontrar este flujo."
+    "flow": "No se encontró este flujo."
   },
   "generating": {
     "eyebrow": "Un momento",
-    "title": "Estamos preparando tus siguientes preguntas",
+    "title": "Preparando tus siguientes preguntas",
     "messages": {
-      "0": "Estamos ajustando el siguiente paso a partir de tus respuestas.",
+      "0": "Estamos personalizando el siguiente paso con tus respuestas.",
       "1": "Revisando lo que nos has contado hasta ahora…",
-      "2": "Eligiendo las preguntas que más importan para ti.",
-      "3": "Ya casi: le damos los últimos toques.",
-      "4": "Gracias por tu paciencia, solo toma un momento."
+      "2": "Eligiendo las preguntas más importantes para ti.",
+      "3": "Ya casi está — dando los últimos toques.",
+      "4": "Gracias por tu paciencia, esto solo toma un momento."
     },
     "failed": "No pudimos preparar tus siguientes preguntas.",
-    "retry": "Intentar de nuevo"
+    "retry": "Reintentar"
   }
 }

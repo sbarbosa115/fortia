@@ -20,5 +20,6 @@
     "title": "Your Personalized Health Profile Is Ready",
     "name": "Your name (optional)",
     "submit": "See My Results"
-  }
+  },
+  "ariaForm": "Contact details form"
 }

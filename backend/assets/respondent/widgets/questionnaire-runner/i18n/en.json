@@ -5,8 +5,8 @@
     "subtitle": "This only takes a few seconds. We're reviewing what you wrote to make sure we have everything we need."
   },
   "submitting": {
-    "title": "Processing",
-    "subtitle": "We're finishing documenting your answers"
+    "eyebrow": "Processing",
+    "title": "We're finishing documenting your answers"
   },
   "disclaimer": {
     "title": "Before you start",
@@ -36,17 +36,20 @@
     "question": "Question {{current}} of {{total}}",
     "continue": "Continue",
     "startOver": "Start over",
-    "warning_one": "Your {{count}} saved answer will be deleted",
+    "warning_one": "Your saved answer will be deleted",
     "warning_other": "Your {{count}} saved answers will be deleted"
   },
   "progress": {
     "step": "Step {{step}} of {{total}}",
+    "stepWord": "Step",
+    "of": "of",
     "percent": "{{pct}}%",
     "stage": "Stage {{current}} of {{total}}"
   },
   "followUp": {
     "attemptsLeft_one": "{{count}} attempt left",
-    "attemptsLeft_other": "{{count}} attempts left"
+    "attemptsLeft_other": "{{count}} attempts left",
+    "improve": "Improve your answer"
   },
   "review": {
     "approved": "Approved",

@@ -14,7 +14,7 @@ import {
   heightValid,
   type WeightUnit,
 } from '@respondent/entities/session';
-import {Field, Select, TextInput} from '@shared/ui';
+import {Field, Icon, Select, TextInput} from '@shared/ui';
 import {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {ControlProps} from '../model/types';
@@ -43,19 +43,31 @@ export function GenderControl({
       role="radiogroup"
       aria-label={question.title}
     >
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          role="radio"
-          aria-checked={control.value === option.value}
-          className="answer-gender__card"
-          disabled={disabled}
-          onClick={() => onChange(option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
+      {options.map((option) => {
+        const checked = control.value === option.value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={checked}
+            className="answer-gender__card"
+            data-gender={option.value === 'female' ? 'female' : 'male'}
+            disabled={disabled}
+            onClick={() => onChange(option.value)}
+          >
+            {checked ? (
+              <span className="answer-gender__check" aria-hidden="true">
+                <Icon name="check" size={24} />
+              </span>
+            ) : null}
+            <span className="answer-gender__avatar" aria-hidden="true">
+              <Icon name="user-round" size={64} />
+            </span>
+            <span className="answer-gender__label">{option.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -87,18 +99,47 @@ export function TransitionScreen({
   }, [onDone]);
   return (
     <div className="answer-transition" role="status" aria-live="polite">
-      <span className="answer-transition__pulse" aria-hidden="true" />
       {theme === 'quote' ? (
-        <p className="serif-heading answer-transition__title">
-          {t('quote.text')}
-        </p>
+        <>
+          <div className="answer-transition__mark" aria-hidden="true">
+            <span className="answer-transition__halo">
+              <span className="answer-transition__disc">
+                <span className="answer-transition__core" />
+              </span>
+            </span>
+            <span className="answer-transition__spinner" />
+          </div>
+          <p className="answer-transition__title">{t('quote.text')}</p>
+          <p className="answer-transition__dots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </p>
+          <div className="answer-transition__steps" aria-hidden="true">
+            <span data-on />
+            <span />
+            <span />
+            <span />
+          </div>
+        </>
       ) : (
         <>
-          <p className="serif-heading answer-transition__title">{title}</p>
-          {description ? <p className="muted">{description}</p> : null}
-          {disclaimer ? (
-            <p className="answer-disclaimer">{disclaimer}</p>
+          <div className="answer-transition__burst" aria-hidden="true">
+            <span className="answer-transition__core" />
+          </div>
+          <p className="answer-transition__title">{title}</p>
+          {description ? (
+            <p className="answer-transition__description">{description}</p>
           ) : null}
+          {disclaimer ? (
+            <p className="answer-transition__disclaimer">{disclaimer}</p>
+          ) : null}
+          <div className="answer-transition__bounce" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+          </div>
         </>
       )}
     </div>
