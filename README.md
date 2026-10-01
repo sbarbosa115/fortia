@@ -187,3 +187,7 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
   real-time transport and the account's `transcription_url` are not wired, and a respondent without either can type
   the answer (D12). `/f/:id` chains stop at "We couldn't prepare your next questions" until the generation item adds
   `POST /questionnaire/prompt`. The PDF report is built in the browser (jsPDF, standard fonts).
+- Documentation: the guides' screenshots of AI Experience and Plans are missing (those pages were still placeholders
+  when they were taken; retake them from the demo data and drop the PNGs in `public/docs/screenshots/{es,en}/`). The
+  demo videos use placeholder YouTube ids, so the embedded player says the video is unavailable until an Admin sets
+  real links through `/admin/videos`; there is no admin UI for videos (the "tower" console is out of scope).
