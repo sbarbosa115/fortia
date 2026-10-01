@@ -1,0 +1,18 @@
+{
+  "validation": {
+    "letters": "Only letters are allowed",
+    "numbers": "Only numbers are allowed, no spaces",
+    "symbols": "Only symbols are allowed",
+    "letters_numbers": "Only letters and numbers are allowed",
+    "letters_symbols": "Only letters and symbols are allowed",
+    "numbers_symbols": "Only numbers and symbols are allowed",
+    "letters_numbers_symbols": "Only letters, numbers and symbols are allowed",
+    "rfc": "Enter a valid RFC: 3 or 4 letters, a YYMMDD date and the homoclave. E.g.: ABC680524P76",
+    "nit": "Enter a valid NIT: 9 or 10 digits, with no dots or dash. E.g.: 9001234568",
+    "phone": "Enter a phone number with the country code. E.g.: +52 55 0000 0000",
+    "pattern": "The answer does not have the expected format",
+    "email": "Enter a valid email address (e.g. name@example.com).",
+    "contactPhone": "Enter a valid phone number: digits only, optional international prefix (e.g. +57).",
+    "range": "Choose a value within the range"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "validation": {
+    "letters": "Solo se permiten letras",
+    "numbers": "Solo se permiten números, sin espacios",
+    "symbols": "Solo se permiten símbolos",
+    "letters_numbers": "Solo se permiten letras y números",
+    "letters_symbols": "Solo se permiten letras y símbolos",
+    "numbers_symbols": "Solo se permiten números y símbolos",
+    "letters_numbers_symbols": "Solo se permiten letras, números y símbolos",
+    "rfc": "Ingresa un RFC válido: 3 o 4 letras, una fecha AAMMDD y la homoclave. Ej.: ABC680524P76",
+    "nit": "Ingresa un NIT válido: 9 o 10 dígitos, sin puntos ni guion. Ej.: 9001234568",
+    "phone": "Ingresa un teléfono con el código de país. Ej.: +52 55 0000 0000",
+    "pattern": "La respuesta no tiene el formato esperado",
+    "email": "Ingresa un correo válido (p. ej. nombre@ejemplo.com).",
+    "contactPhone": "Ingresa un teléfono válido: solo dígitos, prefijo internacional opcional (p. ej. +57).",
+    "range": "Elige un valor dentro del rango"
+  }
+}
