@@ -1,3 +1,31 @@
 {
-  "title": "Documentation"
+  "title": "Documentation",
+  "subtitle": "Guides and videos to get the most out of Mappi.",
+  "sections": "Documentation sections",
+  "tabs": {
+    "guides": "Guides",
+    "videos": "Videos"
+  },
+  "guides": {
+    "search": "Search guides",
+    "searchPlaceholder": "Search guides…",
+    "topic": "Topic",
+    "allTopics": "All topics",
+    "count_one": "{{count}} guide",
+    "count_other": "{{count}} guides",
+    "read": "Read the guide",
+    "noMatches": "No guides match your search",
+    "noMatchesBody": "Try other words or another topic."
+  },
+  "videos": {
+    "loading": "Loading videos…",
+    "empty": "No videos yet",
+    "emptyBody": "Videos in this language will appear here. Meanwhile, the guides cover every part of the console.",
+    "readGuides": "Read the guides",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min",
+    "player": "Video: {{title}}",
+    "unavailable": "This video can't be played here.",
+    "openOnYoutube": "Open on YouTube"
+  }
 }

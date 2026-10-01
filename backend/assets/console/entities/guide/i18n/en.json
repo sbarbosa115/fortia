@@ -1,0 +1,13 @@
+{
+  "topics": {
+    "getting-started": "Getting started",
+    "questionnaires": "Questionnaires",
+    "organizations": "Organizations",
+    "projects": "Projects",
+    "analytics": "Analytics",
+    "brand-integrations": "Brand and integrations",
+    "account": "Account"
+  },
+  "readingTime_one": "{{count}} min read",
+  "readingTime_other": "{{count}} min read"
+}

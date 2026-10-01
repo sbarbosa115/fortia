@@ -142,6 +142,7 @@
     "WEBHOOK_NOT_FOUND": "Ese webhook no existe.",
     "INVALID_API_KEY": "La clave de API no es válida.",
     "INVALID_LANGUAGE": "Ese idioma no es válido.",
+    "VIDEO_NOT_FOUND": "Ese video no existe.",
     "UNKNOWN_PLAN": "Ese plan no existe.",
     "INVALID_DATE_RANGE": "Las fechas no son válidas.",
     "UNKNOWN_FEATURE": "Esa funcionalidad no existe.",

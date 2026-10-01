@@ -1,3 +1,14 @@
 {
-  "title": "Guide"
+  "title": "Guide",
+  "documentation": "Documentation",
+  "breadcrumb": "Breadcrumb",
+  "contents": "On this page",
+  "tip": "Tip",
+  "tipLabel": "Tip:",
+  "previous": "Previous guide",
+  "next": "Next guide",
+  "pager": "More guides",
+  "notFound": "Guide not found",
+  "notFoundBody": "That guide does not exist. Browse every guide in the documentation.",
+  "backToDocs": "Back to the documentation"
 }

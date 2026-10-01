@@ -1,3 +1,14 @@
 {
-  "title": "Guía"
+  "title": "Guía",
+  "documentation": "Documentación",
+  "breadcrumb": "Ruta de navegación",
+  "contents": "En esta página",
+  "tip": "Consejo",
+  "tipLabel": "Consejo:",
+  "previous": "Guía anterior",
+  "next": "Guía siguiente",
+  "pager": "Más guías",
+  "notFound": "Guía no encontrada",
+  "notFoundBody": "Esa guía no existe. Explora todas las guías en la documentación.",
+  "backToDocs": "Volver a la documentación"
 }

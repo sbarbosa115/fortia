@@ -1,0 +1,116 @@
+/* Documentation (item 20): the guide cards and the videos of /documentation. */
+.docs-panel {
+  margin-top: var(--space-5);
+}
+.docs-count {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+.docs-grid,
+.docs-videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.docs-videos {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+.docs-grid > li,
+.docs-videos > li {
+  display: flex;
+}
+.docs-card,
+.docs-video {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.docs-card {
+  padding: var(--space-5);
+}
+.docs-card > article,
+.docs-video__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.docs-video > article {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.docs-video__body {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+.docs-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.docs-card__time {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.docs-card__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.docs-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+.docs-card__title a:hover {
+  color: var(--color-primary);
+}
+.docs-card__summary {
+  flex: 1;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.docs-card__read {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  color: var(--color-primary-strong);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.docs-card__read:hover {
+  text-decoration: underline;
+}
+.docs-video__player {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--color-sidebar);
+}
+.docs-video__player iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.docs-video__unavailable {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  margin: 0;
+  padding: var(--space-4);
+  color: var(--color-sidebar-text);
+  font-size: 14px;
+  text-align: center;
+}
