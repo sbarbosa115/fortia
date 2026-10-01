@@ -1,3 +1,63 @@
 {
-  "title": "Asignaciones"
+  "title": "Asignaciones",
+  "subtitle": "Envía un cuestionario a las personas de una organización y sigue sus respuestas.",
+  "count_one": "{{count}} asignación",
+  "count_other": "{{count}} asignaciones",
+  "new": "Nueva asignación",
+  "notInPlan": "Tu plan no incluye asignaciones.",
+  "tabs": {
+    "label": "Asignaciones por tipo",
+    "all": "Todas",
+    "default": "Estándar",
+    "follow_up": "Seguimiento"
+  },
+  "columns": {
+    "name": "Nombre",
+    "audience": "Audiencia",
+    "type": "Tipo",
+    "progress": "Progreso",
+    "due": "Vence",
+    "created": "Creada",
+    "active": "Activa",
+    "actions": "Acciones"
+  },
+  "attempt": "Intento {{n}}",
+  "progress": {
+    "respondents": "{{completed}} de {{total}} personas",
+    "questions": "{{completed}} de {{total}} preguntas",
+    "completed": "Completado",
+    "label": "Progreso de {{name}}"
+  },
+  "activeLabel": "Activa: {{name}}",
+  "activated": "«{{name}}» está activa",
+  "deactivated": "«{{name}}» está inactiva",
+  "actions": {
+    "view": "Ver {{name}}",
+    "edit": "Editar {{name}}",
+    "copyLink": "Copiar el enlace de {{name}}",
+    "delete": "Eliminar {{name}}",
+    "remind": "Enviar un recordatorio de {{name}}",
+    "remindDone": "Está completo: no hay nada que recordar"
+  },
+  "delete": {
+    "title": "¿Eliminar la asignación?",
+    "body": "«{{name}}» se eliminará y su enlace dejará de funcionar. Las respuestas ya enviadas se conservan.",
+    "confirm": "Eliminar",
+    "done": "«{{name}}» se eliminó"
+  },
+  "reminder": {
+    "title": "¿Enviar el recordatorio ahora?",
+    "body": "Se enviará un correo con el enlace a «{{name}}» a las personas que lo responden.",
+    "confirm": "Enviar recordatorio",
+    "done_one": "Recordatorio enviado a {{count}} destinatario",
+    "done_other": "Recordatorio enviado a {{count}} destinatarios"
+  },
+  "empty": {
+    "title": "Aún no hay asignaciones",
+    "body": "Asigna un cuestionario a una organización para recoger las respuestas de su gente."
+  },
+  "filtered": {
+    "title": "No hay asignaciones de este tipo",
+    "body": "Prueba otro tipo o quita el filtro."
+  }
 }

@@ -1,3 +1,63 @@
 {
-  "title": "Assignations"
+  "title": "Assignations",
+  "subtitle": "Send a questionnaire to the people of an organization and follow their answers.",
+  "count_one": "{{count}} assignation",
+  "count_other": "{{count}} assignations",
+  "new": "New assignation",
+  "notInPlan": "Your plan doesn't include assignations.",
+  "tabs": {
+    "label": "Assignations by type",
+    "all": "All",
+    "default": "Default",
+    "follow_up": "Follow-up"
+  },
+  "columns": {
+    "name": "Name",
+    "audience": "Audience",
+    "type": "Type",
+    "progress": "Progress",
+    "due": "Due",
+    "created": "Created",
+    "active": "Active",
+    "actions": "Actions"
+  },
+  "attempt": "Attempt {{n}}",
+  "progress": {
+    "respondents": "{{completed}} of {{total}} people",
+    "questions": "{{completed}} of {{total}} questions",
+    "completed": "Completed",
+    "label": "Progress of {{name}}"
+  },
+  "activeLabel": "Active: {{name}}",
+  "activated": "\"{{name}}\" is active",
+  "deactivated": "\"{{name}}\" is inactive",
+  "actions": {
+    "view": "View {{name}}",
+    "edit": "Edit {{name}}",
+    "copyLink": "Copy the link of {{name}}",
+    "delete": "Delete {{name}}",
+    "remind": "Send a reminder for {{name}}",
+    "remindDone": "It is complete: there is nothing to remind"
+  },
+  "delete": {
+    "title": "Delete assignation?",
+    "body": "\"{{name}}\" will be deleted and its link will stop working. The answers already given are kept.",
+    "confirm": "Delete",
+    "done": "\"{{name}}\" was deleted"
+  },
+  "reminder": {
+    "title": "Send the reminder now?",
+    "body": "An email with the link to \"{{name}}\" will be sent to the people who answer it.",
+    "confirm": "Send reminder",
+    "done_one": "Reminder sent to {{count}} recipient",
+    "done_other": "Reminder sent to {{count}} recipients"
+  },
+  "empty": {
+    "title": "No assignations yet",
+    "body": "Assign a questionnaire to an organization to collect its people's answers."
+  },
+  "filtered": {
+    "title": "No assignations of this type",
+    "body": "Try another type, or clear the filter."
+  }
 }

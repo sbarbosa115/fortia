@@ -1,0 +1,31 @@
+{
+  "audience": {
+    "everybody": "Todos",
+    "people_one": "{{count}} persona",
+    "people_other": "{{count}} personas",
+    "area": "Área: {{first}}",
+    "role": "Cargo: {{first}}",
+    "more": "+{{count}}"
+  },
+  "type": {
+    "default": "Estándar",
+    "follow_up": "Seguimiento"
+  },
+  "reviewStatus": {
+    "not_ready": "Aún sin completar",
+    "in_review": "En revisión",
+    "changes_requested": "Cambios solicitados",
+    "approved": "Aprobado"
+  },
+  "noDue": "Sin fecha límite",
+  "urgency": {
+    "today": "vence hoy",
+    "inDays_one": "en {{count}} día",
+    "inDays_other": "en {{count}} días",
+    "overdue_one": "vencido hace {{count}} día",
+    "overdue_other": "vencido hace {{count}} días",
+    "done": "completado"
+  },
+  "linkCopied": "Enlace copiado",
+  "linkNotCopied": "No se pudo copiar el enlace"
+}

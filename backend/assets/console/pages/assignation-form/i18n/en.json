@@ -1,3 +1,119 @@
 {
-  "title": "Assignation"
+  "title": "Assignation",
+  "newTitle": "New assignation",
+  "editTitle": "Edit assignation",
+  "subtitle": "Choose who answers which questionnaire, then how they sign in.",
+  "steps": {
+    "label": "Steps",
+    "basic": "Basic",
+    "registration": "Registration",
+    "save": "Save",
+    "current": "{{step}} (current step)"
+  },
+  "type": {
+    "label": "Type",
+    "default": "Default",
+    "defaultBody": "The members you pick answer, each with their own session",
+    "follow_up": "Follow-up",
+    "followUpBody": "The members you pick share one session and receive a daily reminder until it is completed"
+  },
+  "dueDate": {
+    "label": "Due date",
+    "hint": "The day this follow-up should be completed. Reminders keep arriving until it is."
+  },
+  "organization": {
+    "label": "Organization",
+    "search": "Search organizations",
+    "placeholder": "Search by name",
+    "choose": "Choose an organization",
+    "none": "No organization matches",
+    "noneYet": "There are no organizations yet.",
+    "create": "Create one",
+    "members_one": "{{count}} member",
+    "members_other": "{{count}} members"
+  },
+  "audience": {
+    "label": "Who responds?",
+    "needsOrganization": "Choose an organization first.",
+    "all": "Everybody",
+    "allBody": "Every member of the organization",
+    "members": "People",
+    "membersBody": "The people you check",
+    "area": "Area",
+    "areaBody": "Everybody in the areas you check",
+    "role": "Role",
+    "roleBody": "Everybody with the roles you check",
+    "search": "Search people",
+    "searchPlaceholder": "Search by name, email, area or role",
+    "noPeople": "Nobody matches",
+    "noValues": "No member has one yet",
+    "valueCount_one": "{{value}} ({{count}} person)",
+    "valueCount_other": "{{value}} ({{count}} people)",
+    "count_one": "{{count}} person will respond",
+    "count_other": "{{count}} people will respond"
+  },
+  "questionnaire": {
+    "label": "Questionnaire",
+    "search": "Search questionnaires",
+    "placeholder": "Search by title",
+    "none": "No questionnaire matches",
+    "loadMore": "Load more",
+    "selected": "Selected: {{title}}",
+    "change": "Change",
+    "conflict": "This questionnaire is already assigned to \"{{organization}}\". A copy of the questionnaire will be created and the copy will be assigned instead.",
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions"
+  },
+  "name": {
+    "label": "Name"
+  },
+  "description": {
+    "label": "Description",
+    "hint": "An internal note about this assignation. Respondents never see it."
+  },
+  "registration": {
+    "title": "Registration",
+    "intro": "This is the sign-in slide respondents see before the questionnaire.",
+    "slideTitle": "Sign in",
+    "field": "Field",
+    "visible": "Visible",
+    "required": "Required",
+    "fixed": "Always asked",
+    "visibleLabel": "{{field}} is visible",
+    "requiredLabel": "{{field}} is required",
+    "fields": {
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "area": "Area"
+    }
+  },
+  "actions": {
+    "next": "Next",
+    "back": "Back",
+    "create": "Create assignation",
+    "save": "Save changes"
+  },
+  "done": {
+    "created": "Assignation created!",
+    "updated": "Assignation updated!",
+    "body": "Share this link with the people who answer \"{{name}}\".",
+    "link": "Respondent link",
+    "copy": "Copy",
+    "toList": "Go to Assignations",
+    "view": "Open the assignation"
+  },
+  "errors": {
+    "organizationRequired": "Organization is required",
+    "audienceRequired": "Check at least one person, area or role, or choose Everybody",
+    "questionnaireRequired": "Questionnaire is required",
+    "nameRequired": "Name is required",
+    "dueDateInvalid": "Enter a valid due date",
+    "registrationContact": "At least one of email or phone must be required",
+    "fix": "Check the highlighted fields before continuing.",
+    "race": "This questionnaire was just assigned to another organization. Please review and try again."
+  },
+  "notFound": "This assignation does not exist.",
+  "backToList": "Back to Assignations"
 }

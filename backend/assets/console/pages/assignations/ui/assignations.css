@@ -1,0 +1,41 @@
+/* pages/assignations (item assignations): the listing's own layout; everything else is the house kit. */
+.assignations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.assignations__name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+}
+.assignations__name a {
+  color: inherit;
+}
+.assignations__name strong {
+  overflow-wrap: anywhere;
+}
+.assignations__meta {
+  font-size: 13px;
+}
+.assignations__meta a {
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.assignations__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.assignations__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 140px;
+  font-size: 13px;
+}
+.assignations__nowrap {
+  white-space: nowrap;
+}

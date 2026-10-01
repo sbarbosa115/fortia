@@ -1,0 +1,8 @@
+/* entities/assignation: the small pieces the assignation screens share. */
+.assignation-due {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  white-space: nowrap;
+}

@@ -15,8 +15,9 @@ export {
   formatDate,
   daysUntil,
   todayIso,
+  dueUrgency,
 } from './dates';
-export type {TimeZoneMode} from './dates';
+export type {TimeZoneMode, UrgencyLevel} from './dates';
 export {formatMoney, percent, joinClasses} from './format';
 export {decodeJwt} from './jwt';
 export {useDebouncedValue, useDocumentTitle} from './hooks';

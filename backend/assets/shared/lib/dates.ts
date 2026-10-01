@@ -59,3 +59,37 @@ export function todayIso(today: Date = new Date()): string {
   const d = String(today.getDate()).padStart(2, '0');
   return `${today.getFullYear()}-${m}-${d}`;
 }
+
+export type UrgencyLevel =
+  'later' | 'soon' | 'near' | 'urgent' | 'overdue' | 'done';
+
+/**
+ * The deadline's urgency (PRD §10.11, whole calendar days from today, local): later > 14, soon 8–14, near 3–7,
+ * urgent 0–2, overdue < 0, done once completed. Null without a due date.
+ */
+export function dueUrgency(
+  dueDate: string | null | undefined,
+  completed: boolean,
+  today: Date = new Date(),
+): {level: UrgencyLevel; days: number} | null {
+  if (!dueDate) {
+    return null;
+  }
+  const days = daysUntil(dueDate, today);
+  if (completed) {
+    return {level: 'done', days};
+  }
+  if (days < 0) {
+    return {level: 'overdue', days};
+  }
+  if (days <= 2) {
+    return {level: 'urgent', days};
+  }
+  if (days <= 7) {
+    return {level: 'near', days};
+  }
+  if (days <= 14) {
+    return {level: 'soon', days};
+  }
+  return {level: 'later', days};
+}

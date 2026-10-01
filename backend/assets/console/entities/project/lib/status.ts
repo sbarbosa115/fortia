@@ -1,4 +1,3 @@
-import {daysUntil} from '@shared/lib';
 import type {Tone} from '@shared/ui';
 
 /** A project's state (PRD §7.12); `empty` = no assignations. */
@@ -57,39 +56,9 @@ export function stateTone(state: string): Tone {
   return TONES[state as ProjectState] ?? 'neutral';
 }
 
-export type UrgencyLevel =
-  'later' | 'soon' | 'near' | 'urgent' | 'overdue' | 'done';
-
-/**
- * The deadline's urgency (PRD §10.11, whole calendar days from today, local): later > 14, soon 8–14, near 3–7,
- * urgent 0–2, overdue < 0, done once completed. Null without a due date.
- */
-export function dueUrgency(
-  dueDate: string | null | undefined,
-  completed: boolean,
-  today: Date = new Date(),
-): {level: UrgencyLevel; days: number} | null {
-  if (!dueDate) {
-    return null;
-  }
-  const days = daysUntil(dueDate, today);
-  if (completed) {
-    return {level: 'done', days};
-  }
-  if (days < 0) {
-    return {level: 'overdue', days};
-  }
-  if (days <= 2) {
-    return {level: 'urgent', days};
-  }
-  if (days <= 7) {
-    return {level: 'near', days};
-  }
-  if (days <= 14) {
-    return {level: 'soon', days};
-  }
-  return {level: 'later', days};
-}
+// The due-date urgency is shared with the assignations screens (PRD §10.11): it lives in @shared/lib.
+export {dueUrgency} from '@shared/lib';
+export type {UrgencyLevel} from '@shared/lib';
 
 export type NextStep =
   | 'review'
