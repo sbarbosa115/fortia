@@ -1910,7 +1910,7 @@ export interface components {
             ended_at?: string | null;
             flow_id?: string | null;
             /** @enum {string} */
-            status: "filling" | "filled_out" | "processing" | "completed" | "in_progress" | "submitted";
+            status: "filling" | "filled_out" | "processing" | "completed";
             user_data?: {
                 name?: string;
                 email?: string;

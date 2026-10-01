@@ -6634,9 +6634,7 @@
                             "filling",
                             "filled_out",
                             "processing",
-                            "completed",
-                            "in_progress",
-                            "submitted"
+                            "completed"
                         ]
                     },
                     "user_data": {
