@@ -152,26 +152,26 @@ describe('ProjectsPage', () => {
     fetchMock.mockReset();
   });
 
-  it('shows a project row with its state, approvals, deadline and next step', async () => {
+  it('shows a project row with its status, approvals, deadline and next step', async () => {
     fetchMock.mockResolvedValue(page([project()]));
 
     renderPage();
 
     const table = within(await screen.findByRole('table', {name: 'Projects'}));
     expect(table.getByText('Store opening Q4')).toBeInTheDocument();
-    expect(table.getByText('Acme Retail')).toBeInTheDocument();
+    expect(table.getByText(/^Acme Retail, created /)).toBeInTheDocument();
     expect(table.getByText('AR')).toBeInTheDocument();
     expect(table.getByText('Needs your review')).toBeInTheDocument();
     expect(table.getByText('0 of 2 approved')).toBeInTheDocument();
     expect(
-      table.getByRole('progressbar', {name: 'Store opening Q4: 69% complete'}),
-    ).toHaveAttribute('aria-valuenow', '69');
+      table.getByRole('progressbar', {name: '0 of 2 approved'}),
+    ).toHaveAttribute('aria-valuenow', '0');
     expect(table.getByText(/^in \d+ days$/)).toBeInTheDocument();
     expect(table.getByRole('link', {name: 'Review answers'})).toHaveAttribute(
       'href',
       '/assignations/a-2',
     );
-    expect(screen.getByText('1 project')).toBeInTheDocument();
+    expect(screen.getByText('1–1 of 1')).toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'New project'})).toHaveAttribute(
       'href',
       '/projects/new',
@@ -198,31 +198,33 @@ describe('ProjectsPage', () => {
       screen.getByRole('table', {name: 'Assignations of Store opening Q4'}),
     );
     expect(detail.getByText('Question 4 of 8')).toBeInTheDocument();
-    expect(detail.getByText('4 of 4 questions')).toBeInTheDocument();
+    expect(detail.getByText('Completed')).toBeInTheDocument();
     expect(detail.getByText('1 of 4 reviewed')).toBeInTheDocument();
-    expect(detail.getByText('Not complete yet')).toBeInTheDocument();
-    expect(detail.getByRole('link', {name: 'Review'})).toHaveAttribute(
+    expect(detail.getByText('Not ready for review yet')).toBeInTheDocument();
+    expect(
+      detail.getByRole('link', {name: 'Open the assignation Visual review'}),
+    ).toHaveAttribute('href', '/assignations/a-2');
+    expect(
+      detail.getByRole('link', {name: 'Open the assignation Store checklist'}),
+    ).toHaveAttribute('href', '/assignations/a-1');
+    expect(detail.getByText('Review', {selector: 'a'})).toHaveAttribute(
       'href',
       '/assignations/a-2',
     );
-    expect(detail.getByRole('link', {name: 'Open'})).toHaveAttribute(
-      'href',
-      '/assignations/a-1',
-    );
   });
 
-  it('asks the API for the tab state and the search', async () => {
+  it('asks the API for the status pill and the search', async () => {
     fetchMock.mockResolvedValue(page([project()]));
     renderPage();
     await screen.findByText('Store opening Q4');
 
-    await userEvent.click(screen.getByRole('tab', {name: 'In progress'}));
+    await userEvent.click(screen.getByRole('button', {name: 'In progress'}));
     await waitFor(() =>
       expect(fetchMock).toHaveBeenLastCalledWith(
         expect.objectContaining({status: 'progress', page: 1}),
       ),
     );
-    await userEvent.click(screen.getByRole('tab', {name: 'Completed'}));
+    await userEvent.click(screen.getByRole('button', {name: 'Completed'}));
     await waitFor(() =>
       expect(fetchMock).toHaveBeenLastCalledWith(
         expect.objectContaining({status: 'approved'}),
@@ -230,7 +232,7 @@ describe('ProjectsPage', () => {
     );
 
     await userEvent.type(
-      screen.getByRole('searchbox', {name: 'Search projects'}),
+      screen.getByRole('searchbox', {name: 'Search project or organization'}),
       'retail',
     );
     await waitFor(() =>
@@ -246,16 +248,16 @@ describe('ProjectsPage', () => {
     await screen.findByText('Store opening Q4');
     fetchMock.mockResolvedValue(page([]));
 
-    await userEvent.click(screen.getByRole('tab', {name: 'Overdue'}));
+    await userEvent.click(screen.getByRole('button', {name: 'Overdue'}));
     expect(
-      await screen.findByRole('heading', {name: 'No projects match'}),
+      await screen.findByText('No project matches this filter.'),
     ).toBeInTheDocument();
 
     fetchMock.mockResolvedValue(page([project()]));
     await userEvent.click(screen.getByRole('button', {name: 'Clear filters'}));
     expect(await screen.findByText('Store opening Q4')).toBeInTheDocument();
-    expect(screen.getByRole('tab', {name: 'All'})).toHaveAttribute(
-      'aria-selected',
+    expect(screen.getByRole('button', {name: 'All'})).toHaveAttribute(
+      'aria-pressed',
       'true',
     );
   });
@@ -266,8 +268,11 @@ describe('ProjectsPage', () => {
     renderPage();
 
     expect(
-      await screen.findByRole('heading', {name: 'No projects yet'}),
+      await screen.findByText(/^No projects yet\. Create one to follow/),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {name: 'Create the first project'}),
+    ).toHaveAttribute('href', '/projects/new');
   });
 
   it('shows the error with a retry', async () => {
@@ -302,7 +307,9 @@ describe('ProjectsPage', () => {
         name: 'More actions for Store opening Q4',
       }),
     );
-    await userEvent.click(screen.getByRole('menuitem', {name: 'Delete'}));
+    await userEvent.click(
+      screen.getByRole('menuitem', {name: 'Delete project'}),
+    );
 
     const dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByText('Delete this project?')).toBeInTheDocument();
@@ -331,25 +338,31 @@ describe('ProjectsPage', () => {
         name: 'More actions for Store opening Q4',
       }),
     );
-    await userEvent.click(screen.getByRole('menuitem', {name: 'Edit'}));
+    await userEvent.click(screen.getByRole('menuitem', {name: 'Edit project'}));
 
     const dialog = within(screen.getByRole('dialog'));
-    expect(dialog.getByLabelText('Organization')).toHaveValue('Acme Retail');
-    expect(dialog.getByLabelText('Organization')).toBeDisabled();
+    expect(dialog.getByLabelText(/Organization/)).toHaveValue('Acme Retail');
+    expect(dialog.getByLabelText(/Organization/)).toHaveAttribute('readonly');
+    // Each slot offers the organization's free follow-ups.
     expect(
-      await dialog.findByRole('checkbox', {name: 'Training plan'}),
-    ).not.toBeChecked();
-    expect(
-      dialog.getByRole('checkbox', {name: 'Store checklist'}),
-    ).toBeChecked();
+      await dialog.findAllByRole('option', {name: 'Training plan'}),
+    ).toHaveLength(2);
+    expect(dialog.getByRole('combobox', {name: 'Assignation #1'})).toHaveValue(
+      'a-1',
+    );
+    expect(dialog.getByRole('combobox', {name: 'Assignation #2'})).toHaveValue(
+      'a-2',
+    );
     await userEvent.clear(dialog.getByLabelText(/Deadline/));
-    await userEvent.clear(dialog.getByLabelText(/Name/));
-    await userEvent.click(dialog.getByRole('button', {name: 'Save changes'}));
+    await userEvent.clear(dialog.getByLabelText(/Project name/));
+    await userEvent.click(dialog.getByRole('button', {name: 'Save'}));
 
     expect(
       dialog.getByText('Choose a deadline for the project'),
     ).toBeInTheDocument();
-    expect(dialog.getByText('Name is required')).toBeInTheDocument();
+    expect(
+      dialog.getByText('The project name is required'),
+    ).toBeInTheDocument();
   });
 
   it('disables the changes for a read-only user, with the reason', async () => {
@@ -368,8 +381,13 @@ describe('ProjectsPage', () => {
         name: 'More actions for Store opening Q4',
       }),
     );
-    expect(screen.getByRole('menuitem', {name: 'Edit'})).toBeDisabled();
-    expect(screen.getByRole('menuitem', {name: 'Delete'})).toBeDisabled();
+    expect(screen.getByRole('menuitem', {name: 'Edit project'})).toBeDisabled();
+    expect(
+      screen.getByRole('menuitem', {name: 'Delete project'}),
+    ).toBeDisabled();
+    expect(
+      screen.getAllByText("Your read-only role can't make changes.").length,
+    ).toBeGreaterThan(0);
   });
 
   it('disables "New project" when the plan does not include assignations', async () => {

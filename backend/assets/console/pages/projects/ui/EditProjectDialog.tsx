@@ -7,11 +7,10 @@ import {
 } from '@console/entities/project';
 import {
   Button,
-  Checkbox,
-  ErrorState,
   Field,
-  LoadingState,
+  Icon,
   Modal,
+  Select,
   TextArea,
   TextInput,
   useToast,
@@ -26,10 +25,12 @@ import {
   toPayload,
 } from '../model/editForm';
 
+type Slot = {key: number; value: string};
+
 /**
- * Edit a project (PRD §10.12): name (required, ≤ 200), organization (read-only), description (≤ 2000), deadline
- * (required: it moves, never clears) and its assignations, chosen among the organization's follow-ups that are not
- * in another project.
+ * Edit a project: name (required, ≤ 200), the organization (fixed), its assignations (one select each, + for more,
+ * among the organization's follow-ups that are not in another project), the deadline (required: it moves, never
+ * clears) and the description (≤ 2000).
  */
 export function EditProjectDialog({
   project,
@@ -42,6 +43,17 @@ export function EditProjectDialog({
   const toast = useToast();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<EditDraft>(() => draftFrom(project));
+  const [slots, setSlots] = useState<Slot[]>(() =>
+    project.assignations.length > 0
+      ? project.assignations.map((item, index) => ({
+          key: index,
+          value: item.assignations_id,
+        }))
+      : [{key: 0, value: ''}],
+  );
+  const [nextKey, setNextKey] = useState(() =>
+    Math.max(1, project.assignations.length),
+  );
   const [submitted, setSubmitted] = useState(false);
   const detail = useQuery({
     queryKey: projectQueryKey(project.project_id),
@@ -50,30 +62,52 @@ export function EditProjectDialog({
   const save = useMutation({
     mutationFn: (value: EditDraft) =>
       updateProject(project.project_id, toPayload(value)),
-    onSuccess: async (saved) => {
-      toast.success(t('edit.saved', {name: saved.name}));
+    onSuccess: async () => {
+      toast.success(t('form.saved'));
       await queryClient.invalidateQueries({queryKey: PROJECTS_QUERY_KEY});
       onClose();
     },
     onError: (failure) => toast.apiError(failure),
   });
 
+  const eligible = (detail.data?.available_assignations ?? []).map((item) => ({
+    value: item.assignations_id,
+    label: item.name,
+  }));
+  const picked = slots.filter((slot) => slot.value !== '').length;
+  const canAddSlot =
+    eligible.length > picked && slots.every((slot) => slot.value !== '');
+  const canRemoveSlot = slots.length > 1;
+
   const errors = submitted ? editErrors(draft) : {};
   function set<K extends keyof EditDraft>(key: K, value: EditDraft[K]) {
     setDraft((current) => ({...current, [key]: value}));
   }
-  const toggleAssignation = (id: string, checked: boolean) =>
-    set(
-      'assignationIds',
-      checked
-        ? [...draft.assignationIds, id]
-        : draft.assignationIds.filter((value) => value !== id),
+  const setSlot = (index: number, value: string) =>
+    setSlots((current) =>
+      current.map((slot, position) =>
+        position === index ? {...slot, value} : slot,
+      ),
     );
+  const addSlot = () => {
+    setSlots((current) => [...current, {key: nextKey, value: ''}]);
+    setNextKey((key) => key + 1);
+  };
+  const removeSlot = (index: number) =>
+    setSlots((current) => current.filter((_, position) => position !== index));
+  const close = () => {
+    if (!save.isPending) {
+      onClose();
+    }
+  };
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
     setSubmitted(true);
     if (Object.keys(editErrors(draft)).length === 0) {
-      save.mutate(draft);
+      save.mutate({
+        ...draft,
+        assignationIds: slots.map((slot) => slot.value).filter(Boolean),
+      });
     }
   };
   const formId = `edit-project-${project.project_id}`;
@@ -81,12 +115,11 @@ export function EditProjectDialog({
   return (
     <Modal
       open
-      wide
-      title={t('edit.title')}
-      onClose={onClose}
+      title={t('form.title')}
+      onClose={close}
       footer={
         <>
-          <Button onClick={onClose}>
+          <Button onClick={close} disabled={save.isPending}>
             {t('actions.cancel', {ns: 'shared'})}
           </Button>
           <Button
@@ -95,85 +128,158 @@ export function EditProjectDialog({
             form={formId}
             loading={save.isPending}
           >
-            {t('actions.saveChanges', {ns: 'shared'})}
+            {t(save.isPending ? 'form.saving' : 'form.save')}
           </Button>
         </>
       }
     >
-      <form
-        id={formId}
-        className="projects__form"
-        noValidate
-        onSubmit={onSubmit}
-      >
+      <form id={formId} className="project-form" noValidate onSubmit={onSubmit}>
+        <p className="project-form__description">{t('form.description')}</p>
         <Field
-          label={t('edit.name')}
+          label={t('form.name')}
           required
-          error={errors.name ? t(`edit.errors.${errors.name}`) : null}
+          error={errors.name ? t(`form.errors.${errors.name}`) : null}
         >
           <TextInput
             value={draft.name}
             maxLength={200}
+            autoComplete="off"
+            placeholder={t('form.namePlaceholder')}
             onChange={(event) => set('name', event.target.value)}
           />
         </Field>
-        <Field label={t('edit.organization')} hint={t('edit.organizationHint')}>
-          <TextInput value={project.organization_name} readOnly disabled />
+        <div className="field">
+          <label className="field__label" htmlFor={`${formId}-organization`}>
+            {t('form.organization')}
+            <span className="field__required" aria-hidden>
+              *
+            </span>
+          </label>
+          <span className="project-form__locked">
+            <Icon name="lock" size={14} />
+            <input
+              id={`${formId}-organization`}
+              value={project.organization_name}
+              readOnly
+              aria-describedby={`${formId}-organization-hint`}
+            />
+          </span>
+          <span className="field__hint" id={`${formId}-organization-hint`}>
+            {t('form.organizationLocked')}
+          </span>
+        </div>
+        <fieldset className="project-form__slots">
+          <legend className="field__label">{t('form.assignations')}</legend>
+          {detail.isPending ? (
+            <p className="project-form__note">
+              <span className="project-form__spin" aria-hidden>
+                <Icon name="loader" size={14} />
+              </span>
+              {t('form.loadingAssignations')}
+            </p>
+          ) : null}
+          {detail.isError ? (
+            <p className="project-form__note" data-tone="danger">
+              {t('form.loadAssignationsError')}
+            </p>
+          ) : null}
+          {detail.isSuccess && eligible.length === 0 ? (
+            <p className="project-form__note">{t('form.noneAvailable')}</p>
+          ) : null}
+          <ul>
+            {slots.map((slot, index) => {
+              const takenElsewhere = new Set(
+                slots
+                  .filter((other) => other.key !== slot.key)
+                  .map((other) => other.value),
+              );
+              const known = project.assignations.find(
+                (item) => item.assignations_id === slot.value,
+              );
+              const options = eligible.filter(
+                (option) => !takenElsewhere.has(option.value),
+              );
+              // Until the choices load, the slot still shows the assignation it holds.
+              if (
+                known &&
+                !options.some((option) => option.value === slot.value)
+              ) {
+                options.unshift({
+                  value: known.assignations_id,
+                  label: known.name,
+                });
+              }
+              return (
+                <li key={slot.key}>
+                  <Select
+                    aria-label={t('form.assignationN', {n: index + 1})}
+                    value={slot.value}
+                    onChange={(event) => setSlot(index, event.target.value)}
+                    options={[
+                      {
+                        value: '',
+                        label: t('form.assignationPlaceholder'),
+                        disabled: true,
+                      },
+                      ...options,
+                    ]}
+                  />
+                  <button
+                    type="button"
+                    className="project-form__remove"
+                    aria-label={t('form.removeAssignation', {n: index + 1})}
+                    disabled={!canRemoveSlot}
+                    onClick={() => removeSlot(index)}
+                  >
+                    <Icon name="close" size={16} />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <button
+            type="button"
+            className="project-form__add"
+            aria-label={t('form.addAssignation')}
+            title={t('form.addAssignation')}
+            disabled={!canAddSlot}
+            onClick={addSlot}
+          >
+            <Icon name="plus" size={16} />
+          </button>
+        </fieldset>
+        <Field
+          label={t('form.deadline')}
+          required
+          error={errors.dueDate ? t(`form.errors.${errors.dueDate}`) : null}
+        >
+          <TextInput
+            type="date"
+            className="project-form__date"
+            value={draft.dueDate}
+            onChange={(event) => set('dueDate', event.target.value)}
+          />
         </Field>
         <Field
-          label={t('edit.description')}
+          label={
+            <>
+              {t('form.descriptionLabel')}{' '}
+              <span className="project-form__optional">
+                {t('form.optional')}
+              </span>
+            </>
+          }
           error={
-            errors.description ? t(`edit.errors.${errors.description}`) : null
+            errors.description ? t(`form.errors.${errors.description}`) : null
           }
         >
           <TextArea
             value={draft.description}
             maxLength={2000}
+            placeholder={t('form.descriptionPlaceholder')}
             onChange={(event) => set('description', event.target.value)}
           />
         </Field>
-        <Field
-          label={t('edit.deadline')}
-          required
-          hint={t('edit.deadlineHint')}
-          error={errors.dueDate ? t(`edit.errors.${errors.dueDate}`) : null}
-        >
-          <TextInput
-            type="date"
-            value={draft.dueDate}
-            onChange={(event) => set('dueDate', event.target.value)}
-          />
-        </Field>
-        <fieldset className="projects__fieldset">
-          <legend className="field__label">{t('edit.assignations')}</legend>
-          <p className="field__hint">{t('edit.assignationsHint')}</p>
-          {detail.isPending ? (
-            <LoadingState />
-          ) : detail.isError ? (
-            <ErrorState
-              error={detail.error}
-              onRetry={() => void detail.refetch()}
-            />
-          ) : (detail.data.available_assignations ?? []).length === 0 ? (
-            <p className="muted">{t('edit.noAvailable')}</p>
-          ) : (
-            <div className="projects__choices">
-              {(detail.data.available_assignations ?? []).map((item) => (
-                <Checkbox
-                  key={item.assignations_id}
-                  label={item.name}
-                  checked={draft.assignationIds.includes(item.assignations_id)}
-                  onChange={(event) =>
-                    toggleAssignation(
-                      item.assignations_id,
-                      event.target.checked,
-                    )
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </fieldset>
       </form>
     </Modal>
   );

@@ -1,12 +1,19 @@
 {
   "title": "Projects",
-  "subtitle": "Group an organization's follow-ups and track them to the deadline.",
-  "count_one": "{{count}} project",
-  "count_other": "{{count}} projects",
+  "subtitle": "Group the assignations of one organization. See what has been answered and what is waiting for your review.",
   "new": "New project",
   "notInPlan": "Your plan doesn't include assignations.",
+  "loading": "Loading projects",
+  "empty": "No projects yet. Create one to follow the follow-up assignations of an organization together.",
+  "emptyAction": "Create the first project",
+  "listLabel": "Project list",
+  "filtersLabel": "Filter by status",
+  "searchLabel": "Search project or organization",
+  "searchPlaceholder": "Search project or organization",
+  "noResults": "No project matches this filter.",
+  "noResultsSearch": "No project matches “{{query}}”.",
+  "clearFilters": "Clear filters",
   "tabs": {
-    "label": "Projects by state",
     "all": "All",
     "review": "To review",
     "progress": "In progress",
@@ -14,22 +21,16 @@
     "overdue": "Overdue",
     "completed": "Completed"
   },
-  "search": {
-    "label": "Search projects",
-    "placeholder": "Search by project or organization"
+  "status": {
+    "pending": "No answers",
+    "progress": "Answering",
+    "review": "To review",
+    "correction": "In correction",
+    "approved": "Approved",
+    "overdue": "Overdue",
+    "empty": "No assignations"
   },
-  "columns": {
-    "project": "Project",
-    "state": "State",
-    "assignations": "Assignations",
-    "deadline": "Deadline",
-    "nextStep": "Next step",
-    "actions": "Actions"
-  },
-  "created": "created {{date}}",
-  "expand": "Show the assignations of {{name}}",
-  "collapse": "Hide the assignations of {{name}}",
-  "state": {
+  "projectStatus": {
     "pending": "Not started",
     "progress": "In progress",
     "review": "Needs your review",
@@ -39,86 +40,106 @@
     "empty": "No assignations"
   },
   "approvedOf": "{{approved}} of {{total}} approved",
-  "progressLabel": "{{name}}: {{percent}}% complete",
+  "columns": {
+    "project": "Project",
+    "status": "Status",
+    "assignations": "Assignations",
+    "deadline": "Deadline",
+    "nextStep": "Next step",
+    "assignation": "Assignation",
+    "answers": "Answers",
+    "review": "Review",
+    "actions": "Actions"
+  },
+  "createdOn": "created {{date}}",
   "noDeadline": "No deadline",
-  "urgency": {
+  "due": {
+    "today": "due today",
     "inDays_one": "in {{count}} day",
     "inDays_other": "in {{count}} days",
-    "today": "due today",
     "overdue_one": "overdue by {{count}} day",
     "overdue_other": "overdue by {{count}} days",
     "done": "completed"
   },
   "next": {
     "review": "Review answers",
-    "openOverdue": "Open overdue",
-    "seeCorrection": "See correction",
-    "seeProgress": "See progress",
-    "seeResults": "See results",
-    "addAssignations": "Add assignations"
+    "overdue": "Open overdue",
+    "correction": "See correction",
+    "progress": "See progress",
+    "pending": "See progress",
+    "approved": "See results",
+    "empty": "Add assignations"
   },
-  "menu": {
-    "label": "More actions for {{name}}",
-    "edit": "Edit",
-    "delete": "Delete"
-  },
-  "detail": {
-    "caption": "Assignations of {{name}}",
-    "assignation": "Assignation",
-    "answers": "Answers",
+  "open": {
     "review": "Review",
-    "status": "Status",
-    "questionOf": "Question {{n}} of {{total}}",
-    "questionsAnswered": "{{n}} of {{total}} questions",
-    "reviewed": "{{reviewed}} of {{total}} reviewed",
-    "sentBack_one": "{{count}} sent back to the client",
-    "sentBack_other": "{{count}} sent back to the client",
-    "notReady": "Not complete yet",
-    "attempt": "Attempt {{n}}",
-    "reviewLink": "Review",
-    "openLink": "Open",
-    "none": "This project has no assignations yet. Edit it to add the organization's follow-ups."
+    "other": "Open"
   },
+  "reviewText": {
+    "review": "{{reviewed}} of {{total}} reviewed",
+    "approved": "{{approved}} of {{total}} approved",
+    "approvedPlain": "Review closed",
+    "correction_one": "{{count}} sent back to the client",
+    "correction_other": "{{count}} sent back to the client",
+    "notReady": "Not ready for review yet"
+  },
+  "moreActions": "More actions for {{name}}",
+  "expand": "Show the assignations of {{name}}",
+  "collapse": "Hide the assignations of {{name}}",
+  "edit": "Edit project",
+  "delete": "Delete project",
+  "assignationsOf": "Assignations of {{name}}",
+  "currentQuestion": "Question {{number}} of {{total}}",
+  "followUpCompleted": "Completed",
+  "correctionAttempt": "Correction · attempt {{attempt}}",
+  "questionsProgress": "{{completed}} of {{total}} questions",
+  "questionsAnswered": "Questions answered",
+  "emptyProject": "This project has no assignations yet. Edit it to add some.",
+  "openAssignation": "Open the assignation {{name}}",
   "legend": {
-    "title": "What the states mean",
-    "pending": "Nobody has started its follow-ups yet.",
-    "progress": "Its follow-ups are being answered.",
-    "review": "A follow-up is complete and waits for your review.",
-    "correction": "Some answers were sent back and are being corrected.",
-    "approved": "Every follow-up is complete and approved.",
-    "overdue": "A follow-up passed its deadline before being completed.",
-    "empty": "The project has no assignations yet."
+    "title": "How does an assignation move forward?",
+    "hint": "A project shows the status of its most urgent assignation.",
+    "pending": "You sent the link and nobody has started.",
+    "progress": "The client answered part of it. Questions are left.",
+    "reviewYou": "Your turn.",
+    "review": "Everything is answered: approve it or ask for a correction.",
+    "approved": "You reviewed and approved every answer.",
+    "correction": "You asked to correct an answer; once back, it returns to To review.",
+    "overdue": "The project's deadline passed before it was finished."
   },
-  "delete": {
+  "deleteDialog": {
     "title": "Delete this project?",
     "body": "\"{{name}}\" will be deleted. Its assignations and their answers are kept; they just stop belonging to a project.",
-    "confirm": "Delete project",
-    "done": "Project \"{{name}}\" deleted"
+    "deleting": "Deleting...",
+    "done": "Project deleted"
   },
-  "edit": {
+  "form": {
     "title": "Edit project",
-    "name": "Name",
+    "description": "A project groups the follow-up assignations of one organization and shows which question each one is on.",
+    "name": "Project name",
+    "namePlaceholder": "E.g. Finance Software",
     "organization": "Organization",
-    "organizationHint": "A project's organization can't change.",
-    "description": "Description",
+    "organizationLocked": "A project's organization can't change.",
+    "descriptionLabel": "Description",
+    "optional": "(optional)",
+    "descriptionPlaceholder": "What this project is about. Only your team sees it.",
     "deadline": "Deadline",
-    "deadlineHint": "You can move the deadline, but not remove it.",
     "assignations": "Assignations",
-    "assignationsHint": "The organization's follow-ups that are not in another project.",
-    "noAvailable": "This organization has no follow-ups available for the project.",
-    "saved": "Project \"{{name}}\" updated",
+    "assignationN": "Assignation #{{n}}",
+    "assignationPlaceholder": "Choose an assignation",
+    "addAssignation": "Add an assignation",
+    "removeAssignation": "Remove assignation #{{n}}",
+    "noneAvailable": "This organization has no follow-up assignation left to add. A project only holds follow-up assignations, and each one belongs to one project at most.",
+    "loadingAssignations": "Loading assignations...",
+    "loadAssignationsError": "We could not load the assignations.",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Project updated",
     "errors": {
-      "nameRequired": "Name is required",
+      "nameRequired": "The project name is required",
       "nameTooLong": "Use 200 characters or fewer",
       "descriptionTooLong": "Use 2000 characters or fewer",
       "deadlineRequired": "Choose a deadline for the project",
       "deadlineInvalid": "Enter a valid deadline"
     }
-  },
-  "empty": {
-    "noneTitle": "No projects yet",
-    "noneBody": "A project groups an organization's follow-ups with one deadline, so you can see at a glance what to review and what is late.",
-    "filteredTitle": "No projects match",
-    "filteredBody": "No project matches this tab and search."
   }
 }

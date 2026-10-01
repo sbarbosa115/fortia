@@ -1,57 +1,49 @@
-import {nextStep, type Project} from '@console/entities/project';
-import {Button} from '@shared/ui';
+import type {Project} from '@console/entities/project';
+import {Tooltip} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router';
-
-const TARGET_STATE: Record<string, string> = {
-  review: 'review',
-  openOverdue: 'overdue',
-  seeCorrection: 'correction',
-  seeResults: 'approved',
-};
+import {nextStepOf} from '../model/rows';
 
 /**
- * The next step of a project (PRD §10.12): a link to the first assignation that needs it (review, overdue,
- * correction, results), the expanded row for "See progress", or the edit dialog for "Add assignations".
+ * The next step of a project: a link to the first assignation in the project's status (the primary pill when it
+ * waits for your review), or "Add assignations", which opens the edit dialog.
  */
 export function NextStepAction({
   project,
   changeReason,
-  onExpand,
   onEdit,
 }: {
   project: Project;
   changeReason: string | null;
-  onExpand: () => void;
   onEdit: () => void;
 }) {
   const {t} = useTranslation('pages.projects');
-  const step = nextStep(project.state);
-  const label = t(`next.${step}`);
-  if (step === 'addAssignations') {
-    return (
-      <Button size="sm" disabledReason={changeReason} onClick={onEdit}>
-        {label}
-      </Button>
-    );
-  }
-  const wanted = TARGET_STATE[step];
-  const target = wanted
-    ? project.assignations.find((a) => a.state === wanted)
-    : undefined;
-  if (target) {
+  const step = nextStepOf(project);
+  if (step.kind === 'link') {
     return (
       <Link
-        className="btn btn--secondary btn--sm"
-        to={`/assignations/${target.assignations_id}`}
+        to={step.to}
+        className="pill-action"
+        data-tone={step.primary ? 'primary' : 'quiet'}
       >
-        {label}
+        {t(`next.${step.status}`)}
       </Link>
     );
   }
-  return (
-    <Button size="sm" variant="ghost" onClick={onExpand}>
-      {label}
-    </Button>
+  const button = (
+    <button
+      type="button"
+      className="pill-action"
+      data-tone="quiet"
+      disabled={Boolean(changeReason)}
+      onClick={onEdit}
+    >
+      {t('next.empty')}
+    </button>
+  );
+  return changeReason ? (
+    <Tooltip content={changeReason}>{button}</Tooltip>
+  ) : (
+    button
   );
 }

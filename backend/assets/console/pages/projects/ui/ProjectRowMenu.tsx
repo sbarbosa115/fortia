@@ -1,10 +1,10 @@
-import {Button, Icon, IconButton} from '@shared/ui';
+import {Icon, type IconName, Tooltip} from '@shared/ui';
 import {useEffect, useId, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 /**
- * The ⋯ menu of a project row (PRD §10.12): Edit and Delete. Escape and a click outside close it; for a read-only
- * user both items are disabled with the reason.
+ * The ⋯ menu of a project row: Edit project, a separator, Delete project. Escape and a click outside close it; for
+ * a read-only user both items are disabled with the reason.
  */
 export function ProjectRowMenu({
   name,
@@ -44,44 +44,53 @@ export function ProjectRowMenu({
     };
   }, [open]);
 
-  const choose = (action: () => void) => () => {
-    setOpen(false);
-    action();
+  const item = (
+    icon: IconName,
+    label: string,
+    action: () => void,
+    danger = false,
+  ) => {
+    const button = (
+      <button
+        type="button"
+        role="menuitem"
+        className="row-menu__item"
+        data-danger={danger || undefined}
+        disabled={Boolean(changeReason)}
+        onClick={() => {
+          setOpen(false);
+          action();
+        }}
+      >
+        <Icon name={icon} size={16} />
+        {label}
+      </button>
+    );
+    return changeReason ? (
+      <Tooltip content={changeReason}>{button}</Tooltip>
+    ) : (
+      button
+    );
   };
 
   return (
-    <div className="projects__menu" ref={ref}>
-      <IconButton
-        size="sm"
-        icon={<Icon name="more" />}
-        label={t('menu.label', {name})}
+    <div className="row-menu" ref={ref}>
+      <button
+        type="button"
+        className="row-menu__trigger"
+        aria-label={t('moreActions', {name})}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((value) => !value)}
-      />
+      >
+        <Icon name="ellipsis" size={18} />
+      </button>
       {open ? (
-        <div className="projects__menu-list" role="menu" id={menuId}>
-          <Button
-            role="menuitem"
-            size="sm"
-            variant="ghost"
-            icon={<Icon name="edit" size={16} />}
-            disabledReason={changeReason}
-            onClick={choose(onEdit)}
-          >
-            {t('menu.edit')}
-          </Button>
-          <Button
-            role="menuitem"
-            size="sm"
-            variant="ghost"
-            icon={<Icon name="trash" size={16} />}
-            disabledReason={changeReason}
-            onClick={choose(onDelete)}
-          >
-            {t('menu.delete')}
-          </Button>
+        <div className="row-menu__list" role="menu" id={menuId}>
+          {item('square-pen', t('edit'), onEdit)}
+          <div className="row-menu__separator" role="separator" />
+          {item('trash-2', t('delete'), onDelete, true)}
         </div>
       ) : null}
     </div>

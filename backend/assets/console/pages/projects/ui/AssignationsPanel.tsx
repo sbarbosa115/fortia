@@ -1,96 +1,129 @@
-import {answersProgress, type Project} from '@console/entities/project';
+import type {Project, ProjectAssignation} from '@console/entities/project';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router';
-import {StateBadge} from './StateBadge';
+import {answersOf, assignationPath, reviewTextOf} from '../model/rows';
+import {ProjectStatusPill} from './ProjectStatusPill';
 
 /**
- * The expanded row (PRD §10.12): each assignation with its answers ("Question 4 of 8" / "X of N questions"), its
- * review ("R of T reviewed", "N sent back to the client"), its status, and Review / Open.
+ * The expanded row: each assignation with its answers ("Question 4 of 8" / "X of N questions" and a bar), where its
+ * review stands, its status, and Review / Open.
  */
 export function AssignationsPanel({project}: {project: Project}) {
   const {t} = useTranslation('pages.projects');
   if (project.assignations.length === 0) {
-    return <p className="muted projects__none">{t('detail.none')}</p>;
+    return <p className="projects-sub__none">{t('emptyProject')}</p>;
   }
   return (
-    <table className="table projects__assignations">
-      <caption className="visually-hidden">
-        {t('detail.caption', {name: project.name})}
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">{t('detail.assignation')}</th>
-          <th scope="col">{t('detail.answers')}</th>
-          <th scope="col">{t('detail.review')}</th>
-          <th scope="col">{t('detail.status')}</th>
-          <th scope="col">
-            <span className="visually-hidden">{t('columns.actions')}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {project.assignations.map((assignation) => {
-          const answers = answersProgress(assignation.progress);
-          return (
-            <tr key={assignation.assignations_id}>
-              <td>
-                <strong>{assignation.name}</strong>
-                {assignation.attempt > 1 ? (
-                  <span className="muted projects__attempt">
-                    {t('detail.attempt', {n: assignation.attempt})}
-                  </span>
-                ) : null}
-              </td>
-              <td>
-                {t(`detail.${answers.key}`, {
-                  n: answers.n,
-                  total: answers.total,
-                })}
-              </td>
-              <td>
-                {assignation.completed ? (
-                  <div className="projects__review">
-                    <span>
-                      {t('detail.reviewed', {
-                        reviewed: assignation.review.reviewed,
-                        total: assignation.review.total,
-                      })}
-                    </span>
-                    {assignation.review.rejected > 0 ? (
-                      <span className="muted">
-                        {t('detail.sentBack', {
-                          count: assignation.review.rejected,
-                        })}
-                      </span>
-                    ) : null}
-                  </div>
-                ) : (
-                  <span className="muted">{t('detail.notReady')}</span>
-                )}
-              </td>
-              <td>
-                <StateBadge state={assignation.state} />
-              </td>
-              <td>
-                <div className="table__actions">
+    <div className="projects-sub">
+      <table className="projects-sub__table">
+        <caption className="visually-hidden">
+          {t('assignationsOf', {name: project.name})}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{t('columns.assignation')}</th>
+            <th scope="col" className="projects-sub__answers">
+              {t('columns.answers')}
+            </th>
+            <th scope="col" className="projects-sub__review">
+              {t('columns.review')}
+            </th>
+            <th scope="col" className="projects-sub__status">
+              {t('columns.status')}
+            </th>
+            <th scope="col" className="projects-sub__action">
+              <span className="visually-hidden">{t('columns.nextStep')}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {project.assignations.map((item) => {
+            const review = reviewTextOf(item);
+            const to = assignationPath(item.assignations_id);
+            const isReview = item.state === 'review';
+            return (
+              <tr key={item.assignations_id}>
+                <td>
                   <Link
-                    className={
-                      assignation.state === 'review'
-                        ? 'btn btn--primary btn--sm'
-                        : 'btn btn--ghost btn--sm'
-                    }
-                    to={`/assignations/${assignation.assignations_id}`}
+                    to={to}
+                    className="projects-sub__name"
+                    aria-label={t('openAssignation', {name: item.name})}
                   >
-                    {assignation.state === 'review'
-                      ? t('detail.reviewLink')
-                      : t('detail.openLink')}
+                    {item.name}
                   </Link>
-                </div>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+                </td>
+                <td>
+                  <AnswersCell item={item} />
+                </td>
+                <td className="projects-sub__review">
+                  {t(review.key, review.values)}
+                </td>
+                <td>
+                  <ProjectStatusPill status={item.state} />
+                </td>
+                <td className="projects-sub__action">
+                  <Link
+                    to={to}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    className="pill-action pill-action--small"
+                    data-tone={isReview ? 'primary' : 'quiet'}
+                  >
+                    {t(isReview ? 'open.review' : 'open.other')}
+                  </Link>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** The Answers cell: the question the organization is on, "Completed", or how many are answered, over a bar. */
+function AnswersCell({item}: {item: ProjectAssignation}) {
+  const {t} = useTranslation('pages.projects');
+  const answers = answersOf(item);
+  if (answers.kind === 'unknown') {
+    return <span className="projects-muted">—</span>;
+  }
+  const done = answers.kind === 'completed';
+  return (
+    <span className="projects-answers">
+      {done ? (
+        <span className="projects-answers__done">{t('followUpCompleted')}</span>
+      ) : null}
+      {answers.kind === 'onQuestion' ? (
+        <span className="projects-answers__current">
+          {t('currentQuestion', {
+            number: answers.number,
+            total: answers.total,
+          })}
+        </span>
+      ) : null}
+      {answers.kind === 'counted' ? (
+        <span className="projects-answers__counted">
+          {t('questionsProgress', {
+            completed: answers.completed,
+            total: answers.total,
+          })}
+        </span>
+      ) : null}
+      <span
+        role="progressbar"
+        aria-label={t('questionsAnswered')}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={answers.percent}
+        className="projects-bar projects-bar--thin"
+      >
+        <span
+          className="projects-bar__fill"
+          data-tone={done ? 'done' : 'progress'}
+          style={{width: `${answers.percent}%`}}
+        />
+      </span>
+    </span>
   );
 }

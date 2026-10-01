@@ -1,19 +1,25 @@
-import {avatarColor} from '@console/entities/organization';
 import {initials, type Project} from '@console/entities/project';
-import {formatDate} from '@shared/lib';
-import {IconButton, Icon, ProgressBar} from '@shared/ui';
-import {Fragment, useState} from 'react';
+import {Icon} from '@shared/ui';
+import {Fragment, type MouseEvent, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {approvalPercent, shortDay} from '../model/rows';
 import {AssignationsPanel} from './AssignationsPanel';
 import {Deadline} from './Deadline';
 import {NextStepAction} from './NextStepAction';
 import {ProjectRowMenu} from './ProjectRowMenu';
-import {StateBadge} from './StateBadge';
+import {ProjectStatusPill} from './ProjectStatusPill';
 
 /**
- * The projects table (PRD §10.12): project (chevron, organization initials, name, organization, created), state,
- * "{approved} of {total} approved" with a bar, deadline with its urgency, next step and the ⋯ menu. The chevron
- * opens the project's assignations under its row. Same markup and classes as the house Table.
+ * A click on one of these inside a row is theirs, not the row's: `[data-row-actions]` wraps the next step and the
+ * menu, so a click on a disabled control (or its read-only tooltip) does not open the row either.
+ */
+const ROW_CONTROLS =
+  'button, a, input, select, textarea, [role="button"], [role="menuitem"], [data-row-actions]';
+
+/**
+ * The projects table: project (toggle, organization initials, name, "organization, created …"), status,
+ * "{approved} of {total} approved" with a bar, deadline with its urgency, next step and the ⋯ menu. The whole row
+ * (or its chevron, for the keyboard) opens the project's assignations under it.
  */
 export function ProjectTable({
   rows,
@@ -38,19 +44,36 @@ export function ProjectTable({
       }
       return next;
     });
+  const toggleFromRow = (id: string, event: MouseEvent<HTMLElement>) => {
+    const target = event.target as Element;
+    if (!event.currentTarget.contains(target) || target.closest(ROW_CONTROLS)) {
+      return;
+    }
+    toggle(id);
+  };
 
   return (
-    <div className="table-wrap">
-      <table className="table projects__table">
+    <div className="projects-table-wrap">
+      <table className="projects-table">
         <caption className="visually-hidden">{t('title')}</caption>
         <thead>
           <tr>
-            <th scope="col">{t('columns.project')}</th>
-            <th scope="col">{t('columns.state')}</th>
-            <th scope="col">{t('columns.assignations')}</th>
-            <th scope="col">{t('columns.deadline')}</th>
-            <th scope="col">{t('columns.nextStep')}</th>
-            <th scope="col">
+            <th scope="col" className="projects-table__name">
+              {t('columns.project')}
+            </th>
+            <th scope="col" className="projects-table__status">
+              {t('columns.status')}
+            </th>
+            <th scope="col" className="projects-table__approval">
+              {t('columns.assignations')}
+            </th>
+            <th scope="col" className="projects-table__deadline">
+              {t('columns.deadline')}
+            </th>
+            <th scope="col" className="projects-table__next">
+              {t('columns.nextStep')}
+            </th>
+            <th scope="col" className="projects-table__menu">
               <span className="visually-hidden">{t('columns.actions')}</span>
             </th>
           </tr>
@@ -59,89 +82,100 @@ export function ProjectTable({
           {rows.map((project) => {
             const open = expanded.has(project.project_id);
             const panelId = `project-${project.project_id}-assignations`;
+            const created = shortDay(project.created_at, i18n.language);
+            const approvalLabel = t('approvedOf', {
+              approved: project.approved_assignations,
+              total: project.total_assignations,
+            });
+            const percent = approvalPercent(project);
+            const nextStep = (
+              <div data-row-actions>
+                <NextStepAction
+                  project={project}
+                  changeReason={changeReason}
+                  onEdit={() => onEdit(project)}
+                />
+              </div>
+            );
             return (
               <Fragment key={project.project_id}>
-                <tr className={open ? 'projects__row--open' : undefined}>
-                  <td>
-                    <div className="projects__project">
-                      <IconButton
-                        size="sm"
-                        icon={
-                          <Icon
-                            name={open ? 'chevron-down' : 'chevron-right'}
-                          />
-                        }
-                        label={t(open ? 'collapse' : 'expand', {
-                          name: project.name,
-                        })}
+                <tr
+                  className="projects-table__row"
+                  data-open={open || undefined}
+                  onClick={(event) => toggleFromRow(project.project_id, event)}
+                >
+                  <td className="projects-table__name">
+                    <div className="projects-project">
+                      <button
+                        type="button"
+                        className="projects-project__toggle"
                         aria-expanded={open}
                         aria-controls={panelId}
-                        onClick={() => toggle(project.project_id)}
-                      />
-                      <span
-                        className="projects__initials"
-                        aria-hidden
-                        style={{
-                          background: avatarColor(project.organization_name),
-                        }}
-                      >
-                        {initials(project.organization_name)}
-                      </span>
-                      <div className="projects__name">
-                        <strong>{project.name}</strong>
-                        <span className="muted projects__meta">
-                          <span>{project.organization_name}</span>
-                          <span>
-                            {t('created', {
-                              date: formatDate(
-                                project.created_at,
-                                i18n.language,
-                              ),
-                            })}
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <StateBadge state={project.state} />
-                  </td>
-                  <td>
-                    <div className="projects__approved">
-                      <span>
-                        {t('approvedOf', {
-                          approved: project.approved_assignations,
-                          total: project.total_assignations,
-                        })}
-                      </span>
-                      <ProgressBar
-                        value={project.progress_percent}
-                        label={t('progressLabel', {
-                          percent: project.progress_percent,
+                        aria-label={t(open ? 'collapse' : 'expand', {
                           name: project.name,
                         })}
-                        tone={
-                          project.state === 'approved' ? 'success' : undefined
-                        }
-                      />
+                        onClick={() => toggle(project.project_id)}
+                      >
+                        <Icon name="chevron-right" size={16} />
+                      </button>
+                      <span className="projects-project__tile" aria-hidden>
+                        {initials(project.organization_name || project.name)}
+                      </span>
+                      <span className="projects-project__text">
+                        <span
+                          className="projects-project__title"
+                          title={project.name}
+                        >
+                          {project.name}
+                        </span>
+                        <span className="projects-project__meta">
+                          {project.organization_name || '—'}
+                          {created
+                            ? `, ${t('createdOn', {date: created})}`
+                            : null}
+                        </span>
+                      </span>
                     </div>
                   </td>
                   <td>
+                    <ProjectStatusPill status={project.state} scope="project" />
+                  </td>
+                  <td>
+                    {project.total_assignations === 0 ? (
+                      <span className="projects-muted">
+                        {t('status.empty')}
+                      </span>
+                    ) : (
+                      <span className="projects-approval">
+                        <span className="projects-approval__label">
+                          {approvalLabel}
+                        </span>
+                        <span
+                          role="progressbar"
+                          aria-label={approvalLabel}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={percent}
+                          className="projects-bar"
+                        >
+                          <span
+                            className="projects-bar__fill"
+                            data-tone="done"
+                            style={{width: `${percent}%`}}
+                          />
+                        </span>
+                      </span>
+                    )}
+                  </td>
+                  <td className="projects-table__deadline">
                     <Deadline
                       dueDate={project.due_date}
                       completed={project.state === 'approved'}
                     />
                   </td>
-                  <td>
-                    <NextStepAction
-                      project={project}
-                      changeReason={changeReason}
-                      onExpand={() => toggle(project.project_id)}
-                      onEdit={() => onEdit(project)}
-                    />
-                  </td>
-                  <td>
-                    <div className="table__actions">
+                  <td className="projects-table__next">{nextStep}</td>
+                  <td className="projects-table__menu">
+                    <div data-row-actions className="projects-table__menu-cell">
                       <ProjectRowMenu
                         name={project.name}
                         changeReason={changeReason}
@@ -152,8 +186,12 @@ export function ProjectTable({
                   </td>
                 </tr>
                 {open ? (
-                  <tr className="projects__detail" id={panelId}>
+                  <tr className="projects-table__detail" id={panelId}>
                     <td colSpan={6}>
+                      {/* Below the wide layout the next step has no column: it opens the sub-table. */}
+                      <div className="projects-table__detail-next">
+                        {nextStep}
+                      </div>
                       <AssignationsPanel project={project} />
                     </td>
                   </tr>
