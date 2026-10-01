@@ -1,0 +1,38 @@
+.assignation-login {
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  padding-top: var(--space-5);
+}
+.assignation-login__title {
+  margin: 0;
+  font-size: clamp(26px, 6vw, 36px);
+}
+.assignation-login__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 14px;
+}
+
+.assignation-completed__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+.assignation-completed__icon--review {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+}
+.assignation-completed__icon--approved {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+}
+.assignation-completed__icon--done {
+  color: var(--color-text-muted);
+  background: var(--color-hover);
+}

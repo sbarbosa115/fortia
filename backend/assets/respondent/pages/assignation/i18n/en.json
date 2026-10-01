@@ -1,3 +1,36 @@
 {
-  "title": "Questionnaire"
+  "documentTitle": "Mappi - {{title}}",
+  "login": {
+    "title": "Sign in",
+    "description": "Tell us who you are to answer.",
+    "submit": "Continue",
+    "fields": {
+      "email": {"label": "Email", "placeholder": "you@email.com"},
+      "phone": {"label": "Phone", "placeholder": "Your phone number"},
+      "role": {"label": "Role", "placeholder": "Your role"},
+      "area": {"label": "Area", "placeholder": "Your area"},
+      "name": {"label": "Full name", "placeholder": "Your full name"}
+    },
+    "outcomes": {
+      "notInAudience": "This assessment isn't addressed to you. If you think this is a mistake, contact whoever sent it to you.",
+      "userNotFound": "We can't find you in this organization. Check the name and email you were invited with.",
+      "failed": "We could not sign you in. Please try again.",
+      "completed": "This follow-up has already been completed.",
+      "limit": "The response limit has been reached."
+    }
+  },
+  "completed": {
+    "review": {
+      "title": "Your answers are being reviewed",
+      "hint": "If something needs changes, you'll receive an email with the link to correct it."
+    },
+    "approved": {
+      "title": "Your answers were approved",
+      "hint": "Thank you for taking part. There is nothing else to do."
+    },
+    "done": {
+      "title": "This follow-up has already been completed.",
+      "hint": "There is no need to answer it again."
+    }
+  }
 }

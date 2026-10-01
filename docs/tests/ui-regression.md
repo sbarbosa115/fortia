@@ -704,6 +704,74 @@ no raw translation keys.
 
 <!-- ASG-27 – 30: free. -->
 
+**ARS-01 · The login slide**
+Open `/a/{Monthly store report}` (no saved token). **Expected:** the brand's logo and ES/EN switch, the assignation's name
+as eyebrow, "Inicia sesión" / "Sign in", "Cuéntanos quién eres para responder.", one field per control of the
+registration slide (Nombre completo*, Correo* by default; Teléfono, Cargo, Área when the assignation shows them, with
+their placeholders), and "Continuar" disabled until every required field is filled.
+
+**ARS-02 · Not in the audience**
+Log in as `Lucía Fernández` / `lucia@acme-retail.test` (area Operations; the audience is Sales). **Expected:** "Esta
+evaluación no está dirigida a ti. Si crees que es un error, contacta a quien te la envió." under the form; still on the
+login.
+
+**ARS-03 · Unknown member**
+Log in with `nobody@acme-retail.test`. **Expected:** "No te encontramos en esta organización. Revisa el nombre y el
+correo con los que te invitaron."
+
+**ARS-04 · Log in by email (the name is not used to find you)**
+On a follow-up of Acme Retail log in with any name and ` MARIA@acme-retail.test ` (spaces, capitals). **Expected:** the
+first question opens (no resume modal, no disclaimer of the login); `localStorage['organization-user-token']` holds an
+`rt.` token; the request body had the name lowercased without accents (`maria gomez` for "María  Gómez").
+
+**ARS-05 · Log in by phone**
+On an assignation whose registration shows Phone (required) log in as María with `300 111 2233`: "No te
+encontramos…" (the member's phone has the country code). With `+57 (300) 111-22-33`: the questionnaire opens.
+
+**ARS-06 · Resume without login**
+Answer question 1, press Siguiente, reload. **Expected:** question 2 again, without the login and without "Retoma
+donde lo dejaste".
+
+**ARS-07 · Shared progress on another device**
+In a private window log in to the same follow-up as Juan. **Expected:** he lands on the first question nobody answered
+or skipped yet, with María's answers filled in.
+
+**ARS-08 · Finish**
+Answer every question and Finalizar. **Expected:** "Procesando", then `/session/{id}/results` (default results); the
+token is gone from localStorage.
+
+**ARS-09 · Completed: in review**
+Open the follow-up's link again. **Expected:** amber hourglass, "Tus respuestas están en revisión" / "Si algo necesita
+cambios, recibirás un correo con el enlace para corregirlo." — no login. Logging in elsewhere while it is complete
+(409) shows the same screen.
+
+**ARS-10 · Completed: approved and plain completed**
+Approve every answer in the console. **Expected:** green check, "Tus respuestas fueron aprobadas" / "Gracias por
+participar. No hay nada más que hacer.". A completed follow-up without reviews yet: "Este seguimiento ya se completó."
+/ "No es necesario responderlo de nuevo.".
+
+**ARS-11 · Retry: lands on the rejected question**
+In the console reject question 2 with a comment, approve the rest, "Enviar a corrección". Open the link (the old
+token is of attempt 1: the login shows). Log in. **Expected:** "Paso 2 de 4" with "Requiere corrección" and the
+reviewer's comment, the answer empty.
+
+**ARS-12 · Retry: locked answers**
+Press Atrás. **Expected:** question 1 shows "Aprobada / Esta respuesta fue aprobada y no se puede cambiar." with the
+previous answer, the field disabled, no "Omitir". Answer the rejected one and finish: "en revisión" again.
+
+**ARS-13 · Default assignation**
+On "Customer service survey" log in as Pedro: a new session; finishing opens the results; opening the link again shows
+the login (a default assignation never shows the completed screen; each member can answer again).
+
+**ARS-14 · Not found and limit**
+`/a/{made-up uuid}`, a Globex-less id or an inactive assignation (switch Active off in the console): "Este cuestionario
+no existe.". An account whose plan lacks assignations: "Se alcanzó el límite de respuestas.".
+
+**ARS-15 · English**
+Press EN on the login, the completed screens and the runner. **Expected:** "Sign in", "Full name", "Email" /
+"you@email.com", "Phone" / "Your phone number", "Continue", "This assessment isn't addressed to you…", "Your answers
+are being reviewed", "Your answers were approved", "Needs correction"… no raw keys; the choice stays on reload.
+
 **PRJ-01 · The list**
 As `owner@acme.test` (language English) open Projects. **Expected:** "2 projects", newest first: "Supplier audit" and
 "Store opening Q4", each with "AR" on a colour, the name, "Acme Retail · created {date}". Supplier audit: "Overdue",

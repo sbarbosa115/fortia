@@ -1,3 +1,36 @@
 {
-  "title": "Cuestionario"
+  "documentTitle": "Mappi - {{title}}",
+  "login": {
+    "title": "Inicia sesión",
+    "description": "Cuéntanos quién eres para responder.",
+    "submit": "Continuar",
+    "fields": {
+      "email": {"label": "Correo", "placeholder": "tu@correo.com"},
+      "phone": {"label": "Teléfono", "placeholder": "Tu número de teléfono"},
+      "role": {"label": "Cargo", "placeholder": "Tu cargo"},
+      "area": {"label": "Área", "placeholder": "Tu área"},
+      "name": {"label": "Nombre completo", "placeholder": "Tu nombre completo"}
+    },
+    "outcomes": {
+      "notInAudience": "Esta evaluación no está dirigida a ti. Si crees que es un error, contacta a quien te la envió.",
+      "userNotFound": "No te encontramos en esta organización. Revisa el nombre y el correo con los que te invitaron.",
+      "failed": "No pudimos iniciar tu sesión. Inténtalo de nuevo.",
+      "completed": "Este seguimiento ya se completó.",
+      "limit": "Se alcanzó el límite de respuestas."
+    }
+  },
+  "completed": {
+    "review": {
+      "title": "Tus respuestas están en revisión",
+      "hint": "Si algo necesita cambios, recibirás un correo con el enlace para corregirlo."
+    },
+    "approved": {
+      "title": "Tus respuestas fueron aprobadas",
+      "hint": "Gracias por participar. No hay nada más que hacer."
+    },
+    "done": {
+      "title": "Este seguimiento ya se completó.",
+      "hint": "No es necesario responderlo de nuevo."
+    }
+  }
 }
