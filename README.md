@@ -108,6 +108,9 @@ below is added by the item that builds the endpoint.
 | `/api/v1/webhooks` | GET, POST | signed in; POST write permission + Feat(`webhook`) | `{url (https only), event_type? (questionnaire.completed), method? (POST)}` → 201 the webhook `{id, customer_id, url, event_type, method, created_at, updated_at}`. 400 `VALIDATION_ERROR`, 403, 429 |
 | `/api/v1/webhooks/{id}` | PUT, DELETE | write permission, owner or Admin | PUT partial (≥ 1 field) → the webhook; DELETE 204 (its delivery log too). 400 `INVALID_UUID`, 404 `WEBHOOK_NOT_FOUND` (also another account's) |
 | `/api/v1/webhooks/{id}/deliveries` | GET | signed in, owner or Admin | extension (D19): the latest 20 deliveries `[{id, status: pending\|delivered\|failed, attempts, last_status_code, last_error, next_attempt_at, …}]`. 404 `WEBHOOK_NOT_FOUND` |
+| `/api/v1/videos` | GET | signed in | `{videos:[{id, title, description, url, language, category, order, duration_minutes, created_at, updated_at}]}` sorted by `order`, then title. `?language=es\|en`; without it, both languages. 400 `INVALID_LANGUAGE` (anything else, also empty) |
+| `/api/v1/admin/videos` | GET, POST | Admin only (Customer-Admin 403 `FORBIDDEN`; ignores `X-Assume-Customer-Id`) | GET: every video (or `?language=`), same order. POST `{title (1–200), url (YouTube video link, ≤ 500), language (es\|en), description? (≤ 2000), category? (≤ 100), order? ≥ 0, duration_minutes? ≥ 0}` (no extra fields) → 201 the video. 400 `VALIDATION_ERROR` |
+| `/api/v1/admin/videos/{id}` | GET, PUT, DELETE | Admin only | PUT is a full replacement (same body as POST). DELETE 204. 400 `INVALID_UUID`, 404 `VIDEO_NOT_FOUND` |
 
 Every endpoint answers `{message, data}` or `{error: {code, message, details?}}` (PRD §8.1); `X-Assume-Customer-Id`
 lets a platform Admin act as an account's root user (logged in `impersonation_log`).
@@ -148,6 +151,11 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
   permission (read-only is 403), as the Integrations screen shows. Every external call (both endpoints) passes
   Cap(`api`) and counts one `api`; a call refused by the plan or answered 404 does not count. The answers endpoint
   lists every session of the questionnaire (in progress too), newest first, as the PRD's shape has no status.
+- **Documentation.** The 15 guides are static content in the console bundle (`console/entities/guide/content/{en,es}.ts`,
+  typed so both languages must have every guide), not i18n JSON; the guide follows the console's UI language. Their
+  screenshots are PNGs in `public/docs/screenshots/{es,en}/` taken from the demo data; a guide hides a screenshot whose
+  file is missing. Videos must be YouTube links (watch, youtu.be, embed, shorts) and play through
+  `youtube-nocookie.com`; `GET /videos` without `language` lists both languages.
 
 ## Known gaps
 

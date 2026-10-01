@@ -954,6 +954,58 @@ API reference shows the base URL of this deployment, both endpoints with GET, th
 pagination/errors notes; each block has "Copy". Switch the sidebar to Español: "Integraciones", "Claves de API",
 "Referencia de la API", "¿Revocar la clave de API?", "Debe empezar por https://" — no raw translation keys.
 
+### Documentation — DOC (item docs)
+
+**DOC-01 · Fifteen guides in seven topics**
+As `owner@acme.test` (sidebar in English) open Documentation. **Expected:** the title "Documentation", tabs "Guides"
+(selected) and "Videos", "15 guides", and 15 cards, each with its topic badge (Getting started, Questionnaires,
+Organizations, Projects, Analytics, Brand and integrations, Account), "N min read", the title as a link, the summary and
+"Read the guide". The Topic filter lists "All topics" and the seven topics.
+
+**DOC-02 · Search ignores case and accents; topic filter; clearing**
+Type `ORGANIZATION csv` in "Search guides". **Expected:** "Organizations and members" and "Send questionnaires with
+assignations" (both mention organizations and CSV), and "2 guides". Switch the sidebar to Español, type `organizacion PLANTILLA`: "Organizaciones
+y miembros" (no tilde needed). Clear the box and pick Topic "Analítica": 2 guides ("Lee el tablero", "Respuestas y
+exportaciones"). Type `zzzz`: "Ninguna guía coincide con tu búsqueda" with "Limpiar filtros", which empties the box,
+resets the topic to "Todos los temas" and brings back the 15 guides. Ctrl+K focuses the search box.
+
+**DOC-03 · A guide: table of contents, tips, screenshots**
+Open "Read the dashboard" (`/console/documentation/guides/dashboard`). **Expected:** breadcrumb "Documentation › Read
+the dashboard", the topic badge, the reading time, the serif title and the summary; "On this page" lists the four
+section headings and each one scrolls to its section; a "Tip:" box at the end; screenshots appear only where an image
+exists for the language (never a broken image). The tab title is "Mappi - Read the dashboard".
+
+**DOC-04 · Previous and next**
+On "Create your first questionnaire": "Previous guide · Welcome to Mappi" and "Next guide · Create a questionnaire with
+AI"; Next opens that guide at the top of the page. The first guide ("Welcome to Mappi") has no Previous; the last ("Plans,
+usage and billing") has no Next. `/console/documentation/guides/nope` shows "Guide not found" with "Back to the
+documentation".
+
+**DOC-05 · Guides in Spanish, screenshots in Spanish**
+Switch the sidebar to Español on a guide page. **Expected:** the same guide in Spanish (e.g. "Lee el tablero",
+"En esta página", "Guía anterior / Guía siguiente", "Consejo:"), and the screenshots show the console in Spanish
+(`/docs/screenshots/es/…`). Back in English they show the English console.
+
+**DOC-06 · Videos of the UI language, privacy-enhanced**
+Open the "Videos" tab (the URL becomes `/console/documentation?tab=videos`). **Expected (Español):** the three Spanish
+demo videos in order ("Primeros pasos en Mappi", "Crea un cuestionario con IA", "Lee el tablero de un cuestionario"),
+each with its category, "N min", description, an embedded player whose address is `www.youtube-nocookie.com/embed/…`
+(DevTools → Elements) and "Abrir en YouTube" (new tab). In English: the two English videos. The demo YouTube ids are
+placeholders, so the player says the video is unavailable — that is expected in dev.
+
+**DOC-07 · No videos, and the API's rules**
+As `admin@mappi.test`, delete the English videos with `DELETE /api/v1/admin/videos/{id}` (ids `…000000000004` and
+`…000000000005` from `GET /api/v1/admin/videos?language=en`; or re-seed afterwards with `bin/console app:seed-demo`).
+In English, Videos shows "No videos yet" with "Read the guides", which opens the Guides tab. `GET
+/api/v1/videos?language=fr` answers `400 INVALID_LANGUAGE`.
+
+**DOC-08 · Only the platform Admin manages videos**
+With the token of `owner@acme.test` (Customer-Admin, root): `GET /api/v1/admin/videos` and `POST /api/v1/admin/videos`
+answer `403 FORBIDDEN`; `GET /api/v1/videos?language=es` answers 200. As `admin@mappi.test`: `POST
+/api/v1/admin/videos` with `{"title":"Nuevo","url":"https://youtu.be/abcDEF12345","language":"es","order":0}` answers
+201 and the video appears first in the Spanish Videos tab; a `https://vimeo.com/…` URL answers `400 VALIDATION_ERROR`
+("The URL must be a YouTube video link."). Remove the test video with `DELETE /api/v1/admin/videos/{id}` (204).
+
 ## Emails
 
 **MAIL-01 · Every email is readable and links to a real screen**
