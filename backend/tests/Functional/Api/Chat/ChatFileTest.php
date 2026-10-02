@@ -138,6 +138,16 @@ final class ChatFileTest extends ApiTestCase
         }
     }
 
+    public function testTheNameGivenWhenAskingForTheQuestionnaireIsItsTitle(): void
+    {
+        $first = $this->reply(['Crea un cuestionario llamado Clima laboral Y sobre ambiente de trabajo y liderazgo']);
+        self::assertSame('Clima laboral Y', $first['draft']['title'], 'PRD §7.19: basics come from the user\'s own words');
+        self::assertSame('ambiente de trabajo y liderazgo', $first['draft']['topic']);
+
+        $named = $this->reply(['Create a questionnaire called Onboarding 2026']);
+        self::assertSame('Onboarding 2026', $named['draft']['title'], 'a name with no topic is the topic too');
+    }
+
     public function testAMessageTheAssistantDoesNotFollowKeepsTheDraftInsteadOfStartingOver(): void
     {
         $first = $this->reply(['Crea un cuestionario sobre café']);

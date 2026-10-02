@@ -211,8 +211,14 @@ final class ChatResponder implements FakeLlmResponder
         }
         if (1 === preg_match('/(crea|create|haz|make|nuevo|new|quiero).*(cuestionario|questionnaire|encuesta|survey|diagnostico|diagnostic)/', $text)) {
             $topic = preg_match('/\b(?:sobre|about|de|on)\s+(.+)$/iu', $original, $m) ? trim($m[1], " .!?¿¡\t\n") : $texts['untitled'];
+            $title = $topic;
+            // "llamado X sobre Y" / "called X about Y": the name is the title, the rest the topic.
+            if (1 === preg_match('/\b(?:llamad[oa]|titulad[oa]|called|named|titled)\s+(.+?)(?:\s+(?:sobre|about|de|on)\s+(.+))?$/iu', $original, $m)) {
+                $title = trim($m[1], " .!?¿¡«»\"'\t\n");
+                $topic = isset($m[2]) ? trim($m[2], " .!?¿¡\t\n") : $title;
+            }
             $type = str_contains($text, 'diagnostic') ? 'diagnostic' : (str_contains($text, 'cadena') || str_contains($text, 'chain') ? 'chain' : 'regular');
-            $basics = ['title' => mb_substr(mb_strtoupper(mb_substr($topic, 0, 1)).mb_substr($topic, 1), 0, 200), 'type' => $type, 'topic' => $topic, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false];
+            $basics = ['title' => mb_substr(mb_strtoupper(mb_substr($title, 0, 1)).mb_substr($title, 1), 0, 200), 'type' => $type, 'topic' => $topic, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false];
             if ('chain' === $type) {
                 $basics['chain_prompt'] = $texts['chain_prompt'];
             }
