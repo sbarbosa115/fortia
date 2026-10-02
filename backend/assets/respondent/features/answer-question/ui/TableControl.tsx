@@ -5,13 +5,14 @@ import {
   tableRowsOf,
 } from '@respondent/entities/session';
 import {Icon} from '@shared/ui';
-import {useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import {type KeyboardEvent, useLayoutEffect, useRef, useState} from 'react';
+import {Trans, useTranslation} from 'react-i18next';
 import type {ControlProps} from '../model/types';
 
 /**
- * A table: a column per option. With fixed rows (`rows`) each row is labelled and filled in; without them the
- * respondent adds rows (up to 50) and removes them. The value is the list of rows, each {column value: text}.
+ * A table: a column per option, laid out as a sheet. With fixed rows (`rows`) each row is labelled and filled in;
+ * without them the rows are numbered and the respondent adds rows (up to 50, also with Enter on the last row) and
+ * removes them. The value is the list of rows, each {column value: text}.
  */
 export function TableControl({
   question,
@@ -22,13 +23,16 @@ export function TableControl({
   const {t} = useTranslation('features.answer-question');
   const columns = tableColumns(control);
   const fixed = control.rows ?? [];
+  const growable = fixed.length === 0;
   const [rows, setRows] = useState<TableRow[]>(() => {
     const saved = tableRowsOf(control.value);
-    if (fixed.length > 0) {
+    if (!growable) {
       return fixed.map((_, i) => saved[i] ?? {});
     }
     return saved.length > 0 ? saved : [{}];
   });
+  const tableRef = useRef<HTMLTableElement>(null);
+  const canAdd = growable && !disabled && rows.length < MAX_TABLE_ROWS;
 
   const update = (next: TableRow[]) => {
     setRows(next);
@@ -36,6 +40,38 @@ export function TableControl({
   };
   const setCell = (index: number, key: string, text: string) =>
     update(rows.map((row, i) => (i === index ? {...row, [key]: text} : row)));
+  const focusCell = (row: number, column: number) =>
+    tableRef.current
+      ?.querySelector<HTMLInputElement>(`[data-cell="${row}-${column}"]`)
+      ?.focus();
+  // A row just added takes the focus as soon as it is on screen, before the next key lands.
+  const focusAdded = useRef(false);
+  useLayoutEffect(() => {
+    if (focusAdded.current) {
+      focusAdded.current = false;
+      focusCell(rows.length - 1, 0);
+    }
+  });
+  const addRow = () => {
+    focusAdded.current = true;
+    update([...rows, {}]);
+  };
+  // Enter goes down a row in the same column; on the last row it adds a row.
+  const onCellKey = (
+    event: KeyboardEvent<HTMLInputElement>,
+    index: number,
+    column: number,
+  ) => {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing) {
+      return;
+    }
+    event.preventDefault();
+    if (index < rows.length - 1) {
+      focusCell(index + 1, column);
+    } else if (canAdd) {
+      addRow();
+    }
+  };
 
   return (
     <div className="answer-table">
@@ -45,18 +81,22 @@ export function TableControl({
         aria-label={question.title}
         tabIndex={0}
       >
-        <table className="answer-table__table">
+        <table className="answer-table__table" ref={tableRef}>
           <thead>
             <tr>
-              {fixed.length > 0 ? (
+              {growable ? (
+                <td className="answer-table__index" aria-hidden="true">
+                  #
+                </td>
+              ) : (
                 <td className="answer-table__corner" aria-hidden="true" />
-              ) : null}
+              )}
               {columns.map((column) => (
                 <th key={column.key} scope="col">
                   {column.label}
                 </th>
               ))}
-              {fixed.length === 0 ? (
+              {growable ? (
                 <td className="answer-table__actions" aria-hidden="true" />
               ) : null}
             </tr>
@@ -66,13 +106,18 @@ export function TableControl({
               const rowName = fixed[index] ?? t('table.row', {n: index + 1});
               return (
                 <tr key={index}>
-                  {fixed.length > 0 ? (
+                  {growable ? (
+                    <td className="answer-table__index" aria-hidden="true">
+                      {index + 1}
+                    </td>
+                  ) : (
                     <th scope="row">{fixed[index]}</th>
-                  ) : null}
-                  {columns.map((column) => (
-                    <td key={column.key}>
+                  )}
+                  {columns.map((column, c) => (
+                    <td key={column.key} data-label={column.label}>
                       <input
-                        className="answer-field answer-table__cell"
+                        className="answer-table__cell"
+                        data-cell={`${index}-${c}`}
                         aria-label={t('table.cell', {
                           column: column.label,
                           row: rowName,
@@ -83,14 +128,15 @@ export function TableControl({
                         onChange={(event) =>
                           setCell(index, column.key, event.target.value)
                         }
+                        onKeyDown={(event) => onCellKey(event, index, c)}
                       />
                     </td>
                   ))}
-                  {fixed.length === 0 ? (
+                  {growable ? (
                     <td className="answer-table__actions">
                       <button
                         type="button"
-                        className="link-button"
+                        className="answer-table__remove"
                         aria-label={t('table.remove', {row: rowName})}
                         disabled={disabled || rows.length === 1}
                         onClick={() =>
@@ -106,25 +152,35 @@ export function TableControl({
             })}
           </tbody>
         </table>
+        {growable ? (
+          <div className="answer-table__footer">
+            <button
+              type="button"
+              className="answer-table__add"
+              disabled={!canAdd}
+              onClick={addRow}
+            >
+              <span className="answer-table__add-icon" aria-hidden="true">
+                <Icon name="plus" />
+              </span>
+              {t('table.add')}
+            </button>
+            {rows.length >= MAX_TABLE_ROWS ? (
+              <span className="answer-table__hint">
+                {t('table.limit', {max: MAX_TABLE_ROWS})}
+              </span>
+            ) : (
+              <span className="answer-table__hint answer-table__hint--keys">
+                <Trans
+                  t={t}
+                  i18nKey="table.enterHint"
+                  components={{key: <kbd />}}
+                />
+              </span>
+            )}
+          </div>
+        ) : null}
       </div>
-      {fixed.length === 0 ? (
-        <div className="answer-table__footer">
-          <button
-            type="button"
-            className="link-button"
-            disabled={disabled || rows.length >= MAX_TABLE_ROWS}
-            onClick={() => update([...rows, {}])}
-          >
-            <Icon name="plus" />
-            {t('table.add')}
-          </button>
-          {rows.length >= MAX_TABLE_ROWS ? (
-            <span className="muted">
-              {t('table.limit', {max: MAX_TABLE_ROWS})}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
     </div>
   );
 }

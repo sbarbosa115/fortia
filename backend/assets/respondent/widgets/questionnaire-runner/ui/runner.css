@@ -347,7 +347,10 @@
   text-transform: uppercase;
 }
 .question__title {
-  margin: 0 0 16px;
+  /* Wider than the answer column (up to the 896 px content) so a long question runs across, not down. */
+  width: min(848px, calc(100vw - 32px));
+  margin: 0 0 16px 50%;
+  transform: translateX(-50%);
   color: var(--color-text);
   font-family: var(--font-heading);
   font-size: 30px;
@@ -355,6 +358,7 @@
   letter-spacing: -0.025em;
   line-height: 1.1;
   text-align: center;
+  text-wrap: balance;
 }
 .question__description {
   max-width: 576px;
@@ -422,6 +426,20 @@
 @media (min-width: 1024px) {
   .question__title {
     font-size: 48px;
+  }
+}
+/* A long question steps its size down so it stays a few lines tall. */
+.question__title--long {
+  font-size: 24px;
+}
+@media (min-width: 640px) {
+  .question__title--long {
+    font-size: 28px;
+  }
+}
+@media (min-width: 1024px) {
+  .question__title--long {
+    font-size: 34px;
   }
 }
 @media (max-height: 740px) {

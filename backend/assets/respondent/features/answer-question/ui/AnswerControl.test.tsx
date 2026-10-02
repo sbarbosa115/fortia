@@ -6,7 +6,7 @@ import {
   type Question,
 } from '@respondent/entities/session';
 import {testI18n} from '@shared/i18n/testing';
-import {fireEvent, render, screen} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {I18nextProvider} from 'react-i18next';
@@ -186,6 +186,31 @@ describe('AnswerControl (PRD §9.4)', () => {
 
     await userEvent.click(screen.getByRole('button', {name: 'Remove Row 1'}));
     expect(onValue).toHaveBeenLastCalledWith([{role: 'CEO'}]);
+  });
+
+  it('adds a table row with Enter on the last row and moves to it', async () => {
+    const onValue = vi.fn();
+    renderControl({
+      control: makeControl({
+        type: 'table',
+        options: [
+          {label: 'Name', value: 'name', visibility: []},
+          {label: 'Role', value: 'role', visibility: []},
+        ],
+      }),
+      onValue,
+    });
+    await userEvent.type(
+      screen.getByRole('textbox', {name: 'Role, Row 1'}),
+      'CEO{Enter}',
+    );
+    expect(
+      onValue,
+      'Enter on the last row adds an empty row',
+    ).toHaveBeenLastCalledWith([{role: 'CEO'}, {}]);
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', {name: 'Name, Row 2'})).toHaveFocus(),
+    );
   });
 
   it("labels a table's fixed rows and keeps one answer per row", async () => {

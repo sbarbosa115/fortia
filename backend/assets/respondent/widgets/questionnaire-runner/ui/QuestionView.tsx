@@ -11,6 +11,9 @@ import {Icon} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import type {Runner} from '../model/useRunner';
 
+// Past this many characters the title steps down a size, so it reads as a paragraph, not a tower.
+const LONG_TITLE = 90;
+
 function ReviewBanner({question}: {question: Question}) {
   const {t} = useTranslation('widgets.questionnaire-runner');
   const review = question.review;
@@ -121,7 +124,10 @@ export function QuestionView({
       <p className="question__eyebrow">
         {String(question.order + 1).padStart(2, '0')}
       </p>
-      <h1 id={titleId} className="question__title">
+      <h1
+        id={titleId}
+        className={`question__title${question.title.length > LONG_TITLE ? ' question__title--long' : ''}`}
+      >
         {question.title}
       </h1>
       {question.description ? (
