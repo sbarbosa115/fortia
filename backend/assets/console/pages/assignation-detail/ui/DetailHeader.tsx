@@ -6,6 +6,7 @@ import {
   useCopyLink,
 } from '@console/entities/assignation';
 import {useViewer} from '@console/entities/viewer';
+import {useBackTo, useHere, withFrom} from '@shared/lib';
 import {Badge, Button, Icon, PageHeader} from '@shared/ui';
 import type {ReactNode} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -30,12 +31,14 @@ export function DetailHeader({
   const viewer = useViewer();
   const copyLink = useCopyLink();
   const followUp = assignation.type === 'follow_up';
+  const backTo = useBackTo();
+  const here = useHere();
 
   return (
     <>
-      <Link className="asg-detail__back" to="/assignations">
+      <Link className="asg-detail__back" to={backTo?.to ?? '/assignations'}>
         <Icon name="chevron-left" size={16} />
-        {t('back')}
+        {backTo ? tShared(`back.${backTo.kind}`) : t('back')}
       </Link>
       <PageHeader
         title={assignation.name}
@@ -51,7 +54,10 @@ export function DetailHeader({
             {viewer.canWrite ? (
               <Link
                 className="btn btn--secondary"
-                to={`/questionnaires/${assignation.questionnaire_id}/edit?from=${encodeURIComponent(`/assignations/${assignation.assignations_id}`)}`}
+                to={withFrom(
+                  `/questionnaires/${assignation.questionnaire_id}/edit`,
+                  here,
+                )}
               >
                 <Icon name="clipboard-list" size={16} />
                 {t('editQuestionnaire')}
@@ -67,7 +73,10 @@ export function DetailHeader({
             {viewer.canWrite ? (
               <Link
                 className="btn btn--secondary"
-                to={`/assignations/${assignation.assignations_id}/edit`}
+                to={withFrom(
+                  `/assignations/${assignation.assignations_id}/edit`,
+                  here,
+                )}
               >
                 <Icon name="edit" size={16} />
                 {t('edit')}

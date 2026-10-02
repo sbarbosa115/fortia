@@ -210,6 +210,31 @@ describe('AssignationDetailPage (PRD §10.11)', () => {
     );
   });
 
+  it('goes back to the projects it was opened from, and the editor comes back here with that way back', async () => {
+    vi.mocked(fetchAssignation).mockResolvedValue(assignation());
+    renderPage('/assignations/a-1?from=%2Fprojects%3Fsearch%3Dacme');
+
+    expect(
+      await screen.findByRole('link', {name: 'Back to Projects'}),
+      'Back returns to the page the assignation was opened from, with its filters',
+    ).toHaveAttribute('href', '/projects?search=acme');
+    expect(
+      screen.getByRole('link', {name: 'Edit questionnaire'}),
+    ).toHaveAttribute(
+      'href',
+      `/questionnaires/q-1/edit?from=${encodeURIComponent('/assignations/a-1?from=%2Fprojects%3Fsearch%3Dacme')}`,
+    );
+  });
+
+  it('goes back to the assignations when opened from nowhere known', async () => {
+    vi.mocked(fetchAssignation).mockResolvedValue(assignation());
+    renderPage('/assignations/a-1?from=https%3A%2F%2Fevil.test');
+
+    expect(
+      await screen.findByRole('link', {name: 'Assignations'}),
+    ).toHaveAttribute('href', '/assignations');
+  });
+
   it('reviews an answer and jumps to the next one not reviewed', async () => {
     vi.mocked(fetchAssignation).mockResolvedValue(assignation());
     vi.mocked(reviewAnswer).mockResolvedValue({
@@ -399,7 +424,7 @@ describe('AssignationDetailPage (PRD §10.11)', () => {
       screen.getByRole('link', {name: 'View the answers of ana'}),
     ).toHaveAttribute(
       'href',
-      '/questionnaires/q-1/answers/s-ana?from=/assignations/a-1',
+      `/questionnaires/q-1/answers/s-ana?from=${encodeURIComponent('/assignations/a-1')}`,
     );
     await userEvent.type(
       screen.getByRole('searchbox', {name: 'Search respondents'}),

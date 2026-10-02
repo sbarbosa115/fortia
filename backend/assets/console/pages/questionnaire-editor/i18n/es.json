@@ -318,11 +318,7 @@
     "another": "Crear otro",
     "linkCopied": "¡Copiado!",
     "linkNotCopied": "No pudimos copiar el enlace.",
-    "crumb": "Listo",
-    "back": {
-      "projects": "Volver a Proyectos",
-      "assignation": "Volver a la asignación"
-    }
+    "crumb": "Listo"
   },
   "locked": {
     "badge": "Bloqueado",

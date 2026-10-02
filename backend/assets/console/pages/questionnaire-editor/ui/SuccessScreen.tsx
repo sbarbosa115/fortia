@@ -104,7 +104,7 @@ export function SuccessScreen() {
             </Button>
             {returnTo ? (
               <Link className="btn btn--ghost success__list" to={returnTo.to}>
-                {t(`success.back.${returnTo.kind}`)}
+                {t(`back.${returnTo.kind}`, {ns: 'shared'})}
               </Link>
             ) : (
               <Link

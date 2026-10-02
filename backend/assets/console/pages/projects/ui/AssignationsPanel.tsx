@@ -1,5 +1,6 @@
 import type {Project, ProjectAssignation} from '@console/entities/project';
 import {useViewer} from '@console/entities/viewer';
+import {useHere, withFrom} from '@shared/lib';
 import {Icon, IconButton} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {Link, useNavigate} from 'react-router';
@@ -15,6 +16,7 @@ export function AssignationsPanel({project}: {project: Project}) {
   const {t: tShared} = useTranslation('shared');
   const viewer = useViewer();
   const navigate = useNavigate();
+  const here = useHere();
   if (project.assignations.length === 0) {
     return <p className="projects-sub__none">{t('emptyProject')}</p>;
   }
@@ -44,7 +46,7 @@ export function AssignationsPanel({project}: {project: Project}) {
         <tbody>
           {project.assignations.map((item) => {
             const review = reviewTextOf(item);
-            const to = assignationPath(item.assignations_id);
+            const to = withFrom(assignationPath(item.assignations_id), here);
             const isReview = item.state === 'review';
             return (
               <tr key={item.assignations_id}>
@@ -77,7 +79,10 @@ export function AssignationsPanel({project}: {project: Project}) {
                     }
                     onClick={() =>
                       void navigate(
-                        `/questionnaires/${item.questionnaire_id}/edit?from=%2Fprojects`,
+                        withFrom(
+                          `/questionnaires/${item.questionnaire_id}/edit`,
+                          here,
+                        ),
                       )
                     }
                   />

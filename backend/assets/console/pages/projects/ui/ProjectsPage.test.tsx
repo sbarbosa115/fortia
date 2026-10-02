@@ -127,7 +127,7 @@ function renderPage() {
     <I18nextProvider i18n={testI18n('console')}>
       <QueryClientProvider client={client}>
         <ToastProvider>
-          <MemoryRouter>
+          <MemoryRouter initialEntries={['/projects']}>
             <ProjectsPage />
           </MemoryRouter>
         </ToastProvider>
@@ -159,7 +159,7 @@ describe('ProjectsPage', () => {
     expect(table.getByText(/^in \d+ days$/)).toBeInTheDocument();
     expect(table.getByRole('link', {name: 'Review answers'})).toHaveAttribute(
       'href',
-      '/assignations/a-2',
+      '/assignations/a-2?from=%2Fprojects',
     );
     expect(screen.getByText('1–1 of 1')).toBeInTheDocument();
     expect(screen.getByRole('link', {name: 'New project'})).toHaveAttribute(
@@ -193,13 +193,14 @@ describe('ProjectsPage', () => {
     expect(detail.getByText('Not ready for review yet')).toBeInTheDocument();
     expect(
       detail.getByRole('link', {name: 'Open the assignation Visual review'}),
-    ).toHaveAttribute('href', '/assignations/a-2');
+      'returns to the projects',
+    ).toHaveAttribute('href', '/assignations/a-2?from=%2Fprojects');
     expect(
       detail.getByRole('link', {name: 'Open the assignation Store checklist'}),
-    ).toHaveAttribute('href', '/assignations/a-1');
+    ).toHaveAttribute('href', '/assignations/a-1?from=%2Fprojects');
     expect(detail.getByText('Review', {selector: 'a'})).toHaveAttribute(
       'href',
-      '/assignations/a-2',
+      '/assignations/a-2?from=%2Fprojects',
     );
     expect(
       detail.getByRole('button', {

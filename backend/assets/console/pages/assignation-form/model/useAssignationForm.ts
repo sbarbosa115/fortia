@@ -12,6 +12,7 @@ import {
   QUESTIONNAIRES_QUERY_KEY,
 } from '@console/entities/questionnaire';
 import {isApiError} from '@shared/api';
+import {useBackTo} from '@shared/lib';
 import {useToast} from '@shared/ui';
 import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {useMemo, useState} from 'react';
@@ -37,6 +38,7 @@ export type Step = 'basic' | 'registration' | 'done';
 export function useAssignationForm(id: string | undefined) {
   const {t} = useTranslation('pages.assignation-form');
   const navigate = useNavigate();
+  const backTo = useBackTo();
   const toast = useToast();
   const queryClient = useQueryClient();
   const editing = id !== undefined;
@@ -170,7 +172,11 @@ export function useAssignationForm(id: string | undefined) {
       }
       save.mutate();
     },
-    cancel: () => navigate(editing ? `/assignations/${id}` : '/assignations'),
+    backTo,
+    cancel: () =>
+      navigate(
+        backTo?.to ?? (editing ? `/assignations/${id}` : '/assignations'),
+      ),
   };
 }
 

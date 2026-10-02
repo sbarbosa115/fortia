@@ -1,4 +1,5 @@
 import type {Project} from '@console/entities/project';
+import {useHere, withFrom} from '@shared/lib';
 import {Tooltip} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router';
@@ -19,10 +20,11 @@ export function NextStepAction({
 }) {
   const {t} = useTranslation('pages.projects');
   const step = nextStepOf(project);
+  const here = useHere();
   if (step.kind === 'link') {
     return (
       <Link
-        to={step.to}
+        to={withFrom(step.to, here)}
         className="pill-action"
         data-tone={step.primary ? 'primary' : 'quiet'}
       >

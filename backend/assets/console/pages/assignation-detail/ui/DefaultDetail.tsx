@@ -133,7 +133,6 @@ export function DefaultDetail({assignation}: {assignation: Assignation}) {
             <RespondentsTable
               rows={completed}
               questionnaireId={assignation.questionnaire_id}
-              assignationId={assignation.assignations_id}
               caption={t('respondents.completed', {count: completed.length})}
             />
           ) : (
@@ -150,7 +149,6 @@ export function DefaultDetail({assignation}: {assignation: Assignation}) {
             <RespondentsTable
               rows={pending}
               questionnaireId={assignation.questionnaire_id}
-              assignationId={assignation.assignations_id}
               caption={t('respondents.pending', {count: pending.length})}
             />
           ) : (

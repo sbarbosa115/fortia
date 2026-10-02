@@ -131,5 +131,14 @@
     "FILE_TOO_LONG": "El archivo tiene más de 100.000 caracteres de texto.",
     "FILE_HAS_NO_TEXT": "No se pudo leer texto del archivo. Si es un PDF escaneado, adjunta una versión con texto.",
     "FILE_UNREADABLE": "No se pudo leer el archivo: puede estar dañado o protegido con contraseña."
+  },
+  "back": {
+    "projects": "Volver a Proyectos",
+    "assignations": "Volver a Asignaciones",
+    "assignation": "Volver a la asignación",
+    "questionnaires": "Volver a Cuestionarios",
+    "answers": "Volver a las respuestas",
+    "organizations": "Volver a Organizaciones",
+    "organization": "Volver a la organización"
   }
 }

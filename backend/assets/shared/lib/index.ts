@@ -32,3 +32,5 @@ export {
 export type {SheetQuestion, SheetSession, SheetLabels} from './sheets';
 export {tableColumns, tableRowsOf, tableFilled, tableText} from './table';
 export type {TableRow, TableColumn} from './table';
+export {backToOf, withFrom, useBackTo, useHere} from './backTo';
+export type {BackTo, BackKind} from './backTo';

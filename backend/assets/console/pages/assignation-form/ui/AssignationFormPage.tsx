@@ -105,8 +105,13 @@ export function AssignationFormPage() {
                 >
                   {t('done.copy')}
                 </Button>
-                <Link className="btn btn--primary" to="/assignations">
-                  {t('done.toList')}
+                <Link
+                  className="btn btn--primary"
+                  to={state.backTo?.to ?? '/assignations'}
+                >
+                  {state.backTo
+                    ? tShared(`back.${state.backTo.kind}`)
+                    : t('done.toList')}
                 </Link>
               </div>
             </div>

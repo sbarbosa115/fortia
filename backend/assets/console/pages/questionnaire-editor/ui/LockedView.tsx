@@ -87,7 +87,9 @@ export function LockedView({
                 className="btn btn--secondary"
                 to={returnTo?.to ?? '/questionnaires'}
               >
-                {t(returnTo ? `success.back.${returnTo.kind}` : 'success.list')}
+                {returnTo
+                  ? t(`back.${returnTo.kind}`, {ns: 'shared'})
+                  : t('success.list')}
               </Link>
             </div>
           </div>

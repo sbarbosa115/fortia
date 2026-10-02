@@ -131,5 +131,14 @@
     "FILE_TOO_LONG": "The file has more than 100,000 characters of text.",
     "FILE_HAS_NO_TEXT": "No text could be read from the file. If it is a scanned PDF, attach a version with text.",
     "FILE_UNREADABLE": "The file could not be read: it may be damaged or protected with a password."
+  },
+  "back": {
+    "projects": "Back to Projects",
+    "assignations": "Back to Assignations",
+    "assignation": "Back to the assignation",
+    "questionnaires": "Back to Questionnaires",
+    "answers": "Back to the answers",
+    "organizations": "Back to Organizations",
+    "organization": "Back to the organization"
   }
 }

@@ -1,5 +1,5 @@
 import {respondent, totalSeconds} from '@console/entities/answer';
-import {formatDateTime, useDocumentTitle} from '@shared/lib';
+import {formatDateTime, useBackTo, useDocumentTitle} from '@shared/lib';
 import {
   Card,
   CardBody,
@@ -9,19 +9,15 @@ import {
   PageHeader,
 } from '@shared/ui';
 import {useTranslation} from 'react-i18next';
-import {Link, useParams, useSearchParams} from 'react-router';
+import {Link, useParams} from 'react-router';
 import {useAnswerDetail} from '../model/useAnswerDetail';
 import {ResultCard} from './ResultCard';
 import {StageCard} from './StageCard';
 import './detail.css';
 
-/** Only an assignation's detail may be the way back (an open redirect otherwise). */
-const ASSIGNATION_PATH = /^\/assignations\/[0-9a-f-]{36}$/i;
-
 /** /questionnaires/:id/answers/:sessionId (PRD §10.8). */
 export function AnswerDetailPage() {
   const {id = '', sessionId = ''} = useParams();
-  const [search] = useSearchParams();
   const {t, i18n} = useTranslation('pages.answer-detail');
   const detail = useAnswerDetail(id, sessionId);
   const view = detail.data;
@@ -36,11 +32,10 @@ export function AnswerDetailPage() {
   const phone = who?.phone ?? fromStages.find((p) => p.phone)?.phone ?? null;
   useDocumentTitle(t('documentTitle', {name}));
 
-  const from = search.get('from');
-  const back =
-    from && ASSIGNATION_PATH.test(from)
-      ? {to: from, label: t('backToAssignation')}
-      : {to: `/questionnaires/${id}/answers`, label: t('backToAnswers')};
+  const backTo = useBackTo();
+  const back = backTo
+    ? {to: backTo.to, label: t(`back.${backTo.kind}`, {ns: 'shared'})}
+    : {to: `/questionnaires/${id}/answers`, label: t('backToAnswers')};
   const backLink = (
     <Link className="detail-back" to={back.to}>
       <Icon name="chevron-left" size={16} />

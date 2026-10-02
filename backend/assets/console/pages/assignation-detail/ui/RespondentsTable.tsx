@@ -1,5 +1,5 @@
 import type {Respondent} from '@console/entities/assignation';
-import {formatDateTime} from '@shared/lib';
+import {formatDateTime, useHere, withFrom} from '@shared/lib';
 import {Badge, Icon, IconButton, type Tone} from '@shared/ui';
 import {Fragment, useState} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -38,16 +38,14 @@ export function RespondentStatus({row}: {row: Respondent}) {
 export function RespondentsTable({
   rows,
   questionnaireId,
-  assignationId,
   caption,
 }: {
   rows: Respondent[];
   questionnaireId: string;
-  /** The answer detail's back link returns here (PRD §10.8). */
-  assignationId: string;
   caption: string;
 }) {
   const {t, i18n} = useTranslation('pages.assignation-detail');
+  const here = useHere();
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const toggle = (id: string) =>
     setOpen((current) => {
@@ -125,7 +123,10 @@ export function RespondentsTable({
                       {row.session_id ? (
                         <Link
                           className="btn btn--ghost btn--sm"
-                          to={`/questionnaires/${questionnaireId}/answers/${row.session_id}?from=/assignations/${assignationId}`}
+                          to={withFrom(
+                            `/questionnaires/${questionnaireId}/answers/${row.session_id}`,
+                            here,
+                          )}
                           aria-label={t('respondents.viewAnswersOf', {name})}
                         >
                           {t('respondents.viewAnswers')}
@@ -162,7 +163,10 @@ export function RespondentsTable({
                               </span>
                             ) : null}
                             <Link
-                              to={`/questionnaires/${questionnaireId}/answers/${attempt.session_id}?from=/assignations/${assignationId}`}
+                              to={withFrom(
+                                `/questionnaires/${questionnaireId}/answers/${attempt.session_id}`,
+                                here,
+                              )}
                             >
                               {t('respondents.viewAnswers')}
                             </Link>
