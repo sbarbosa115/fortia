@@ -28,7 +28,7 @@
     "chatChangesHint": "Pídeselo al asistente aquí: cada versión nueva reemplaza a la anterior.",
     "chatDoneTitle": "Cuestionario creado",
     "chatDoneHint": "Ya quedó guardado. Sigue con el siguiente paso.",
-    "greeting": "¡Hola! Pega aquí las preguntas que necesitas, adjunta un documento Word, PDF o Markdown que las tenga, o cuéntame de qué trata el cuestionario. Por ejemplo: «Mira estas 30 preguntas, crea un cuestionario».",
+    "greeting": "¡Hola! ¿Cómo podemos ayudarte hoy?",
     "approved": "Listo, tu cuestionario **{{title}}** ha sido creado. Puedes continuar con el siguiente paso o [editarlo aquí]({{url}}).",
     "approvedNotSaved": "**{{title}}** quedó aprobado. Se guardará cuando pulses Crear.",
     "existingTitle": "Elige un cuestionario que ya tengas",

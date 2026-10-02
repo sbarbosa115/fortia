@@ -28,7 +28,7 @@
     "chatChangesHint": "Ask the assistant here: each new version replaces the previous one.",
     "chatDoneTitle": "Questionnaire created",
     "chatDoneHint": "It is saved. Go on to the next step.",
-    "greeting": "Hi! Paste the questions you need here, attach a Word, PDF or Markdown document with them, or tell me what the questionnaire is about. For example: \"Here are 30 questions, make a questionnaire\".",
+    "greeting": "Hi! How can we help you today?",
     "approved": "Done, your questionnaire **{{title}}** has been created. You can go on to the next step or [edit it here]({{url}}).",
     "approvedNotSaved": "**{{title}}** is approved. It will be saved when you press Create.",
     "existingTitle": "Choose a questionnaire you already have",

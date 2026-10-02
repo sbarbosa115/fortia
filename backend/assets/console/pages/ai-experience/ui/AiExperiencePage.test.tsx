@@ -111,7 +111,7 @@ describe('AiExperiencePage', () => {
       screen.getByRole('heading', {name: 'What do you want to create today?'}),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Hi! Tell me what the questionnaire is about/),
+      screen.getByText(/Hi! How can we help you today\?/),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('complementary', {name: 'Live preview'}),
