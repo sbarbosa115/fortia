@@ -67,7 +67,7 @@ final class SendReminderHandler
         }
         $view = $this->context->view($assignation);
         $locale = $this->context->locale($assignation);
-        $timing = ReminderTiming::of($assignation->dueDate(), $this->clock->today());
+        $timing = ReminderTiming::of($view['due_date'], $this->clock->today());
         // An owner who is also a respondent only receives the reminder (§7.13).
         $roots = array_values(array_diff($this->context->rootEmails($assignation), $recipients));
         try {

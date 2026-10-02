@@ -72,6 +72,18 @@ final class ReminderTest extends ApiTestCase
         }
     }
 
+    public function testAFollowUpWithNoDueDateOfItsOwnIsRemindedWithItsProjectsDeadline(): void
+    {
+        $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['sales']]]);
+        $this->data($this->api('POST', '/api/v1/projects', ['organization_id' => $this->org, 'name' => 'Q4', 'due_date' => '2026-10-02', 'assignation_ids' => [$id]], as: $this->owner));
+
+        $this->data($this->api('POST', '/api/v1/assignations/'.$id.'/reminders', as: $this->owner));
+
+        $sent = $this->mailer()->sent;
+        self::assertSame('«Weekly store check» vence en 2 días', $sent[0]->subject, '§7.12: an assignation is due on its own date or, without one, on its project\'s');
+        self::assertSame('2026-10-02', $sent[2]->context['assignation']['due_date'], 'the status shows the same deadline');
+    }
+
     public function testTheManualSendRefusesWhatCannotBeReminded(): void
     {
         $default = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['type' => 'default']);
