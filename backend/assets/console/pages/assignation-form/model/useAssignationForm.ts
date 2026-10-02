@@ -132,6 +132,8 @@ export function useAssignationForm(id: string | undefined) {
 
   return {
     editing,
+    /** PRD §8.8: the organization of an assignation in a project cannot change (ASSIGNATION_IN_PROJECT). */
+    inProject: editing && Boolean(stored.data?.project_id),
     loading: (editing && stored.isPending) || organizations.isPending,
     loadError: (editing && stored.error) || organizations.error || null,
     retry: () => {

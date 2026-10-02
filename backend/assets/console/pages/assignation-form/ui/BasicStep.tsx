@@ -64,6 +64,7 @@ export function BasicStep({state}: {state: AssignationFormState}) {
             value={form.organizationId}
             onChange={state.setOrganization}
             error={error('organization')}
+            lockedReason={state.inProject ? t('organization.inProject') : null}
           />
           <AudiencePicker
             members={state.organization?.organization_users ?? null}

@@ -30,7 +30,8 @@
     "noneYet": "Aún no hay organizaciones.",
     "create": "Crear una",
     "members_one": "{{count}} miembro",
-    "members_other": "{{count}} miembros"
+    "members_other": "{{count}} miembros",
+    "inProject": "Pertenece a un proyecto, así que su organización no se puede cambiar."
   },
   "questionnaire": {
     "label": "Cuestionario",

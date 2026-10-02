@@ -7,23 +7,28 @@ import {Link} from 'react-router';
 
 /**
  * Organization* (PRD §10.11): a list of the account's organizations with a client-side search over every word,
- * ignoring case and accents. One radio per organization.
+ * ignoring case and accents. One radio per organization. Locked (only the chosen one, with the reason) when the
+ * organization cannot change.
  */
 export function OrganizationPicker({
   organizations,
   value,
   onChange,
   error,
+  lockedReason = null,
 }: {
   organizations: Organization[];
   value: string;
   onChange: (organizationId: string) => void;
   error: string | null;
+  lockedReason?: string | null;
 }) {
   const {t} = useTranslation('pages.assignation-form');
   const [search, setSearch] = useState('');
-  const shown = organizations.filter(
-    (o) => o.organization_id === value || matchesAllWords(o.name, search),
+  const shown = organizations.filter((o) =>
+    lockedReason
+      ? o.organization_id === value
+      : o.organization_id === value || matchesAllWords(o.name, search),
   );
 
   if (organizations.length === 0) {
@@ -44,12 +49,16 @@ export function OrganizationPicker({
           *
         </span>
       </legend>
-      <SearchInput
-        value={search}
-        onChange={setSearch}
-        label={t('organization.search')}
-        placeholder={t('organization.placeholder')}
-      />
+      {lockedReason ? (
+        <p className="muted">{lockedReason}</p>
+      ) : (
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          label={t('organization.search')}
+          placeholder={t('organization.placeholder')}
+        />
+      )}
       <div
         className="asg-form__options"
         role="radiogroup"
@@ -67,6 +76,7 @@ export function OrganizationPicker({
                 type="radio"
                 name="organization"
                 checked={organization.organization_id === value}
+                disabled={lockedReason !== null}
                 onChange={() => onChange(organization.organization_id)}
               />
               <span>{organization.name}</span>
