@@ -671,13 +671,19 @@ body {
   font-size: 12px;
   font-weight: 500;
   line-height: 1.4;
-  opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s;
+  /* Out of the layout until shown: a hidden bubble near an edge would widen its scroll container (a table's). */
+  display: none;
 }
 .tooltip:hover .tooltip__bubble,
 .tooltip:focus-within .tooltip__bubble {
-  opacity: 1;
+  display: block;
+}
+/* In a table's last column (the row actions) the bubble opens leftwards, inside the table's scroll box. */
+.table td:last-child .tooltip__bubble {
+  left: auto;
+  right: 0;
+  transform: none;
 }
 
 /* Choice cards (radio-like cards) */
