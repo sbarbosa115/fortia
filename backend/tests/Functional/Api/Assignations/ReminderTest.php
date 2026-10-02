@@ -75,7 +75,7 @@ final class ReminderTest extends ApiTestCase
     public function testAFollowUpWithNoDueDateOfItsOwnIsRemindedWithItsProjectsDeadline(): void
     {
         $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['sales']]]);
-        $this->data($this->api('POST', '/api/v1/projects', ['organization_id' => $this->org, 'name' => 'Q4', 'due_date' => '2026-10-02', 'assignation_ids' => [$id]], as: $this->owner));
+        $this->data($this->api('POST', '/api/v1/projects', ['organization_id' => $this->org, 'name' => 'Q4', 'due_date' => '2026-10-02', 'assignation_ids' => [$id]], as: $this->owner), 201);
 
         $this->data($this->api('POST', '/api/v1/assignations/'.$id.'/reminders', as: $this->owner));
 
