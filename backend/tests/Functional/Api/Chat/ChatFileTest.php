@@ -101,6 +101,34 @@ final class ChatFileTest extends ApiTestCase
         self::assertSame('chat-questionnaire-created', $third['type'], 'create mode saves it when the user approves');
     }
 
+    public function testTheUserChangesTheTitleTakenFromADocumentBeforeConfirmingTheBasics(): void
+    {
+        $file = $this->data($this->upload('Cuestionario AP.md', "- Cuestionario de dimensionamiento FORTIA Módulo Administración de personal. CONSIDERACIONES: 1. Se recomienda llenarlo en equipo.\n\n1. ¿Cuántos empleados tiene?\n2. ¿Cuántas nóminas procesa?\n3. ¿Usa reloj checador?"));
+        $message = ['role' => 'user', 'content' => 'Crea el cuestionario con las preguntas del documento adjunto.', 'files' => [$file]];
+
+        $first = $this->reply([$message]);
+        self::assertSame('Cuestionario de dimensionamiento FORTIA Módulo Administración de personal', $first['draft']['title'], 'the document\'s title is its first sentence, not the whole paragraph');
+
+        $history = [$message, ['role' => 'assistant', 'content' => $first['message']], ['role' => 'user', 'content' => 'El title que sea cuestionario de 37 preguntas AP']];
+        $second = $this->reply($history, ['draft' => $first['draft']]);
+        self::assertSame('Cuestionario de 37 preguntas AP', $second['draft']['title'], 'PRD §7.19: basics come from the user\'s own words');
+        self::assertFalse($second['draft']['basics_confirmed']);
+        self::assertStringContainsString('Cuestionario de 37 preguntas AP', $second['message'], 'the basics are shown again to confirm');
+
+        $third = $this->reply([...$history, ['role' => 'assistant', 'content' => $second['message']], ['role' => 'user', 'content' => 'Sí']], ['draft' => $second['draft']]);
+        self::assertSame('Cuestionario de 37 preguntas AP', $third['draft']['title']);
+        self::assertSame(['¿Cuántos empleados tiene?', '¿Cuántas nóminas procesa?', '¿Usa reloj checador?'], array_column($third['draft']['questions'], 'title'), 'the document\'s questions are still taken');
+    }
+
+    public function testAMessageTheAssistantDoesNotFollowKeepsTheDraftInsteadOfStartingOver(): void
+    {
+        $first = $this->reply(['Crea un cuestionario sobre café']);
+        $second = $this->reply(['Crea un cuestionario sobre café', $first['message'], 'mmm no sé'], ['draft' => $first['draft']]);
+
+        self::assertSame('Café', $second['draft']['title'], 'the draft is kept');
+        self::assertStringNotContainsString('¡Hola!', $second['message'], 'no greeting in the middle of a draft');
+    }
+
     public function testQuestionsPastedInTheMessageAreTakenLikeADocumentsInBothModes(): void
     {
         $pasted = "Encuesta de bienestar:\n1. ¿Cómo dormiste?\n2. ¿Hiciste ejercicio?\n3. ¿Cómo te sientes hoy?\na) Bien\nb) Mal";

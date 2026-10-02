@@ -20,6 +20,8 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  * - a message with an attached document, or with three or more questions pasted → update_draft with its title; then
  *   "sí" → its questions (see DocumentQuestions)
  *   instead of the three; with the questions under way, its questions are added;
+ * - with a draft, "el título que sea X" / "cambia el tema a X" / "change the title to X" → update_draft with that
+ *   basic (the basics are shown again to confirm); anything else it doesn't follow → it asks again, keeping the draft;
  * - with the questions under way, "agrega una tabla" / "add a table" and "agrega un archivo con plantilla" / "add a
  *   file with a template" → add_questions (a table, a file question with a CSV template) and request_review;
  * - "mis cuestionarios / organizaciones / asignaciones / proyectos / videos / usuarios" → the list
@@ -58,6 +60,7 @@ final class ChatResponder implements FakeLlmResponder
             'columns' => ['#', 'Pregunta', 'Tipo'],
             'controls' => ['radio' => 'Opción única', 'checkbox' => 'Opción múltiple', 'select' => 'Lista desplegable', 'text' => 'Texto', 'range' => 'Escala', 'table' => 'Tabla', 'file' => 'Archivo'],
             'untitled' => 'Mi cuestionario',
+            'not_understood' => 'No entendí qué quieres cambiar del borrador. Dime, por ejemplo, «el título es …» o «el tema es …», o responde «Sí» para confirmar los datos básicos.',
             'chain_prompt' => 'Genera tres preguntas de seguimiento a partir de las respuestas.',
             'table' => ['¿Quiénes integran tu equipo?', ['Nombre', 'Cargo', 'Correo']],
             'file' => ['Sube tu presupuesto con la plantilla', 'plantilla-presupuesto.csv', ['Concepto', 'Cantidad', 'Costo'], ['Licencias', '10', '500']],
@@ -84,6 +87,7 @@ final class ChatResponder implements FakeLlmResponder
             'columns' => ['#', 'Question', 'Type'],
             'controls' => ['radio' => 'Single choice', 'checkbox' => 'Multiple choice', 'select' => 'Dropdown', 'text' => 'Text', 'range' => 'Scale', 'table' => 'Table', 'file' => 'File'],
             'untitled' => 'My questionnaire',
+            'not_understood' => 'I didn\'t get what to change in the draft. Tell me, for example, “the title is …” or “the topic is …”, or answer “Yes” to confirm the basics.',
             'chain_prompt' => 'Generate three follow-up questions from the answers.',
             'table' => ['Who is on your team?', ['Name', 'Role', 'Email']],
             'file' => ['Upload your budget using the template', 'budget-template.csv', ['Item', 'Quantity', 'Cost'], ['Licenses', '10', '500']],
@@ -120,6 +124,11 @@ final class ChatResponder implements FakeLlmResponder
         $typed = array_values(array_map(static fn (LlmMessage $m): string => self::withoutFiles($m->content), array_filter($request->messages, static fn (LlmMessage $m): bool => 'user' === $m->role && [] === $m->toolResults)));
         $calls = $this->script(Text::fold($last->content), $last->content, $draft, $request->context + ['typed' => $typed], $texts);
         if ([] === $calls) {
+            // A draft under way is never dropped for the greeting.
+            if (null !== ($draft['title'] ?? null) && !($draft['basics_confirmed'] ?? false)) {
+                return self::answer($texts['not_understood'], [$texts['yes']]);
+            }
+
             return self::answer($texts['greeting'], $texts['replies']);
         }
 
@@ -179,6 +188,10 @@ final class ChatResponder implements FakeLlmResponder
             $title = self::titleOf($attached && [] !== $files ? $files[\count($files) - 1] : ['text' => self::withoutFiles($original)]);
 
             return [['update_draft', ['title' => $title, 'type' => 'regular', 'topic' => $title, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false]]];
+        }
+        // With a draft: "el título que sea X", "cambia el tema a X", "change the title to X".
+        if (null !== ($draft['title'] ?? null) && null !== ($basic = self::basicChange($original))) {
+            return [['update_draft', $basic]];
         }
         // With the questions under way: "agrega una tabla" / "add a table", "agrega un archivo con plantilla" / "add a
         // file with a template".
@@ -317,16 +330,42 @@ final class ChatResponder implements FakeLlmResponder
     }
 
     /**
-     * A document's title: its first heading, else its first line that is not a question, else its file name.
+     * The basic the user asks to change, in their words: "el título que sea X", "cambia el tema a X", "title: X".
+     *
+     * @return array<string, string>|null
+     */
+    private static function basicChange(string $original): ?array
+    {
+        $connector = '(?:[:=]|(?:que\s+)?(?:sea|ser[aá]|debe\s+ser|es|por|a|como|should\s+be|must\s+be|be|is|to|as)\b)';
+        if (1 !== preg_match('/\b(t[ií]tulo|title|tema|topic)\b(?:\s+(?:del|de|of the|of)\s+\w+)?\s*'.$connector.'\s*(.+)$/iu', self::withoutFiles($original), $m)) {
+            return null;
+        }
+        $value = trim($m[2], " .!?¿¡\t\n\"'«»“”");
+        if ('' === $value) {
+            return null;
+        }
+        $field = 1 === preg_match('/^(tema|topic)$/iu', $m[1]) ? 'topic' : 'title';
+
+        return [$field => mb_substr(mb_strtoupper(mb_substr($value, 0, 1)).mb_substr($value, 1), 0, 'title' === $field ? 200 : 2000)];
+    }
+
+    /**
+     * A document's title: its first heading, else its first line that is not a question, else its file name. A list
+     * marker goes and only its first sentence stays ("- Cuestionario X. CONSIDERACIONES: 1. …" → "Cuestionario X").
      *
      * @param array<string, mixed> $file
      */
     private static function titleOf(array $file): string
     {
         foreach (preg_split('/\n/', (string) ($file['text'] ?? '')) ?: [] as $line) {
-            $line = trim((string) preg_replace('/^#+\s*/', '', trim($line)));
-            if ('' !== $line && !str_ends_with($line, '?') && 1 !== preg_match('/^\d{1,3}\s*[.)]/', $line)) {
-                return mb_substr(rtrim($line, ' :'), 0, 200);
+            $line = trim($line);
+            if ('' === $line || str_ends_with($line, '?') || 1 === preg_match('/^\d{1,3}\s*[.)]/', $line)) {
+                continue;
+            }
+            $line = trim((string) preg_replace('/^(?:#+|[-*•])\s*/u', '', $line));
+            $sentence = trim(preg_split('/(?<=\S)[.:]\s+/u', $line, 2)[0] ?? $line);
+            if ('' !== $sentence) {
+                return mb_substr(rtrim($sentence, ' .:'), 0, 200);
             }
         }
 
