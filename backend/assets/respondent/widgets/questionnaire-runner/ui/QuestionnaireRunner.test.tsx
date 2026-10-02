@@ -135,6 +135,18 @@ describe('QuestionnaireRunner (PRD §9.3)', () => {
     ).toBeNull();
   });
 
+  it('moves on with Enter right after picking an option, as its hint says', async () => {
+    renderRunner(
+      makeSession([radio('q1', 'How was it?'), radio('q2', 'Again?')]),
+    );
+    await userEvent.click(screen.getByRole('radio', {name: /Good/}));
+    await userEvent.keyboard('{Enter}');
+    expect(
+      await screen.findByText('Again?'),
+      'PRD §9.3: Enter moves on when nothing blocks',
+    ).toBeInTheDocument();
+  });
+
   it('offers Skip only on optional questions and saves the skip', async () => {
     renderRunner(
       makeSession([radio('q1', 'Optional?', false), radio('q2', 'Required')]),

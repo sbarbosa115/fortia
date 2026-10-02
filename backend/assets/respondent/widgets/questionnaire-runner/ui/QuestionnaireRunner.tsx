@@ -49,6 +49,13 @@ const NO_FOOTER = ['quote', 'celebration', 'user-capture-data'];
 
 function isTyping(target: EventTarget | null): boolean {
   const element = target as HTMLElement | null;
+  // A picked option keeps the focus; its card shows the Enter hint, so Enter moves on from it.
+  if (
+    element instanceof HTMLInputElement &&
+    (element.type === 'radio' || element.type === 'checkbox')
+  ) {
+    return false;
+  }
   return Boolean(
     element?.closest?.(
       'input, textarea, select, button, a, [contenteditable="true"], [role="dialog"]',
