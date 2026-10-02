@@ -5,6 +5,7 @@ import {editRouteKind} from '../model/decode';
 import {emptyDraft} from '../model/draft';
 import {EditorProvider} from '../model/EditorContext';
 import type {EditorKind} from '../model/types';
+import {returnToSearch, useReturnTo} from '../model/returnTo';
 import {useEditorData} from '../model/useEditorData';
 import {CreationEditor} from './CreationEditor';
 import {GenericEditor} from './GenericEditor';
@@ -47,6 +48,7 @@ function CreateNew({routeKind}: {routeKind: string}) {
 
 function EditExisting({id, routeKind}: {id: string; routeKind?: string}) {
   const {data, isPending, isError, error, refetch} = useEditorData(id);
+  const search = returnToSearch(useReturnTo());
   if (isPending) {
     return <LoadingState />;
   }
@@ -60,7 +62,7 @@ function EditExisting({id, routeKind}: {id: string; routeKind?: string}) {
   const asked = routeKind === 'chaining' ? 'prompt' : routeKind;
   if (wanted === null) {
     if (routeKind) {
-      return <Navigate to={`/questionnaires/${id}/edit`} replace />;
+      return <Navigate to={`/questionnaires/${id}/edit${search}`} replace />;
     }
     return (
       <EditorProvider initial={data.draft} mode="edit" questionnaireId={id}>
@@ -69,7 +71,9 @@ function EditExisting({id, routeKind}: {id: string; routeKind?: string}) {
     );
   }
   if (asked !== wanted) {
-    return <Navigate to={`/questionnaires/${id}/edit/${wanted}`} replace />;
+    return (
+      <Navigate to={`/questionnaires/${id}/edit/${wanted}${search}`} replace />
+    );
   }
   return (
     <EditorProvider initial={data.draft} mode="edit" questionnaireId={id}>

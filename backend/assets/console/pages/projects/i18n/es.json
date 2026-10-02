@@ -140,5 +140,6 @@
       "deadlineRequired": "Elige una fecha límite para el proyecto",
       "deadlineInvalid": "Escribe una fecha límite válida"
     }
-  }
+  },
+  "editQuestionnaire": "Editar el cuestionario de {{name}}"
 }

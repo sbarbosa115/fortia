@@ -318,7 +318,11 @@
     "another": "Crear otro",
     "linkCopied": "¡Copiado!",
     "linkNotCopied": "No pudimos copiar el enlace.",
-    "crumb": "Listo"
+    "crumb": "Listo",
+    "back": {
+      "projects": "Volver a Proyectos",
+      "assignation": "Volver a la asignación"
+    }
   },
   "locked": {
     "badge": "Bloqueado",

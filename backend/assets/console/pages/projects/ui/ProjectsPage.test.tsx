@@ -201,6 +201,12 @@ describe('ProjectsPage', () => {
       'href',
       '/assignations/a-2',
     );
+    expect(
+      detail.getByRole('button', {
+        name: 'Edit the questionnaire of Visual review',
+      }),
+      'its questions can grow while the project runs',
+    ).toBeEnabled();
   });
 
   it('asks the API for the status pill and the search', async () => {

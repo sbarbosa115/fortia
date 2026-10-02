@@ -4,6 +4,7 @@ import type {ReactNode} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link, useNavigate} from 'react-router';
 import {useEditorContext} from '../model/EditorContext';
+import {useReturnTo} from '../model/returnTo';
 import {ChainPromptsStep} from './ChainPromptsStep';
 import {DetailsStep} from './DetailsStep';
 import {DiagnosticResultsStep} from './DiagnosticResultsStep';
@@ -24,6 +25,7 @@ import {SuccessScreen} from './SuccessScreen';
 export function CreationEditor() {
   const {t} = useTranslation('pages.questionnaire-editor');
   const navigate = useNavigate();
+  const returnTo = useReturnTo();
   const editor = useEditorContext();
   const {draft, mode, step} = editor;
   const kindName = t(`kind.${draft.kind}`);
@@ -87,7 +89,9 @@ export function CreationEditor() {
       editor.back();
     } else {
       void navigate(
-        mode === 'create' ? '/questionnaires/new' : '/questionnaires',
+        mode === 'create'
+          ? '/questionnaires/new'
+          : (returnTo?.to ?? '/questionnaires'),
       );
     }
   };

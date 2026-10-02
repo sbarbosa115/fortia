@@ -51,6 +51,22 @@ export function DetailHeader({
             {viewer.canWrite ? (
               <Link
                 className="btn btn--secondary"
+                to={`/questionnaires/${assignation.questionnaire_id}/edit?from=${encodeURIComponent(`/assignations/${assignation.assignations_id}`)}`}
+              >
+                <Icon name="clipboard-list" size={16} />
+                {t('editQuestionnaire')}
+              </Link>
+            ) : (
+              <Button
+                icon={<Icon name="clipboard-list" size={16} />}
+                disabledReason={tShared('readOnly.change')}
+              >
+                {t('editQuestionnaire')}
+              </Button>
+            )}
+            {viewer.canWrite ? (
+              <Link
+                className="btn btn--secondary"
                 to={`/assignations/${assignation.assignations_id}/edit`}
               >
                 <Icon name="edit" size={16} />

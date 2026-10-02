@@ -116,5 +116,6 @@
     "confirm": "Enviar a corrección",
     "done_one": "Intento {{attempt}} enviado a {{count}} destinatario",
     "done_other": "Intento {{attempt}} enviado a {{count}} destinatarios"
-  }
+  },
+  "editQuestionnaire": "Editar cuestionario"
 }

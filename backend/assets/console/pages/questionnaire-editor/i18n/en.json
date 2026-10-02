@@ -318,7 +318,11 @@
     "another": "Create another",
     "linkCopied": "Copied!",
     "linkNotCopied": "We couldn't copy the link.",
-    "crumb": "Done"
+    "crumb": "Done",
+    "back": {
+      "projects": "Back to Projects",
+      "assignation": "Back to the assignation"
+    }
   },
   "locked": {
     "badge": "Locked",

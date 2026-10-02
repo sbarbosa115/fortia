@@ -1,15 +1,20 @@
 import type {Project, ProjectAssignation} from '@console/entities/project';
+import {useViewer} from '@console/entities/viewer';
+import {Icon, IconButton} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
-import {Link} from 'react-router';
+import {Link, useNavigate} from 'react-router';
 import {answersOf, assignationPath, reviewTextOf} from '../model/rows';
 import {ProjectStatusPill} from './ProjectStatusPill';
 
 /**
  * The expanded row: each assignation with its answers ("Question 4 of 8" / "X of N questions" and a bar), where its
- * review stands, its status, and Review / Open.
+ * review stands, its status, Edit questionnaire (its questions can grow while the project runs) and Review / Open.
  */
 export function AssignationsPanel({project}: {project: Project}) {
   const {t} = useTranslation('pages.projects');
+  const {t: tShared} = useTranslation('shared');
+  const viewer = useViewer();
+  const navigate = useNavigate();
   if (project.assignations.length === 0) {
     return <p className="projects-sub__none">{t('emptyProject')}</p>;
   }
@@ -62,6 +67,20 @@ export function AssignationsPanel({project}: {project: Project}) {
                   <ProjectStatusPill status={item.state} />
                 </td>
                 <td className="projects-sub__action">
+                  <IconButton
+                    size="sm"
+                    className="projects-sub__edit"
+                    label={t('editQuestionnaire', {name: item.name})}
+                    icon={<Icon name="square-pen" size={16} />}
+                    disabledReason={
+                      viewer.canWrite ? null : tShared('readOnly.change')
+                    }
+                    onClick={() =>
+                      void navigate(
+                        `/questionnaires/${item.questionnaire_id}/edit?from=%2Fprojects`,
+                      )
+                    }
+                  />
                   <Link
                     to={to}
                     tabIndex={-1}

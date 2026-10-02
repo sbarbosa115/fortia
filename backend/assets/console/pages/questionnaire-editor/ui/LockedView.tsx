@@ -16,6 +16,7 @@ import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link, useNavigate} from 'react-router';
+import {useReturnTo} from '../model/returnTo';
 
 /**
  * A questionnaire with answers (PRD §10.7): "Locked to preserve answers", and "Create a copy" (confirmed) that
@@ -33,6 +34,7 @@ export function LockedView({
   const {t} = useTranslation('pages.questionnaire-editor');
   const toast = useToast();
   const navigate = useNavigate();
+  const returnTo = useReturnTo();
   const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState(false);
   useDocumentTitle(`Mappi - ${questionnaire.title}`);
@@ -81,8 +83,11 @@ export function LockedView({
               >
                 {t('locked.copy')}
               </Button>
-              <Link className="btn btn--secondary" to="/questionnaires">
-                {t('success.list')}
+              <Link
+                className="btn btn--secondary"
+                to={returnTo?.to ?? '/questionnaires'}
+              >
+                {t(returnTo ? `success.back.${returnTo.kind}` : 'success.list')}
               </Link>
             </div>
           </div>

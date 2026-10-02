@@ -650,7 +650,7 @@
   width: 150px;
 }
 .projects-sub__table th.projects-sub__action {
-  width: 96px;
+  width: 136px;
   padding: 0;
 }
 .projects-sub__review {
@@ -1166,4 +1166,8 @@
 .project-form__add:disabled {
   opacity: 0.5;
   pointer-events: none;
+}
+.projects-sub__table td.projects-sub__action .projects-sub__edit {
+  margin-right: 4px;
+  vertical-align: middle;
 }

@@ -4,6 +4,7 @@ import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {Link, useNavigate} from 'react-router';
 import {useEditorContext} from '../model/EditorContext';
+import {useReturnTo} from '../model/returnTo';
 
 /**
  * After saving (PRD §10.5), as in the admin console: a header with the breadcrumb and "Create another", then the
@@ -14,6 +15,7 @@ export function SuccessScreen() {
   const {t} = useTranslation('pages.questionnaire-editor');
   const editor = useEditorContext();
   const navigate = useNavigate();
+  const returnTo = useReturnTo();
   const [copied, setCopied] = useState(false);
   const saved = editor.saved;
   if (!saved) {
@@ -100,9 +102,18 @@ export function SuccessScreen() {
             >
               {t('success.keepEditing')}
             </Button>
-            <Link className="btn btn--ghost success__list" to="/questionnaires">
-              {t('success.list')}
-            </Link>
+            {returnTo ? (
+              <Link className="btn btn--ghost success__list" to={returnTo.to}>
+                {t(`success.back.${returnTo.kind}`)}
+              </Link>
+            ) : (
+              <Link
+                className="btn btn--ghost success__list"
+                to="/questionnaires"
+              >
+                {t('success.list')}
+              </Link>
+            )}
           </div>
         </div>
       </div>

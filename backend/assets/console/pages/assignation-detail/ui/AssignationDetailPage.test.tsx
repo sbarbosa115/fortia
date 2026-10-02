@@ -201,6 +201,13 @@ describe('AssignationDetailPage (PRD §10.11)', () => {
     expect(
       screen.getByRole('button', {name: 'Send for correction'}),
     ).toBeDisabled();
+    expect(
+      screen.getByRole('link', {name: 'Edit questionnaire'}),
+      'the editor comes back to this assignation',
+    ).toHaveAttribute(
+      'href',
+      `/questionnaires/q-1/edit?from=${encodeURIComponent('/assignations/a-1')}`,
+    );
   });
 
   it('reviews an answer and jumps to the next one not reviewed', async () => {

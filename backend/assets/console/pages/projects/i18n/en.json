@@ -140,5 +140,6 @@
       "deadlineRequired": "Choose a deadline for the project",
       "deadlineInvalid": "Enter a valid deadline"
     }
-  }
+  },
+  "editQuestionnaire": "Edit the questionnaire of {{name}}"
 }
