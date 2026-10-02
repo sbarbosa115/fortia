@@ -20,7 +20,7 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  * - a message with an attached document, or with three or more questions pasted → update_draft with its title; then
  *   "sí" → its questions (see DocumentQuestions)
  *   instead of the three; with the questions under way, its questions are added;
- * - with a draft, "el título que sea X" / "cambia el tema a X" / "change the title to X" → update_draft with that
+ * - with a draft, "el título que sea X" / "ponle de título X" / "llámalo X" / "change the title to X" → update_draft with that
  *   basic (the basics are shown again to confirm); anything else it doesn't follow → it asks again, keeping the draft;
  * - with the questions under way, "agrega una tabla" / "add a table" and "agrega un archivo con plantilla" / "add a
  *   file with a template" → add_questions (a table, a file question with a CSV template) and request_review;
@@ -60,7 +60,7 @@ final class ChatResponder implements FakeLlmResponder
             'columns' => ['#', 'Pregunta', 'Tipo'],
             'controls' => ['radio' => 'Opción única', 'checkbox' => 'Opción múltiple', 'select' => 'Lista desplegable', 'text' => 'Texto', 'range' => 'Escala', 'table' => 'Tabla', 'file' => 'Archivo'],
             'untitled' => 'Mi cuestionario',
-            'not_understood' => 'No entendí qué quieres cambiar del borrador. Dime, por ejemplo, «el título es …» o «el tema es …», o responde «Sí» para confirmar los datos básicos.',
+            'not_understood' => 'No entendí qué quieres cambiar del borrador. Dime, por ejemplo, «ponle de título …» o «cambia el tema a …», o responde «Sí» para confirmar los datos básicos.',
             'chain_prompt' => 'Genera tres preguntas de seguimiento a partir de las respuestas.',
             'table' => ['¿Quiénes integran tu equipo?', ['Nombre', 'Cargo', 'Correo']],
             'file' => ['Sube tu presupuesto con la plantilla', 'plantilla-presupuesto.csv', ['Concepto', 'Cantidad', 'Costo'], ['Licencias', '10', '500']],
@@ -87,7 +87,7 @@ final class ChatResponder implements FakeLlmResponder
             'columns' => ['#', 'Question', 'Type'],
             'controls' => ['radio' => 'Single choice', 'checkbox' => 'Multiple choice', 'select' => 'Dropdown', 'text' => 'Text', 'range' => 'Scale', 'table' => 'Table', 'file' => 'File'],
             'untitled' => 'My questionnaire',
-            'not_understood' => 'I didn\'t get what to change in the draft. Tell me, for example, “the title is …” or “the topic is …”, or answer “Yes” to confirm the basics.',
+            'not_understood' => 'I didn\'t get what to change in the draft. Tell me, for example, “set the title to …” or “change the topic to …”, or answer “Yes” to confirm the basics.',
             'chain_prompt' => 'Generate three follow-up questions from the answers.',
             'table' => ['Who is on your team?', ['Name', 'Role', 'Email']],
             'file' => ['Upload your budget using the template', 'budget-template.csv', ['Item', 'Quantity', 'Cost'], ['Licenses', '10', '500']],
@@ -330,21 +330,35 @@ final class ChatResponder implements FakeLlmResponder
     }
 
     /**
-     * The basic the user asks to change, in their words: "el título que sea X", "cambia el tema a X", "title: X".
+     * The basic the user asks to change, in their words: "el título que sea X", "cambia el tema a X", "title: X",
+     * "ponle de título X", "set the title X", "llámalo X".
      *
      * @return array<string, string>|null
      */
     private static function basicChange(string $original): ?array
     {
+        $typed = self::withoutFiles($original);
+        $field = '(t[ií]tulo|title|tema|topic)';
+        $of = '(?:\s+(?:del|de|of the|of)\s+(?:cuestionario|questionnaire|borrador|draft|encuesta|survey))?';
         $connector = '(?:[:=]|(?:que\s+)?(?:sea|ser[aá]|debe\s+ser|es|por|a|como|should\s+be|must\s+be|be|is|to|as)\b)';
-        if (1 !== preg_match('/\b(t[ií]tulo|title|tema|topic)\b(?:\s+(?:del|de|of the|of)\s+\w+)?\s*'.$connector.'\s*(.+)$/iu', self::withoutFiles($original), $m)) {
+        // A verb that asks for a change ("ponle", "pongle", "cambia", "set"…): then the field needs no connector.
+        $verb = '\b(?:p[oó]n\w*|cambi\w*|c[aá]mbi\w*|modific\w*|actualiz\w*|us[ae]|dej\w*|escrib\w*|set|change|update|make|put|use|give)\b';
+        $filler = '(?:\s+(?:de|del|como|el|la|su|un|nuevo|nueva|otro|the|a|an|as|its|it|new))*';
+        $naming = '\b(?:ll[aá]m(?:alo|ala|elo|ele|ese)|que\s+se\s+llame|renombr\w*|call\s+it|name\s+it|rename\s+it)\b(?:\s+(?:a|como|to|as))?';
+
+        if (1 === preg_match('/\b'.$field.'\b'.$of.'\s*'.$connector.'\s*(.+)$/iu', $typed, $m)
+            || 1 === preg_match('/'.$verb.$filler.'\s+'.$field.'\b'.$of.'\s*(?:'.$connector.')?\s*(.+)$/iu', $typed, $m)) {
+            [$name, $value] = [$m[1], $m[2]];
+        } elseif (1 === preg_match('/'.$naming.'\s*(.+)$/iu', $typed, $m)) {
+            [$name, $value] = ['title', $m[1]];
+        } else {
             return null;
         }
-        $value = trim($m[2], " .!?¿¡\t\n\"'«»“”");
+        $value = trim((string) preg_replace('/[\s,]*(?:por\s+favor|please|pls|porfa)[\s.!]*$/iu', '', $value), " .!?¿¡\t\n\"'«»“”");
         if ('' === $value) {
             return null;
         }
-        $field = 1 === preg_match('/^(tema|topic)$/iu', $m[1]) ? 'topic' : 'title';
+        $field = 1 === preg_match('/^(tema|topic)$/iu', $name) ? 'topic' : 'title';
 
         return [$field => mb_substr(mb_strtoupper(mb_substr($value, 0, 1)).mb_substr($value, 1), 0, 'title' === $field ? 200 : 2000)];
     }

@@ -120,6 +120,24 @@ final class ChatFileTest extends ApiTestCase
         self::assertSame(['¿Cuántos empleados tiene?', '¿Cuántas nóminas procesa?', '¿Usa reloj checador?'], array_column($third['draft']['questions'], 'title'), 'the document\'s questions are still taken');
     }
 
+    public function testTheTitleChangesWhateverWordsTheUserAsksForItWith(): void
+    {
+        $first = $this->reply(['Crea un cuestionario sobre café']);
+        $cases = [
+            'Pongle de titulo 37 preguntas AP fortia' => ['title', '37 preguntas AP fortia'],
+            'Ponle como título Encuesta de café, por favor' => ['title', 'Encuesta de café'],
+            'cambia el título del cuestionario a Café 2026' => ['title', 'Café 2026'],
+            'Llámalo «Barista»' => ['title', 'Barista'],
+            'set the title Coffee survey' => ['title', 'Coffee survey'],
+            'pon de tema el café de especialidad' => ['topic', 'El café de especialidad'],
+        ];
+        foreach ($cases as $said => [$field, $value]) {
+            $second = $this->reply(['Crea un cuestionario sobre café', $first['message'], $said], ['draft' => $first['draft']]);
+            self::assertSame($value, $second['draft'][$field], "PRD §7.19: «{$said}» changes the {$field}");
+            self::assertFalse($second['draft']['basics_confirmed'], 'the basics are shown again to confirm');
+        }
+    }
+
     public function testAMessageTheAssistantDoesNotFollowKeepsTheDraftInsteadOfStartingOver(): void
     {
         $first = $this->reply(['Crea un cuestionario sobre café']);
