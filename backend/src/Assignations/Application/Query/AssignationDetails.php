@@ -12,7 +12,9 @@ use App\Organizations\Application\Query\OrganizationQueries;
 use App\Questionnaires\Application\Query\QuestionnaireQueries;
 use App\Responses\Application\Query\SessionQueries;
 use App\Responses\Application\Query\SessionView;
+use App\Shared\Domain\Document\ControlType;
 use App\Shared\Domain\Document\Questions;
+use App\Shared\Domain\Document\TableAnswer;
 
 /**
  * The enriched assignations of the console and the respondent page (PRD §8.8): the stored fields plus
@@ -247,7 +249,7 @@ final class AssignationDetails
                 'position' => $position,
                 'title' => (string) ($question['title'] ?? ''),
                 'type' => (string) ($control['type'] ?? ''),
-                'answer' => self::answerText($value),
+                'answer' => self::answerText($value, $control),
                 'skipped' => $skipped && !Questions::isAnswered($question),
                 'answered_at' => Questions::isResolved($question) ? $answeredAt : null,
                 'locked' => $locked,
@@ -269,12 +271,33 @@ final class AssignationDetails
         return $rows;
     }
 
-    /** @param array{title: string, value: mixed, min?: int|float, max?: int|float}|null $answer */
-    private static function answerText(?array $answer): ?string
+    /**
+     * @param array{title: string, value: mixed, min?: int|float, max?: int|float}|null $answer
+     * @param array<string, mixed>                                                      $control
+     */
+    private static function answerText(?array $answer, array $control): ?string
     {
+        if (ControlType::Table->value === ($control['type'] ?? null)) {
+            // One line per row, "Column: value; …": the rows are objects, not values to join.
+            $text = TableAnswer::toText($control['value'] ?? null, $control);
+
+            return '' === $text ? null : $text;
+        }
         $value = $answer['value'] ?? null;
         if (null === $value || [] === $value) {
             return null;
+        }
+        if (true === ControlType::tryFrom((string) ($control['type'] ?? ''))?->isSelection()) {
+            // The options' labels, not their stored values (a slug like "se-usara-nombre").
+            $labels = [];
+            foreach ((array) ($control['options'] ?? []) as $option) {
+                if (\is_array($option) && \is_scalar($option['value'] ?? $option['label'] ?? null)) {
+                    $labels[(string) ($option['value'] ?? $option['label'])] = (string) ($option['label'] ?? '');
+                }
+            }
+            $value = array_map(static fn ($v) => \is_scalar($v) ? ($labels[(string) $v] ?? $v) : $v, (array) $value);
+
+            return implode(', ', array_map(static fn ($v): string => \is_scalar($v) ? (string) $v : '', $value));
         }
         if (\is_array($value)) {
             return implode(', ', array_map(static fn ($v): string => \is_scalar($v) ? basename((string) $v) : '', $value));

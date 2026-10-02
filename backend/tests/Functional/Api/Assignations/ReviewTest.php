@@ -62,6 +62,31 @@ final class ReviewTest extends ApiTestCase
         self::assertNull($this->data($this->api('GET', '/api/v1/assignations/'.$id))['attempts'][0]['answers'], 'the respondent page never sees the answers');
     }
 
+    public function testTheDetailShowsATablesRowsAndTheLabelsOfTheChosenOptions(): void
+    {
+        $id = $this->completeFollowUp();
+        $session = $this->sharedSession($id);
+        $questions = $session->questions();
+        $at = '2026-09-30T12:00:00.000Z';
+        $questions[0]['options'] = [[
+            'name' => 'who', 'type' => 'table', 'rows' => ['Altas', 'Bajas'], 'timestamp' => $at,
+            'options' => [['label' => 'Nombre', 'value' => 'nombre'], ['label' => 'Correo', 'value' => 'correo']],
+            'value' => [['nombre' => 'Ana', 'correo' => 'ana@acme.test'], ['nombre' => 'Luis']],
+        ]];
+        $questions[1]['options'] = [[
+            'name' => 'how', 'type' => 'checkbox', 'timestamp' => $at,
+            'options' => [['label' => 'Se usará nombre', 'value' => 'se-usara-nombre'], ['label' => 'Clave', 'value' => 'clave']],
+            'value' => ['se-usara-nombre', 'clave'],
+        ]];
+        $session->answer($questions, new \DateTimeImmutable($at));
+        $this->em()->flush();
+
+        $answers = $this->data($this->api('GET', '/api/v1/assignations/'.$id, as: $this->owner))['attempts'][0]['answers'];
+
+        self::assertSame("Altas — Nombre: Ana; Correo: ana@acme.test\nBajas — Nombre: Luis", $answers[0]['answer'], 'PRD §10.11: a table answer shows its rows, not "not answered"');
+        self::assertSame('Se usará nombre, Clave', $answers[1]['answer'], 'PRD §10.11: a choice shows the option labels, not their values');
+    }
+
     public function testOnlyACompleteFollowUpIsReviewed(): void
     {
         $default = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['type' => 'default']);

@@ -223,7 +223,10 @@ final class DocumentQuestions
         $sameShape = [] === array_filter(\array_slice($rows, 1), static fn (array $cells): bool => \count($cells) !== \count($rows[0]));
         // A header and rows to fill in (empty, or naming each row).
         if ([] === $firsts || ($onlyFirst && $sameShape && !$ticks)) {
-            return ['kind' => 'fill', 'columns' => \array_slice(array_map(self::label(...), $header), 0, self::MAX_COLUMNS), 'rows' => \array_slice($firsts, 0, self::MAX_ROWS)];
+            // With rows named in the first column, its header ("Evento") names the rows: it is not a column to fill.
+            $columns = [] !== $firsts && '' !== ($rows[0][0] ?? '') ? \array_slice($header, 1) : $header;
+
+            return ['kind' => 'fill', 'columns' => \array_slice(array_map(self::label(...), $columns), 0, self::MAX_COLUMNS), 'rows' => \array_slice($firsts, 0, self::MAX_ROWS)];
         }
 
         return ['kind' => 'options', 'choices' => $firsts];

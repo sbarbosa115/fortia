@@ -125,6 +125,17 @@ final class DocumentQuestionsTest extends TestCase
         self::assertSame('text', $questions[2]['type'], 'a question without choices is free text');
     }
 
+    public function testATableWithNamedRowsKeepsItsFirstHeaderAsTheRowsNameNotAColumn(): void
+    {
+        $questions = DocumentQuestions::in("1. ¿A quién le llegan los avisos?\n| Evento | Nombre | Correo |\n| --- | --- | --- |\n| Altas | | |\n| Bajas | | |\n\n2. ¿Quién genera las altas?\n| Nombre | Clave |\n| --- | --- |\n| | |\n\n3. ¿Qué cuentas usas?\n| | Cuenta | Centro |\n| --- | --- | --- |\n| Sueldo | | |\n| Aguinaldo | | |");
+
+        self::assertSame(['Nombre', 'Correo'], $questions[0]['columns'], 'the header over the row labels is not a column to fill in');
+        self::assertSame(['Altas', 'Bajas'], $questions[0]['rows']);
+        self::assertSame(['Nombre', 'Clave'], $questions[1]['columns'], 'without named rows every header is a column');
+        self::assertSame(['Cuenta', 'Centro'], $questions[2]['columns'], 'an empty corner header is not a column either');
+        self::assertSame(['Sueldo', 'Aguinaldo'], $questions[2]['rows']);
+    }
+
     /**
      * @param array<string, mixed> $question
      *
