@@ -8,7 +8,8 @@ use App\Shared\Application\Mail\MailNotSent;
  * The emails of assignations (PRD §7.13, §7.11 retry, §7.21), in the account's language (`es` | `en`). Each method
  * sends one message to each address in $to (respondents never see each other) and throws when one is not sent.
  *
- * $assignation: {assignations_id, name, organization_name, due_date}; $timing: ReminderTiming::of().
+ * $assignation: {assignations_id, customer_id, name, organization_name, due_date}; they go through the
+ * account's own SMTP server when it has one; $timing: ReminderTiming::of().
  */
 interface AssignationMailer
 {

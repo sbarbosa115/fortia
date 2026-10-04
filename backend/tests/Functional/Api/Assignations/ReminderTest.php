@@ -5,6 +5,7 @@ namespace App\Tests\Functional\Api\Assignations;
 use App\Assignations\Application\DailyReminders;
 use App\Shared\Application\Mail\OutgoingEmail;
 use App\Tests\Support\ApiTestCase;
+use App\Tests\Support\RecordingSmtpTransports;
 
 /**
  * PRD §7.13 reminders: the daily run at 13:00 UTC and the manual button. Respondents get the link, the account's root
@@ -44,6 +45,20 @@ final class ReminderTest extends ApiTestCase
         self::assertSame(2, $sent[2]->context['reminded']);
         self::assertSame('http://localhost:8080/console/assignations/'.$id, $sent[2]->context['link'], '§7.13: {ADMIN_URL}/assignations/{id}');
         self::assertNotNull($this->storedAssignation($id)->lastReminderSentAt(), 'both emails sent: the day is marked');
+    }
+
+    public function testAnAccountWithItsOwnSmtpServerSendsItsRemindersThroughIt(): void
+    {
+        $this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', ['smtp_host' => 'smtp.acme.test', 'smtp_port' => 587, 'smtp_encryption' => 'tls', 'smtp_from_email' => 'hello@acme.test', 'smtp_from_name' => 'Acme'], as: $this->owner);
+        $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['sales']]]);
+
+        $this->data($this->api('POST', '/api/v1/assignations/'.$id.'/reminders', as: $this->owner));
+
+        $relayed = static::getContainer()->get(RecordingSmtpTransports::class)->sent;
+        self::assertSame(['ana@acme.test', 'luis@acme.test', 'root@acme0001.test'], array_map(static fn (array $s): string => $s['email']->getTo()[0]->getAddress(), $relayed), "the account's emails go through its own server");
+        self::assertSame('smtp.acme.test', $relayed[0]['server']->host);
+        self::assertSame('hello@acme.test', $relayed[0]['email']->getFrom()[0]->getAddress(), "from the account's sender, not SUPPORT_EMAIL");
+        self::assertSame('ACME0001', $this->mailer()->sent[0]->customerId);
     }
 
     public function testAnOwnerWhoIsAlsoARespondentOnlyGetsTheReminder(): void

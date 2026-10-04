@@ -63,11 +63,11 @@ final class TwigAssignationMailer implements AssignationMailer
      */
     private function each(array $to, string $subject, string $template, string $locale, array $context): void
     {
-        /** @var array{due_date?: string|null} $assignation */
+        /** @var array{due_date?: string|null, customer_id?: string} $assignation */
         $assignation = $context['assignation'];
         $context['due_date'] = self::longDate($assignation['due_date'] ?? null, $locale);
         foreach ($to as $address) {
-            $this->mailer->send(new OutgoingEmail([$address], $subject, 'emails/assignations/'.$template.'.html.twig', $context, $locale));
+            $this->mailer->send(new OutgoingEmail([$address], $subject, 'emails/assignations/'.$template.'.html.twig', $context, $locale, [], $assignation['customer_id'] ?? null));
         }
     }
 

@@ -54,6 +54,7 @@ final class AssignationMailContext
     {
         return [
             'assignations_id' => $assignation->assignationsId(),
+            'customer_id' => $assignation->customerId(),
             'name' => $assignation->name(),
             'organization_name' => (string) ($this->organizations->find($assignation->organizationId())['name'] ?? ''),
             'due_date' => $this->dueDate($assignation),
