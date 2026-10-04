@@ -4,7 +4,9 @@ namespace App\Identity\Infrastructure\Mail;
 
 use App\Identity\Application\Port\AccountEmails;
 use App\Shared\Application\Mail\Mailer;
+use App\Shared\Application\Mail\MailServerCheck;
 use App\Shared\Application\Mail\OutgoingEmail;
+use App\Shared\Application\Mail\SmtpServer;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -17,6 +19,7 @@ final class TemplatedAccountEmails implements AccountEmails
 
     public function __construct(
         private readonly Mailer $mailer,
+        private readonly MailServerCheck $check,
         private readonly TranslatorInterface $translator,
         private readonly string $adminFrontendUrl,
         private readonly string $supportEmail,
@@ -50,6 +53,20 @@ final class TemplatedAccountEmails implements AccountEmails
                 'support_email' => $this->supportEmail,
             ],
             $locale,
+        ));
+    }
+
+    public function smtpCheck(SmtpServer $server, string $email, string $accountLanguage, string $customerId): void
+    {
+        $locale = OutgoingEmail::localeOf($accountLanguage);
+        $this->check->sendThrough($server, new OutgoingEmail(
+            [$email],
+            $this->translator->trans('smtp_check.subject', [], self::DOMAIN, $locale),
+            'emails/identity/smtp_check.html.twig',
+            ['host' => $server->host, 'port' => $server->port, 'from_email' => $server->fromEmail],
+            $locale,
+            [],
+            $customerId,
         ));
     }
 }

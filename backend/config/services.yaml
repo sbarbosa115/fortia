@@ -53,6 +53,12 @@ services:
             $generationModel: '%env(LLM_MODEL_GENERATION)%'
             $fastModel: '%env(LLM_MODEL_FAST)%'
 
+    # The secrets an account saves in /profile › System (its SMTP password, its OpenAI key) are sealed with this key.
+    App\Shared\Application\Security\SecretBox: '@App\Shared\Infrastructure\Security\SodiumSecretBox'
+    App\Shared\Infrastructure\Security\SodiumSecretBox:
+        arguments:
+            $encryptionKey: '%env(SETTINGS_ENCRYPTION_KEY)%'
+
     App\Shared\Infrastructure\Storage\LocalObjectStorage:
         arguments:
             $storage: '@objects.storage'
@@ -92,3 +98,9 @@ when@test:
 
         # Services the tests call directly even where no controller uses them yet.
         App\Shared\Infrastructure\Llm\Fake\FakeLanguageModel: ~
+
+        # An account's own SMTP server records what it would send instead of opening a connection.
+        App\Tests\Support\RecordingSmtpTransports: ~
+        App\Shared\Infrastructure\Mail\SmtpTransports: '@App\Tests\Support\RecordingSmtpTransports'
+        App\Shared\Application\Mail\CustomerMailServers: '@App\Identity\Infrastructure\Secrets\SystemSettingsSecrets'
+        App\Shared\Application\Llm\OpenAiKeys: '@App\Identity\Infrastructure\Secrets\SystemSettingsSecrets'

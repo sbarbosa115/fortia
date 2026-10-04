@@ -15,6 +15,11 @@ framework:
             policy: sliding_window
             limit: 300
             interval: '1 minute'
+        # The SMTP server check of /profile › System, per account: each one opens a connection to a host it names.
+        smtp_check:
+            policy: sliding_window
+            limit: 10
+            interval: '10 minutes'
 
 when@test:
     framework:
@@ -34,6 +39,11 @@ when@test:
                 policy: sliding_window
                 limit: 300
                 interval: '1 minute'
+                storage_service: app.test_rate_limiter_storage
+            smtp_check:
+                policy: sliding_window
+                limit: 10
+                interval: '10 minutes'
                 storage_service: app.test_rate_limiter_storage
     services:
         app.test_rate_limiter_storage:

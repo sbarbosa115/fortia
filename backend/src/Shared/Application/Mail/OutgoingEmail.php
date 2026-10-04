@@ -10,6 +10,7 @@ final class OutgoingEmail
      * @param array<string, mixed> $context  variables for the template
      * @param 'es'|'en'            $locale
      * @param list<string>         $bcc
+     * @param string|null          $customerId the account it is sent for: its own SMTP server, when it has one
      */
     public function __construct(
         public readonly array $to,
@@ -18,6 +19,7 @@ final class OutgoingEmail
         public readonly array $context = [],
         public readonly string $locale = 'es',
         public readonly array $bcc = [],
+        public readonly ?string $customerId = null,
     ) {
     }
 
