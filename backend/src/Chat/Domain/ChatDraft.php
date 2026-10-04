@@ -4,6 +4,7 @@ namespace App\Chat\Domain;
 
 use App\Chat\Domain\Error\DraftNotReady;
 use App\Shared\Domain\Document\FileTemplate;
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Error\Rejected;
 use App\Shared\Domain\Ids;
 
@@ -19,6 +20,8 @@ use App\Shared\Domain\Ids;
  *   columns, example_rows}), saved as a CSV;
  * - ending: a thank-you message; a diagnostic also needs its tiers (name, description, recommendations, action
  *   plan), a chain the instructions that generate its next stage;
+ * - tags: optional free-text labels ("AP-03") the user asks for at any phase, with the questionnaire's rules
+ *   (Shared\Domain\Document\QuestionnaireTags); they are not a basic and changing them asks for no confirmation;
  * - review: the complete draft shown to the user; it is saved (create mode) or handed back (draft mode) only when
  *   the user approves it. Any change after the review takes the draft back to the ending phase.
  *
@@ -60,12 +63,14 @@ final class ChatDraft
         private readonly array $questions,
         private readonly array $ending,
         private readonly ?string $chainPrompt,
+        /** @var list<string> */
+        private readonly array $tags = [],
     ) {
     }
 
     public static function empty(): self
     {
-        return new self(null, 'basics', null, null, null, null, null, null, null, null, false, [], ['message' => null, 'tiers' => []], null);
+        return new self(null, 'basics', null, null, null, null, null, null, null, null, false, [], ['message' => null, 'tiers' => []], null, []);
     }
 
     /** The draft as the client sends it back: anything unexpected is dropped, every text capped. */
@@ -100,6 +105,7 @@ final class ChatDraft
             $questions,
             self::endingOf($raw['ending'] ?? null),
             self::string($raw['chain_prompt'] ?? null, self::LONG_TEXT_MAX),
+            self::storedTags($raw['tags'] ?? null),
         );
 
         // A phase the content does not support falls back to the one it does (a tampered or stale client).
@@ -124,6 +130,7 @@ final class ChatDraft
             'questions' => $this->questions,
             'ending' => $this->ending,
             'chain_prompt' => $this->chainPrompt,
+            'tags' => $this->tags,
         ];
     }
 
@@ -175,6 +182,12 @@ final class ChatDraft
     public function basicsConfirmed(): bool
     {
         return $this->basicsConfirmed;
+    }
+
+    /** @return list<string> */
+    public function tags(): array
+    {
+        return $this->tags;
     }
 
     public function chainPrompt(): ?string
@@ -232,12 +245,19 @@ final class ChatDraft
      * confirmation again.
      *
      * @param array<string, mixed> $fields title, type, topic, description, landing_page, has_disclaimer, disclaimer,
-     *                                     capture_user_data, chain_prompt
+     *                                     capture_user_data, chain_prompt, tags
      */
     public function withBasics(array $fields): self
     {
         $changes = [];
         $basicChanged = false;
+        if (\array_key_exists('tags', $fields)) {
+            $changes['tags'] = QuestionnaireTags::normalize($fields['tags']);
+            if (['tags'] === array_keys($fields)) {
+                // Only the tags: no basic changed, the draft stays in its phase (even the review).
+                return $this->with($changes);
+            }
+        }
         foreach (['title' => self::TITLE_MAX, 'topic' => self::TEXT_MAX, 'description' => self::TEXT_MAX, 'disclaimer' => self::TEXT_MAX, 'chain_prompt' => self::LONG_TEXT_MAX] as $field => $max) {
             if (\array_key_exists($field, $fields)) {
                 $changes[$field] = self::string($fields[$field], $max);
@@ -492,6 +512,7 @@ final class ChatDraft
             $data['questions'],
             $data['ending'],
             $data['chain_prompt'],
+            $data['tags'],
         );
     }
 
@@ -666,6 +687,27 @@ final class ChatDraft
         }
 
         return $out;
+    }
+
+    /**
+     * The tags the client sends back: normalized; what breaks the rules is dropped rather than refused (a tampered
+     * client never blocks the turn).
+     *
+     * @return list<string>
+     */
+    private static function storedTags(mixed $raw): array
+    {
+        $tags = [];
+        foreach (\is_array($raw) ? array_values($raw) : [] as $tag) {
+            if (\count($tags) >= QuestionnaireTags::MAX_TAGS) {
+                break;
+            }
+            if (\is_string($tag) && mb_strlen(trim($tag)) <= QuestionnaireTags::MAX_LENGTH) {
+                $tags = QuestionnaireTags::normalize([...$tags, $tag]);
+            }
+        }
+
+        return $tags;
     }
 
     private static function string(mixed $value, int $max): ?string

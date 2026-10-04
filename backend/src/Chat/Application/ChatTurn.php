@@ -207,10 +207,10 @@ final class ChatTurn
         Permissions::adminGroups($caller);
         $payload = DraftFlow::payload($draft);
         if (null === $draft->questionnaireId()) {
-            return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], source: 'chat'));
+            return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], source: 'chat', tags: $payload['tags']));
         }
 
-        return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], questionnaireId: $draft->questionnaireId(), source: 'chat'));
+        return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], questionnaireId: $draft->questionnaireId(), source: 'chat', tags: $payload['tags']));
     }
 
     /**

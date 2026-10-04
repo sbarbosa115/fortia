@@ -99,21 +99,38 @@ final class ChatTurnTest extends ApiTestCase
         self::assertSame("\u{FEFF}Concepto,Cantidad,Costo\nLicencias,10,500\n", static::getContainer()->get(ObjectStorage::class)->get($template['key']), 'the respondent downloads a CSV with the columns and the example');
     }
 
-    public function testADiagnosticDraftIsSavedWithTiersWhoseBandsTheServerComputes(): void
+    public function testTheChatCreatesRegularQuestionnairesOnly(): void
     {
         $first = $this->reply(['Crea un diagnóstico sobre madurez digital']);
-        self::assertSame('diagnostic', $first['draft']['type']);
-        $second = $this->reply(['Crea un diagnóstico sobre madurez digital', $first['message'], 'Sí'], ['draft' => $first['draft']]);
-        $third = $this->reply(['x', 'y', 'Sí'], ['draft' => $second['draft']]);
+        self::assertSame('regular', $first['draft']['type'], 'the chat builds a regular questionnaire even when asked for a diagnostic');
 
-        $created = static::getContainer()->get(QuestionnaireDetails::class)->find($third['questionnaire_id']);
+        $tools = $this->llm()->requests()[0]->tools;
+        $updateDraft = array_values(array_filter($tools, static fn ($t): bool => 'update_draft' === $t->name))[0];
+        self::assertSame(['regular'], $updateDraft->inputSchema['properties']['type']['enum'], 'update_draft offers the regular type only');
+
+        $this->llm()->willAnswer(LlmResponse::toolCalls([new LlmToolCall('t1', 'update_draft', ['type' => 'diagnostic'])]));
+        $this->llm()->willAnswer(LlmResponse::json(['message' => 'Solo regulares.', 'quick_replies' => []]));
+        $result = $this->reply(['Crea un diagnóstico sobre madurez digital', $first['message'], 'Hazlo diagnóstico'], ['draft' => $first['draft']]);
+
+        self::assertSame('regular', $result['draft']['type'], 'a diagnostic, chain or quiz funnel cannot be started in the chat');
+        self::assertStringContainsString('TYPE_NOT_AVAILABLE', $this->lastToolResult());
+    }
+
+    public function testTheUserTagsTheDraftAndTheQuestionnaireIsCreatedWithItsTags(): void
+    {
+        $first = $this->reply(['Crea un cuestionario sobre ventas']);
+        $history = ['Crea un cuestionario sobre ventas', $first['message'], 'Sí'];
+        $second = $this->reply($history, ['draft' => $first['draft']]);
+        $history = [...$history, $second['message'], 'Etiquétalo AP-03 y NP-12'];
+        $third = $this->reply($history, ['draft' => $second['draft']]);
+
+        self::assertSame(['AP-03', 'NP-12'], $third['draft']['tags'], 'the user asks for tags in their own words');
+        self::assertSame('review', $third['draft']['phase'], 'tags need no new confirmation');
+
+        $done = $this->reply([...$history, $third['message'], 'Sí'], ['draft' => $third['draft']]);
+        $created = static::getContainer()->get(QuestionnaireDetails::class)->find($done['questionnaire_id']);
         self::assertNotNull($created);
-        self::assertSame('diagnostic', $created['type']);
-        $tiers = $created['on_completed']['tiers'];
-        self::assertCount(2, $tiers);
-        self::assertSame(0, $tiers[0]['min'], 'PRD §7.8: bands start at 0');
-        self::assertSame(9, $tiers[1]['max'], 'PRD §7.8: bands end at the maximum (3 questions × 3)');
-        self::assertSame($tiers[0]['max'] + 1, $tiers[1]['min'], 'contiguous bands');
+        self::assertSame(['AP-03', 'NP-12'], $created['tags'], 'the questionnaire is saved with the tags of the draft');
     }
 
     public function testTheDraftModeSavesNothingAndHandsBackTheApprovedDraftWithItsFlow(): void

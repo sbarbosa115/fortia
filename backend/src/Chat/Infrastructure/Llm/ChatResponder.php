@@ -15,8 +15,10 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  * tools a real model would, so every path of a turn (reads, queued writes, the draft through its phases) runs
  * without a provider.
  *
- * - "crea un cuestionario sobre X" / "create a questionnaire about X" (+ "diagnóstico"/"diagnostic", "cadena"/"chain")
- *   → update_draft with the basics; then "sí" → confirm_basics, three questions, the ending and request_review;
+ * - "crea un cuestionario sobre X" / "create a questionnaire about X" (a "diagnóstico" or a "cadena" too: the chat
+ *   creates regular questionnaires only) → update_draft with the basics; then "sí" → confirm_basics, three questions,
+ *   the ending and request_review;
+ * - with a draft, "etiquétalo AP-03 y NP-12" / "tag it AP-03, NP-12" → update_draft with the draft's tags plus those;
  * - a message with an attached document, or with three or more questions pasted → update_draft with its title; then
  *   "sí" → its questions (see DocumentQuestions)
  *   instead of the three; with the questions under way, its questions are added;
@@ -61,7 +63,6 @@ final class ChatResponder implements FakeLlmResponder
             'controls' => ['radio' => 'Opción única', 'checkbox' => 'Opción múltiple', 'select' => 'Lista desplegable', 'text' => 'Texto', 'range' => 'Escala', 'table' => 'Tabla', 'file' => 'Archivo'],
             'untitled' => 'Mi cuestionario',
             'not_understood' => 'No entendí qué quieres cambiar del borrador. Dime, por ejemplo, «ponle de título …» o «cambia el tema a …», o responde «Sí» para confirmar los datos básicos.',
-            'chain_prompt' => 'Genera tres preguntas de seguimiento a partir de las respuestas.',
             'table' => ['¿Quiénes integran tu equipo?', ['Nombre', 'Cargo', 'Correo']],
             'file' => ['Sube tu presupuesto con la plantilla', 'plantilla-presupuesto.csv', ['Concepto', 'Cantidad', 'Costo'], ['Licencias', '10', '500']],
         ],
@@ -88,7 +89,6 @@ final class ChatResponder implements FakeLlmResponder
             'controls' => ['radio' => 'Single choice', 'checkbox' => 'Multiple choice', 'select' => 'Dropdown', 'text' => 'Text', 'range' => 'Scale', 'table' => 'Table', 'file' => 'File'],
             'untitled' => 'My questionnaire',
             'not_understood' => 'I didn\'t get what to change in the draft. Tell me, for example, “set the title to …” or “change the topic to …”, or answer “Yes” to confirm the basics.',
-            'chain_prompt' => 'Generate three follow-up questions from the answers.',
             'table' => ['Who is on your team?', ['Name', 'Role', 'Email']],
             'file' => ['Upload your budget using the template', 'budget-template.csv', ['Item', 'Quantity', 'Cost'], ['Licenses', '10', '500']],
         ],
@@ -189,6 +189,10 @@ final class ChatResponder implements FakeLlmResponder
 
             return [['update_draft', ['title' => $title, 'type' => 'regular', 'topic' => $title, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false]]];
         }
+        // With a draft: "etiquétalo AP-03 y NP-12", "tag it AP-03".
+        if (null !== ($draft['title'] ?? null) && null !== ($tags = self::tagsAsked($original))) {
+            return [['update_draft', ['tags' => array_values(array_merge(array_filter((array) ($draft['tags'] ?? []), 'is_string'), $tags))]]];
+        }
         // With a draft: "el título que sea X", "cambia el tema a X", "change the title to X".
         if (null !== ($draft['title'] ?? null) && null !== ($basic = self::basicChange($original))) {
             return [['update_draft', $basic]];
@@ -217,11 +221,7 @@ final class ChatResponder implements FakeLlmResponder
                 $title = trim($m[1], " .!?¿¡«»\"'\t\n");
                 $topic = isset($m[2]) ? trim($m[2], " .!?¿¡\t\n") : $title;
             }
-            $type = str_contains($text, 'diagnostic') ? 'diagnostic' : (str_contains($text, 'cadena') || str_contains($text, 'chain') ? 'chain' : 'regular');
-            $basics = ['title' => mb_substr(mb_strtoupper(mb_substr($title, 0, 1)).mb_substr($title, 1), 0, 200), 'type' => $type, 'topic' => $topic, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false];
-            if ('chain' === $type) {
-                $basics['chain_prompt'] = $texts['chain_prompt'];
-            }
+            $basics = ['title' => mb_substr(mb_strtoupper(mb_substr($title, 0, 1)).mb_substr($title, 1), 0, 200), 'type' => 'regular', 'topic' => $topic, 'landing_page' => false, 'has_disclaimer' => false, 'capture_user_data' => false];
 
             return [['update_draft', $basics]];
         }
@@ -367,6 +367,24 @@ final class ChatResponder implements FakeLlmResponder
         $field = 1 === preg_match('/^(tema|topic)$/iu', $name) ? 'topic' : 'title';
 
         return [$field => mb_substr(mb_strtoupper(mb_substr($value, 0, 1)).mb_substr($value, 1), 0, 'title' === $field ? 200 : 2000)];
+    }
+
+    /**
+     * The tags the user asks for: "etiquétalo AP-03 y NP-12", "tag it AP-03, NP-12", "etiquetas: AP-03; Some".
+     *
+     * @return list<string>|null
+     */
+    private static function tagsAsked(string $original): ?array
+    {
+        if (1 !== preg_match('/\b(?:tag(?:s|ged)?|etiqu\p{L}*)\b(?:\s+(?:it|them|with|as|lo|la|con|como|de))*\s*:?\s*(.+)$/iu', self::withoutFiles($original), $m)) {
+            return null;
+        }
+        $tags = array_values(array_filter(array_map(
+            static fn (string $t): string => trim($t, " .!?¿¡\t\n\"'«»“”"),
+            preg_split('/\s*(?:[,;]|\s(?:y|and|e)\s)\s*/u', $m[1]) ?: [],
+        ), static fn (string $t): bool => '' !== $t));
+
+        return [] === $tags ? null : $tags;
     }
 
     /**

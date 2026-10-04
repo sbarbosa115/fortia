@@ -22,12 +22,13 @@ use App\Shared\Domain\Text;
  *
  * The questions go through the LLM-output clean-up of §7.6 (one control each, renumbered, deduplicated values, new
  * ids); an edited questionnaire keeps the ids of the questions it already had. A table's columns become its options;
- * a template the chat wrote travels as CSV text, which the save stores.
+ * a template the chat wrote travels as CSV text, which the save stores. The tags travel beside the states (the `tags`
+ * of POST /questionnaire).
  */
 final class DraftFlow
 {
     /**
-     * @return array{states: list<array<string, mixed>>, cta: null, layout: list<string>|null}
+     * @return array{states: list<array<string, mixed>>, cta: null, layout: list<string>|null, tags: list<string>}
      *
      * @throws DraftNotReady when the draft is not complete
      */
@@ -59,6 +60,7 @@ final class DraftFlow
                 'states' => [$start, ['state_id' => 'diagnostic', 'type' => 'diagnostic', 'parameters' => [], 'next' => null]],
                 'cta' => null,
                 'layout' => null,
+                'tags' => $draft->tags(),
             ];
         }
         $start['parameters']['questionnaire']['on_completed'] = null === $ending['message'] ? ['type' => 'default'] : ['type' => 'default', 'message' => $ending['message']];
@@ -73,10 +75,11 @@ final class DraftFlow
                 ],
                 'cta' => null,
                 'layout' => null,
+                'tags' => $draft->tags(),
             ];
         }
 
-        return ['states' => [$start], 'cta' => null, 'layout' => null];
+        return ['states' => [$start], 'cta' => null, 'layout' => null, 'tags' => $draft->tags()];
     }
 
     /**
@@ -156,6 +159,7 @@ final class DraftFlow
             'basics_confirmed' => true,
             'questions' => $questions,
             'ending' => ['message' => \is_string($onCompleted['message'] ?? null) ? $onCompleted['message'] : null, 'tiers' => $tiers],
+            'tags' => \is_array($stored['tags'] ?? null) ? $stored['tags'] : [],
         ])->forQuestionnaire((string) $stored['questionnaire_id']);
     }
 

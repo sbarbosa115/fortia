@@ -157,6 +157,38 @@ final class ChatDraftTest extends TestCase
         $this->assertRefused('NOT_EDITABLE_IN_CHAT', static fn () => DraftFlow::draftOf(['questionnaire_id' => 'x', 'type' => 'quiz_funnel', 'parent' => 'ROOT', 'questions' => []]));
     }
 
+    public function testTagsFollowTheQuestionnairesRulesAndNeedNoNewConfirmation(): void
+    {
+        $draft = ChatDraft::empty()->withBasics(self::BASICS)->confirmBasics()
+            ->withQuestions([self::radio('¿Cómo estás?')])->withEnding(['message' => 'Gracias'])->toReview();
+
+        $tagged = $draft->withBasics(['tags' => [' AP-03 ', 'ap-03', 'NP-12']]);
+
+        self::assertSame(['AP-03', 'NP-12'], $tagged->tags(), 'trimmed, repeats (any case) dropped');
+        self::assertTrue($tagged->basicsConfirmed(), 'tags are not a basic: no new confirmation');
+        self::assertSame('review', $tagged->phase(), 'only the tags changed: the draft stays in its phase');
+        self::assertSame(['AP-03', 'NP-12'], DraftFlow::payload($tagged)['tags'], 'the flow carries the tags to the save');
+        self::assertSame(['AP-03', 'NP-12'], ChatDraft::fromArray($tagged->toArray())->tags(), 'the client sends them back');
+        $this->assertRefused('VALIDATION_ERROR', static fn () => $draft->withBasics(['tags' => [str_repeat('a', 41)]]), 'at most 40 characters a tag');
+        $this->assertRefused('VALIDATION_ERROR', static fn () => $draft->withBasics(['tags' => array_map(static fn (int $i): string => 'T'.$i, range(1, 21))]), 'at most 20 tags');
+    }
+
+    public function testTamperedTagsFromTheClientAreDroppedNotRefused(): void
+    {
+        $draft = ChatDraft::fromArray(['tags' => ['ok', str_repeat('a', 41), 3, ...array_map(static fn (int $i): string => 'T'.$i, range(1, 30))]]);
+
+        self::assertCount(20, $draft->tags());
+        self::assertSame('ok', $draft->tags()[0]);
+        self::assertSame([], ChatDraft::fromArray(['tags' => 'AP-03'])->tags());
+    }
+
+    public function testAStoredQuestionnairesTagsComeIntoTheDraft(): void
+    {
+        $draft = DraftFlow::draftOf(['questionnaire_id' => '11111111-1111-4111-8111-111111111111', 'title' => 'Pulso', 'type' => 'default', 'parent' => 'ROOT', 'tags' => ['AP-03'], 'questions' => []]);
+
+        self::assertSame(['AP-03'], $draft->tags());
+    }
+
     public function testATableQuestionNeedsItsColumnsAndMayHaveFixedRows(): void
     {
         $draft = ChatDraft::empty()->withBasics(self::BASICS)->confirmBasics();

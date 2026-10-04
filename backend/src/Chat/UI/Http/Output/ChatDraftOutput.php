@@ -30,6 +30,9 @@ final class ChatDraftOutput
         public readonly ChatEndingOutput $ending,
         #[OA\Property(description: 'Chains: the instructions that generate the next stage')]
         public readonly ?string $chain_prompt,
+        /** @var list<string> */
+        #[OA\Property(description: 'Free-text labels the user asked for ("AP-03")', type: 'array', items: new OA\Items(type: 'string'))]
+        public readonly array $tags = [],
     ) {
     }
 }
