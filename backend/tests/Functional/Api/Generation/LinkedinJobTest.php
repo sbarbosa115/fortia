@@ -37,6 +37,7 @@ final class LinkedinJobTest extends ApiTestCase
         self::assertSame([[0, 7], [8, 15], [16, 24]], array_map(static fn (array $t): array => [$t['min'], $t['max']], $diagnostic['tiers']), '§7.8: tier bands computed on the server (8 questions × 3 = 24)');
 
         $request = $this->llm()->requests()[0];
+        self::assertSame(self::OWNER, $request->customerId, "billed to the account's own OpenAI key when it saved one");
         self::assertSame('linkedin--rules-to-create-diagnostic-questionnaires', $request->purpose);
         self::assertStringContainsString('<profile>', $request->messages[0]->content, 'the profile is untrusted data, between its tags');
         self::assertStringContainsString('Write every text in English', $request->messages[0]->content);

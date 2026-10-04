@@ -4,9 +4,9 @@ namespace App\Shared\Application\Llm;
 
 final class LlmRequest
 {
-    /** The most capable model: generating questionnaires, dashboards, styles, chat (configurable via AppSetting). */
+    /** Quality-sensitive work: generating questionnaires, dashboards, styles, chat (more reasoning). */
     public const TIER_GENERATION = 'generation';
-    /** The fast, low-cost model: recommending products, evaluating answers. */
+    /** Simple, cheap calls: recommending products, evaluating answers (less reasoning, same model). */
     public const TIER_FAST = 'fast';
 
     /**
@@ -17,8 +17,10 @@ final class LlmRequest
      * @param array<string, mixed>|null $jsonSchema  structured output: the answer is JSON valid against it
      * @param list<LlmTool>             $tools
      * @param list<LlmAttachment>       $attachments files added to the first user message
-     * @param string|null               $model       overrides the tier's model (AppSetting "default model")
+     * @param string|null               $model       overrides LLM_MODEL for this call
      * @param array<string, mixed>      $context     free data for the fake responder (never sent to a provider)
+     * @param string|null               $customerId  the account the call is for: billed to its own OpenAI key when
+     *                                               it saved one, else to the platform's
      */
     public function __construct(
         public readonly string $purpose,
@@ -31,6 +33,7 @@ final class LlmRequest
         public readonly ?string $model = null,
         public readonly int $maxTokens = 16000,
         public readonly array $context = [],
+        public readonly ?string $customerId = null,
     ) {
     }
 
@@ -40,8 +43,8 @@ final class LlmRequest
      * @param array<string, mixed>|null $jsonSchema
      * @param array<string, mixed>      $context
      */
-    public static function single(string $purpose, string $system, string $user, ?array $jsonSchema = null, string $tier = self::TIER_GENERATION, array $context = []): self
+    public static function single(string $purpose, string $system, string $user, ?array $jsonSchema = null, string $tier = self::TIER_GENERATION, array $context = [], ?string $customerId = null): self
     {
-        return new self($purpose, $system, [LlmMessage::user($user)], $jsonSchema, [], $tier, [], null, 16000, $context);
+        return new self($purpose, $system, [LlmMessage::user($user)], $jsonSchema, [], $tier, [], null, 16000, $context, $customerId);
     }
 }

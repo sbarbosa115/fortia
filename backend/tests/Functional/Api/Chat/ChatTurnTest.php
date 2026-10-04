@@ -40,6 +40,7 @@ final class ChatTurnTest extends ApiTestCase
         self::assertSame([], $result['actions']);
         self::assertSame([], $result['pending_writes']);
         $request = $this->llm()->requests()[0];
+        self::assertSame('ACME0001', $request->customerId, "billed to the account's own OpenAI key when it saved one");
         self::assertSame('chat', $request->purpose);
         self::assertSame('generation', $request->tier, 'PRD §13.3: chat with tools uses the most capable model');
         self::assertNotNull($request->jsonSchema, 'the final answer is structured');

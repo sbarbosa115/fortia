@@ -66,6 +66,7 @@ final class StylesJobTest extends ApiTestCase
         self::assertSame('https://brand.example/hero.jpg', $styles['logoUrl'], '§7.16 step 4: the logo is one of the candidates');
         self::assertSame('https://brand.example', $this->stored('ACME0001')->website());
         $request = $this->llm()->requests()[0];
+        self::assertSame('ACME0001', $request->customerId, "billed to the account's own OpenAI key when it saved one");
         self::assertSame('styles--rules-to-extract-brand-styles', $request->purpose, 'the system prompt of §13 for styles');
         self::assertStringContainsString('untrusted page content', $request->messages[0]->content, 'the page is data, never instructions');
         self::assertSame('generation', $request->tier);

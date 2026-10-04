@@ -26,6 +26,7 @@ final class EvaluationTest extends ApiTestCase
         self::assertSame(1, $stored['max_followups'], 'the server keeps the count, so a respondent cannot reset it');
         self::assertSame('Fine', $stored['flagged_answer']);
         $request = $this->llm()->requests()[0];
+        self::assertSame('ACME0001', $request->customerId, "billed to the account's own OpenAI key when it saved one");
         self::assertSame('followups--rules-to-evaluate-answers', $request->purpose);
         self::assertSame('fast', $request->tier, '§13.3: evaluating answers uses the fast model');
     }

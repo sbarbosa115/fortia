@@ -44,14 +44,9 @@ services:
         factory: ['@App\Shared\Infrastructure\Llm\LanguageModelFactory', 'create']
         arguments: ['%env(LLM_PROVIDER)%']
 
-    App\Shared\Infrastructure\Llm\AnthropicLanguageModel:
+    App\Shared\Infrastructure\Llm\OpenAiLanguageModel:
         arguments:
-            $apiKey: '%env(ANTHROPIC_API_KEY)%'
-
-    App\Shared\Infrastructure\Llm\ModelCatalog:
-        arguments:
-            $generationModel: '%env(LLM_MODEL_GENERATION)%'
-            $fastModel: '%env(LLM_MODEL_FAST)%'
+            $model: '%env(LLM_MODEL)%'
 
     # The secrets an account saves in /profile › System (its SMTP password, its OpenAI key) are sealed with this key.
     App\Shared\Application\Security\SecretBox: '@App\Shared\Infrastructure\Security\SodiumSecretBox'

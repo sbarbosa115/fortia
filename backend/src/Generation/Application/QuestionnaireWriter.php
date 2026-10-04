@@ -31,12 +31,13 @@ final class QuestionnaireWriter
      * @param list<LlmAttachment>        $attachments
      * @param array<string, mixed>       $context          for the offline fake only
      * @param list<array<string, mixed>> $earlierQuestions questions of the earlier stages scored together with these
+     * @param string|null                $customerId       the account it is written for (its own OpenAI key)
      *
      * @return array{title: string, description: string|null, questions: list<array<string, mixed>>, diagnostic: array{tiers: list<array<string, mixed>>, recommendations: list<array<string, mixed>>, action_plan: list<array<string, mixed>>}|null}
      *
      * @throws UpstreamFailed GENERATION_FAILED after the last attempt
      */
-    public function write(string $purpose, string $system, string $user, string $fallbackTitle, bool $scored, bool $withTiers, array $attachments = [], array $context = [], array $earlierQuestions = []): array
+    public function write(string $purpose, string $system, string $user, string $fallbackTitle, bool $scored, bool $withTiers, array $attachments = [], array $context = [], array $earlierQuestions = [], ?string $customerId = null): array
     {
         $request = new LlmRequest(
             purpose: $purpose,
@@ -46,6 +47,7 @@ final class QuestionnaireWriter
             tier: LlmRequest::TIER_GENERATION,
             attachments: $attachments,
             context: $context + ['scored' => $scored, 'tiers' => $withTiers],
+            customerId: $customerId,
         );
 
         for ($attempt = 1; $attempt <= self::ATTEMPTS; ++$attempt) {

@@ -4,14 +4,15 @@ namespace App\Responses\Infrastructure\Transcription;
 
 use App\Responses\Application\Port\TranscriptionToken;
 use App\Responses\Application\Port\TranscriptionTokens;
+use App\Shared\Application\Llm\OpenAiKeys;
 use App\Shared\Domain\Error\UpstreamFailed;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
  * An ephemeral client secret of the OpenAI Realtime API for a transcription session (PCM16 at 24 kHz, PRD §13.4),
- * valid about a minute. The API key never leaves the server.
+ * valid about a minute, billed to the account's own key (/profile › System) or the platform's OPENAI_API_KEY. The
+ * API key never leaves the server; without any key the browser transcribes instead.
  */
 final class OpenAiTranscriptionTokens implements TranscriptionTokens
 {
@@ -21,17 +22,21 @@ final class OpenAiTranscriptionTokens implements TranscriptionTokens
 
     public function __construct(
         private readonly HttpClientInterface $http,
-        #[Autowire(env: 'OPENAI_API_KEY')]
-        private readonly string $apiKey,
+        private readonly OpenAiKeys $keys,
+        private readonly TranscriptionTokens $withoutKey,
         private readonly string $model = 'gpt-4o-transcribe',
     ) {
     }
 
-    public function issue(): TranscriptionToken
+    public function issue(?string $customerId = null): TranscriptionToken
     {
+        $apiKey = $this->keys->keyFor($customerId);
+        if ('' === $apiKey) {
+            return $this->withoutKey->issue($customerId);
+        }
         try {
             $response = $this->http->request('POST', self::URL, [
-                'auth_bearer' => $this->apiKey,
+                'auth_bearer' => $apiKey,
                 'timeout' => 10,
                 'json' => [
                     'expires_after' => ['anchor' => 'created_at', 'seconds' => self::TTL],

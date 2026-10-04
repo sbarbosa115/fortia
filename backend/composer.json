@@ -7,7 +7,6 @@
     "php": ">=8.2",
     "ext-ctype": "*",
     "ext-iconv": "*",
-    "anthropic-ai/sdk": "*",
     "doctrine/doctrine-bundle": "^3.3",
     "doctrine/doctrine-migrations-bundle": "^4.0",
     "doctrine/orm": "^3.7",

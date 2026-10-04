@@ -53,6 +53,7 @@ final class GenerateDashboardHandler
                 self::schema(),
                 LlmRequest::TIER_GENERATION,
                 ['questions' => array_map(static fn (QuestionProfile $q): array => $q->toArray(), $profiles), 'diagnostic' => $diagnostic],
+                $questionnaire->customerId(),
             ));
         } catch (LlmUnavailable $failure) {
             throw new DashboardGenerationFailed($failure);
