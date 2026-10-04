@@ -43,6 +43,26 @@
                 }
             }
         },
+        "/api/v1/questionnaire/tags": {
+            "get": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "get_api_questionnaire_tags",
+                "responses": {
+                    "200": {
+                        "description": "Every tag of the account's questionnaires once, sorted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireTagsOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assignations": {
             "get": {
                 "tags": [
@@ -2531,6 +2551,15 @@
                             "type": "string",
                             "maxLength": 200
                         }
+                    },
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "description": "One of the questionnaire's tags, whole, ignoring case and accents",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 40
+                        }
                     }
                 ],
                 "responses": {
@@ -2982,8 +3011,19 @@
                 "tags": [
                     "Files and transcription"
                 ],
-                "summary": "An ephemeral secret for one recording (~1 min, \u00a713.4). P, rate limited.",
+                "summary": "An ephemeral secret for one recording (~1 min, \u00a713.4). P, rate limited. customer_id: the account of the session,\nwhose own OpenAI key is used when it saved one.",
                 "operationId": "get_api_transcription_token",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9]{1,16}$"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "The token",
@@ -4477,6 +4517,20 @@
                 "properties": {
                     "questionnaire_url": {
                         "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "QuestionnaireTagsOutput": {
+                "required": [
+                    "tags"
+                ],
+                "properties": {
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "type": "object"
@@ -8145,6 +8199,9 @@
             "name": "Flows"
         },
         {
+            "name": "Questionnaires"
+        },
+        {
             "name": "Assignations"
         },
         {
@@ -8185,9 +8242,6 @@
         },
         {
             "name": "Organizations"
-        },
-        {
-            "name": "Questionnaires"
         },
         {
             "name": "Reporting"

@@ -1,38 +1,39 @@
 import {
   fetchQuestionnaires,
-  type ListingType,
+  fetchQuestionnaireTags,
+  QUESTIONNAIRE_TAGS_QUERY_KEY,
   QUESTIONNAIRES_QUERY_KEY,
 } from '@console/entities/questionnaire';
 import {useDebouncedValue} from '@shared/lib';
-import {keepPreviousData, useInfiniteQuery} from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from '@tanstack/react-query';
 import {useState} from 'react';
 
 const BATCH = 20;
 
-/** The type filter of step 1: every type, or one of them. */
-export type TypeFilter = ListingType | 'all';
-export const TYPE_FILTERS: TypeFilter[] = [
-  'all',
-  'default',
-  'diagnostic',
-  'quiz_funnel',
-  'process_mapping',
-];
-
 /**
- * The questionnaires step 1 lists: searched by name on the server (300 ms debounce), filtered by type, newest change
- * first, in batches of 20 (the next batch loads near the end of the list, or with "Load more").
+ * The questionnaires step 1 lists: searched by name on the server (300 ms debounce), filtered by one of the account's
+ * tags (or none), newest change first, in batches of 20 (the next batch loads near the end of the list, or with
+ * "Load more").
  */
 export function useQuestionnaireChoices() {
   const [search, setSearch] = useState('');
-  const [type, setType] = useState<TypeFilter>('all');
+  const [tag, setTag] = useState<string | null>(null);
   const term = useDebouncedValue(search.trim(), 300);
+  const tagsQuery = useQuery({
+    queryKey: QUESTIONNAIRE_TAGS_QUERY_KEY,
+    queryFn: fetchQuestionnaireTags,
+  });
   const query = useInfiniteQuery({
-    queryKey: [...QUESTIONNAIRES_QUERY_KEY, 'assignation-wizard', term, type],
+    queryKey: [...QUESTIONNAIRES_QUERY_KEY, 'assignation-wizard', term, tag],
     queryFn: ({pageParam}) =>
       fetchQuestionnaires({
         search: term,
-        type: type === 'all' ? null : type,
+        type: null,
+        tag,
         isActive: null,
         sortBy: 'updated_at',
         order: 'desc',
@@ -55,12 +56,14 @@ export function useQuestionnaireChoices() {
   return {
     search,
     setSearch,
-    type,
-    setType,
-    filtered: search.trim() !== '' || type !== 'all',
+    /** The account's tags to filter by; empty while they load or when no questionnaire has one. */
+    tags: tagsQuery.data?.tags ?? [],
+    tag,
+    setTag,
+    filtered: search.trim() !== '' || tag !== null,
     clearFilters: () => {
       setSearch('');
-      setType('all');
+      setTag(null);
     },
     items,
     loading: query.isPending,

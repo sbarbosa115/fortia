@@ -73,6 +73,35 @@ final class QuestionnaireTagsTest extends ApiTestCase
         self::assertSame(['AP-03'], $row['tags'], 'PATCH answers the row with its tags, untouched');
     }
 
+    public function testTheListingFiltersByATagIgnoringCaseAndAccents(): void
+    {
+        $owner = $this->account('ACME0001');
+        $this->createQuestionnaire($owner, ['tags' => ['AP-03', 'Educación']] + self::regularFlow('First'));
+        $this->createQuestionnaire($owner, ['tags' => ['NP-12']] + self::regularFlow('Second'));
+        $this->createQuestionnaire($owner, self::regularFlow('Untagged'));
+
+        self::assertSame(['First'], $this->titles('tag=ap-03', $owner), 'a tag matches without case');
+        self::assertSame(['First'], $this->titles('tag=EDUCACION', $owner), 'nor accents');
+        self::assertSame([], $this->titles('tag=AP', $owner), 'a tag matches whole, not a part of it');
+        self::assertCount(3, $this->titles('tag=%20', $owner), 'an empty tag filters nothing');
+    }
+
+    public function testTheTagsListIsTheAccountsDistinctTagsInOrder(): void
+    {
+        $owner = $this->account('ACME0001');
+        $globex = $this->account('GLOBEX01');
+        $this->createQuestionnaire($owner, ['tags' => ['NP-12', 'AP-03']] + self::regularFlow('First'));
+        $this->later('+1 minute');
+        $this->createQuestionnaire($owner, ['tags' => ['ap-03', 'Onboarding']] + self::regularFlow('Second'));
+        $this->createQuestionnaire($globex, ['tags' => ['Theirs']] + self::regularFlow('Globex'));
+
+        $tags = $this->data($this->api('GET', '/api/v1/questionnaire/tags', as: $owner))['tags'];
+
+        self::assertSame(['AP-03', 'NP-12', 'Onboarding'], $tags, 'every tag once (any case), sorted, only the account\'s own');
+        self::assertSame(['Theirs'], $this->data($this->api('GET', '/api/v1/questionnaire/tags', as: $globex))['tags']);
+        self::assertSame(401, $this->api('GET', '/api/v1/questionnaire/tags')['status'], 'a console user only');
+    }
+
     public function testACopyKeepsTheTags(): void
     {
         $owner = $this->account('ACME0001');
@@ -93,6 +122,12 @@ final class QuestionnaireTagsTest extends ApiTestCase
         $this->assertApiError($this->api('PUT', '/api/v1/questionnaire', ['questionnaire_id' => $id, 'tags' => ['Theirs']] + self::regularFlow(), as: $globex), 404, 'QUESTIONNAIRE_NOT_FOUND');
         self::assertSame(['AP-03'], $this->tagsOf($id, $owner), 'the other tenant changed nothing');
         self::assertSame([], $this->data($this->api('GET', '/api/v1/questionnaire', as: $globex))['items'], 'nor sees it listed');
+    }
+
+    /** @return list<string> */
+    private function titles(string $query, string $as): array
+    {
+        return array_column($this->data($this->api('GET', '/api/v1/questionnaire?'.$query, as: $as))['items'], 'title');
     }
 
     /** @return list<string> */

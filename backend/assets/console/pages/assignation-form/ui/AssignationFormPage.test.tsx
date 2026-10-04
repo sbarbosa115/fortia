@@ -4,6 +4,7 @@ import {createProject, type Project} from '@console/entities/project';
 import {
   copyQuestionnaire,
   fetchQuestionnaires,
+  fetchQuestionnaireTags,
   type QuestionnairePage,
 } from '@console/entities/questionnaire';
 import {testI18n} from '@shared/i18n/testing';
@@ -37,6 +38,7 @@ vi.mock('@console/entities/project', async (original) => ({
 vi.mock('@console/entities/questionnaire', async (original) => ({
   ...(await original<typeof import('@console/entities/questionnaire')>()),
   fetchQuestionnaires: vi.fn(),
+  fetchQuestionnaireTags: vi.fn(),
   copyQuestionnaire: vi.fn(),
 }));
 
@@ -68,6 +70,7 @@ function row(id: string, title: string, extra: Record<string, unknown> = {}) {
     type: 'default',
     question_count: 3,
     is_active: true,
+    tags: [] as string[],
     ...extra,
   };
 }
@@ -121,17 +124,20 @@ describe('AssignationFormPage', () => {
     vi.clearAllMocks();
     vi.mocked(fetchQuestionnaires).mockImplementation(async (params) => {
       const all = [
-        row('q-1', 'Store audit'),
-        row('q-2', 'Warehouse audit', {type: 'diagnostic'}),
+        row('q-1', 'Store audit', {tags: ['AP-03']}),
+        row('q-2', 'Warehouse audit', {tags: ['NP-12']}),
         row('q-3', 'Empty draft', {question_count: 0}),
       ];
       return page(
         all.filter(
           (item) =>
             item.title.toLowerCase().includes(params.search.toLowerCase()) &&
-            (params.type === null || item.type === params.type),
+            (!params.tag || item.tags.includes(params.tag)),
         ),
       );
+    });
+    vi.mocked(fetchQuestionnaireTags).mockResolvedValue({
+      tags: ['AP-03', 'NP-12'],
     });
     vi.mocked(fetchAssignationOfQuestionnaire).mockResolvedValue(null);
     vi.mocked(createProject).mockResolvedValue({
@@ -160,7 +166,7 @@ describe('AssignationFormPage', () => {
     expect(continueButton()).toBeEnabled();
   });
 
-  it('searches the questionnaires by name and filters them by type', async () => {
+  it('searches the questionnaires by name and filters them by tag', async () => {
     renderPage();
     await screen.findByRole('checkbox', {name: /Store audit/});
 
@@ -177,10 +183,20 @@ describe('AssignationFormPage', () => {
       await screen.findByRole('checkbox', {name: /Warehouse audit/}),
     ).toBeInTheDocument();
     expect(fetchQuestionnaires).toHaveBeenLastCalledWith(
-      expect.objectContaining({search: 'warehouse', type: null}),
+      expect.objectContaining({search: 'warehouse', tag: null}),
     );
 
-    await userEvent.click(screen.getByRole('button', {name: 'Regular'}));
+    expect(
+      screen.queryByRole('button', {name: 'Regular'}),
+      'there is no type filter',
+    ).not.toBeInTheDocument();
+    const tags = screen.getByRole('group', {name: 'Filter by tag'});
+    await userEvent.click(within(tags).getByRole('button', {name: 'AP-03'}));
+    await waitFor(() =>
+      expect(fetchQuestionnaires).toHaveBeenLastCalledWith(
+        expect.objectContaining({search: 'warehouse', tag: 'AP-03'}),
+      ),
+    );
     expect(
       await screen.findByText('No questionnaire matches these filters.'),
     ).toBeInTheDocument();

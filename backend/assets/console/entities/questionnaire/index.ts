@@ -1,12 +1,15 @@
 export {
   fetchQuestionnaires,
+  fetchQuestionnaireTags,
   setQuestionnaireActive,
   questionnairesQueryKey,
   QUESTIONNAIRES_QUERY_KEY,
+  QUESTIONNAIRE_TAGS_QUERY_KEY,
 } from './api/questionnaires';
 export type {
   QuestionnaireRow,
   QuestionnairePage,
+  QuestionnaireTags,
   ListingParams,
   ListingType,
   SortBy,

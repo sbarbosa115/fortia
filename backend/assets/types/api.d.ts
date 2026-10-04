@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/questionnaire/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_questionnaire_tags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/assignations": {
         parameters: {
             query?: never;
@@ -959,7 +975,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** An ephemeral secret for one recording (~1 min, §13.4). P, rate limited. */
+        /**
+         * An ephemeral secret for one recording (~1 min, §13.4). P, rate limited. customer_id: the account of the session,
+         *     whose own OpenAI key is used when it saved one.
+         */
         get: operations["get_api_transcription_token"];
         put?: never;
         post?: never;
@@ -1399,6 +1418,9 @@ export interface components {
         };
         QuestionnaireUrlOutput: {
             questionnaire_url: string;
+        };
+        QuestionnaireTagsOutput: {
+            tags: string[];
         };
         AudienceOutput: {
             /** @enum {string} */
@@ -2378,6 +2400,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    get_api_questionnaire_tags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Every tag of the account's questionnaires once, sorted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionnaireTagsOutput"];
+                };
             };
         };
     };
@@ -4922,6 +4964,8 @@ export interface operations {
                 page_size?: number;
                 /** @description Every word must appear in the title */
                 search?: string;
+                /** @description One of the questionnaire's tags, whole, ignoring case and accents */
+                tag?: string;
             };
             header?: never;
             path?: never;
@@ -5334,7 +5378,9 @@ export interface operations {
     };
     get_api_transcription_token: {
         parameters: {
-            query?: never;
+            query?: {
+                customer_id?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;

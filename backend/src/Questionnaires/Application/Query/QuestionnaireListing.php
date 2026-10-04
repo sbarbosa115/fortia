@@ -22,4 +22,12 @@ interface QuestionnaireListing
      * @return array<string, mixed>|null
      */
     public function row(string $questionnaireId): ?array;
+
+    /**
+     * Every tag the account's questionnaires carry (every account's for null), each once whatever its case
+     * (the oldest questionnaire's spelling), sorted.
+     *
+     * @return list<string>
+     */
+    public function tags(?string $customerId): array;
 }

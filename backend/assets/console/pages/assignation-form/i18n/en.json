@@ -18,13 +18,14 @@
   },
   "questionnaires": {
     "hero": "Which questionnaires?",
-    "subtitle": "Pick every questionnaire the organization will answer. Search them by name or filter them by type.",
+    "subtitle": "Pick every questionnaire the organization will answer. Search them by name or filter them by tag.",
     "question": "Choose one or more questionnaires",
     "search": "Search by name…",
-    "typeLabel": "Filter by type",
+    "tagLabel": "Filter by tag",
+    "allTags": "All",
+    "tags": "Tags",
     "listLabel": "Questionnaires",
     "types": {
-      "all": "All",
       "default": "Regular",
       "diagnostic": "Diagnostic",
       "quiz_funnel": "Quiz funnel",

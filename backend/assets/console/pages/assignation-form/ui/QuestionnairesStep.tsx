@@ -1,15 +1,14 @@
+import {TagList} from '@console/entities/questionnaire';
 import {ErrorState, Icon} from '@shared/ui';
 import type {UIEvent} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {AssignationWizardState} from '../model/useAssignationWizard';
-import {
-  TYPE_FILTERS,
-  useQuestionnaireChoices,
-} from '../model/useQuestionnaireChoices';
+import {useQuestionnaireChoices} from '../model/useQuestionnaireChoices';
 
 /**
  * Step 1: the questionnaires the organization will answer — one checkbox each, searched by name and filtered by
- * type. A questionnaire without questions can't be picked.
+ * one of the account's tags (the chips show only when some questionnaire has tags). A questionnaire without questions
+ * can't be picked.
  */
 export function QuestionnairesStep({wizard}: {wizard: AssignationWizardState}) {
   const {t} = useTranslation('pages.assignation-form');
@@ -59,23 +58,33 @@ export function QuestionnairesStep({wizard}: {wizard: AssignationWizardState}) {
         />
       </label>
 
-      <div
-        role="group"
-        aria-label={t('questionnaires.typeLabel')}
-        className="asg-wiz__filters"
-      >
-        {TYPE_FILTERS.map((type) => (
+      {choices.tags.length > 0 ? (
+        <div
+          role="group"
+          aria-label={t('questionnaires.tagLabel')}
+          className="asg-wiz__filters"
+        >
           <button
-            key={type}
             type="button"
             className="asg-wiz__filter"
-            aria-pressed={choices.type === type}
-            onClick={() => choices.setType(type)}
+            aria-pressed={choices.tag === null}
+            onClick={() => choices.setTag(null)}
           >
-            {t(`questionnaires.types.${type}`)}
+            {t('questionnaires.allTags')}
           </button>
-        ))}
-      </div>
+          {choices.tags.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              className="asg-wiz__filter"
+              aria-pressed={choices.tag === tag}
+              onClick={() => choices.setTag(tag)}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {choices.loading ? (
         <p className="asg-wiz__loading">
@@ -147,6 +156,7 @@ export function QuestionnairesStep({wizard}: {wizard: AssignationWizardState}) {
                       .filter(Boolean)
                       .join(' · ')}
                   </span>
+                  <TagList tags={item.tags} label={t('questionnaires.tags')} />
                 </span>
               </label>
             );

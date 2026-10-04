@@ -18,6 +18,7 @@ use App\Questionnaires\UI\Http\Output\PromptOutput;
 use App\Questionnaires\UI\Http\Output\QuestionnaireIdOutput;
 use App\Questionnaires\UI\Http\Output\QuestionnaireListItemOutput;
 use App\Questionnaires\UI\Http\Output\QuestionnaireListOutput;
+use App\Questionnaires\UI\Http\Output\QuestionnaireTagsOutput;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\Caller;
 use App\Shared\Domain\Document\QuestionnaireTags;
@@ -56,6 +57,7 @@ final class QuestionnaireController
     #[OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer', minimum: 1))]
     #[OA\Parameter(name: 'page_size', in: 'query', schema: new OA\Schema(type: 'integer', maximum: 100))]
     #[OA\Parameter(name: 'search', in: 'query', description: 'Every word must appear in the title', schema: new OA\Schema(type: 'string', maxLength: 200))]
+    #[OA\Parameter(name: 'tag', in: 'query', description: 'One of the questionnaire\'s tags, whole, ignoring case and accents', schema: new OA\Schema(type: 'string', maxLength: 40))]
     #[OA\Response(response: 200, description: 'One page of questionnaires', content: new Model(type: QuestionnaireListOutput::class))]
     #[OA\Response(response: 400, description: 'INVALID_TYPE, INVALID_SORT, INVALID_ORDER, INVALID_IS_ACTIVE')]
     public function list(Caller $caller, Request $request): JsonResponse
@@ -64,6 +66,13 @@ final class QuestionnaireController
         $page = $this->listing->page($criteria);
 
         return ApiResponse::ok(QuestionnaireListOutput::of($page['items'], $criteria->page, $criteria->pageSize, $page['total']));
+    }
+
+    #[Route('/questionnaire/tags', name: 'api_questionnaire_tags', methods: ['GET'], priority: 10)]
+    #[OA\Response(response: 200, description: 'Every tag of the account\'s questionnaires once, sorted', content: new Model(type: QuestionnaireTagsOutput::class))]
+    public function tags(Caller $caller): JsonResponse
+    {
+        return ApiResponse::ok(new QuestionnaireTagsOutput($this->listing->tags($caller->isAdmin() ? null : $caller->customerId)));
     }
 
     #[Route('/questionnaire', name: 'api_questionnaire_create', methods: ['POST'])]
