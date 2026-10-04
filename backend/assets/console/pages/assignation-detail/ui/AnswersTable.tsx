@@ -1,3 +1,4 @@
+import {TableAnswer, tableAnswerProps} from '@console/entities/answer';
 import type {FollowUpAnswer} from '@console/entities/assignation';
 import {formatDateTime} from '@shared/lib';
 import {Badge, Button, type Column, Table, type Tone} from '@shared/ui';
@@ -47,7 +48,13 @@ export function AnswersTable({
       key: 'answer',
       header: t('followUp.table.answer'),
       render: (row) =>
-        row.answer ? (
+        row.answer_table ? (
+          <TableAnswer
+            {...tableAnswerProps(row.answer_table)}
+            caption={row.title}
+            compact
+          />
+        ) : row.answer ? (
           <span className="asg-detail__answer">{row.answer}</span>
         ) : (
           <span className="muted">

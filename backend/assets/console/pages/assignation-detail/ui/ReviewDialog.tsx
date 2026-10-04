@@ -1,3 +1,4 @@
+import {TableAnswer, tableAnswerProps} from '@console/entities/answer';
 import type {FollowUpAnswer} from '@console/entities/assignation';
 import {Button, Field, Icon, IconButton, Modal, TextArea} from '@shared/ui';
 import {useState} from 'react';
@@ -93,12 +94,21 @@ export function ReviewDialog({
           <h3 className="asg-detail__question">{answer.title}</h3>
           <div>
             <span className="field__label">{t('review.answer')}</span>
-            <p className="asg-detail__answer-box">
-              {answer.answer ??
-                (answer.skipped
-                  ? t('followUp.table.skipped')
-                  : t('followUp.table.empty'))}
-            </p>
+            {answer.answer_table ? (
+              <div className="asg-detail__answer-table">
+                <TableAnswer
+                  {...tableAnswerProps(answer.answer_table)}
+                  caption={answer.title}
+                />
+              </div>
+            ) : (
+              <p className="asg-detail__answer-box">
+                {answer.answer ??
+                  (answer.skipped
+                    ? t('followUp.table.skipped')
+                    : t('followUp.table.empty'))}
+              </p>
+            )}
           </div>
           <AnswerState answer={answer} />
           {editable ? (
