@@ -6,8 +6,8 @@ final class OutgoingEmail
 {
     /**
      * @param list<string>         $to
-     * @param string               $template e.g. "emails/assignations/reminder.html.twig"
-     * @param array<string, mixed> $context  variables for the template
+     * @param string               $template   e.g. "emails/assignations/reminder.html.twig"
+     * @param array<string, mixed> $context    variables for the template
      * @param 'es'|'en'            $locale
      * @param list<string>         $bcc
      * @param string|null          $customerId the account it is sent for: its own SMTP server, when it has one

@@ -19,12 +19,12 @@ final class SodiumSecretBox implements SecretBox
         if ('' === $encryptionKey) {
             throw new \LogicException('SETTINGS_ENCRYPTION_KEY is not set.');
         }
-        $this->key = sodium_crypto_generichash($encryptionKey, '', SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+        $this->key = sodium_crypto_generichash($encryptionKey, '', \SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
     }
 
     public function seal(#[\SensitiveParameter] string $secret): string
     {
-        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+        $nonce = random_bytes(\SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
 
         return base64_encode($nonce.sodium_crypto_secretbox($secret, $nonce, $this->key));
     }
@@ -32,12 +32,12 @@ final class SodiumSecretBox implements SecretBox
     public function open(string $sealed): string
     {
         $raw = base64_decode($sealed, true);
-        if (false === $raw || \strlen($raw) <= SODIUM_CRYPTO_SECRETBOX_NONCEBYTES) {
+        if (false === $raw || \strlen($raw) <= \SODIUM_CRYPTO_SECRETBOX_NONCEBYTES) {
             throw new SecretNotReadable('The stored secret is not a sealed value.');
         }
         $secret = sodium_crypto_secretbox_open(
-            substr($raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
-            substr($raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
+            substr($raw, \SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
+            substr($raw, 0, \SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
             $this->key,
         );
         if (false === $secret) {

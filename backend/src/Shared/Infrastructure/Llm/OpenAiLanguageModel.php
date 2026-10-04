@@ -4,7 +4,6 @@ namespace App\Shared\Infrastructure\Llm;
 
 use App\Shared\Application\Llm\LanguageModel;
 use App\Shared\Application\Llm\LlmAttachment;
-use App\Shared\Application\Llm\LlmMessage;
 use App\Shared\Application\Llm\LlmRequest;
 use App\Shared\Application\Llm\LlmResponse;
 use App\Shared\Application\Llm\LlmToolCall;
