@@ -135,6 +135,7 @@ export interface paths {
         /** Newest first; an Admin sees every account's. */
         get: operations["get_api_projects_list"];
         put?: never;
+        /** questionnaire_ids: each one becomes a new follow-up of the organization (the console's assignation wizard). */
         post: operations["post_api_projects_create"];
         delete?: never;
         options?: never;
@@ -658,6 +659,40 @@ export interface paths {
         head?: never;
         /** AG; a non-Admin only on their own account (another account is 404). */
         patch: operations["patch_api_settings_patch"];
+        trace?: never;
+    };
+    "/api/v1/customer/{customer_id}/system-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_api_system_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** AG. */
+        patch: operations["patch_api_system_settings_patch"];
+        trace?: never;
+    };
+    "/api/v1/customer/{customer_id}/system-settings/smtp-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** AG. Sends a test email through the form's server to the user who asked (rate limited). Nothing is saved. */
+        post: operations["post_api_system_settings_smtp_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/users": {
@@ -1229,6 +1264,11 @@ export interface components {
             questions: components["schemas"]["QuestionOutput"][];
             created_at?: string | null;
             updated_at?: string | null;
+            /**
+             * @description The owner's free-text labels
+             * @default []
+             */
+            tags: string[];
         };
         FlowStateOutput: {
             state_id: string;
@@ -1365,6 +1405,20 @@ export interface components {
             type: "all" | "members" | "area" | "role";
             values: string[];
         };
+        TableAnswerColumnOutput: {
+            key: string;
+            label: string;
+        };
+        TableAnswerRowOutput: {
+            label?: string | null;
+            cells: {
+                [key: string]: string;
+            };
+        };
+        TableAnswerOutput: {
+            columns: components["schemas"]["TableAnswerColumnOutput"][];
+            rows: components["schemas"]["TableAnswerRowOutput"][];
+        };
         FollowUpAnswerOutput: {
             question_id: string;
             /** 1-based among the answerable questions. */
@@ -1373,6 +1427,8 @@ export interface components {
             type: string;
             /** The answer as text (option labels, "7 / 10", file names); null when unanswered. */
             answer?: string | null;
+            /** A table question's answer as a table (its columns and rows); null for other questions or when unanswered. */
+            answer_table?: components["schemas"]["TableAnswerOutput"] | null;
             skipped: boolean;
             answered_at?: string | null;
             locked: boolean;
@@ -1580,6 +1636,10 @@ export interface components {
             description?: string | null;
             due_date?: string | null;
             assignation_ids?: string[] | null;
+            /** create only: each one becomes a new follow-up of the organization */
+            questionnaire_ids?: string[] | null;
+            /** Create only: the title of the new follow-ups' registration slide, in the console's language. */
+            registration_title?: string | null;
         };
         RespondentLoginInput: {
             name: string;
@@ -1673,6 +1733,11 @@ export interface components {
             ending: components["schemas"]["ChatEndingOutput"];
             /** @description Chains: the instructions that generate the next stage */
             chain_prompt?: string | null;
+            /**
+             * @description Free-text labels the user asked for ("AP-03")
+             * @default []
+             */
+            tags: string[];
         };
         ChatPendingWriteOutput: {
             id: string;
@@ -1922,6 +1987,18 @@ export interface components {
             google_ads_conversion_label?: string | null;
             max_files: number;
         };
+        SystemSettingsOutput: {
+            smtp_host?: string | null;
+            smtp_port?: number | null;
+            /** @enum {string|null} */
+            smtp_encryption?: "tls" | "ssl" | "none" | null;
+            smtp_username?: string | null;
+            smtp_password_set: boolean;
+            smtp_from_email?: string | null;
+            smtp_from_name?: string | null;
+            openai_api_key_set: boolean;
+            openai_api_key_last4?: string | null;
+        };
         UserOutput: {
             email: string;
             name: string;
@@ -1997,6 +2074,8 @@ export interface components {
             slug?: string | null;
             /** @enum {string} */
             type: "default" | "ecommerce" | "quiz_funnel" | "samurai8" | "ai_team_profile" | "diagnostic" | "prompt";
+            /** @description The owner's free-text labels */
+            tags: string[];
         };
         QuestionnaireListOutput: {
             items: components["schemas"]["QuestionnaireListItemOutput"][];
@@ -2021,6 +2100,8 @@ export interface components {
                 [key: string]: string;
             } | null;
             detail?: string | null;
+            /** @description Free-text labels ("AP-03"): trimmed, repeats (any case) dropped, at most 20 of at most 40 characters. Omitted on PUT: the questionnaire keeps its tags */
+            tags?: string[] | null;
         };
         FlowInput: {
             /** @description Empty: generated from the title. ^[a-z0-9]+(-[a-z0-9]+)*$, unique across the system */
@@ -2037,6 +2118,8 @@ export interface components {
                 [key: string]: string;
             } | null;
             detail?: string | null;
+            /** @description Free-text labels ("AP-03"): trimmed, repeats (any case) dropped, at most 20 of at most 40 characters. Omitted on PUT: the questionnaire keeps its tags */
+            tags?: string[] | null;
         };
         QuestionnaireIdOutput: {
             questionnaire_id: string;
@@ -2794,14 +2877,14 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND */
+            /** @description ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description ASSIGNATION_IN_OTHER_PROJECT */
+            /** @description ASSIGNATION_IN_OTHER_PROJECT, QUESTIONNAIRE_ALREADY_ASSIGNED */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4337,6 +4420,154 @@ export interface operations {
             };
             /** @description CUSTOMER_NOT_FOUND */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_api_system_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SystemSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOutput"];
+                };
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    patch_api_system_settings_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description SystemSettings after the change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SystemSettingsOutput"];
+                };
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_SMTP_SERVER */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_api_system_settings_smtp_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                customer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The test email was accepted by the server */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description VALIDATION_ERROR */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description FORBIDDEN */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CUSTOMER_NOT_FOUND */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description INVALID_SMTP_SERVER */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description TOO_MANY_ATTEMPTS */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SMTP_CHECK_FAILED (details.reason: connection, tls, authentication, blocked, refused) */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
