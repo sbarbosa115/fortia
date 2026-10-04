@@ -8,6 +8,8 @@ import {
   runCreate,
   stepErrors,
   togglePicked,
+  addPicked,
+  removePicked,
 } from './wizard';
 
 const TODAY = '2026-10-04';
@@ -49,6 +51,16 @@ describe('the steps of the assignation wizard', () => {
     const two = togglePicked(togglePicked([], q1), q2);
     expect(two.map((q) => q.id)).toEqual(['q-1', 'q-2']);
     expect(togglePicked(two, q1).map((q) => q.id)).toEqual(['q-2']);
+  });
+
+  it('adds the visible questionnaires once, and takes several out at a time', () => {
+    const q3 = {id: 'q-3', title: 'Office audit', questionCount: 1};
+    const all = addPicked([q2], [q1, q2, q3]);
+    expect(
+      all.map((q) => q.id),
+      'q-2 is not added twice',
+    ).toEqual(['q-2', 'q-1', 'q-3']);
+    expect(removePicked(all, ['q-1', 'q-3']).map((q) => q.id)).toEqual(['q-2']);
   });
 
   it('wants a name of at most 200 characters and a real deadline from today on', () => {

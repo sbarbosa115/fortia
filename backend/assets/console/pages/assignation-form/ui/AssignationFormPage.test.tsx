@@ -3,7 +3,6 @@ import {createProject, type Project} from '@console/entities/project';
 import {
   copyQuestionnaire,
   fetchQuestionnaires,
-  fetchQuestionnaireTags,
   type QuestionnairePage,
 } from '@console/entities/questionnaire';
 import {testI18n} from '@shared/i18n/testing';
@@ -14,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import {I18nextProvider} from 'react-i18next';
 import {MemoryRouter, Route, Routes} from 'react-router';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {fixtureChoices} from '../model/choicesFixture';
 import {AssignationFormPage} from './AssignationFormPage';
 
 vi.mock('@console/entities/organization', async (original) => ({
@@ -33,7 +33,6 @@ vi.mock('@console/entities/project', async (original) => ({
 vi.mock('@console/entities/questionnaire', async (original) => ({
   ...(await original<typeof import('@console/entities/questionnaire')>()),
   fetchQuestionnaires: vi.fn(),
-  fetchQuestionnaireTags: vi.fn(),
   copyQuestionnaire: vi.fn(),
 }));
 
@@ -70,7 +69,7 @@ function row(id: string, title: string, extra: Record<string, unknown> = {}) {
   };
 }
 
-function page(items: ReturnType<typeof row>[]): QuestionnairePage {
+function page(items: unknown[]): QuestionnairePage {
   return {
     items,
     page: 1,
@@ -103,6 +102,17 @@ function renderPage() {
 
 const continueButton = () => screen.getByRole('button', {name: /Continue/});
 
+/** The titles of the listed questionnaires, in order. */
+function listed(): string[] {
+  return screen
+    .getAllByRole('checkbox')
+    .map(
+      (box) =>
+        box.closest('label')?.querySelector('.asg-wiz__option-name')
+          ?.textContent ?? '',
+    );
+}
+
 /** Step 1 with Store audit and Warehouse audit picked, then Continue. */
 async function pickTwoAndContinue() {
   await userEvent.click(
@@ -117,23 +127,14 @@ async function pickTwoAndContinue() {
 describe('AssignationFormPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(fetchQuestionnaires).mockImplementation(async (params) => {
-      const all = [
+    vi.mocked(fetchQuestionnaires).mockResolvedValue(
+      page([
         row('q-1', 'Store audit', {tags: ['AP-03']}),
         row('q-2', 'Warehouse audit', {tags: ['NP-12']}),
         row('q-3', 'Empty draft', {question_count: 0}),
-      ];
-      return page(
-        all.filter(
-          (item) =>
-            item.title.toLowerCase().includes(params.search.toLowerCase()) &&
-            (!params.tag || item.tags.includes(params.tag)),
-        ),
-      );
-    });
-    vi.mocked(fetchQuestionnaireTags).mockResolvedValue({
-      tags: ['AP-03', 'NP-12'],
-    });
+        row('q-4', 'Office audit', {tags: ['ap-03', 'Q3'], question_count: 9}),
+      ]),
+    );
     vi.mocked(createProject).mockResolvedValue({
       project_id: 'p-1',
     } as unknown as Project);
@@ -160,67 +161,189 @@ describe('AssignationFormPage', () => {
     expect(continueButton()).toBeEnabled();
   });
 
-  it('searches the questionnaires by name and filters them by tag', async () => {
+  it('loads every questionnaire once and searches by name or tag, ignoring case and accents', async () => {
+    renderPage();
+    await screen.findByRole('checkbox', {name: /Store audit/});
+    expect(fetchQuestionnaires).toHaveBeenCalledTimes(1);
+    expect(fetchQuestionnaires).toHaveBeenCalledWith(
+      expect.objectContaining({page: 1, pageSize: 100}),
+    );
+    expect(screen.getByText('4 questionnaires')).toBeInTheDocument();
+
+    await userEvent.type(
+      screen.getByRole('searchbox', {name: 'Search by name or tag…'}),
+      'np-12',
+    );
+    await waitFor(() => expect(listed()).toEqual(['Warehouse audit']));
+    expect(
+      screen.getByText('1 of 4 questionnaires'),
+      'the counter says how many the filters leave',
+    ).toBeInTheDocument();
+    expect(fetchQuestionnaires, 'the search runs here').toHaveBeenCalledTimes(
+      1,
+    );
+
+    await userEvent.clear(screen.getByRole('searchbox'));
+    await userEvent.type(screen.getByRole('searchbox'), 'AUDIT');
+    await waitFor(() =>
+      expect(screen.getAllByText('audit', {selector: 'mark'})).toHaveLength(3),
+    );
+  });
+
+  it('filters by any of several tags, chosen in a popover with their counts', async () => {
     renderPage();
     await screen.findByRole('checkbox', {name: /Store audit/});
 
-    await userEvent.type(
-      screen.getByRole('searchbox', {name: 'Search by name…'}),
-      'warehouse',
-    );
-    await waitFor(() =>
-      expect(
-        screen.queryByRole('checkbox', {name: /Store audit/}),
-      ).not.toBeInTheDocument(),
-    );
-    expect(
-      await screen.findByRole('checkbox', {name: /Warehouse audit/}),
-    ).toBeInTheDocument();
-    expect(fetchQuestionnaires).toHaveBeenLastCalledWith(
-      expect.objectContaining({search: 'warehouse', tag: null}),
-    );
-
-    expect(
-      screen.queryByRole('button', {name: 'Regular'}),
-      'there is no type filter',
-    ).not.toBeInTheDocument();
-    const tagField = screen.getByRole('combobox', {name: 'Filter by tag'});
-    await userEvent.type(tagField, 'ap');
+    await userEvent.click(screen.getByRole('button', {name: 'Filter by tag'}));
+    const tagSearch = screen.getByRole('combobox', {name: 'Search a tag…'});
+    expect(tagSearch).toHaveFocus();
     const options = screen.getByRole('listbox', {name: 'Tags'});
     expect(
       within(options)
         .getAllByRole('option')
-        .map((option) => option.textContent),
-      'the tag field lists the account tags that contain the text',
-    ).toEqual(['AP-03']);
-    expect(fetchQuestionnaires).not.toHaveBeenLastCalledWith(
-      expect.objectContaining({tag: 'ap'}),
+        .map(
+          (option) => option.querySelector('.asg-wiz__tag-name')?.textContent,
+        ),
+      'most used first; "AP-03" and "ap-03" are one tag',
+    ).toEqual(['AP-03', 'NP-12', 'Q3']);
+    expect(
+      within(options).getByRole('option', {name: /AP-03.*2 questionnaires/}),
+    ).toBeInTheDocument();
+
+    await userEvent.type(tagSearch, 'ap');
+    await userEvent.keyboard('{Enter}');
+    expect(listed().sort()).toEqual(['Office audit', 'Store audit']);
+    await userEvent.clear(tagSearch);
+    await userEvent.keyboard('{ArrowDown} ');
+    expect(
+      within(options).getByRole('option', {name: /NP-12/}),
+    ).toHaveAttribute('aria-selected', 'true');
+    expect(
+      listed().sort(),
+      'a questionnaire with ANY of the chosen tags shows (OR)',
+    ).toEqual(['Office audit', 'Store audit', 'Warehouse audit']);
+
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {name: 'Filter by tag, 2 chosen'}),
+    ).toHaveFocus();
+
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Remove tag NP-12'}),
     );
-    await userEvent.keyboard('{ArrowDown}{Enter}');
-    expect(tagField).toHaveValue('AP-03');
-    await waitFor(() =>
-      expect(fetchQuestionnaires).toHaveBeenLastCalledWith(
-        expect.objectContaining({search: 'warehouse', tag: 'AP-03'}),
+    expect(listed().sort()).toEqual(['Office audit', 'Store audit']);
+    expect(screen.getByText('2 of 4 questionnaires')).toBeInTheDocument();
+  });
+
+  it('selects the visible ones, keeps the picks across filters and shows only the picked ones', async () => {
+    renderPage();
+    await screen.findByRole('checkbox', {name: /Store audit/});
+
+    await userEvent.type(screen.getByRole('searchbox'), 'office');
+    await waitFor(() => expect(listed()).toEqual(['Office audit']));
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Select the visible one'}),
+    );
+    await userEvent.clear(screen.getByRole('searchbox'));
+    await userEvent.type(screen.getByRole('searchbox'), 'store');
+    await waitFor(() => expect(listed()).toEqual(['Store audit']));
+    await userEvent.click(screen.getByRole('checkbox', {name: /Store audit/}));
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', {name: 'Clear filters'}));
+    await waitFor(() => expect(listed()).toHaveLength(4));
+    expect(
+      screen.getByText('2 selected'),
+      'the picks survive the filters',
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('switch', {name: /selected only/}));
+    expect(listed().sort()).toEqual(['Office audit', 'Store audit']);
+    expect(
+      screen.getByRole('button', {name: 'Unselect the 2 visible'}),
+    ).toBeInTheDocument();
+
+    const summary = screen.getByRole('list', {name: 'Picked questionnaires'});
+    await userEvent.click(
+      within(summary).getByRole('button', {name: 'Remove Office audit'}),
+    );
+    expect(screen.getByText('1 selected')).toBeInTheDocument();
+  });
+
+  it('sorts by name, by question count or by the latest change', async () => {
+    renderPage();
+    await screen.findByRole('checkbox', {name: /Store audit/});
+
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', {name: 'Sort by'}),
+      'name',
+    );
+    expect(listed()).toEqual([
+      'Empty draft',
+      'Office audit',
+      'Store audit',
+      'Warehouse audit',
+    ]);
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', {name: 'Sort by'}),
+      'questions',
+    );
+    expect(listed()[0]).toBe('Office audit');
+  });
+
+  it('copes with 57 questionnaires and 30 tags', async () => {
+    vi.mocked(fetchQuestionnaires).mockResolvedValue(page(fixtureChoices()));
+    renderPage();
+    await screen.findAllByRole('checkbox');
+
+    expect(screen.getByText('57 questionnaires')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: 'Filter by tag'}));
+    expect(
+      within(screen.getByRole('listbox', {name: 'Tags'})).getAllByRole(
+        'option',
       ),
+    ).toHaveLength(30);
+    await userEvent.keyboard('{Escape}');
+
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Select the 56 visible'}),
     );
+    expect(
+      screen.getByText('56 selected'),
+      'the questionnaire without questions is skipped',
+    ).toBeInTheDocument();
+    const summary = screen.getByRole('list', {name: 'Picked questionnaires'});
+    expect(
+      within(summary).getAllByRole('listitem'),
+      'the summary folds a long pick',
+    ).toHaveLength(5);
+    await userEvent.click(screen.getByRole('button', {name: 'Show all 56'}));
+    expect(within(summary).getAllByRole('listitem')).toHaveLength(56);
+  });
+
+  it('shows the tag filter disabled, saying why, when no questionnaire has tags', async () => {
+    vi.mocked(fetchQuestionnaires).mockResolvedValue(
+      page([row('q-1', 'Store audit')]),
+    );
+    renderPage();
+    await screen.findByRole('checkbox', {name: /Store audit/});
+
+    const trigger = screen.getByRole('button', {name: 'Filter by tag'});
+    expect(trigger).toBeDisabled();
+    expect(trigger).toHaveTextContent('No tags yet');
+  });
+
+  it('says when the filters leave nothing, with a way back', async () => {
+    renderPage();
+    await screen.findByRole('checkbox', {name: /Store audit/});
+
+    await userEvent.type(screen.getByRole('searchbox'), 'zzz');
     expect(
       await screen.findByText('No questionnaire matches these filters.'),
     ).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', {name: 'Clear filters'}));
-    expect(
-      await screen.findByRole('checkbox', {name: /Store audit/}),
-    ).toBeInTheDocument();
-    expect(tagField).toHaveValue('');
-  });
-
-  it('keeps the tag field visible but disabled, with the reason, when no questionnaire has tags', async () => {
-    vi.mocked(fetchQuestionnaireTags).mockResolvedValue({tags: []});
-    renderPage();
-    await screen.findByRole('checkbox', {name: /Store audit/});
-
-    const tagField = screen.getByRole('combobox', {name: 'Filter by tag'});
-    expect(tagField).toBeDisabled();
-    expect(tagField).toHaveAttribute('placeholder', 'No tags yet');
+    await waitFor(() => expect(listed()).toHaveLength(4));
   });
 
   it('creates the assignation for the organization with the name and the deadline', async () => {

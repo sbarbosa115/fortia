@@ -23,6 +23,8 @@ import {
   type Step,
   stepErrors,
   togglePicked,
+  addPicked,
+  removePicked,
 } from './wizard';
 
 const DEPS: CreateDeps = {
@@ -199,6 +201,10 @@ export function useAssignationWizard() {
     // Step 1
     questionnaires,
     toggleQuestionnaire,
+    pickQuestionnaires: (list: PickedQuestionnaire[]) =>
+      setQuestionnaires((current) => addPicked(current, list)),
+    unpickQuestionnaires: (ids: string[]) =>
+      setQuestionnaires((current) => removePicked(current, ids)),
     clearQuestionnaires: () => setQuestionnaires([]),
     // Step 2
     organizations,

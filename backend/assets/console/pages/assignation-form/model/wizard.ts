@@ -90,6 +90,24 @@ export function togglePicked(
     : [...picked, questionnaire];
 }
 
+/** Adds the questionnaires not picked yet, keeping the order they were picked in ("Select the visible ones"). */
+export function addPicked(
+  picked: PickedQuestionnaire[],
+  questionnaires: PickedQuestionnaire[],
+): PickedQuestionnaire[] {
+  const ids = new Set(picked.map((item) => item.id));
+  return [...picked, ...questionnaires.filter((item) => !ids.has(item.id))];
+}
+
+/** Takes these questionnaires out of the picked ones. */
+export function removePicked(
+  picked: PickedQuestionnaire[],
+  ids: string[],
+): PickedQuestionnaire[] {
+  const out = new Set(ids);
+  return picked.filter((item) => !out.has(item.id));
+}
+
 /** The new-organization dialog's problems: name required, and each member row's own rules. */
 export function newOrganizationErrors(organization: NewOrganization): {
   name: 'nameRequired' | null;

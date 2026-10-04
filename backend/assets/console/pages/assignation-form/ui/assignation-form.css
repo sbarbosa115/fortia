@@ -1033,84 +1033,240 @@
   max-width: 220px;
 }
 
-/* Step 1: the name search and the tag search, side by side */
+/* Step 1: the search, the tags popover and the sort, on one row */
 .asg-wiz__finders {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 8px;
 }
 @media (max-width: 640px) {
   .asg-wiz__finders {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
+  .asg-wiz__finders > .asg-wiz__search {
+    grid-column: 1 / -1;
+  }
+}
+.asg-wiz__sort .select {
+  min-height: 48px;
+  border-radius: 16px;
+  background: var(--color-bg);
 }
 .asg-wiz__tag-filter {
   position: relative;
 }
-.asg-wiz__tag-filter .asg-wiz__input--search {
-  padding-right: 40px;
-}
-.asg-wiz__tag-filter .asg-wiz__input:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-.asg-wiz__tag-clear {
-  position: absolute;
-  right: 8px;
+.asg-wiz__tag-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-text-muted);
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-bg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
   cursor: pointer;
 }
-.asg-wiz__tag-clear:hover {
-  background: var(--color-surface);
-  color: var(--color-text);
+.asg-wiz__tag-trigger > svg {
+  color: var(--color-text-muted);
 }
-.asg-wiz__tag-clear:focus-visible {
+.asg-wiz__tag-trigger[data-active] {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.asg-wiz__tag-trigger[data-active] > svg {
+  color: var(--color-primary);
+}
+.asg-wiz__tag-trigger:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-primary);
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-primary);
 }
-.asg-wiz__tag-list {
+.asg-wiz__tag-trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.asg-wiz__tag-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #fff;
+}
+.asg-wiz__tag-panel {
   position: absolute;
   z-index: 20;
   top: calc(100% + 4px);
-  left: 0;
   right: 0;
-  max-height: 240px;
-  margin: 0;
-  padding: 4px;
-  overflow-y: auto;
-  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(320px, calc(100vw - 32px));
+  padding: 8px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-surface);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
 }
+@media (max-width: 640px) {
+  .asg-wiz__tag-panel {
+    right: auto;
+    left: 0;
+  }
+}
+.asg-wiz__input--small {
+  height: 36px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-radius: 10px;
+}
+.asg-wiz__tag-list {
+  max-height: 260px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
 .asg-wiz__tag-option {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 7px 10px;
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
 }
-.asg-wiz__tag-option[data-active] {
+.asg-wiz__tag-option[data-active],
+.asg-wiz__tag-option:hover {
   background: var(--color-bg);
 }
-.asg-wiz__tag-option[aria-selected='true'] {
-  color: var(--color-primary);
+.asg-wiz__tag-box {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid color-mix(in srgb, var(--color-text-muted) 50%, transparent);
+  border-radius: 4px;
+  color: #fff;
+}
+.asg-wiz__tag-option[aria-selected='true'] .asg-wiz__tag-box {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+.asg-wiz__tag-option[aria-selected='true'] .asg-wiz__tag-name {
   font-weight: 600;
 }
+.asg-wiz__tag-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.asg-wiz__tag-n {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
 .asg-wiz__tag-none {
-  padding: 8px 12px;
+  padding: 8px 10px;
   font-size: 14px;
   color: var(--color-text-muted);
+}
+.asg-wiz__tag-foot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 4px 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+.asg-wiz__tag-foot .asg-wiz__link-button {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+/* Step 1: the chosen tags, the counter and the bulk actions */
+.asg-wiz__active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.asg-wiz__list-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: -6px;
+}
+.asg-wiz__counter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+.asg-wiz__list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+.asg-wiz__list-actions .toggle {
+  font-size: 13px;
+}
+.asg-wiz__link-button:disabled {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+.asg-wiz__mark {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  color: inherit;
+}
+
+/* The summary's picked questionnaires */
+.asg-wiz__summary ul.asg-wiz__picked {
+  gap: 0;
+  margin-top: 8px;
+}
+.asg-wiz__picked li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 28px;
+  font-size: 13px;
+  color: var(--color-text);
+}
+.asg-wiz__picked li > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.asg-wiz__picked + .asg-wiz__link-button {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: 12px;
 }

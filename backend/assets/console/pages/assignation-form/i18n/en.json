@@ -18,14 +18,13 @@
   },
   "questionnaires": {
     "hero": "Which questionnaires?",
-    "subtitle": "Pick every questionnaire the organization will answer. Search them by name or filter them by tag.",
+    "subtitle": "Pick every questionnaire the organization will answer. Search them by name or tag, or filter them by one or more tags.",
     "question": "Choose one or more questionnaires",
-    "search": "Search by name…",
+    "search": "Search by name or tag…",
     "tagLabel": "Filter by tag",
     "tagSearch": "Search a tag…",
     "noTags": "No tags yet",
     "noTagMatches": "No tag matches",
-    "clearTag": "Clear tag",
     "tags": "Tags",
     "listLabel": "Questionnaires",
     "types": {
@@ -46,8 +45,32 @@
     "none": "You have no questionnaires yet. Create one in Questionnaires first.",
     "noMatches": "No questionnaire matches these filters.",
     "clearFilters": "Clear filters",
-    "loadMore": "Load more",
-    "loadingMore": "Loading more..."
+    "tagLabelCount_one": "Filter by tag, {{count}} chosen",
+    "tagLabelCount_other": "Filter by tag, {{count}} chosen",
+    "tagCount_one": "{{count}} questionnaire",
+    "tagCount_other": "{{count}} questionnaires",
+    "tagAny": "Shows the questionnaires with any of the chosen tags.",
+    "clearTags": "Clear tags",
+    "chosenTags": "Chosen tags",
+    "removeTag": "Remove tag {{tag}}",
+    "sortLabel": "Sort by",
+    "sort": {
+      "recent": "Most recent",
+      "name": "Name (A–Z)",
+      "questions": "Most questions"
+    },
+    "counter_one": "{{shown}} of {{count}} questionnaire",
+    "counter_other": "{{shown}} of {{count}} questionnaires",
+    "total_one": "{{count}} questionnaire",
+    "total_other": "{{count}} questionnaires",
+    "onlyPicked": "Show selected only",
+    "pickVisible_one": "Select the visible one",
+    "pickVisible_other": "Select the {{count}} visible",
+    "unpickVisible_one": "Unselect the visible one",
+    "unpickVisible_other": "Unselect the {{count}} visible",
+    "noMatchesHint": "Try other words or remove a tag. What you picked stays picked.",
+    "showMore_one": "Show {{count}} more",
+    "showMore_other": "Show {{count}} more"
   },
   "organization": {
     "hero": "Who is it for?",
@@ -87,7 +110,11 @@
     "members_one": "{{count}} member",
     "members_other": "{{count}} members",
     "due": "due {{date}}",
-    "nothingSaved": "Nothing is saved until you press Create. Each questionnaire is a follow-up: the members share one session and get a daily reminder until it is completed."
+    "nothingSaved": "Nothing is saved until you press Create. Each questionnaire is a follow-up: the members share one session and get a daily reminder until it is completed.",
+    "pickedLabel": "Picked questionnaires",
+    "unpick": "Remove {{title}}",
+    "showAll": "Show all {{count}}",
+    "showLess": "Show less"
   },
   "missing": {
     "title": "Complete these before creating:",
