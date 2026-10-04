@@ -75,6 +75,8 @@
     "INVALID_PASSWORD": "Esa contraseña no cumple los requisitos.",
     "INVALID_CREDENTIALS": "Correo o contraseña incorrectos.",
     "CUSTOMER_NOT_FOUND": "La cuenta no existe.",
+    "INVALID_SMTP_SERVER": "Revisa el servidor de correo: necesita un nombre de servidor, un puerto, un cifrado y un correo de remitente válido.",
+    "SMTP_CHECK_FAILED": "No se pudo enviar el correo de prueba por este servidor.",
     "INVALID_TYPE": "Ese tipo no es válido.",
     "INVALID_SORT": "Ese orden no es válido.",
     "INVALID_ORDER": "Ese orden no es válido.",

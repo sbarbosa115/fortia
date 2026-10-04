@@ -36,12 +36,13 @@ Switch in `backend/.env.local`:
 
 | Capability | Variable | Values |
 |---|---|---|
-| Language model | `LLM_PROVIDER`, `ANTHROPIC_API_KEY` | `fake` (default) · `anthropic` (Claude: `claude-opus-5-5` for generation, `claude-haiku-4-5` for fast calls) |
+| Language model | `LLM_PROVIDER`, `LLM_MODEL`, `OPENAI_API_KEY` | `fake` (default) · `openai` (Responses API, one model for every call: `gpt-5.6-terra`). An account's own key (/profile › System) replaces `OPENAI_API_KEY` for its calls |
 | E-commerce | `COMMERCE_PROVIDER`, `SHOPIFY_API_KEY`, `SHOPIFY_API_SECRET` | `fake` · `shopify` |
 | Catalog scraper | `SCRAPER_PROVIDER` | `fake` · `http` (schema.org Product data) |
-| Transcription | `TRANSCRIPTION_PROVIDER`, `OPENAI_API_KEY` | `browser` (Web Speech API) · `openai` |
+| Transcription | `TRANSCRIPTION_PROVIDER`, `OPENAI_API_KEY` | `browser` (Web Speech API) · `openai` (the account's own key, else the platform's) |
 | Google sign-in / Sheets | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_SHEETS_CLIENT_ID` | empty = disabled |
-| Email | `MAILER_DSN` | Mailpit in dev |
+| Email | `MAILER_DSN` | Mailpit in dev. An account's own SMTP server (/profile › System) sends its assignation emails |
+| Account secrets | `SETTINGS_ENCRYPTION_KEY`, `SMTP_ALLOW_PRIVATE_HOSTS` | Seals the SMTP passwords and OpenAI keys accounts save (long random value in production, never changed). Private SMTP hosts: `1` only in dev (Mailpit) |
 
 ## Checks
 
@@ -157,8 +158,13 @@ lets a platform Admin act as an account's root user (logged in `impersonation_lo
 - No S3 adapter: object storage is local with signed URLs (the port allows adding one).
 - Error tracking (Sentry) is configuration only; heatmaps (Clarity), GA page views and the account's pixels load in
   the respondent app only when their ids are configured.
-- The Claude adapter is written against the official SDK but has not been run against the live API in this repo
-  (no key in dev); refusals and output-token exhaustion fail the job with a clear error.
+- The OpenAI adapter (Responses API) is unit-tested against hand-written API shapes but has not been run against the live
+  API in this repo (no key in dev); refusals and output-token exhaustion fail the job with a clear error.
+- `SETTINGS_ENCRYPTION_KEY` can't be rotated yet: after a change, accounts must enter their SMTP password and OpenAI
+  key again (the platform defaults keep working meanwhile). The SMTP check's private-address block resolves the host
+  once, so a DNS-rebinding name is a residual risk (rate limited). See `docs/security/audits/2026-10-04-system-settings.md`.
+- Only assignation emails (reminders, status, retry) go through an account's own SMTP server; sign-up and password
+  recovery emails always use the platform server, so a broken account server can't lock its users out.
 - Google Sheets export (answers and a default assignation's detail) runs in the browser with Google Identity
   Services and needs `GOOGLE_SHEETS_CLIENT_ID`; without it the button is disabled with the reason. It has not been run
   against a real Google account in this repo.

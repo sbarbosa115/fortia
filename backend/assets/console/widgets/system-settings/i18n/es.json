@@ -1,0 +1,57 @@
+{
+  "smtp": {
+    "title": "Servidor de correo (SMTP)",
+    "intro": "Envía los correos de tu cuenta (recordatorios, estado del seguimiento, correcciones) por tu propio servidor. Sin uno, los envía el servidor de Mappi.",
+    "statusOwn": "Tu servidor",
+    "statusPlatform": "Servidor de Mappi",
+    "host": "Servidor",
+    "port": "Puerto",
+    "encryption": "Cifrado",
+    "encryptions": {
+      "tls": "STARTTLS (normalmente 587)",
+      "ssl": "SSL/TLS (normalmente 465)",
+      "none": "Ninguno (normalmente 25)"
+    },
+    "username": "Usuario",
+    "usernameHint": "Déjalo vacío si el servidor no pide inicio de sesión.",
+    "password": "Contraseña",
+    "passwordSaved": "Hay una contraseña guardada y cifrada. Deja esto vacío para conservarla.",
+    "fromEmail": "Correo del remitente",
+    "fromEmailHint": "La dirección desde la que salen tus correos. Tu servidor debe permitirla.",
+    "fromName": "Nombre del remitente",
+    "check": "Validar",
+    "checkSent": "Enviamos un correo de prueba a {{email}}. Revisa tu bandeja de entrada.",
+    "checkFailed": {
+      "connection": "No pudimos conectarnos al servidor. Revisa el nombre del servidor, el puerto y que acepte conexiones desde internet.",
+      "tls": "Falló la conexión segura. Revisa el cifrado y el puerto (STARTTLS con 587, SSL/TLS con 465).",
+      "authentication": "El servidor rechazó el usuario o la contraseña.",
+      "blocked": "Ese servidor apunta a una dirección de red privada, que no se puede usar.",
+      "refused": "El servidor rechazó el correo de prueba. Revisa el correo del remitente y la configuración del servidor."
+    },
+    "errors": {
+      "required": "Este campo es obligatorio.",
+      "host": "Escribe solo el nombre del servidor, p. ej. smtp.ejemplo.com.",
+      "port": "Escribe un número entero de 1 a 65535.",
+      "email": "Escribe un correo válido."
+    },
+    "saved": "Servidor de correo guardado.",
+    "remove": "Usar el servidor de Mappi",
+    "removeTitle": "¿Dejar de usar tu servidor de correo?",
+    "removeBody": "Los correos de tu cuenta volverán a salir por el servidor de Mappi. Se borran el servidor guardado y su contraseña.",
+    "removed": "Tus correos vuelven a salir por el servidor de Mappi."
+  },
+  "openai": {
+    "title": "Clave de API de OpenAI",
+    "intro": "Las funciones de IA de tu cuenta (generación de cuestionarios, chat, tableros, evaluaciones) funcionan con OpenAI. Con tu propia clave se cobran a tu cuenta de OpenAI; sin ella, se usa la clave de Mappi.",
+    "statusOwn": "Tu clave ····{{last4}}",
+    "statusPlatform": "Clave de Mappi",
+    "key": "Clave de API",
+    "replaceKey": "Reemplazar la clave",
+    "keyHint": "Se guarda cifrada. Solo se muestran sus últimos 4 caracteres.",
+    "saved": "Clave de OpenAI guardada.",
+    "remove": "Quitar mi clave",
+    "removeTitle": "¿Quitar tu clave de OpenAI?",
+    "removeBody": "Las funciones de IA de tu cuenta volverán a usar la clave de Mappi.",
+    "removed": "Se quitó tu clave de OpenAI."
+  }
+}

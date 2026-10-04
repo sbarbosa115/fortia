@@ -49,12 +49,17 @@ final class OpenAiLanguageModelTest extends TestCase
         return json_decode((string) $this->calls[$call]['options']['body'], true);
     }
 
-    /** @param list<array<string, mixed>> $output */
+    /**
+     * @param list<array<string, mixed>> $output
+     *
+     * @return array<string, mixed>
+     */
     private static function answer(array $output, string $status = 'completed'): array
     {
         return ['id' => 'resp_1', 'status' => $status, 'output' => $output];
     }
 
+    /** @return array<string, mixed> */
     private static function text(string $text): array
     {
         return ['type' => 'message', 'role' => 'assistant', 'content' => [['type' => 'output_text', 'text' => $text]]];

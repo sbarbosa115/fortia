@@ -1,0 +1,35 @@
+/* The System tab of /profile: the account's own SMTP server and OpenAI key. */
+.system-settings {
+  max-width: 820px;
+  margin-top: var(--space-4);
+}
+.system-settings__notice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-primary-soft);
+  font-size: 14px;
+}
+.system-settings__intro {
+  margin: 0 0 var(--space-4);
+  font-size: 14px;
+}
+.system-settings__pair {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(140px, 2fr);
+  gap: var(--space-3);
+}
+.system-settings__failure {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--color-danger) 8%, white);
+  color: var(--color-danger);
+  font-size: 14px;
+}
+.system-settings__actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: var(--space-4);
+}

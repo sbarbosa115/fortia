@@ -75,6 +75,8 @@
     "INVALID_PASSWORD": "That password does not meet the requirements.",
     "INVALID_CREDENTIALS": "Invalid email or password.",
     "CUSTOMER_NOT_FOUND": "The account does not exist.",
+    "INVALID_SMTP_SERVER": "Check the email server: it needs a server name, a port, an encryption and a valid sender email.",
+    "SMTP_CHECK_FAILED": "The test email could not be sent through this server.",
     "INVALID_TYPE": "That type is not valid.",
     "INVALID_SORT": "That sort is not valid.",
     "INVALID_ORDER": "That order is not valid.",
