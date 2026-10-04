@@ -210,19 +210,19 @@ describe('AssignationDetailPage (PRD §10.11)', () => {
     );
   });
 
-  it('goes back to the projects it was opened from, and the editor comes back here with that way back', async () => {
+  it('goes back to the assignations list it was opened from, and the editor comes back here with that way back', async () => {
     vi.mocked(fetchAssignation).mockResolvedValue(assignation());
-    renderPage('/assignations/a-1?from=%2Fprojects%3Fsearch%3Dacme');
+    renderPage('/assignations/a-1?from=%2Fassignations%3Fsearch%3Dacme');
 
     expect(
-      await screen.findByRole('link', {name: 'Back to Projects'}),
+      await screen.findByRole('link', {name: 'Back to Assignations'}),
       'Back returns to the page the assignation was opened from, with its filters',
-    ).toHaveAttribute('href', '/projects?search=acme');
+    ).toHaveAttribute('href', '/assignations?search=acme');
     expect(
       screen.getByRole('link', {name: 'Edit questionnaire'}),
     ).toHaveAttribute(
       'href',
-      `/questionnaires/q-1/edit?from=${encodeURIComponent('/assignations/a-1?from=%2Fprojects%3Fsearch%3Dacme')}`,
+      `/questionnaires/q-1/edit?from=${encodeURIComponent('/assignations/a-1?from=%2Fassignations%3Fsearch%3Dacme')}`,
     );
   });
 

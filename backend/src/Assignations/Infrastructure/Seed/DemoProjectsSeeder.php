@@ -28,7 +28,7 @@ use App\Shared\Domain\Clock;
  * - "Store opening Q4" (due in 30 days): one follow-up in progress (2 of 4 answered) and one complete with 1 of 4
  *   answers reviewed → state "review";
  * - "Supplier audit" (due 5 days ago): one follow-up nobody opened → state "overdue";
- * - one more follow-up in no project, offered by the edit dialog.
+ * - "Staff training" (due in 45 days): one follow-up nobody opened yet.
  *
  * It uses the organizations seeder's Acme Retail, or any organization of Acme, or creates a small one. Runs after the
  * questionnaires and organizations seeders; fixed assignation and project ids make it run once.
@@ -37,6 +37,7 @@ final class DemoProjectsSeeder implements DemoSeeder
 {
     public const STORE_OPENING = '7c1d2e3f-4a5b-4c6d-8e7f-000000000101';
     public const SUPPLIER_AUDIT = '7c1d2e3f-4a5b-4c6d-8e7f-000000000102';
+    public const STAFF_TRAINING = '7c1d2e3f-4a5b-4c6d-8e7f-000000000103';
     public const IN_PROGRESS = '7c1d2e3f-4a5b-4c6d-8e7f-000000000201';
     public const IN_REVIEW = '7c1d2e3f-4a5b-4c6d-8e7f-000000000202';
     public const NOT_STARTED = '7c1d2e3f-4a5b-4c6d-8e7f-000000000203';
@@ -70,7 +71,7 @@ final class DemoProjectsSeeder implements DemoSeeder
         $inProgress = $this->followUp(self::IN_PROGRESS, $organizationId, 'Store opening checklist', 'acme-store-opening-checklist', null);
         $inReview = $this->followUp(self::IN_REVIEW, $organizationId, 'Visual merchandising review', 'acme-visual-merchandising', null);
         $notStarted = $this->followUp(self::NOT_STARTED, $organizationId, 'Supplier compliance', 'acme-supplier-compliance', null);
-        $this->followUp(self::UNASSIGNED, $organizationId, 'Staff training plan', 'acme-staff-training', null);
+        $training = $this->followUp(self::UNASSIGNED, $organizationId, 'Staff training plan', 'acme-staff-training', null);
 
         $this->answer($inProgress, 2, submit: false);
         $sessionId = $this->answer($inReview, 4, submit: true);
@@ -81,6 +82,7 @@ final class DemoProjectsSeeder implements DemoSeeder
 
         $this->project(self::STORE_OPENING, $organizationId, 'Store opening Q4', 'Every new store ready before the holidays.', $now->modify('+30 days')->format('Y-m-d'), [$inProgress, $inReview]);
         $this->project(self::SUPPLIER_AUDIT, $organizationId, 'Supplier audit', null, $now->modify('-5 days')->format('Y-m-d'), [$notStarted]);
+        $this->project(self::STAFF_TRAINING, $organizationId, 'Staff training', null, $now->modify('+45 days')->format('Y-m-d'), [$training]);
     }
 
     private function organization(): string
@@ -138,6 +140,7 @@ final class DemoProjectsSeeder implements DemoSeeder
         $this->projects->add($project);
         foreach ($assignations as $assignation) {
             $assignation->joinProject($id, $now);
+            $assignation->moveDueDate($dueDate, $now);
         }
     }
 

@@ -2,7 +2,6 @@ import {useLocation, useSearchParams} from 'react-router';
 
 /** The console pages a "Back" link knows how to name (`back.<kind>` in the shared namespace). */
 export type BackKind =
-  | 'projects'
   | 'assignations'
   | 'assignation'
   | 'questionnaires'
@@ -14,7 +13,6 @@ export type BackTo = {to: string; kind: BackKind};
 
 const UUID = '[0-9a-f-]{36}';
 const KINDS: [RegExp, BackKind][] = [
-  [/^\/projects$/, 'projects'],
   [/^\/assignations$/, 'assignations'],
   [new RegExp(`^/assignations/${UUID}$`, 'i'), 'assignation'],
   [/^\/questionnaires$/, 'questionnaires'],

@@ -94,7 +94,7 @@
     "TOKEN_EXCHANGE_FAILED": "We couldn't connect your store. Please try again.",
     "DOMAIN_EMAIL_CONFLICT": "Another organization already uses that email domain.",
     "ORGANIZATION_NOT_FOUND": "This organization does not exist.",
-    "ORGANIZATION_HAS_ASSIGNATIONS": "This organization has assignations or projects. Delete them first.",
+    "ORGANIZATION_HAS_ASSIGNATIONS": "This organization has assignations. Delete them first.",
     "QUESTIONNAIRE_ALREADY_ASSIGNED": "This questionnaire is already assigned to another organization.",
     "AUDIENCE_MEMBER_NOT_IN_ORGANIZATION": "Some of the chosen people are not members of this organization.",
     "ASSIGNATION_IN_PROJECT": "This assignation belongs to a project, so its organization can't change.",
@@ -133,7 +133,6 @@
     "FILE_UNREADABLE": "The file could not be read: it may be damaged or protected with a password."
   },
   "back": {
-    "projects": "Back to Projects",
     "assignations": "Back to Assignations",
     "assignation": "Back to the assignation",
     "questionnaires": "Back to Questionnaires",

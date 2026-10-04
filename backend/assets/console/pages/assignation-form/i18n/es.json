@@ -1,100 +1,142 @@
 {
-  "title": "Asignación",
-  "newTitle": "Nueva asignación",
-  "editTitle": "Editar asignación",
-  "subtitle": "Elige quién responde qué cuestionario y cómo inicia sesión.",
+  "title": "Nueva asignación",
+  "workspace": "Workspace",
+  "assignations": "Asignaciones",
+  "breadcrumb": "Nueva",
+  "draftBadge": "Borrador · se guarda al crear",
+  "kicker": "Paso {{number}} de {{total}}",
+  "registrationTitle": "Cuéntanos quién eres",
+  "created": "Asignación creada",
+  "loading": "Cargando...",
   "steps": {
     "label": "Pasos",
-    "basic": "Básico",
-    "registration": "Registro",
-    "save": "Guardar",
-    "current": "{{step}} (paso actual)"
+    "questionnaires": "Cuestionarios",
+    "organization": "Organización",
+    "details": "Nombre y fecha límite",
+    "done": "completo",
+    "incomplete": "incompleto"
   },
-  "type": {
-    "label": "Tipo",
-    "default": "Estándar",
-    "defaultBody": "Las personas que elijas responden, cada una con su propia sesión",
-    "follow_up": "Seguimiento",
-    "followUpBody": "Las personas que elijas comparten una sesión y reciben un recordatorio diario hasta completarla"
-  },
-  "dueDate": {
-    "label": "Fecha límite",
-    "hint": "El día en que este seguimiento debería estar completo. Los recordatorios siguen llegando hasta que lo esté."
+  "questionnaires": {
+    "hero": "¿Qué cuestionarios?",
+    "subtitle": "Elige todos los cuestionarios que va a responder la organización. Búscalos por nombre o fíltralos por tipo.",
+    "question": "Elige uno o varios cuestionarios",
+    "search": "Buscar por nombre…",
+    "typeLabel": "Filtrar por tipo",
+    "listLabel": "Cuestionarios",
+    "types": {
+      "all": "Todos",
+      "default": "Regular",
+      "diagnostic": "Diagnóstico",
+      "quiz_funnel": "Quiz funnel",
+      "process_mapping": "Mapeo de procesos",
+      "ecommerce": "E-commerce",
+      "samurai8": "Samurai 8",
+      "ai_team_profile": "Perfil de equipo IA",
+      "prompt": "Prompt"
+    },
+    "selected_one": "{{count}} seleccionado",
+    "selected_other": "{{count}} seleccionados",
+    "clearSelection": "Quitar selección",
+    "noQuestions": "Aún sin preguntas",
+    "inactive": "Inactivo",
+    "none": "Todavía no tienes cuestionarios. Crea uno primero en Cuestionarios.",
+    "noMatches": "Ningún cuestionario coincide con estos filtros.",
+    "clearFilters": "Quitar filtros",
+    "loadMore": "Cargar más",
+    "loadingMore": "Cargando más..."
   },
   "organization": {
-    "label": "Organización",
-    "search": "Buscar organizaciones",
-    "placeholder": "Buscar por nombre",
-    "choose": "Elige una organización",
-    "none": "Ninguna organización coincide",
-    "noneYet": "Aún no hay organizaciones.",
-    "create": "Crear una",
+    "hero": "¿Para quién es?",
+    "subtitle": "Elige la organización que va a responder, o créala aquí. Responden todos sus miembros.",
+    "question": "¿Qué organización va a responder estos cuestionarios?",
+    "search": "Buscar organización…",
+    "listLabel": "Organizaciones",
+    "none": "Nada coincide con tu búsqueda.",
+    "noDomain": "sin dominio",
+    "create": "¿No está listada? Crea una nueva",
+    "createHint": "Nombre, dominio y sus miembros. Vuelves aquí con ella elegida.",
+    "copyWarning": "Un cuestionario lo responde una sola organización. Estos ya pertenecen a otra, así que se asignará una copia de cada uno:",
+    "copyItem": "“{{title}}” (asignado a {{organization}})"
+  },
+  "details": {
+    "hero": "Ponle nombre y fecha límite",
+    "subtitle": "Seguirás juntos todos los cuestionarios de esta asignación, hasta su fecha límite.",
+    "question": "Datos de la asignación",
+    "name": "Nombre de la asignación",
+    "namePlaceholder": "Ej: Auditoría Q4",
+    "nameHint": "Solo lo ve tu equipo.",
+    "deadline": "Fecha límite",
+    "deadlineHint": "Todos los cuestionarios vencen en esta fecha. Los miembros reciben un recordatorio diario hasta terminar."
+  },
+  "summary": {
+    "title": "Lo que vamos a crear",
+    "step": "Paso {{number}}",
+    "questionnaires": "Cuestionarios",
+    "organization": "Organización",
+    "assignation": "Asignación",
+    "questionnairesPending": "Elige los cuestionarios",
+    "assignationPending": "Ponle nombre en el paso 3",
+    "notChosen": "Sin elegir",
+    "new": "Nueva",
+    "questionnaireCount_one": "{{count}} cuestionario",
+    "questionnaireCount_other": "{{count}} cuestionarios",
+    "questions_one": "{{count}} pregunta",
+    "questions_other": "{{count}} preguntas",
     "members_one": "{{count}} miembro",
     "members_other": "{{count}} miembros",
-    "inProject": "Pertenece a un proyecto, así que su organización no se puede cambiar."
+    "due": "vence {{date}}",
+    "nothingSaved": "No se guarda nada hasta que pulses Crear. Cada cuestionario es un seguimiento: los miembros comparten una sesión y reciben un recordatorio diario hasta completarlo."
   },
-  "questionnaire": {
-    "label": "Cuestionario",
-    "search": "Buscar cuestionarios",
-    "placeholder": "Buscar por título",
-    "none": "Ningún cuestionario coincide",
-    "loadMore": "Cargar más",
-    "selected": "Seleccionado: {{title}}",
-    "change": "Cambiar",
-    "conflict": "Este cuestionario ya está asignado a «{{organization}}». Se creará una copia del cuestionario y se asignará la copia.",
-    "questions_one": "{{count}} pregunta",
-    "questions_other": "{{count}} preguntas"
-  },
-  "name": {
-    "label": "Nombre"
-  },
-  "description": {
-    "label": "Descripción",
-    "hint": "Una nota interna sobre esta asignación. Quienes responden nunca la ven."
-  },
-  "registration": {
-    "title": "Registro",
-    "intro": "Es la pantalla de inicio de sesión que ven quienes responden antes del cuestionario.",
-    "slideTitle": "Inicia sesión",
-    "field": "Campo",
-    "visible": "Visible",
-    "required": "Obligatorio",
-    "fixed": "Siempre se pide",
-    "visibleLabel": "{{field}} es visible",
-    "requiredLabel": "{{field}} es obligatorio",
-    "fields": {
-      "name": "Nombre completo",
-      "email": "Correo",
-      "phone": "Teléfono",
-      "role": "Cargo",
-      "area": "Área"
-    }
-  },
-  "actions": {
-    "next": "Siguiente",
-    "back": "Atrás",
-    "create": "Crear asignación",
-    "save": "Guardar cambios"
-  },
-  "done": {
-    "created": "¡Asignación creada!",
-    "updated": "¡Asignación actualizada!",
-    "body": "Comparte este enlace con las personas que responden «{{name}}».",
-    "link": "Enlace para responder",
-    "copy": "Copiar",
-    "toList": "Ir a Asignaciones",
-    "view": "Abrir la asignación"
+  "missing": {
+    "title": "Falta completar antes de crear:",
+    "goTo": "Ir al paso {{number}}"
   },
   "errors": {
-    "organizationRequired": "La organización es obligatoria",
-    "audienceRequired": "Marca al menos una persona, área o cargo, o elige Todos",
-    "questionnaireRequired": "El cuestionario es obligatorio",
-    "nameRequired": "El nombre es obligatorio",
-    "dueDateInvalid": "Escribe una fecha límite válida",
-    "registrationContact": "Al menos el correo o el teléfono debe ser obligatorio",
-    "fix": "Revisa los campos marcados antes de continuar.",
-    "race": "Este cuestionario se acaba de asignar a otra organización. Revísalo e inténtalo de nuevo."
+    "questionnairesRequired": "Elige al menos un cuestionario",
+    "organizationRequired": "Elige una organización",
+    "nameRequired": "La asignación necesita un nombre",
+    "nameTooLong": "Usa 200 caracteres o menos",
+    "deadlineRequired": "Elige una fecha límite",
+    "deadlineInvalid": "Escribe una fecha límite válida",
+    "deadlinePast": "La fecha límite no puede estar en el pasado",
+    "assignedElsewhere": "Otra organización empezó a seguir uno de los cuestionarios. Pulsa Crear otra vez para asignar una copia."
   },
-  "notFound": "Esta asignación no existe.",
-  "backToList": "Volver a Asignaciones"
+  "actions": {
+    "back": "Volver",
+    "continue": "Continuar",
+    "create": "Crear",
+    "creating": "Creando..."
+  },
+  "organizationDialog": {
+    "title": "Nueva organización",
+    "description": "Configura la organización y agrega sus miembros. Se crea junto con la asignación.",
+    "name": "Nombre",
+    "namePlaceholder": "Nombre de la organización",
+    "domain": "Dominio de email",
+    "domainPlaceholder": "ejemplo.com",
+    "orgDescription": "Descripción",
+    "orgDescriptionPlaceholder": "Descripción de la organización",
+    "active": "Activa",
+    "members": "Miembros con correo individual",
+    "membersHint": "Cada miembro necesita nombre y al menos un correo o un teléfono. El dominio del correo es solo orientativo.",
+    "csvHelp": "¿Necesitas ayuda con el CSV?",
+    "memberName": "Nombre",
+    "memberEmail": "Email",
+    "memberPhone": "Teléfono",
+    "memberRole": "Cargo",
+    "memberArea": "Área",
+    "memberNamePlaceholder": "Nombre completo",
+    "memberEmailPlaceholder": "correo@ejemplo.com",
+    "memberPhonePlaceholder": "Teléfono",
+    "memberRolePlaceholder": "Rol (opcional)",
+    "memberAreaPlaceholder": "Área (opcional)",
+    "addMember": "Agregar miembro",
+    "editMember": "Editar miembro {{name}}",
+    "removeMember": "Eliminar miembro {{name}}",
+    "cancelEdit": "Cancelar",
+    "saveMember": "Guardar",
+    "noMembers": "Aún no hay miembros",
+    "domainWarning": "{{count}} miembro(s) usan un dominio distinto de {{domain}}. Se guardarán igual.",
+    "save": "Crear organización"
+  }
 }

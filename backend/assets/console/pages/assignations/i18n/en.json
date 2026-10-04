@@ -1,62 +1,137 @@
 {
   "title": "Assignations",
-  "subtitle": "Send a questionnaire to the people of an organization and follow their answers.",
-  "count_one": "{{count}} assignation",
-  "count_other": "{{count}} assignations",
+  "subtitle": "Send questionnaires to an organization with a deadline. See what has been answered and what is waiting for your review.",
   "new": "New assignation",
+  "loading": "Loading assignations",
+  "empty": "No assignations yet. Create one to send questionnaires to an organization and follow their answers together.",
+  "emptyAction": "Create the first assignation",
+  "listLabel": "Assignation list",
+  "filtersLabel": "Filter by status",
+  "searchLabel": "Search assignation or organization",
+  "searchPlaceholder": "Search assignation or organization",
+  "noResults": "No assignation matches this filter.",
+  "noResultsSearch": "No assignation matches “{{query}}”.",
+  "clearFilters": "Clear filters",
   "tabs": {
-    "label": "Assignations by type",
     "all": "All",
-    "default": "Default",
-    "follow_up": "Follow-up"
+    "review": "To review",
+    "progress": "In progress",
+    "correction": "In correction",
+    "overdue": "Overdue",
+    "completed": "Completed"
   },
+  "status": {
+    "pending": "No answers",
+    "progress": "Answering",
+    "review": "To review",
+    "correction": "In correction",
+    "approved": "Approved",
+    "overdue": "Overdue",
+    "empty": "No questionnaires"
+  },
+  "projectStatus": {
+    "pending": "Not started",
+    "progress": "In progress",
+    "review": "Needs your review",
+    "correction": "In correction",
+    "approved": "Completed",
+    "overdue": "Overdue",
+    "empty": "No questionnaires"
+  },
+  "approvedOf": "{{approved}} of {{total}} approved",
   "columns": {
-    "name": "Name",
-    "audience": "Audience",
-    "type": "Type",
-    "progress": "Progress",
-    "due": "Due",
-    "created": "Created",
-    "active": "Active",
+    "project": "Assignation",
+    "status": "Status",
+    "assignations": "Questionnaires",
+    "deadline": "Deadline",
+    "nextStep": "Next step",
+    "assignation": "Questionnaire",
+    "answers": "Answers",
+    "review": "Review",
     "actions": "Actions"
   },
-  "attempt": "Attempt {{n}}",
-  "progress": {
-    "respondents": "{{completed}} of {{total}} people",
-    "questions": "{{completed}} of {{total}} questions",
-    "completed": "Completed",
-    "label": "Progress of {{name}}"
+  "createdOn": "created {{date}}",
+  "noDeadline": "No deadline",
+  "due": {
+    "today": "due today",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days",
+    "overdue_one": "overdue by {{count}} day",
+    "overdue_other": "overdue by {{count}} days",
+    "done": "completed"
   },
-  "activeLabel": "Active: {{name}}",
-  "activated": "\"{{name}}\" is active",
-  "deactivated": "\"{{name}}\" is inactive",
-  "actions": {
-    "view": "View {{name}}",
-    "edit": "Edit {{name}}",
-    "copyLink": "Copy the link of {{name}}",
-    "delete": "Delete {{name}}",
-    "remind": "Send a reminder for {{name}}",
-    "remindDone": "It is complete: there is nothing to remind"
+  "next": {
+    "review": "Review answers",
+    "overdue": "Open overdue",
+    "correction": "See correction",
+    "progress": "See progress",
+    "pending": "See progress",
+    "approved": "See results",
+    "empty": "Edit assignation"
   },
-  "delete": {
-    "title": "Delete assignation?",
-    "body": "\"{{name}}\" will be deleted and its link will stop working. The answers already given are kept.",
-    "confirm": "Delete",
-    "done": "\"{{name}}\" was deleted"
+  "open": {
+    "review": "Review",
+    "other": "Open"
   },
-  "reminder": {
-    "title": "Send the reminder now?",
-    "body": "An email with the link to \"{{name}}\" will be sent to the people who answer it.",
-    "confirm": "Send reminder",
-    "done_one": "Reminder sent to {{count}} recipient",
-    "done_other": "Reminder sent to {{count}} recipients"
+  "reviewText": {
+    "review": "{{reviewed}} of {{total}} reviewed",
+    "approved": "{{approved}} of {{total}} approved",
+    "approvedPlain": "Review closed",
+    "correction_one": "{{count}} sent back to the client",
+    "correction_other": "{{count}} sent back to the client",
+    "notReady": "Not ready for review yet"
   },
-  "empty": {
-    "title": "No assignations yet",
-    "body": "Assign a questionnaire to an organization to collect its people's answers."
+  "moreActions": "More actions for {{name}}",
+  "expand": "Show the questionnaires of {{name}}",
+  "collapse": "Hide the questionnaires of {{name}}",
+  "edit": "Edit assignation",
+  "delete": "Delete assignation",
+  "assignationsOf": "Questionnaires of {{name}}",
+  "currentQuestion": "Question {{number}} of {{total}}",
+  "followUpCompleted": "Completed",
+  "correctionAttempt": "Correction · attempt {{attempt}}",
+  "questionsProgress": "{{completed}} of {{total}} questions",
+  "questionsAnswered": "Questions answered",
+  "emptyProject": "This assignation has no questionnaires.",
+  "openAssignation": "Open the questionnaire {{name}}",
+  "legend": {
+    "title": "How does a questionnaire move forward?",
+    "hint": "An assignation shows the status of its most urgent questionnaire.",
+    "pending": "You sent the link and nobody has started.",
+    "progress": "The client answered part of it. Questions are left.",
+    "reviewYou": "Your turn.",
+    "review": "Everything is answered: approve it or ask for a correction.",
+    "approved": "You reviewed and approved every answer.",
+    "correction": "You asked to correct an answer; once back, it returns to To review.",
+    "overdue": "The assignation's deadline passed before it was finished."
   },
-  "filtered": {
-    "title": "No assignations of this type",
-    "body": "Try another type, or clear the filter."
-  }
+  "deleteDialog": {
+    "title": "Delete this assignation?",
+    "body": "\"{{name}}\" will be deleted. Its questionnaires and their answers are kept.",
+    "deleting": "Deleting...",
+    "done": "Assignation deleted"
+  },
+  "form": {
+    "title": "Edit assignation",
+    "description": "An assignation sends questionnaires to one organization and shows which question each one is on.",
+    "name": "Assignation name",
+    "namePlaceholder": "E.g. Finance Software",
+    "organization": "Organization",
+    "organizationLocked": "An assignation's organization can't change.",
+    "descriptionLabel": "Description",
+    "optional": "(optional)",
+    "descriptionPlaceholder": "What this assignation is about. Only your team sees it.",
+    "deadline": "Deadline",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Assignation updated",
+    "errors": {
+      "nameRequired": "The assignation name is required",
+      "nameTooLong": "Use 200 characters or fewer",
+      "descriptionTooLong": "Use 2000 characters or fewer",
+      "deadlineRequired": "Choose a deadline for the assignation",
+      "deadlineInvalid": "Enter a valid deadline"
+    }
+  },
+  "editQuestionnaire": "Edit the questionnaire of {{name}}"
 }

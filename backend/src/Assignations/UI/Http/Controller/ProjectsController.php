@@ -68,13 +68,14 @@ final class ProjectsController
         return ApiResponse::ok($this->present($caller, RouteId::uuid($id)));
     }
 
+    /** questionnaire_ids: each one becomes a new follow-up of the organization (the console's assignation wizard). */
     #[Route('/projects', name: 'api_projects_create', methods: ['POST'])]
     #[OA\RequestBody(content: new Model(type: ProjectInput::class))]
     #[OA\Response(response: 201, description: 'The enriched project', content: new Model(type: ProjectOutput::class))]
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR, ASSIGNATION_ORGANIZATION_MISMATCH, ASSIGNATION_NOT_FOLLOW_UP')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
-    #[OA\Response(response: 404, description: 'ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND')]
-    #[OA\Response(response: 409, description: 'ASSIGNATION_IN_OTHER_PROJECT')]
+    #[OA\Response(response: 404, description: 'ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND')]
+    #[OA\Response(response: 409, description: 'ASSIGNATION_IN_OTHER_PROJECT, QUESTIONNAIRE_ALREADY_ASSIGNED')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false, groups: ['Default', 'create'])] ProjectInput $input): JsonResponse
     {
         self::assertCanWrite($caller);
@@ -85,6 +86,8 @@ final class ProjectsController
             $input->description,
             (string) $input->due_date,
             $input->assignationIds(),
+            $input->questionnaireIds(),
+            $input->registration_title,
         ));
 
         return ApiResponse::created($this->present($caller, $id));

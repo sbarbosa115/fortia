@@ -230,37 +230,10 @@ export const router = createBrowserRouter(
                   ),
                 },
                 {
-                  path: '/assignations/:id/edit',
-                  element: write(
-                    page(
-                      () => import('@console/pages/assignation-form'),
-                      'AssignationFormPage',
-                    ),
-                    '/assignations',
-                  ),
-                },
-                {
                   path: '/assignations/:id',
                   element: page(
                     () => import('@console/pages/assignation-detail'),
                     'AssignationDetailPage',
-                  ),
-                },
-                {
-                  path: '/projects',
-                  element: page(
-                    () => import('@console/pages/projects'),
-                    'ProjectsPage',
-                  ),
-                },
-                {
-                  path: '/projects/new',
-                  element: write(
-                    page(
-                      () => import('@console/pages/project-new'),
-                      'ProjectNewPage',
-                    ),
-                    '/projects',
                   ),
                 },
                 {

@@ -4,7 +4,9 @@ namespace App\Assignations\Infrastructure\Seed;
 
 use App\Assignations\Domain\Audience;
 use App\Assignations\Domain\Model\Assignation;
+use App\Assignations\Domain\Model\Project;
 use App\Assignations\Domain\Repository\AssignationRepository;
+use App\Assignations\Domain\Repository\ProjectRepository;
 use App\Organizations\Application\Query\OrganizationQueries;
 use App\Questionnaires\Application\Command\SaveFlow;
 use App\Responses\Application\Command\RecordReview;
@@ -28,6 +30,9 @@ use App\Shared\Domain\Clock;
  * - "Safety audit" (follow-up, everybody, due 3 days ago): complete, one answer approved and one rejected — ready to
  *   "Send for correction".
  *
+ * The console shows follow-ups inside an assignation (a project): each of the three is in one of its own, with its
+ * deadline ("Inventory count" due in 14 days). The default survey stays on its own.
+ *
  * Runs after the questionnaires (40) and organizations (50) seeders and before the projects one (30), which seeds
  * its own follow-ups. Fixed assignation ids make it run once; without Acme Retail it does nothing.
  */
@@ -37,6 +42,9 @@ final class DemoAssignationsSeeder implements DemoSeeder
     public const STORE_REPORT = '5d2e7a90-3c1b-4f6e-9a8d-000000000302';
     public const INVENTORY = '5d2e7a90-3c1b-4f6e-9a8d-000000000303';
     public const SAFETY = '5d2e7a90-3c1b-4f6e-9a8d-000000000304';
+    public const STORE_REPORT_PROJECT = '5d2e7a90-3c1b-4f6e-9a8d-000000000402';
+    public const INVENTORY_PROJECT = '5d2e7a90-3c1b-4f6e-9a8d-000000000403';
+    public const SAFETY_PROJECT = '5d2e7a90-3c1b-4f6e-9a8d-000000000404';
     /** DemoOrganizationsSeeder::ACME_RETAIL, named here so this context does not import that seeder. */
     private const ACME_RETAIL = '0a9f3c1e-5b7d-4e2a-9c10-000000000001';
 
@@ -45,6 +53,7 @@ final class DemoAssignationsSeeder implements DemoSeeder
         private readonly OrganizationQueries $organizations,
         private readonly SessionQueries $sessions,
         private readonly AssignationRepository $assignations,
+        private readonly ProjectRepository $projects,
         private readonly Clock $clock,
     ) {
     }
@@ -71,12 +80,15 @@ final class DemoAssignationsSeeder implements DemoSeeder
             }
         }
 
-        $this->assignation(self::STORE_REPORT, Assignation::FOLLOW_UP, 'Monthly store report', 'acme-monthly-store-report', null, $this->clock->now()->modify('+5 days')->format('Y-m-d'), ['type' => Audience::AREA, 'values' => ['Sales']]);
+        $storeReport = $this->assignation(self::STORE_REPORT, Assignation::FOLLOW_UP, 'Monthly store report', 'acme-monthly-store-report', null, $this->clock->now()->modify('+5 days')->format('Y-m-d'), ['type' => Audience::AREA, 'values' => ['Sales']]);
+        $this->project(self::STORE_REPORT_PROJECT, $storeReport);
 
-        $inventory = $this->assignation(self::INVENTORY, Assignation::FOLLOW_UP, 'Inventory count', 'acme-inventory-count', 'Count the back room too.', null, Audience::everybody());
+        $inventory = $this->assignation(self::INVENTORY, Assignation::FOLLOW_UP, 'Inventory count', 'acme-inventory-count', 'Count the back room too.', $this->clock->now()->modify('+14 days')->format('Y-m-d'), Audience::everybody());
+        $this->project(self::INVENTORY_PROJECT, $inventory);
         $this->answerShared($inventory);
 
         $safety = $this->assignation(self::SAFETY, Assignation::FOLLOW_UP, 'Safety audit', 'acme-safety-audit', null, $this->clock->now()->modify('-3 days')->format('Y-m-d'), Audience::everybody());
+        $this->project(self::SAFETY_PROJECT, $safety);
         $sessionId = $this->answerShared($safety);
         $questions = $this->sessions->find($sessionId)?->questions() ?? [];
         foreach ([0 => 'approved', 1 => 'rejected'] as $i => $status) {
@@ -88,6 +100,15 @@ final class DemoAssignationsSeeder implements DemoSeeder
         foreach (\array_slice($questions, 2) as $question) {
             $this->commands->dispatch(new RecordReview($sessionId, (string) $question['id'], 'approved', null, 1));
         }
+    }
+
+    /** The console's assignation around one follow-up: its name and its deadline. */
+    private function project(string $id, Assignation $followUp): void
+    {
+        $now = $this->clock->now();
+        $dueDate = (string) $followUp->dueDate();
+        $this->projects->add(new Project($id, DemoAccounts::ACME, self::ACME_RETAIL, $followUp->name(), $dueDate, $now));
+        $followUp->joinProject($id, $now);
     }
 
     /** @param array{type: string, values: list<string>} $audience */

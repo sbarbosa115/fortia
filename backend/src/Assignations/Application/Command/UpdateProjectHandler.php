@@ -3,6 +3,7 @@
 namespace App\Assignations\Application\Command;
 
 use App\Assignations\Domain\Error\ProjectNotFound;
+use App\Assignations\Domain\Repository\AssignationRepository;
 use App\Assignations\Domain\Repository\ProjectRepository;
 use App\Shared\Domain\Clock;
 use App\Shared\Domain\Error\Rejected;
@@ -14,6 +15,7 @@ final class UpdateProjectHandler
     public function __construct(
         private readonly ProjectRepository $projects,
         private readonly ProjectAssignationSet $assignations,
+        private readonly AssignationRepository $assignationRepository,
         private readonly Clock $clock,
     ) {
     }
@@ -42,5 +44,11 @@ final class UpdateProjectHandler
             \array_key_exists('due_date', $fields) ? (string) $fields['due_date'] : (string) $project->dueDate(),
             $now,
         );
+        if (\array_key_exists('due_date', $fields)) {
+            // The console's assignation is the project: its questionnaires are due on its deadline.
+            foreach ($this->assignationRepository->listByProject($project->projectId()) as $assignation) {
+                $assignation->moveDueDate((string) $fields['due_date'], $now);
+            }
+        }
     }
 }

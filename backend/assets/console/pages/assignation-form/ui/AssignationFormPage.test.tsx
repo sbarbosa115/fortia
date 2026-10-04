@@ -1,19 +1,15 @@
-import {
-  createAssignation,
-  fetchAssignationOfQuestionnaire,
-} from '@console/entities/assignation';
+import {fetchAssignationOfQuestionnaire} from '@console/entities/assignation';
 import type {Organization} from '@console/entities/organization';
+import {createProject, type Project} from '@console/entities/project';
 import {
   copyQuestionnaire,
   fetchQuestionnaires,
-  type QuestionnaireDetail,
   type QuestionnairePage,
 } from '@console/entities/questionnaire';
-import {ApiError} from '@shared/api';
 import {testI18n} from '@shared/i18n/testing';
 import {ToastProvider} from '@shared/ui';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-import {render, screen, waitFor} from '@testing-library/react';
+import {render, screen, waitFor, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {I18nextProvider} from 'react-i18next';
 import {MemoryRouter, Route, Routes} from 'react-router';
@@ -22,19 +18,21 @@ import {AssignationFormPage} from './AssignationFormPage';
 
 vi.mock('@console/entities/assignation', async (original) => ({
   ...(await original<typeof import('@console/entities/assignation')>()),
-  createAssignation: vi.fn(),
-  updateAssignation: vi.fn(),
-  fetchAssignation: vi.fn(),
   fetchAssignationOfQuestionnaire: vi.fn(),
 }));
 vi.mock('@console/entities/organization', async (original) => ({
   ...(await original<typeof import('@console/entities/organization')>()),
+  createOrganization: vi.fn(),
   useOrganizations: () => ({
     data: organizations,
     isPending: false,
     error: null,
     refetch: vi.fn(),
   }),
+}));
+vi.mock('@console/entities/project', async (original) => ({
+  ...(await original<typeof import('@console/entities/project')>()),
+  createProject: vi.fn(),
 }));
 vi.mock('@console/entities/questionnaire', async (original) => ({
   ...(await original<typeof import('@console/entities/questionnaire')>()),
@@ -47,52 +45,42 @@ const organizations = vi.hoisted(() => [
     organization_id: 'o-1',
     customer_id: 'ACME0001',
     name: 'Acme Retail',
+    domain_email: 'acme.test',
     active: true,
     organization_users: [
-      {
-        organization_user_id: 'm-1',
-        organization_id: 'o-1',
-        name: 'ana',
-        email: 'ana@acme.test',
-        area: 'Sales',
-        role: 'Manager',
-      },
-      {
-        organization_user_id: 'm-2',
-        organization_id: 'o-1',
-        name: 'luis',
-        email: 'luis@acme.test',
-        area: 'Sales',
-        role: 'Driver',
-      },
-      {
-        organization_user_id: 'm-3',
-        organization_id: 'o-1',
-        name: 'sara',
-        email: 'sara@acme.test',
-        area: 'Ops',
-        role: 'Driver',
-      },
+      {organization_user_id: 'm-1', name: 'Ana', email: 'ana@acme.test'},
     ],
   },
   {
     organization_id: 'o-2',
     customer_id: 'ACME0001',
-    name: 'Acme Logistics',
+    name: 'Globex',
+    domain_email: null,
     active: true,
     organization_users: [],
   },
 ]) as unknown as Organization[];
 
-const questionnaires = {
-  items: [
-    {questionnaire_id: 'q-1', title: 'Store checklist', question_count: 4},
-  ],
-  page: 1,
-  page_size: 20,
-  total: 1,
-  total_pages: 1,
-} as unknown as QuestionnairePage;
+function row(id: string, title: string, extra: Record<string, unknown> = {}) {
+  return {
+    questionnaire_id: id,
+    title,
+    type: 'default',
+    question_count: 3,
+    is_active: true,
+    ...extra,
+  };
+}
+
+function page(items: ReturnType<typeof row>[]): QuestionnairePage {
+  return {
+    items,
+    page: 1,
+    page_size: 20,
+    total_items: items.length,
+    total_pages: 1,
+  } as unknown as QuestionnairePage;
+}
 
 function renderPage() {
   const client = new QueryClient({defaultOptions: {queries: {retry: false}}});
@@ -106,6 +94,7 @@ function renderPage() {
                 path="/assignations/new"
                 element={<AssignationFormPage />}
               />
+              <Route path="/assignations" element={<p>Assignations list</p>} />
             </Routes>
           </MemoryRouter>
         </ToastProvider>
@@ -114,200 +103,174 @@ function renderPage() {
   );
 }
 
-async function fillBasic() {
+const continueButton = () => screen.getByRole('button', {name: /Continue/});
+
+/** Step 1 with Store audit and Warehouse audit picked, then Continue. */
+async function pickTwoAndContinue() {
   await userEvent.click(
-    await screen.findByRole('radio', {name: /Acme Retail/}),
+    await screen.findByRole('checkbox', {name: /Store audit/}),
   );
   await userEvent.click(
-    await screen.findByRole('radio', {name: /Store checklist/}),
+    screen.getByRole('checkbox', {name: /Warehouse audit/}),
   );
-  await userEvent.type(
-    screen.getByRole('textbox', {name: /^Name/}),
-    'Store check',
-  );
+  await userEvent.click(continueButton());
 }
 
-describe('AssignationFormPage (PRD §10.11)', () => {
+describe('AssignationFormPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(fetchQuestionnaires).mockResolvedValue(questionnaires);
+    vi.mocked(fetchQuestionnaires).mockImplementation(async (params) => {
+      const all = [
+        row('q-1', 'Store audit'),
+        row('q-2', 'Warehouse audit', {type: 'diagnostic'}),
+        row('q-3', 'Empty draft', {question_count: 0}),
+      ];
+      return page(
+        all.filter(
+          (item) =>
+            item.title.toLowerCase().includes(params.search.toLowerCase()) &&
+            (params.type === null || item.type === params.type),
+        ),
+      );
+    });
     vi.mocked(fetchAssignationOfQuestionnaire).mockResolvedValue(null);
+    vi.mocked(createProject).mockResolvedValue({
+      project_id: 'p-1',
+    } as unknown as Project);
   });
 
-  it('says what is missing before moving on', async () => {
+  it('picks several questionnaires with checkboxes before going on', async () => {
     renderPage();
-    await userEvent.click(await screen.findByRole('button', {name: 'Next'}));
 
-    expect(screen.getByText('Organization is required')).toBeInTheDocument();
-    expect(screen.getByText('Questionnaire is required')).toBeInTheDocument();
-    expect(screen.getByText('Name is required')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', {name: 'Which questionnaires?'}),
+    ).toBeInTheDocument();
+    expect(continueButton(), 'step 1 needs a questionnaire').toBeDisabled();
+    expect(
+      await screen.findByRole('checkbox', {name: /Empty draft/}),
+      'a questionnaire without questions cannot be sent',
+    ).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('checkbox', {name: /Store audit/}));
+    await userEvent.click(
+      screen.getByRole('checkbox', {name: /Warehouse audit/}),
+    );
+
+    expect(screen.getByText('2 selected')).toBeInTheDocument();
+    expect(continueButton()).toBeEnabled();
   });
 
-  it('picks the audience by area with a live counter, reset when the organization changes', async () => {
+  it('searches the questionnaires by name and filters them by type', async () => {
     renderPage();
-    await userEvent.click(
-      await screen.findByRole('radio', {name: /Acme Retail/}),
-    );
-    expect(screen.getByText('3 people will respond')).toBeInTheDocument();
+    await screen.findByRole('checkbox', {name: /Store audit/});
 
-    await userEvent.click(screen.getByRole('radio', {name: /^Area/}));
-    await userEvent.click(
-      screen.getByRole('checkbox', {name: 'Sales (2 people)'}),
+    await userEvent.type(
+      screen.getByRole('searchbox', {name: 'Search by name…'}),
+      'warehouse',
     );
-    expect(screen.getByText('2 people will respond')).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('checkbox', {name: /Store audit/}),
+      ).not.toBeInTheDocument(),
+    );
+    expect(
+      await screen.findByRole('checkbox', {name: /Warehouse audit/}),
+    ).toBeInTheDocument();
+    expect(fetchQuestionnaires).toHaveBeenLastCalledWith(
+      expect.objectContaining({search: 'warehouse', type: null}),
+    );
 
-    await userEvent.click(screen.getByRole('radio', {name: /Acme Logistics/}));
-    expect(screen.getByRole('radio', {name: /^Everybody/})).toHaveAttribute(
-      'aria-checked',
-      'true',
-    );
+    await userEvent.click(screen.getByRole('button', {name: 'Regular'}));
+    expect(
+      await screen.findByText('No questionnaire matches these filters.'),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: 'Clear filters'}));
+    expect(
+      await screen.findByRole('checkbox', {name: /Store audit/}),
+    ).toBeInTheDocument();
   });
 
-  it('creates a follow-up with its registration and shows the link to share', async () => {
-    vi.mocked(createAssignation).mockResolvedValue({
-      assignation_id: 'a-1',
-      questionnaire_url: 'http://localhost:8080/a/a-1',
-    });
+  it('creates the assignation for the organization with the name and the deadline', async () => {
     renderPage();
-    await userEvent.click(
-      await screen.findByRole('radio', {name: /^Follow-up/}),
-    );
-    await fillBasic();
-    await userEvent.click(screen.getByRole('button', {name: 'Next'}));
-
-    await userEvent.click(
-      screen.getByRole('checkbox', {name: 'Email is required'}),
-    );
-    expect(
-      screen.getByText('At least one of email or phone must be required'),
-    ).toBeInTheDocument();
-    await userEvent.click(
-      screen.getByRole('checkbox', {name: 'Phone is required'}),
-    );
-    expect(
-      screen.getByRole('checkbox', {name: 'Phone is required'}),
-    ).toBeChecked();
-    expect(
-      screen.getByRole('checkbox', {name: 'Phone is visible'}),
-    ).toBeChecked();
-    expect(
-      screen.queryByText('At least one of email or phone must be required'),
-    ).not.toBeInTheDocument();
-    await userEvent.click(
-      screen.getByRole('button', {name: 'Create assignation'}),
-    );
+    await pickTwoAndContinue();
 
     expect(
-      await screen.findByRole('heading', {name: 'Assignation created!'}),
+      screen.getByRole('heading', {name: 'Who is it for?'}),
     ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue('http://localhost:8080/a/a-1'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', {name: 'Go to Assignations'}),
-    ).toHaveAttribute('href', '/assignations');
-    const payload = vi.mocked(createAssignation).mock.calls[0]![0];
-    expect(payload).toMatchObject({
+    await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
+    await userEvent.click(continueButton());
+
+    await userEvent.type(
+      screen.getByRole('textbox', {name: /Assignation name/}),
+      'Q4 audits',
+    );
+    await userEvent.type(screen.getByLabelText(/Deadline/), '2099-12-15');
+    await userEvent.click(screen.getByRole('button', {name: 'Create'}));
+
+    expect(await screen.findByText('Assignations list')).toBeInTheDocument();
+    expect(createProject).toHaveBeenCalledWith({
       organization_id: 'o-1',
-      questionnaire_id: 'q-1',
-      name: 'Store check',
-      type: 'follow_up',
-      max_follow_ups: 2,
-      due_date: null,
+      name: 'Q4 audits',
+      description: null,
+      due_date: '2099-12-15',
+      questionnaire_ids: ['q-1', 'q-2'],
+      registration_title: 'Tell us who you are',
     });
-    expect(
-      (payload.questions?.[0] as {options: {name: string}[]}).options.map(
-        (o) => o.name,
-      ),
-    ).toEqual(['name', 'email', 'phone']);
+    expect(copyQuestionnaire).not.toHaveBeenCalled();
   });
 
-  it('assigns a copy when the questionnaire belongs to another organization', async () => {
-    vi.mocked(fetchAssignationOfQuestionnaire).mockResolvedValue({
-      organization_id: 'o-9',
-      organization_name: 'Globex Labs',
-      assignations_id: 'a-9',
-    } as never);
-    vi.mocked(copyQuestionnaire).mockResolvedValue({
-      questionnaire_id: 'q-copy',
-    } as QuestionnaireDetail);
-    vi.mocked(createAssignation).mockResolvedValue({
-      assignation_id: 'a-1',
-      questionnaire_url: 'http://localhost:8080/a/a-1',
-    });
-    renderPage();
-    await fillBasic();
-
-    expect(
-      await screen.findByText(
-        'This questionnaire is already assigned to "Globex Labs". A copy of the questionnaire will be created and the copy will be assigned instead.',
-      ),
-    ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', {name: 'Next'}));
-    await userEvent.click(
-      screen.getByRole('button', {name: 'Create assignation'}),
-    );
-
-    await waitFor(() => expect(createAssignation).toHaveBeenCalled());
-    expect(copyQuestionnaire).toHaveBeenCalledWith('q-1');
-    expect(
-      vi.mocked(createAssignation).mock.calls[0]![0].questionnaire_id,
-    ).toBe('q-copy');
-  });
-
-  it('still assigns a copy when the check of the questionnaire answers after Create is pressed (a slow API)', async () => {
-    let release: () => void = () => undefined;
-    const answered = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    vi.mocked(fetchAssignationOfQuestionnaire).mockImplementation(() =>
-      answered.then(
-        () =>
-          ({
-            organization_id: 'o-9',
-            organization_name: 'Globex Labs',
-            assignations_id: 'a-9',
-          }) as never,
-      ),
+  it('warns that a questionnaire of another organization is copied, and copies it', async () => {
+    vi.mocked(fetchAssignationOfQuestionnaire).mockImplementation(async (id) =>
+      id === 'q-2'
+        ? ({
+            organization_id: 'o-2',
+            organization_name: 'Globex',
+          } as Awaited<ReturnType<typeof fetchAssignationOfQuestionnaire>>)
+        : null,
     );
     vi.mocked(copyQuestionnaire).mockResolvedValue({
-      questionnaire_id: 'q-copy',
-    } as QuestionnaireDetail);
-    vi.mocked(createAssignation).mockResolvedValue({
-      assignation_id: 'a-1',
-      questionnaire_url: 'http://localhost:8080/a/a-1',
-    });
+      questionnaire_id: 'q-2-copy',
+    } as Awaited<ReturnType<typeof copyQuestionnaire>>);
     renderPage();
-    await fillBasic();
-    await userEvent.click(screen.getByRole('button', {name: 'Next'}));
-    await userEvent.click(
-      screen.getByRole('button', {name: 'Create assignation'}),
-    );
-    release();
+    await pickTwoAndContinue();
 
-    await waitFor(() => expect(createAssignation).toHaveBeenCalled());
+    await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
+
+    const warning = within(await screen.findByRole('status'));
     expect(
-      vi.mocked(createAssignation).mock.calls[0]![0].questionnaire_id,
-      'PRD §10.11: a questionnaire of another organization is never sent as is (409); its copy is',
-    ).toBe('q-copy');
+      warning.getByText('“Warehouse audit” (assigned to Globex)'),
+      'PRD §6.14: one organization per questionnaire',
+    ).toBeInTheDocument();
+    await userEvent.click(continueButton());
+    await userEvent.type(
+      screen.getByRole('textbox', {name: /Assignation name/}),
+      'Q4',
+    );
+    await userEvent.type(screen.getByLabelText(/Deadline/), '2099-12-15');
+    await userEvent.click(screen.getByRole('button', {name: 'Create'}));
+
+    await waitFor(() =>
+      expect(createProject).toHaveBeenCalledWith(
+        expect.objectContaining({questionnaire_ids: ['q-1', 'q-2-copy']}),
+      ),
+    );
+    expect(copyQuestionnaire).toHaveBeenCalledWith('q-2');
   });
 
-  it('explains a race with another organization', async () => {
-    vi.mocked(createAssignation).mockRejectedValue(
-      new ApiError(409, 'QUESTIONNAIRE_ALREADY_ASSIGNED', 'taken'),
-    );
+  it('lists what is missing when Create is pressed too early', async () => {
     renderPage();
-    await fillBasic();
-    await userEvent.click(screen.getByRole('button', {name: 'Next'}));
-    await userEvent.click(
-      screen.getByRole('button', {name: 'Create assignation'}),
-    );
+    await pickTwoAndContinue();
+    await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
+    await userEvent.click(continueButton());
+
+    await userEvent.click(screen.getByRole('button', {name: 'Create'}));
 
     expect(
-      await screen.findByText(
-        'This questionnaire was just assigned to another organization. Please review and try again.',
-      ),
+      screen.getByText('Complete these before creating:'),
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', {name: 'Next'})).toBeInTheDocument();
+    expect(
+      screen.getAllByText(/The assignation needs a name/).length,
+    ).toBeGreaterThan(0);
+    expect(createProject).not.toHaveBeenCalled();
   });
 });

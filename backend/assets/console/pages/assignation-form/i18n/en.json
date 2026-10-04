@@ -1,100 +1,142 @@
 {
-  "title": "Assignation",
-  "newTitle": "New assignation",
-  "editTitle": "Edit assignation",
-  "subtitle": "Choose who answers which questionnaire, then how they sign in.",
+  "title": "New assignation",
+  "workspace": "Workspace",
+  "assignations": "Assignations",
+  "breadcrumb": "New",
+  "draftBadge": "Draft · saved when you create",
+  "kicker": "Step {{number}} of {{total}}",
+  "registrationTitle": "Tell us who you are",
+  "created": "Assignation created",
+  "loading": "Loading...",
   "steps": {
     "label": "Steps",
-    "basic": "Basic",
-    "registration": "Registration",
-    "save": "Save",
-    "current": "{{step}} (current step)"
+    "questionnaires": "Questionnaires",
+    "organization": "Organization",
+    "details": "Name and deadline",
+    "done": "complete",
+    "incomplete": "incomplete"
   },
-  "type": {
-    "label": "Type",
-    "default": "Default",
-    "defaultBody": "The members you pick answer, each with their own session",
-    "follow_up": "Follow-up",
-    "followUpBody": "The members you pick share one session and receive a daily reminder until it is completed"
-  },
-  "dueDate": {
-    "label": "Due date",
-    "hint": "The day this follow-up should be completed. Reminders keep arriving until it is."
+  "questionnaires": {
+    "hero": "Which questionnaires?",
+    "subtitle": "Pick every questionnaire the organization will answer. Search them by name or filter them by type.",
+    "question": "Choose one or more questionnaires",
+    "search": "Search by name…",
+    "typeLabel": "Filter by type",
+    "listLabel": "Questionnaires",
+    "types": {
+      "all": "All",
+      "default": "Regular",
+      "diagnostic": "Diagnostic",
+      "quiz_funnel": "Quiz funnel",
+      "process_mapping": "Process mapping",
+      "ecommerce": "E-commerce",
+      "samurai8": "Samurai 8",
+      "ai_team_profile": "AI team profile",
+      "prompt": "Prompt"
+    },
+    "selected_one": "{{count}} selected",
+    "selected_other": "{{count}} selected",
+    "clearSelection": "Clear selection",
+    "noQuestions": "No questions yet",
+    "inactive": "Inactive",
+    "none": "You have no questionnaires yet. Create one in Questionnaires first.",
+    "noMatches": "No questionnaire matches these filters.",
+    "clearFilters": "Clear filters",
+    "loadMore": "Load more",
+    "loadingMore": "Loading more..."
   },
   "organization": {
-    "label": "Organization",
-    "search": "Search organizations",
-    "placeholder": "Search by name",
-    "choose": "Choose an organization",
-    "none": "No organization matches",
-    "noneYet": "There are no organizations yet.",
-    "create": "Create one",
+    "hero": "Who is it for?",
+    "subtitle": "Choose the organization that will answer, or create it here. Everybody in it responds.",
+    "question": "Which organization will answer these questionnaires?",
+    "search": "Search organization…",
+    "listLabel": "Organizations",
+    "none": "Nothing matches your search.",
+    "noDomain": "no domain",
+    "create": "Not listed? Create a new one",
+    "createHint": "Name, domain and its members. You come back here with it chosen.",
+    "copyWarning": "A questionnaire is answered by one organization only. These already belong to another one, so a copy of each will be assigned instead:",
+    "copyItem": "“{{title}}” (assigned to {{organization}})"
+  },
+  "details": {
+    "hero": "Name it and set the deadline",
+    "subtitle": "You will follow every questionnaire of this assignation together, up to its deadline.",
+    "question": "Assignation details",
+    "name": "Assignation name",
+    "namePlaceholder": "E.g. Q4 audit",
+    "nameHint": "Only your team sees it.",
+    "deadline": "Deadline",
+    "deadlineHint": "Every questionnaire is due on this date. Members get a daily reminder until they finish."
+  },
+  "summary": {
+    "title": "What we're going to create",
+    "step": "Step {{number}}",
+    "questionnaires": "Questionnaires",
+    "organization": "Organization",
+    "assignation": "Assignation",
+    "questionnairesPending": "Pick the questionnaires",
+    "assignationPending": "Name it in step 3",
+    "notChosen": "Not chosen",
+    "new": "New",
+    "questionnaireCount_one": "{{count}} questionnaire",
+    "questionnaireCount_other": "{{count}} questionnaires",
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions",
     "members_one": "{{count}} member",
     "members_other": "{{count}} members",
-    "inProject": "It belongs to a project, so its organization cannot change."
+    "due": "due {{date}}",
+    "nothingSaved": "Nothing is saved until you press Create. Each questionnaire is a follow-up: the members share one session and get a daily reminder until it is completed."
   },
-  "questionnaire": {
-    "label": "Questionnaire",
-    "search": "Search questionnaires",
-    "placeholder": "Search by title",
-    "none": "No questionnaire matches",
-    "loadMore": "Load more",
-    "selected": "Selected: {{title}}",
-    "change": "Change",
-    "conflict": "This questionnaire is already assigned to \"{{organization}}\". A copy of the questionnaire will be created and the copy will be assigned instead.",
-    "questions_one": "{{count}} question",
-    "questions_other": "{{count}} questions"
-  },
-  "name": {
-    "label": "Name"
-  },
-  "description": {
-    "label": "Description",
-    "hint": "An internal note about this assignation. Respondents never see it."
-  },
-  "registration": {
-    "title": "Registration",
-    "intro": "This is the sign-in slide respondents see before the questionnaire.",
-    "slideTitle": "Sign in",
-    "field": "Field",
-    "visible": "Visible",
-    "required": "Required",
-    "fixed": "Always asked",
-    "visibleLabel": "{{field}} is visible",
-    "requiredLabel": "{{field}} is required",
-    "fields": {
-      "name": "Full name",
-      "email": "Email",
-      "phone": "Phone",
-      "role": "Role",
-      "area": "Area"
-    }
-  },
-  "actions": {
-    "next": "Next",
-    "back": "Back",
-    "create": "Create assignation",
-    "save": "Save changes"
-  },
-  "done": {
-    "created": "Assignation created!",
-    "updated": "Assignation updated!",
-    "body": "Share this link with the people who answer \"{{name}}\".",
-    "link": "Respondent link",
-    "copy": "Copy",
-    "toList": "Go to Assignations",
-    "view": "Open the assignation"
+  "missing": {
+    "title": "Complete these before creating:",
+    "goTo": "Go to step {{number}}"
   },
   "errors": {
-    "organizationRequired": "Organization is required",
-    "audienceRequired": "Check at least one person, area or role, or choose Everybody",
-    "questionnaireRequired": "Questionnaire is required",
-    "nameRequired": "Name is required",
-    "dueDateInvalid": "Enter a valid due date",
-    "registrationContact": "At least one of email or phone must be required",
-    "fix": "Check the highlighted fields before continuing.",
-    "race": "This questionnaire was just assigned to another organization. Please review and try again."
+    "questionnairesRequired": "Choose at least one questionnaire",
+    "organizationRequired": "Choose an organization",
+    "nameRequired": "The assignation needs a name",
+    "nameTooLong": "Use 200 characters or fewer",
+    "deadlineRequired": "Choose a deadline",
+    "deadlineInvalid": "Enter a valid deadline",
+    "deadlinePast": "The deadline can't be in the past",
+    "assignedElsewhere": "Another organization started following one of the questionnaires. Press Create again to assign a copy."
   },
-  "notFound": "This assignation does not exist.",
-  "backToList": "Back to Assignations"
+  "actions": {
+    "back": "Back",
+    "continue": "Continue",
+    "create": "Create",
+    "creating": "Creating..."
+  },
+  "organizationDialog": {
+    "title": "New organization",
+    "description": "Set up the organization and add its members. It is created together with the assignation.",
+    "name": "Name",
+    "namePlaceholder": "Organization name",
+    "domain": "Email domain",
+    "domainPlaceholder": "example.com",
+    "orgDescription": "Description",
+    "orgDescriptionPlaceholder": "Organization description",
+    "active": "Active",
+    "members": "Members with individual email",
+    "membersHint": "Each member needs a name and at least an email or a phone. The email domain is only a hint.",
+    "csvHelp": "Need help with your CSV?",
+    "memberName": "Name",
+    "memberEmail": "Email",
+    "memberPhone": "Phone",
+    "memberRole": "Role",
+    "memberArea": "Area",
+    "memberNamePlaceholder": "Full name",
+    "memberEmailPlaceholder": "email@example.com",
+    "memberPhonePlaceholder": "Phone",
+    "memberRolePlaceholder": "Role (optional)",
+    "memberAreaPlaceholder": "Area (optional)",
+    "addMember": "Add member",
+    "editMember": "Edit member {{name}}",
+    "removeMember": "Remove member {{name}}",
+    "cancelEdit": "Cancel",
+    "saveMember": "Save",
+    "noMembers": "No members yet",
+    "domainWarning": "{{count}} member(s) use a domain other than {{domain}}. They will be saved anyway.",
+    "save": "Create organization"
+  }
 }

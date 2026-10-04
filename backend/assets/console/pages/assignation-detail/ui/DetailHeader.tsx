@@ -14,7 +14,7 @@ import {Link} from 'react-router';
 
 /**
  * The detail's header (PRD §10.11): the name, a summary line, the type badge, the audience, the review state and
- * due date of a follow-up, Copy link, Edit and the variant's own actions.
+ * due date of a follow-up, Copy link, Edit questionnaire and the variant's own actions.
  */
 export function DetailHeader({
   assignation,
@@ -68,25 +68,6 @@ export function DetailHeader({
                 disabledReason={tShared('readOnly.change')}
               >
                 {t('editQuestionnaire')}
-              </Button>
-            )}
-            {viewer.canWrite ? (
-              <Link
-                className="btn btn--secondary"
-                to={withFrom(
-                  `/assignations/${assignation.assignations_id}/edit`,
-                  here,
-                )}
-              >
-                <Icon name="edit" size={16} />
-                {t('edit')}
-              </Link>
-            ) : (
-              <Button
-                icon={<Icon name="edit" size={16} />}
-                disabledReason={tShared('readOnly.change')}
-              >
-                {t('edit')}
               </Button>
             )}
             {actions}

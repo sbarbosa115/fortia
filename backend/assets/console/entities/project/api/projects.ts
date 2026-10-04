@@ -47,13 +47,18 @@ export function fetchProject(id: string): Promise<Project> {
   return api.get<Project>(`/projects/${id}`);
 }
 
-/** POST /projects: organization_id, name and due_date are required (PRD §8.9). */
+/**
+ * POST /projects: organization_id, name and due_date are required (PRD §8.9). Each of questionnaire_ids becomes a
+ * new follow-up of the organization, its registration slide titled registration_title.
+ */
 export type NewProjectPayload = {
   organization_id: string;
   name: string;
   description?: string | null;
   due_date: string;
   assignation_ids?: string[];
+  questionnaire_ids?: string[];
+  registration_title?: string;
 };
 
 export function createProject(payload: NewProjectPayload): Promise<Project> {

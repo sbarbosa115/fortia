@@ -4,7 +4,6 @@
   "backToList": "Volver a Asignaciones",
   "back": "Asignaciones",
   "copyLink": "Copiar enlace",
-  "edit": "Editar",
   "header": {
     "people": "{{loaded}}{{more}} de {{total}} personas",
     "completed": "{{count}}{{more}} completadas",

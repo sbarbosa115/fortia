@@ -1,9 +1,9 @@
 import {
-  type Assignation,
-  deleteAssignation,
-  fetchAssignations,
-  sendReminder,
-} from '@console/entities/assignation';
+  deleteProject,
+  fetchProjects,
+  type Project,
+  type ProjectAssignation,
+} from '@console/entities/project';
 import type {Viewer} from '@console/entities/viewer';
 import {ApiError} from '@shared/api';
 import {testI18n} from '@shared/i18n/testing';
@@ -20,16 +20,14 @@ const mocks = vi.hoisted(() => ({
   viewer: null as unknown as Viewer,
 }));
 
-vi.mock('@console/entities/assignation', async (original) => ({
-  ...(await original<typeof import('@console/entities/assignation')>()),
-  fetchAssignations: vi.fn(),
-  deleteAssignation: vi.fn(),
-  sendReminder: vi.fn(),
-  updateAssignation: vi.fn(),
+vi.mock('@console/entities/project', async (original) => ({
+  ...(await original<typeof import('@console/entities/project')>()),
+  fetchProjects: vi.fn(),
+  deleteProject: vi.fn(),
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
 
-const fetchMock = vi.mocked(fetchAssignations);
+const fetchMock = vi.mocked(fetchProjects);
 
 function viewer(canWrite: boolean): Viewer {
   return {
@@ -47,41 +45,69 @@ function viewer(canWrite: boolean): Viewer {
   };
 }
 
-function assignationFixture(overrides: Partial<Assignation> = {}): Assignation {
+function assignation(
+  overrides: Partial<ProjectAssignation> = {},
+): ProjectAssignation {
   return {
     assignations_id: 'a-1',
-    customer_id: 'ACME0001',
-    organization_id: 'o-1',
-    organization_name: 'Acme Retail',
+    name: 'Store checklist',
     questionnaire_id: 'q-1',
-    questionnaire_name: 'Store checklist',
-    questionnaire_url: 'http://localhost:8080/a/a-1',
-    name: 'Monthly store report',
-    description: null,
-    max_follow_ups: 2,
     active: true,
-    type: 'follow_up',
-    due_date: null,
-    audience: {type: 'area', values: ['Sales', 'Ops']},
-    audience_size: 3,
-    questions: [],
-    project_id: null,
-    shared_session_id: null,
-    attempts: [],
-    attempt: 2,
-    last_reminder_sent_at: null,
-    progress: {completed: 1, total: 4, unit: 'questions', current_question: 2},
+    state: 'progress',
     completed: false,
     review_status: 'not_ready',
-    created_at: '2026-09-01T10:00:00Z',
-    updated_at: '2026-09-01T10:00:00Z',
+    attempt: 1,
+    due_date: '2099-12-01',
+    overdue: false,
+    percent: 38,
+    progress: {completed: 3, total: 8, unit: 'questions', current_question: 4},
+    review: {reviewed: 0, total: 8, approved: 0, rejected: 0},
     ...overrides,
   };
 }
 
-function page(rows: Assignation[], total = rows.length) {
+function project(overrides: Partial<Project> = {}): Project {
   return {
-    assignations: rows,
+    project_id: 'p-1',
+    customer_id: 'ACME0001',
+    organization_id: 'o-1',
+    organization_name: 'Acme Retail',
+    name: 'Store opening Q4',
+    description: null,
+    due_date: '2099-12-01',
+    created_at: '2026-09-01T10:00:00Z',
+    updated_at: '2026-09-01T10:00:00Z',
+    state: 'review',
+    progress_percent: 69,
+    completed_assignations: 1,
+    approved_assignations: 0,
+    total_assignations: 2,
+    assignations: [
+      assignation(),
+      assignation({
+        assignations_id: 'a-2',
+        name: 'Visual review',
+        state: 'review',
+        completed: true,
+        review_status: 'in_review',
+        percent: 100,
+        progress: {
+          completed: 4,
+          total: 4,
+          unit: 'questions',
+          current_question: null,
+        },
+        review: {reviewed: 1, total: 4, approved: 1, rejected: 0},
+      }),
+    ],
+    available_assignations: null,
+    ...overrides,
+  };
+}
+
+function page(projects: Project[], total = projects.length) {
+  return {
+    projects,
     pagination: {
       page: 1,
       page_size: 10,
@@ -96,194 +122,266 @@ function page(rows: Assignation[], total = rows.length) {
 function renderPage() {
   const client = new QueryClient({defaultOptions: {queries: {retry: false}}});
   return render(
-    <QueryClientProvider client={client}>
-      <I18nextProvider i18n={testI18n('console')}>
+    <I18nextProvider i18n={testI18n('console')}>
+      <QueryClientProvider client={client}>
         <ToastProvider>
-          <MemoryRouter>
+          <MemoryRouter initialEntries={['/assignations']}>
             <AssignationsPage />
           </MemoryRouter>
         </ToastProvider>
-      </I18nextProvider>
-    </QueryClientProvider>,
+      </QueryClientProvider>
+    </I18nextProvider>,
   );
 }
 
-describe('AssignationsPage (PRD §10.11)', () => {
+describe('AssignationsPage', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     mocks.viewer = viewer(true);
+    fetchMock.mockReset();
   });
 
-  it('shows each assignation with its organization, audience, attempt and progress', async () => {
-    fetchMock.mockResolvedValue(page([assignationFixture()]));
+  it('shows an assignation row with its status, approvals, deadline and next step', async () => {
+    fetchMock.mockResolvedValue(page([project()]));
+
     renderPage();
 
-    const row = (await screen.findByText('Monthly store report')).closest(
-      'tr',
-    )!;
-    expect(
-      within(row).getByRole('link', {name: 'Acme Retail'}),
-    ).toHaveAttribute('href', '/organizations/o-1/view');
-    expect(
-      within(row).getByRole('link', {name: 'Store checklist'}),
-    ).toHaveAttribute('href', '/questionnaires/q-1/edit');
-    expect(within(row).getByText('Area: Sales +1')).toBeInTheDocument();
-    expect(within(row).getByText('Attempt 2')).toBeInTheDocument();
-    expect(within(row).getByText('Follow-up')).toBeInTheDocument();
-    expect(within(row).getByText('1 of 4 questions')).toBeInTheDocument();
-    expect(
-      within(row).getByRole('progressbar', {
-        name: 'Progress of Monthly store report',
-      }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('1 assignation')).toBeInTheDocument();
-  });
-
-  it('filters by type, shows the due column for follow-ups and offers to clear an empty filter', async () => {
-    fetchMock.mockResolvedValue(
-      page([assignationFixture({due_date: '2099-01-01'})]),
+    const table = within(
+      await screen.findByRole('table', {name: 'Assignations'}),
     );
-    renderPage();
-    await screen.findByText('Monthly store report');
+    expect(table.getByText('Store opening Q4')).toBeInTheDocument();
+    expect(table.getByText(/^Acme Retail, created /)).toBeInTheDocument();
+    expect(table.getByText('AR')).toBeInTheDocument();
+    expect(table.getByText('Needs your review')).toBeInTheDocument();
+    expect(table.getByText('0 of 2 approved')).toBeInTheDocument();
+    expect(
+      table.getByRole('progressbar', {name: '0 of 2 approved'}),
+    ).toHaveAttribute('aria-valuenow', '0');
+    expect(table.getByText(/^in \d+ days$/)).toBeInTheDocument();
+    expect(table.getByRole('link', {name: 'Review answers'})).toHaveAttribute(
+      'href',
+      '/assignations/a-2?from=%2Fassignations',
+    );
+    expect(screen.getByText('1–1 of 1')).toBeInTheDocument();
+    expect(screen.getByRole('link', {name: 'New assignation'})).toHaveAttribute(
+      'href',
+      '/assignations/new',
+    );
+    expect(fetchMock).toHaveBeenCalledWith({
+      status: null,
+      q: '',
+      page: 1,
+      pageSize: 10,
+    });
+  });
 
-    fetchMock.mockResolvedValue(page([]));
-    await userEvent.click(screen.getByRole('tab', {name: 'Default'}));
+  it('expands a row into its questionnaires', async () => {
+    fetchMock.mockResolvedValue(page([project()]));
+    renderPage();
+
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'Show the questionnaires of Store opening Q4',
+      }),
+    );
+
+    const detail = within(
+      screen.getByRole('table', {name: 'Questionnaires of Store opening Q4'}),
+    );
+    expect(detail.getByText('Question 4 of 8')).toBeInTheDocument();
+    expect(detail.getByText('Completed')).toBeInTheDocument();
+    expect(detail.getByText('1 of 4 reviewed')).toBeInTheDocument();
+    expect(detail.getByText('Not ready for review yet')).toBeInTheDocument();
+    expect(
+      detail.getByRole('link', {name: 'Open the questionnaire Visual review'}),
+      'returns to the assignations',
+    ).toHaveAttribute('href', '/assignations/a-2?from=%2Fassignations');
+    expect(
+      detail.getByRole('link', {
+        name: 'Open the questionnaire Store checklist',
+      }),
+    ).toHaveAttribute('href', '/assignations/a-1?from=%2Fassignations');
+    expect(detail.getByText('Review', {selector: 'a'})).toHaveAttribute(
+      'href',
+      '/assignations/a-2?from=%2Fassignations',
+    );
+    expect(
+      detail.getByRole('button', {
+        name: 'Edit the questionnaire of Visual review',
+      }),
+      'its questions can grow while the assignation runs',
+    ).toBeEnabled();
+  });
+
+  it('asks the API for the status pill and the search', async () => {
+    fetchMock.mockResolvedValue(page([project()]));
+    renderPage();
+    await screen.findByText('Store opening Q4');
+
+    await userEvent.click(screen.getByRole('button', {name: 'In progress'}));
     await waitFor(() =>
-      expect(fetchMock).toHaveBeenLastCalledWith({
-        type: 'default',
-        page: 1,
-        pageSize: 10,
-      }),
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({status: 'progress', page: 1}),
+      ),
     );
-    expect(
-      await screen.findByText('No assignations of this type'),
-    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: 'Completed'}));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({status: 'approved'}),
+      ),
+    );
 
-    fetchMock.mockResolvedValue(
-      page([assignationFixture({due_date: '2099-01-01'})]),
+    await userEvent.type(
+      screen.getByRole('searchbox', {
+        name: 'Search assignation or organization',
+      }),
+      'retail',
     );
-    await userEvent.click(screen.getByRole('tab', {name: 'Follow-up'}));
-    expect(
-      await screen.findByRole('columnheader', {name: 'Due'}),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole('columnheader', {name: 'Type'}),
-    ).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({q: 'retail', status: 'approved'}),
+      ),
+    );
   });
 
-  it('says there is nothing yet with the primary action', async () => {
+  it('says when the filters leave nothing and clears them', async () => {
+    fetchMock.mockResolvedValue(page([project()]));
+    renderPage();
+    await screen.findByText('Store opening Q4');
     fetchMock.mockResolvedValue(page([]));
+
+    await userEvent.click(screen.getByRole('button', {name: 'Overdue'}));
+    expect(
+      await screen.findByText('No assignation matches this filter.'),
+    ).toBeInTheDocument();
+
+    fetchMock.mockResolvedValue(page([project()]));
+    await userEvent.click(screen.getByRole('button', {name: 'Clear filters'}));
+    expect(await screen.findByText('Store opening Q4')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'All'})).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+
+  it('explains the section when there are no assignations', async () => {
+    fetchMock.mockResolvedValue(page([]));
+
     renderPage();
 
-    expect(await screen.findByText('No assignations yet')).toBeInTheDocument();
     expect(
-      screen.getAllByRole('link', {name: 'New assignation'})[0],
+      await screen.findByText(
+        /^No assignations yet\. Create one to send questionnaires/,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {name: 'Create the first assignation'}),
     ).toHaveAttribute('href', '/assignations/new');
   });
 
-  it('sends a reminder after confirming and says to how many people', async () => {
-    fetchMock.mockResolvedValue(page([assignationFixture()]));
-    vi.mocked(sendReminder).mockResolvedValue({recipients: 3});
+  it('shows the error with a retry', async () => {
+    fetchMock.mockRejectedValue(
+      new ApiError(500, 'INTERNAL_ERROR', 'Boom', undefined),
+    );
+
     renderPage();
 
-    await userEvent.click(
-      await screen.findByRole('button', {
-        name: 'Send a reminder for Monthly store report',
-      }),
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Something went wrong',
     );
-    const dialog = screen.getByRole('dialog', {name: 'Send the reminder now?'});
-    expect(dialog).toHaveTextContent(
-      'An email with the link to "Monthly store report" will be sent to the people who answer it.',
-    );
-    await userEvent.click(
-      within(dialog).getByRole('button', {name: 'Send reminder'}),
-    );
-
-    expect(
-      await screen.findByText('Reminder sent to 3 recipients'),
-    ).toBeInTheDocument();
-    expect(sendReminder).toHaveBeenCalledWith('a-1');
+    expect(screen.getByRole('button', {name: 'Try again'})).toBeInTheDocument();
   });
 
-  it('cannot remind a completed follow-up and has no reminder for a default one', async () => {
-    fetchMock.mockResolvedValue(
-      page([
-        assignationFixture({completed: true}),
-        assignationFixture({
-          assignations_id: 'a-2',
-          name: 'Survey',
-          type: 'default',
-          progress: {
-            completed: 2,
-            total: 5,
-            unit: 'respondents',
-            current_question: null,
-          },
-        }),
-      ]),
-    );
+  it('shows the loading state first', () => {
+    fetchMock.mockReturnValue(new Promise(() => {}));
+
     renderPage();
 
-    expect(
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
+  });
+
+  it('confirms before deleting and says the questionnaires are kept', async () => {
+    fetchMock.mockResolvedValue(page([project()]));
+    vi.mocked(deleteProject).mockResolvedValue(undefined);
+    renderPage();
+
+    await userEvent.click(
       await screen.findByRole('button', {
-        name: 'Send a reminder for Monthly store report',
+        name: 'More actions for Store opening Q4',
       }),
-    ).toBeDisabled();
+    );
+    await userEvent.click(
+      screen.getByRole('menuitem', {name: 'Delete assignation'}),
+    );
+
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByText('Delete this assignation?')).toBeInTheDocument();
     expect(
-      screen.queryByRole('button', {name: 'Send a reminder for Survey'}),
+      dialog.getByText(/Its questionnaires and their answers are kept/),
+    ).toBeInTheDocument();
+    await userEvent.click(
+      dialog.getByRole('button', {name: 'Delete assignation'}),
+    );
+    await waitFor(() =>
+      expect(vi.mocked(deleteProject)).toHaveBeenCalledWith('p-1'),
+    );
+  });
+
+  it('validates the edit dialog: the deadline can move but not be cleared', async () => {
+    fetchMock.mockResolvedValue(page([project()]));
+    renderPage();
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'More actions for Store opening Q4',
+      }),
+    );
+    await userEvent.click(
+      screen.getByRole('menuitem', {name: 'Edit assignation'}),
+    );
+
+    const dialog = within(screen.getByRole('dialog'));
+    expect(dialog.getByLabelText(/Organization/)).toHaveValue('Acme Retail');
+    expect(dialog.getByLabelText(/Organization/)).toHaveAttribute('readonly');
+    expect(
+      dialog.queryByRole('combobox'),
+      'its questionnaires are set by the wizard, not here',
     ).not.toBeInTheDocument();
-    expect(screen.getByText('2 of 5 people')).toBeInTheDocument();
-    expect(screen.getByText('Completed')).toBeInTheDocument();
-  });
-
-  it('deletes after confirming', async () => {
-    fetchMock.mockResolvedValue(page([assignationFixture()]));
-    vi.mocked(deleteAssignation).mockResolvedValue(undefined);
-    renderPage();
-
-    await userEvent.click(
-      await screen.findByRole('button', {name: 'Delete Monthly store report'}),
-    );
-    const dialog = screen.getByRole('dialog', {name: 'Delete assignation?'});
-    await userEvent.click(within(dialog).getByRole('button', {name: 'Delete'}));
+    await userEvent.clear(dialog.getByLabelText(/Deadline/));
+    await userEvent.clear(dialog.getByLabelText(/Assignation name/));
+    await userEvent.click(dialog.getByRole('button', {name: 'Save'}));
 
     expect(
-      await screen.findByText('"Monthly store report" was deleted'),
+      dialog.getByText('Choose a deadline for the assignation'),
+    ).toBeInTheDocument();
+    expect(
+      dialog.getByText('The assignation name is required'),
     ).toBeInTheDocument();
   });
 
-  it('shows a failed load with a retry', async () => {
-    fetchMock.mockRejectedValue(new ApiError(500, 'INTERNAL_ERROR', 'boom'));
-    renderPage();
-
-    expect(
-      await screen.findByRole('button', {name: 'Try again'}),
-    ).toBeInTheDocument();
-  });
-
-  it('gives a read-only user disabled controls with the reason', async () => {
+  it('disables the changes for a read-only user, with the reason', async () => {
     mocks.viewer = viewer(false);
-    fetchMock.mockResolvedValue(page([assignationFixture()]));
+    fetchMock.mockResolvedValue(page([project()]));
     renderPage();
 
-    await screen.findByText('Monthly store report');
     expect(
-      screen.getByRole('button', {name: 'New assignation'}),
+      await screen.findByRole('button', {name: 'New assignation'}),
     ).toBeDisabled();
     expect(
-      screen.getByRole('button', {name: 'Delete Monthly store report'}),
+      screen.getAllByText("Your read-only role can't create resources.").length,
+    ).toBeGreaterThan(0);
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'More actions for Store opening Q4',
+      }),
+    );
+    expect(
+      screen.getByRole('menuitem', {name: 'Edit assignation'}),
     ).toBeDisabled();
     expect(
-      screen.getByRole('button', {name: 'Edit Monthly store report'}),
-    ).toBeDisabled();
-    expect(
-      screen.getByRole('switch', {name: 'Active: Monthly store report'}),
+      screen.getByRole('menuitem', {name: 'Delete assignation'}),
     ).toBeDisabled();
     expect(
       screen.getAllByText("Your read-only role can't make changes.").length,
     ).toBeGreaterThan(0);
-    expect(
-      screen.queryByRole('link', {name: 'Store checklist'}),
-    ).not.toBeInTheDocument();
   });
 });
