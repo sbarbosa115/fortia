@@ -8,9 +8,9 @@
     "port": "Puerto",
     "encryption": "Cifrado",
     "encryptions": {
-      "tls": "STARTTLS (normalmente 587)",
-      "ssl": "SSL/TLS (normalmente 465)",
-      "none": "Ninguno (normalmente 25)"
+      "tls": "STARTTLS (587)",
+      "ssl": "SSL/TLS (465)",
+      "none": "Ninguno (25)"
     },
     "username": "Usuario",
     "usernameHint": "Déjalo vacío si el servidor no pide inicio de sesión.",

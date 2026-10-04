@@ -17,7 +17,7 @@
 }
 .system-settings__pair {
   display: grid;
-  grid-template-columns: minmax(90px, 1fr) minmax(140px, 2fr);
+  grid-template-columns: 96px minmax(0, 1fr);
   gap: var(--space-3);
 }
 .system-settings__failure {

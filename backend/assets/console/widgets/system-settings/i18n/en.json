@@ -8,9 +8,9 @@
     "port": "Port",
     "encryption": "Encryption",
     "encryptions": {
-      "tls": "STARTTLS (usually 587)",
-      "ssl": "SSL/TLS (usually 465)",
-      "none": "None (usually 25)"
+      "tls": "STARTTLS (587)",
+      "ssl": "SSL/TLS (465)",
+      "none": "None (25)"
     },
     "username": "Username",
     "usernameHint": "Leave it empty if the server does not ask for a login.",
