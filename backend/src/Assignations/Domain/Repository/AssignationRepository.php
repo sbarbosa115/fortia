@@ -8,11 +8,8 @@ interface AssignationRepository
 {
     public function find(string $assignationsId): ?Assignation;
 
-    /** The assignation of a questionnaire (a questionnaire is assigned to one organization only, PRD §6.14). */
+    /** One assignation of a questionnaire, if it has any (a questionnaire can go to many organizations, PRD §6.14). */
     public function findByQuestionnaire(string $questionnaireId): ?Assignation;
-
-    /** @return list<Assignation> every assignation of a questionnaire (all of one organization, PRD §6.14) */
-    public function listByQuestionnaire(string $questionnaireId): array;
 
     /**
      * @param string|null $customerId      null = every account (Admin)

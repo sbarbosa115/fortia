@@ -13,8 +13,8 @@ use App\Shared\Application\Security\Caller;
  *
  * The handler checks the organization (404 ORGANIZATION_NOT_FOUND, also another account's) and each assignation
  * (ProjectAssignationSet). Each of $questionnaireIds becomes a new follow-up of the organization (everybody, the
- * default registration, the project's due date), checked like POST /assignations (404 QUESTIONNAIRE_NOT_FOUND, 409
- * QUESTIONNAIRE_ALREADY_ASSIGNED). It does NOT run the write-permission check: the caller does first
+ * default registration, the project's due date), checked like POST /assignations (404 QUESTIONNAIRE_NOT_FOUND); a
+ * questionnaire another organization has is assigned as is. It does NOT run the write-permission check: the caller does first
  * ($caller->canWrite()).
  */
 final class CreateProject

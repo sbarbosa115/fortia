@@ -78,10 +78,6 @@ function deps(): CreateDeps & {calls: string[]} {
       calls.push('organization');
       return {organization_id: 'o-new'};
     }),
-    copyQuestionnaire: vi.fn(async (id: string) => {
-      calls.push(`copy ${id}`);
-      return {questionnaire_id: `${id}-copy`};
-    }),
     createProject: vi.fn(async () => {
       calls.push('assignation');
       return {project_id: 'p-1'};
@@ -93,7 +89,6 @@ const plan: CreatePlan = {
   newOrganization: null,
   organizationId: 'o-1',
   questionnaireIds: ['q-1', 'q-2'],
-  copy: [],
   name: '  Q4 audits ',
   dueDate: '2026-12-15',
   registrationTitle: 'Tell us who you are',
@@ -118,7 +113,7 @@ describe('Create', () => {
     });
   });
 
-  it('saves a new organization first and copies the questionnaires another organization has', async () => {
+  it('saves a new organization first and assigns the questionnaires themselves, never copies', async () => {
     const api = deps();
 
     await runCreate(
@@ -126,22 +121,20 @@ describe('Create', () => {
         ...plan,
         organizationId: 'new-organization',
         newOrganization: {name: 'Acme', domain: '', members: []},
-        copy: ['q-2'],
       },
       {},
       api,
       () => {},
     );
 
-    expect(api.calls, 'PRD §6.14: one organization per questionnaire').toEqual([
-      'organization',
-      'copy q-2',
-      'assignation',
-    ]);
-    expect(api.createProject).toHaveBeenCalledWith(
+    expect(api.calls).toEqual(['organization', 'assignation']);
+    expect(
+      api.createProject,
+      'PRD §6.14: a questionnaire can be assigned to many organizations',
+    ).toHaveBeenCalledWith(
       expect.objectContaining({
         organization_id: 'o-new',
-        questionnaire_ids: ['q-1', 'q-2-copy'],
+        questionnaire_ids: ['q-1', 'q-2'],
       }),
     );
   });
@@ -154,7 +147,6 @@ describe('Create', () => {
       ...plan,
       organizationId: 'new-organization',
       newOrganization: {name: 'Acme', domain: '', members: []},
-      copy: ['q-1'],
     };
 
     await expect(
@@ -169,7 +161,7 @@ describe('Create', () => {
     expect(api.createProject).toHaveBeenLastCalledWith(
       expect.objectContaining({
         organization_id: 'o-new',
-        questionnaire_ids: ['q-1-copy', 'q-2'],
+        questionnaire_ids: ['q-1', 'q-2'],
       }),
     );
   });

@@ -125,8 +125,6 @@ export function newOrganizationPayload(
 /** What an attempt of Create already saved, so a retry picks up where it failed and duplicates nothing. */
 export type Progress = {
   organizationId?: string;
-  /** Questionnaire id → the copy made because another organization already has it. */
-  copies?: Record<string, string>;
 };
 
 /** Everything Create needs, decided from the wizard's state. */
@@ -134,8 +132,6 @@ export type CreatePlan = {
   newOrganization: NewOrganization | null;
   organizationId: string;
   questionnaireIds: string[];
-  /** The picked questionnaires another organization already has: a copy of each is assigned instead. */
-  copy: string[];
   name: string;
   dueDate: string;
   registrationTitle: string;
@@ -146,14 +142,13 @@ export type CreateDeps = {
   createOrganization: (
     payload: OrganizationPayload,
   ) => Promise<{organization_id: string}>;
-  copyQuestionnaire: (id: string) => Promise<{questionnaire_id: string}>;
   createProject: (payload: NewProjectPayload) => Promise<{project_id: string}>;
 };
 
 /**
- * Create, in order: the new organization, a copy of each questionnaire another organization already has (one
- * organization per questionnaire, PRD §6.14), then the assignation with one follow-up per questionnaire. Each saved
- * id goes to `save` at once, so a retry with that progress skips what already exists.
+ * Create, in order: the new organization, then the assignation with one follow-up per questionnaire. A questionnaire
+ * other organizations already have is assigned as it is (PRD §6.14): each assignation keeps its own answers. The new
+ * organization's id goes to `save` at once, so a retry with that progress does not create it again.
  */
 export async function runCreate(
   plan: CreatePlan,
@@ -161,8 +156,7 @@ export async function runCreate(
   deps: CreateDeps,
   save: (progress: Progress) => void,
 ): Promise<{projectId: string}> {
-  const progress: Progress = {...start, copies: {...start.copies}};
-  const record = () => save({...progress, copies: {...progress.copies}});
+  const progress: Progress = {...start};
 
   let organizationId = plan.organizationId;
   if (plan.newOrganization) {
@@ -171,24 +165,9 @@ export async function runCreate(
         newOrganizationPayload(plan.newOrganization),
       );
       progress.organizationId = saved.organization_id;
-      record();
+      save({...progress});
     }
     organizationId = progress.organizationId;
-  }
-
-  const copies = progress.copies ?? {};
-  const questionnaireIds: string[] = [];
-  for (const id of plan.questionnaireIds) {
-    if (plan.copy.includes(id)) {
-      if (!copies[id]) {
-        copies[id] = (await deps.copyQuestionnaire(id)).questionnaire_id;
-        progress.copies = copies;
-        record();
-      }
-      questionnaireIds.push(copies[id]);
-    } else {
-      questionnaireIds.push(id);
-    }
   }
 
   const created = await deps.createProject({
@@ -196,7 +175,7 @@ export async function runCreate(
     name: plan.name.trim(),
     description: null,
     due_date: plan.dueDate.trim(),
-    questionnaire_ids: questionnaireIds,
+    questionnaire_ids: plan.questionnaireIds,
     registration_title: plan.registrationTitle,
   });
   return {projectId: created.project_id};

@@ -1,21 +1,14 @@
-import {
-  ASSIGNATIONS_QUERY_KEY,
-  fetchAssignationOfQuestionnaire,
-} from '@console/entities/assignation';
+import {ASSIGNATIONS_QUERY_KEY} from '@console/entities/assignation';
 import {
   createOrganization,
   ORGANIZATIONS_QUERY_KEY,
   useOrganizations,
 } from '@console/entities/organization';
 import {createProject, PROJECTS_QUERY_KEY} from '@console/entities/project';
-import {
-  copyQuestionnaire,
-  QUESTIONNAIRES_QUERY_KEY,
-} from '@console/entities/questionnaire';
-import {isApiError} from '@shared/api';
+import {QUESTIONNAIRES_QUERY_KEY} from '@console/entities/questionnaire';
 import {todayIso} from '@shared/lib';
 import {useToast} from '@shared/ui';
-import {useMutation, useQueries, useQueryClient} from '@tanstack/react-query';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router';
@@ -34,7 +27,6 @@ import {
 
 const DEPS: CreateDeps = {
   createOrganization,
-  copyQuestionnaire,
   createProject,
 };
 
@@ -45,9 +37,6 @@ export type WizardOrganization = {
   isNew: boolean;
   memberCount: number;
 };
-
-/** A picked questionnaire another organization already has: a copy of it is assigned instead. */
-export type Conflict = {id: string; title: string; organization: string};
 
 /**
  * The state of /assignations/new: the questionnaires (step 1), the organization (step 2, listed or created here and
@@ -114,42 +103,15 @@ export function useAssignationWizard() {
   const chooseOrganization = (id: string) => {
     if (id !== organizationId) {
       setOrganizationId(id);
-      forget(['organizationId', 'copies']);
+      forget(['organizationId']);
     }
   };
   const saveNewOrganization = (value: NewOrganization) => {
     setNewOrganization(value);
     setOrganizationId(NEW_ORGANIZATION);
     setOrganizationDialog(false);
-    forget(['organizationId', 'copies']);
+    forget(['organizationId']);
   };
-
-  // One organization per questionnaire: the picked ones another organization has are copied on Create.
-  const owners = useQueries({
-    queries: questionnaires.map((questionnaire) => ({
-      queryKey: [
-        ...ASSIGNATIONS_QUERY_KEY,
-        'of-questionnaire',
-        questionnaire.id,
-      ],
-      queryFn: () => fetchAssignationOfQuestionnaire(questionnaire.id),
-      enabled: organization !== null,
-    })),
-  });
-  const conflicts: Conflict[] = organization
-    ? questionnaires.flatMap((questionnaire, index) => {
-        const owner = owners[index]?.data;
-        return owner && owner.organization_id !== organization.id
-          ? [
-              {
-                id: questionnaire.id,
-                title: questionnaire.title,
-                organization: owner.organization_name ?? '',
-              },
-            ]
-          : [];
-      })
-    : [];
 
   // --- Step 3: the name and the deadline ---------------------------------------------------------------------
 
@@ -189,7 +151,6 @@ export function useAssignationWizard() {
           newOrganization: organization.isNew ? newOrganization : null,
           organizationId: organization.id,
           questionnaireIds: questionnaires.map((q) => q.id),
-          copy: conflicts.map((conflict) => conflict.id),
           name,
           dueDate,
           registrationTitle: t('registrationTitle'),
@@ -212,21 +173,7 @@ export function useAssignationWizard() {
       );
       void navigate('/assignations');
     },
-    onError: (failure) => {
-      if (
-        isApiError(failure) &&
-        failure.code === 'QUESTIONNAIRE_ALREADY_ASSIGNED'
-      ) {
-        // Another organization took one since the check: refreshed, step 2 warns and the retry copies it.
-        void queryClient.invalidateQueries({
-          queryKey: [...ASSIGNATIONS_QUERY_KEY, 'of-questionnaire'],
-        });
-        toast.error(t('errors.assignedElsewhere'));
-        setStep(1);
-        return;
-      }
-      toast.apiError(failure);
-    },
+    onError: (failure) => toast.apiError(failure),
   });
 
   const submit = () => {
@@ -265,7 +212,6 @@ export function useAssignationWizard() {
     openOrganizationDialog: () => setOrganizationDialog(true),
     closeOrganizationDialog: () => setOrganizationDialog(false),
     saveNewOrganization,
-    conflicts,
     // Step 3
     name,
     setName,

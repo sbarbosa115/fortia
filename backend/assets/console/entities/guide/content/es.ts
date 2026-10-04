@@ -276,7 +276,7 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         paragraphs: [
           'El listado muestra cuántas personas o preguntas están completas. Abre una asignación para ver quién la completó y quién está pendiente, exportar la lista a CSV o enviar un recordatorio por correo.',
         ],
-        tip: 'Un cuestionario pertenece a una sola organización. Si asignas uno que ya está asignado a otra, Mappi asigna una copia.',
+        tip: 'Puedes asignar el mismo cuestionario a todas las organizaciones que necesites, sin copias. Cada asignación guarda sus propias respuestas: ábrela para verlas.',
       },
     ],
   },

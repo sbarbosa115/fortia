@@ -88,25 +88,6 @@ export function OrganizationStep({wizard}: {wizard: AssignationWizardState}) {
           hint={t('organization.createHint')}
           onClick={wizard.openOrganizationDialog}
         />
-
-        {wizard.conflicts.length > 0 ? (
-          <div className="asg-wiz__warning" role="status">
-            <Icon name="alert" size={16} />
-            <div>
-              <p>{t('organization.copyWarning')}</p>
-              <ul>
-                {wizard.conflicts.map((conflict) => (
-                  <li key={conflict.id}>
-                    {t('organization.copyItem', {
-                      title: conflict.title,
-                      organization: conflict.organization,
-                    })}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        ) : null}
       </section>
 
       {wizard.organizationDialog ? (

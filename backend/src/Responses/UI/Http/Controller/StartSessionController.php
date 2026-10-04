@@ -57,8 +57,8 @@ final class StartSessionController
             throw new NotFound('QUESTIONNAIRE_NOT_FOUND', 'The questionnaire does not exist.');
         }
         $binding = $this->bindingOf($claims, $questionnaire);
-        $assigned = $this->assignations->findByQuestionnaire($id);
-        if (null !== $assigned && ($binding['assignations_id'] ?? null) !== $assigned['assignations_id']) {
+        // An assigned questionnaire (to one or many organizations) is answered only with a token of one of its assignations.
+        if (null === $binding && $this->assignations->isQuestionnaireAssigned($id)) {
             throw new NotFound('QUESTIONNAIRE_NOT_FOUND', 'The questionnaire does not exist.');
         }
 

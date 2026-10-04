@@ -25,11 +25,6 @@ final class DoctrineAssignationRepository extends DoctrineRepository implements 
         return $this->repository()->findOneBy(['questionnaireId' => $questionnaireId]);
     }
 
-    public function listByQuestionnaire(string $questionnaireId): array
-    {
-        return $this->repository()->findBy(['questionnaireId' => $questionnaireId], ['createdAt' => 'ASC']);
-    }
-
     public function page(?string $customerId, ?string $type, int $offset, int $limit, ?string $questionnaireId = null): array
     {
         /** @var list<Assignation> $rows */

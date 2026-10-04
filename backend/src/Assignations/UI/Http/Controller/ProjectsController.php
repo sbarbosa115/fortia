@@ -75,7 +75,7 @@ final class ProjectsController
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR, ASSIGNATION_ORGANIZATION_MISMATCH, ASSIGNATION_NOT_FOLLOW_UP')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 404, description: 'ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND')]
-    #[OA\Response(response: 409, description: 'ASSIGNATION_IN_OTHER_PROJECT, QUESTIONNAIRE_ALREADY_ASSIGNED')]
+    #[OA\Response(response: 409, description: 'ASSIGNATION_IN_OTHER_PROJECT')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false, groups: ['Default', 'create'])] ProjectInput $input): JsonResponse
     {
         self::assertCanWrite($caller);

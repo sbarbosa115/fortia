@@ -58,9 +58,7 @@
     "none": "Nothing matches your search.",
     "noDomain": "no domain",
     "create": "Not listed? Create a new one",
-    "createHint": "Name, domain and its members. You come back here with it chosen.",
-    "copyWarning": "A questionnaire is answered by one organization only. These already belong to another one, so a copy of each will be assigned instead:",
-    "copyItem": "“{{title}}” (assigned to {{organization}})"
+    "createHint": "Name, domain and its members. You come back here with it chosen."
   },
   "details": {
     "hero": "Name it and set the deadline",
@@ -102,8 +100,7 @@
     "nameTooLong": "Use 200 characters or fewer",
     "deadlineRequired": "Choose a deadline",
     "deadlineInvalid": "Enter a valid deadline",
-    "deadlinePast": "The deadline can't be in the past",
-    "assignedElsewhere": "Another organization started following one of the questionnaires. Press Create again to assign a copy."
+    "deadlinePast": "The deadline can't be in the past"
   },
   "actions": {
     "back": "Back",

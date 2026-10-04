@@ -273,7 +273,7 @@ export const GUIDES_EN: Record<GuideId, GuideText> = {
         paragraphs: [
           'The listing shows how many people or questions are complete. Open an assignation to see who completed it and who is pending, export the list to CSV, or send a reminder by email.',
         ],
-        tip: 'A questionnaire belongs to one organization. If you assign one that is already assigned elsewhere, Mappi assigns a copy instead.',
+        tip: 'You can assign the same questionnaire to as many organizations as you need, without copies. Each assignation keeps its own answers: open it to see them.',
       },
     ],
   },

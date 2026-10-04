@@ -87,19 +87,34 @@ final class AssignationApiTest extends ApiTestCase
         self::assertSame(201, $this->api('POST', self::URL, $body, as: $owner)['status']);
     }
 
-    public function testAQuestionnaireIsAssignedToOneOrganizationOnly(): void
+    public function testOneQuestionnaireIsAssignedToManyOrganizationsWithoutCopies(): void
     {
         $owner = $this->account('ACME0001');
-        [$retail] = $this->organizationWith('ACME0001', 'Acme Retail');
-        [$logistics] = $this->organizationWith('ACME0001', 'Acme Logistics');
+        [$retail, $r] = $this->organizationWith('ACME0001', 'Acme Retail', [['ana', 'ana@retail.test']]);
+        [$logistics, $l] = $this->organizationWith('ACME0001', 'Acme Logistics', [['luis', 'luis@logistics.test']]);
         $questionnaire = $this->questionnaireOf('ACME0001');
-        $this->createAssignation($owner, $retail, $questionnaire);
+        $forRetail = $this->createAssignation($owner, $retail, $questionnaire, ['type' => 'default']);
+        $before = $this->data($this->api('GET', '/api/v1/questionnaire', as: $owner))['pagination']['total_items'];
 
-        $response = $this->api('POST', self::URL, ['organization_id' => $logistics, 'questionnaire_id' => $questionnaire, 'name' => 'B', 'max_follow_ups' => 2, 'type' => 'default', 'questions' => [self::registration()]], as: $owner);
+        $forLogistics = $this->createAssignation($owner, $logistics, $questionnaire, ['type' => 'default']);
+        $this->createAssignation($owner, $retail, $questionnaire, ['type' => 'default', 'name' => 'Same organization again']);
 
-        $this->assertApiError($response, 409, 'QUESTIONNAIRE_ALREADY_ASSIGNED', 'PRD §6.14: a questionnaire is assigned to only one organization');
-        self::assertSame(['organization_id' => $retail, 'organization_name' => 'Acme Retail'], $response['json']['error']['details'], 'the console names the organization that has it');
-        $this->createAssignation($owner, $retail, $questionnaire, ['name' => 'Same organization again']);
+        self::assertSame($questionnaire, $this->storedAssignation($forLogistics)->questionnaireId(), 'the assignation uses the questionnaire itself, not a copy');
+        self::assertSame($before, $this->data($this->api('GET', '/api/v1/questionnaire', as: $owner))['pagination']['total_items'], 'assigning a questionnaire again creates no questionnaire');
+
+        $this->answerAs($forRetail, 'ana@retail.test');
+        $luis = $this->answerAs($forLogistics, 'luis@logistics.test');
+        $respondents = fn (string $id): array => array_column($this->data($this->api('GET', self::URL.'/'.$id.'/respondents', as: $owner))['respondents'], 'status', 'organization_user_id');
+        self::assertSame([$r['ana'] => 'completed'], $respondents($forRetail), 'each assignation shows only its own organization and answers');
+        self::assertSame([$l['luis'] => 'completed'], $respondents($forLogistics), 'each assignation shows only its own organization and answers');
+        $answersOf = fn (string $id): array => array_column($this->data($this->api('GET', '/api/v1/questionnaire/'.$questionnaire.'/answers?status=all&assignations_id='.$id, as: $owner))['items'], 'organization_user_id');
+        self::assertSame([$r['ana']], $answersOf($forRetail), 'the answers of an assignation are its own sessions only');
+        self::assertSame([$l['luis']], $answersOf($forLogistics), 'the answers of an assignation are its own sessions only');
+
+        $started = $this->api('POST', '/api/v1/questionnaire/'.$questionnaire.'/session', headers: ['Authorization' => 'Bearer '.$luis['token']]);
+        self::assertSame(200, $started['status'], 'a token of any of its assignations starts a session of the shared questionnaire: '.$started['body']);
+        self::assertSame($forLogistics, $started['json']['assignations_id'], "…bound to the token's own assignation");
+        $this->assertApiError($this->api('POST', '/api/v1/questionnaire/'.$questionnaire.'/session'), 404, 'QUESTIONNAIRE_NOT_FOUND', '§8.4: an assigned questionnaire is only answered through /a/');
     }
 
     public function testAMembersAudienceOnlyNamesMembersOfTheOrganization(): void

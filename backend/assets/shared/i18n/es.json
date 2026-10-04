@@ -97,7 +97,6 @@
     "DOMAIN_EMAIL_CONFLICT": "Otra organización ya usa ese dominio de correo.",
     "ORGANIZATION_NOT_FOUND": "Esta organización no existe.",
     "ORGANIZATION_HAS_ASSIGNATIONS": "Esta organización tiene asignaciones. Elimínalas primero.",
-    "QUESTIONNAIRE_ALREADY_ASSIGNED": "Este cuestionario ya está asignado a otra organización.",
     "AUDIENCE_MEMBER_NOT_IN_ORGANIZATION": "Algunas de las personas elegidas no son miembros de esta organización.",
     "ASSIGNATION_IN_PROJECT": "Esta asignación pertenece a un proyecto, así que su organización no puede cambiar.",
     "ASSIGNATION_NOT_FOUND": "Esta asignación no existe.",

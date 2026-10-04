@@ -2499,13 +2499,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name) */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
     get_api_assignations_get: {
@@ -2584,13 +2577,6 @@ export interface operations {
             };
             /** @description ASSIGNATION_NOT_FOUND, ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description QUESTIONNAIRE_ALREADY_ASSIGNED */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2926,7 +2912,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description ASSIGNATION_IN_OTHER_PROJECT, QUESTIONNAIRE_ALREADY_ASSIGNED */
+            /** @description ASSIGNATION_IN_OTHER_PROJECT */
             409: {
                 headers: {
                     [name: string]: unknown;

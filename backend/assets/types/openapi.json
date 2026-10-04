@@ -159,9 +159,6 @@
                     },
                     "404": {
                         "description": "ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
-                    },
-                    "409": {
-                        "description": "QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name)"
                     }
                 }
             }
@@ -246,9 +243,6 @@
                     },
                     "404": {
                         "description": "ASSIGNATION_NOT_FOUND, ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
-                    },
-                    "409": {
-                        "description": "QUESTIONNAIRE_ALREADY_ASSIGNED"
                     }
                 }
             },
@@ -594,7 +588,7 @@
                         "description": "ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
                     },
                     "409": {
-                        "description": "ASSIGNATION_IN_OTHER_PROJECT, QUESTIONNAIRE_ALREADY_ASSIGNED"
+                        "description": "ASSIGNATION_IN_OTHER_PROJECT"
                     }
                 }
             }

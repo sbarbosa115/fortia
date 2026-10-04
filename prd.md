@@ -444,7 +444,7 @@ Each member needs at least an email or a phone. The email is unique within the o
 | *Server-managed:* `project_id?`, `shared_session_id?`, `attempts[{number ≥ 1, session_id, created_at}]`, `last_reminder_sent_at?` | |
 | timestamps | |
 
-**Rule:** a questionnaire can be assigned to **only one organization**.
+**Rule:** a questionnaire can be assigned to **any number of organizations** (and more than once to the same one), always as it is — never copied. Each assignation keeps its own sessions and answers (`questionnaire_session.assignations_id`); the answers of an organization are read from its assignation.
 
 ### 6.15 AssignationAnswer
 
@@ -1108,7 +1108,7 @@ There is no `GET /organizations/{id}`: the console filters the listing on the cl
 | Method and route | Access | Input | Output / errors |
 |---|---|---|---|
 | `GET /assignations?page&page_size&type` | A | `page_size` default 20, max. 100. `type`: `default` \| `follow_up` | `{assignations:[enriched], pagination}`. Newest first; `Admin` sees all |
-| `POST /assignations` | AG, Cap(assignations) | `organization_id`, `questionnaire_id` (UUIDv4), `name` (1–200), `description?` (≤ 2000), `max_follow_ups` (≥ 0), `active` (default true), `type`, `due_date?` (follow-up only), `audience` (default `{type:"all"}`), `questions` (≥ 1). No extra fields allowed | `201 {questionnaire_url: {FRONTEND_URL}/a/{id}, assignation_id}`. `409 QUESTIONNAIRE_ALREADY_ASSIGNED`, `400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`. `AssignationCreated` event |
+| `POST /assignations` | AG, Cap(assignations) | `organization_id`, `questionnaire_id` (UUIDv4), `name` (1–200), `description?` (≤ 2000), `max_follow_ups` (≥ 0), `active` (default true), `type`, `due_date?` (follow-up only), `audience` (default `{type:"all"}`), `questions` (≥ 1). No extra fields allowed | `201 {questionnaire_url: {FRONTEND_URL}/a/{id}, assignation_id}`. `400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`. `AssignationCreated` event |
 | `GET /assignations/{id}` | P (used by the respondent page) | — | Enriched assignation with detailed `attempts`, `organization_name`, `questionnaire_name`, `questionnaire_url`, `completed`, `review_status`. For anonymous callers only: Feat(assignations) → 429 |
 | `PUT /assignations/{id}` | A, owner or `Admin` | Partial. `type` forbidden ("type cannot be changed"). `due_date:null` clears it | `404`, `400 ASSIGNATION_IN_PROJECT`, `400 VALIDATION_ERROR`, `400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION` |
 | `DELETE /assignations/{id}` | A, owner or `Admin` | — | 204. `AssignationDeleted` event |
@@ -2203,7 +2203,6 @@ questions: [{ question_id, answers_count,
   - **Name\***.
   - **Description:** "An internal note about this assignation. Respondents never see it."
   - **Validations:** "Organization is required", "Check at least one person, area or role, or choose Everybody", "Questionnaire is required", "Name is required", "Enter a valid due date".
-  - **Conflict:** if the questionnaire is already assigned to another organization: "This questionnaire is already assigned to "{{organization}}". A copy of the questionnaire will be created and the copy will be assigned instead." On create, the copy is made first.
 - **Registration:** configures the login slide.
 
   | Field | Visible by default | Required by default |
@@ -2218,7 +2217,6 @@ questions: [{ question_id, answers_count,
   - It is built as a question with the `user-capture-data` topic.
 - **Save:**
   - Sends `max_follow_ups: 2`. `due_date` only for follow-up (null clears it when editing). `type` is never sent when editing.
-  - Race detected with `409 QUESTIONNAIRE_ALREADY_ASSIGNED`: "This questionnaire was just assigned to another organization. Please review and try again."
   - Final: "Assignation created!" / "Assignation updated!", share link with Copy and "Go to Assignations".
 
 **`/assignations/:id` — default type:**
@@ -2285,7 +2283,7 @@ questions: [{ question_id, answers_count,
 - Summary panel: "What we're going to create".
 - **On create, in order**, remembering each id so that a retry duplicates nothing:
   1. New organization, if applicable.
-  2. Questionnaire (slug = `slugify(title)` + 6 hex, ≤ 100). Copied if already assigned to another organization.
+  2. Questionnaire (slug = `slugify(title)` + 6 hex, ≤ 100). A questionnaire other organizations already have is assigned as it is.
   3. Follow-up assignation with `max_follow_ups: 2` and the default registration.
   4. Create the project, or update it with its assignations + the new one.
 - Toast "Done: questionnaire, assignation and project created".
@@ -2868,7 +2866,6 @@ The new product is presented as **Mappi**. It MUST be decided whether the respon
 | `DOMAIN_EMAIL_CONFLICT` | 409 | Organization |
 | `ORGANIZATION_NOT_FOUND` | 404 | |
 | `INTERNAL_ERROR` | 500 | |
-| `QUESTIONNAIRE_ALREADY_ASSIGNED` | 409 | Assignation |
 | `AUDIENCE_MEMBER_NOT_IN_ORGANIZATION`, `ASSIGNATION_IN_PROJECT` | 400 | Assignation |
 | `ASSIGNATION_NOT_FOUND` | 404 | |
 | `MISSING_IDENTIFIER` | 400 | Respondent login |

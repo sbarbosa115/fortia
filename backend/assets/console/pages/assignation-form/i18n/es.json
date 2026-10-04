@@ -58,9 +58,7 @@
     "none": "Nada coincide con tu búsqueda.",
     "noDomain": "sin dominio",
     "create": "¿No está listada? Crea una nueva",
-    "createHint": "Nombre, dominio y sus miembros. Vuelves aquí con ella elegida.",
-    "copyWarning": "Un cuestionario lo responde una sola organización. Estos ya pertenecen a otra, así que se asignará una copia de cada uno:",
-    "copyItem": "“{{title}}” (asignado a {{organization}})"
+    "createHint": "Nombre, dominio y sus miembros. Vuelves aquí con ella elegida."
   },
   "details": {
     "hero": "Ponle nombre y fecha límite",
@@ -102,8 +100,7 @@
     "nameTooLong": "Usa 200 caracteres o menos",
     "deadlineRequired": "Elige una fecha límite",
     "deadlineInvalid": "Escribe una fecha límite válida",
-    "deadlinePast": "La fecha límite no puede estar en el pasado",
-    "assignedElsewhere": "Otra organización empezó a seguir uno de los cuestionarios. Pulsa Crear otra vez para asignar una copia."
+    "deadlinePast": "La fecha límite no puede estar en el pasado"
   },
   "actions": {
     "back": "Volver",

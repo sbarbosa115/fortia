@@ -1,4 +1,3 @@
-import {fetchAssignationOfQuestionnaire} from '@console/entities/assignation';
 import type {Organization} from '@console/entities/organization';
 import {createProject, type Project} from '@console/entities/project';
 import {
@@ -17,10 +16,6 @@ import {MemoryRouter, Route, Routes} from 'react-router';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {AssignationFormPage} from './AssignationFormPage';
 
-vi.mock('@console/entities/assignation', async (original) => ({
-  ...(await original<typeof import('@console/entities/assignation')>()),
-  fetchAssignationOfQuestionnaire: vi.fn(),
-}));
 vi.mock('@console/entities/organization', async (original) => ({
   ...(await original<typeof import('@console/entities/organization')>()),
   createOrganization: vi.fn(),
@@ -139,7 +134,6 @@ describe('AssignationFormPage', () => {
     vi.mocked(fetchQuestionnaireTags).mockResolvedValue({
       tags: ['AP-03', 'NP-12'],
     });
-    vi.mocked(fetchAssignationOfQuestionnaire).mockResolvedValue(null);
     vi.mocked(createProject).mockResolvedValue({
       project_id: 'p-1',
     } as unknown as Project);
@@ -255,45 +249,10 @@ describe('AssignationFormPage', () => {
       questionnaire_ids: ['q-1', 'q-2'],
       registration_title: 'Tell us who you are',
     });
-    expect(copyQuestionnaire).not.toHaveBeenCalled();
-  });
-
-  it('warns that a questionnaire of another organization is copied, and copies it', async () => {
-    vi.mocked(fetchAssignationOfQuestionnaire).mockImplementation(async (id) =>
-      id === 'q-2'
-        ? ({
-            organization_id: 'o-2',
-            organization_name: 'Globex',
-          } as Awaited<ReturnType<typeof fetchAssignationOfQuestionnaire>>)
-        : null,
-    );
-    vi.mocked(copyQuestionnaire).mockResolvedValue({
-      questionnaire_id: 'q-2-copy',
-    } as Awaited<ReturnType<typeof copyQuestionnaire>>);
-    renderPage();
-    await pickTwoAndContinue();
-
-    await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
-
-    const warning = within(await screen.findByRole('status'));
     expect(
-      warning.getByText('“Warehouse audit” (assigned to Globex)'),
-      'PRD §6.14: one organization per questionnaire',
-    ).toBeInTheDocument();
-    await userEvent.click(continueButton());
-    await userEvent.type(
-      screen.getByRole('textbox', {name: /Assignation name/}),
-      'Q4',
-    );
-    await userEvent.type(screen.getByLabelText(/Deadline/), '2099-12-15');
-    await userEvent.click(screen.getByRole('button', {name: 'Create'}));
-
-    await waitFor(() =>
-      expect(createProject).toHaveBeenCalledWith(
-        expect.objectContaining({questionnaire_ids: ['q-1', 'q-2-copy']}),
-      ),
-    );
-    expect(copyQuestionnaire).toHaveBeenCalledWith('q-2');
+      copyQuestionnaire,
+      'PRD §6.14: questionnaires are assigned as they are, never copied',
+    ).not.toHaveBeenCalled();
   });
 
   it('lists what is missing when Create is pressed too early', async () => {

@@ -134,9 +134,11 @@ final class ProjectApiTest extends ApiTestCase
         $this->assertApiError($this->api('POST', self::URL, $body([Ids::uuid4()]), as: $owner), 404, 'QUESTIONNAIRE_NOT_FOUND');
         $theirs = $this->questionnaire('GLOBEX01');
         $this->assertApiError($this->api('POST', self::URL, $body([$theirs]), as: $owner), 404, 'QUESTIONNAIRE_NOT_FOUND', "another account's questionnaire is 404");
-        $taken = $this->storedAssignation($this->followUp('ACME0001', $otherOrg, 'Elsewhere'))->questionnaireId();
-        $this->assertApiError($this->api('POST', self::URL, $body([$taken]), as: $owner), 409, 'QUESTIONNAIRE_ALREADY_ASSIGNED', 'PRD §6.14: one organization per questionnaire');
         self::assertSame(0, $this->data($this->api('GET', self::URL, as: $owner))['pagination']['total_items'], 'a refusal saves nothing');
+        $shared = $this->storedAssignation($this->followUp('ACME0001', $otherOrg, 'Elsewhere'))->questionnaireId();
+        $created = $this->data($this->api('POST', self::URL, $body([$shared]), as: $owner), 201);
+        $assigned = array_map(fn (array $item): string => $this->storedAssignation($item['assignations_id'])->questionnaireId(), $created['assignations']);
+        self::assertSame([$shared], $assigned, 'PRD §6.14: a questionnaire another organization has is assigned as is, never copied');
 
         $project = $this->data($this->api('POST', self::URL, ['organization_id' => $org, 'name' => 'P', 'due_date' => '2026-12-01'], as: $owner), 201);
         $this->assertApiError($this->api('PUT', self::URL.'/'.$project['project_id'], ['questionnaire_ids' => []], as: $owner), 400, 'VALIDATION_ERROR', 'questionnaire_ids only when creating');
