@@ -396,7 +396,9 @@ body {
 }
 
 /* Tables */
+/* Positioned, so a visually hidden header label stays inside the scroll box instead of widening the page. */
 .table-wrap {
+  position: relative;
   width: 100%;
   overflow-x: auto;
 }
