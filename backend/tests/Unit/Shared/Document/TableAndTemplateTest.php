@@ -45,6 +45,26 @@ final class TableAndTemplateTest extends TestCase
         self::assertSame('February — Sales: 12', TableAnswer::toText([[], ['sales' => '12']], $control));
     }
 
+    public function testAnAnswerIsStructuredAsATableToPreviewAndNullWhenNothingIsFilledIn(): void
+    {
+        $control = self::table([['label' => 'Sales', 'value' => 'sales'], ['label' => 'Notes']], ['January', 'February']);
+
+        self::assertSame([
+            'columns' => [['key' => 'sales', 'label' => 'Sales'], ['key' => 'Notes', 'label' => 'Notes']],
+            'rows' => [
+                ['label' => 'January', 'cells' => ['sales' => '', 'Notes' => '']],
+                ['label' => 'February', 'cells' => ['sales' => '12', 'Notes' => 'late']],
+            ],
+        ], TableAnswer::structured([[], ['sales' => '12', 'Notes' => 'late']], $control), 'every column, every row with its fixed label');
+        self::assertSame(
+            [['label' => null, 'cells' => ['sales' => '3', 'Notes' => '']]],
+            TableAnswer::structured([['sales' => 3]], self::table([['label' => 'Sales', 'value' => 'sales'], ['label' => 'Notes']]))['rows'] ?? null,
+            'rows the respondent added have no label',
+        );
+        self::assertNull(TableAnswer::structured([[], ['sales' => ' ']], $control), 'nothing filled in: no table');
+        self::assertNull(TableAnswer::structured('text', $control));
+    }
+
     public function testNormalizingKeepsRowsOnlyOnATableAndTheTemplateOnlyOnAFileQuestion(): void
     {
         $template = ['key' => 'templates/ACME0001/'.self::UUID.'/budget.xlsx', 'filename' => 'budget.xlsx'];
