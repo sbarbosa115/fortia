@@ -76,7 +76,6 @@ final class AssignationsController
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR, AUDIENCE_MEMBER_NOT_IN_ORGANIZATION')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 404, description: 'ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND')]
-    #[OA\Response(response: 409, description: 'QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name)')]
     public function create(Caller $caller, #[Payload(allowExtraFields: false, groups: ['Default', 'create'])] AssignationInput $input): JsonResponse
     {
         if (!$caller->inAdminGroups()) {
@@ -112,7 +111,6 @@ final class AssignationsController
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR, INVALID_UUID, ASSIGNATION_IN_PROJECT, AUDIENCE_MEMBER_NOT_IN_ORGANIZATION')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
     #[OA\Response(response: 404, description: 'ASSIGNATION_NOT_FOUND, ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND')]
-    #[OA\Response(response: 409, description: 'QUESTIONNAIRE_ALREADY_ASSIGNED')]
     public function update(Caller $caller, string $id, #[Payload(allowExtraFields: false, groups: ['Default', 'update'])] AssignationInput $input): JsonResponse
     {
         $id = RouteId::uuid($id);

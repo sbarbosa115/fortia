@@ -1,4 +1,5 @@
 import type {ChatDraft, ChatDraftQuestion} from '@console/entities/chat';
+import {TagList} from '@console/entities/questionnaire';
 import {joinClasses} from '@shared/lib';
 import {Icon} from '@shared/ui';
 import type {ReactNode} from 'react';
@@ -337,22 +338,6 @@ function Final({draft, chat, t}: {draft: ChatDraft; chat: AiExperience; t: T}) {
       </div>
     );
   }
-  if (draft.type === 'chain') {
-    return (
-      <div className="pv-final">
-        <section className="pv-card pv-final__card">
-          <span className="pv-final__icon">
-            <Icon name="sparkles" size={20} />
-          </span>
-          <span className="pv-result__eyebrow">
-            {t('shopper.generatingEyebrow')}
-          </span>
-          <h3>{t('shopper.generatingTitle')}</h3>
-          <p className="pv-muted">{t('shopper.generatingSubtitle')}</p>
-        </section>
-      </div>
-    );
-  }
   return (
     <div className="pv-final">
       <section className="pv-card pv-final__card">
@@ -364,6 +349,25 @@ function Final({draft, chat, t}: {draft: ChatDraft; chat: AiExperience; t: T}) {
           {draft.ending.message?.trim() || t('shopper.defaultEndMessage')}
         </p>
       </section>
+    </div>
+  );
+}
+
+/**
+ * The draft's tags (the owner's labels, never shown to respondents), above the preview; nothing without tags.
+ */
+export function DraftTags({chat}: {chat: AiExperience}) {
+  const {t} = useTranslation('pages.ai-experience');
+  const tags = chat.draft?.tags ?? [];
+  if (tags.length === 0) {
+    return null;
+  }
+  return (
+    <div className="ai-preview__row ai-tags">
+      <span className="ai-tags__label" aria-hidden="true">
+        {t('preview.tags')}
+      </span>
+      <TagList tags={tags} label={t('preview.tags')} />
     </div>
   );
 }

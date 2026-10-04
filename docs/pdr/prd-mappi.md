@@ -124,7 +124,7 @@ assets/types/openapi.json && npm run -s api:types` (in the node container), comm
 | Command / query | Owner | Used by |
 |---|---|---|
 | `Questionnaires\Application\Command\SaveFlow` (create or update a questionnaire from a flow payload, returns the id; emits `QuestionnaireCreated` with the feature of its type) and `CreateGeneratedStage` (child stage of a chain, no usage) | authoring (4) | commerce, generation, chat, project-wizard |
-| `Questionnaires\Application\Command\CopyQuestionnaire` | authoring (4) | assignations (copy on conflict), chat |
+| `Questionnaires\Application\Command\CopyQuestionnaire` | authoring (4) | chat |
 | `Responses\Application\Command\StartSession` (questionnaire id, optional assignation binding and attempt; returns the session id) | sessions (6) | assignations |
 | `Responses\Application\Query\SessionQueries` additions (answers of a session as `[{title, value, min?, max?}]` for webhooks and the external API) | sessions (6) | integrations, analytics (reads) |
 | `Organizations\Application\Command\SaveOrganization` | organizations (8) | chat, project-wizard (via API is fine too) |

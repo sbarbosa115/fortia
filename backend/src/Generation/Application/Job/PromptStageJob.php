@@ -83,6 +83,7 @@ final class PromptStageJob implements JobHandler
             null === $sessionId ? [] : $this->attachments($sessionId),
             ['answers' => $answers],
             $scored ? $earlier : [],
+            $root?->customerId(),
         );
 
         $progress->stage('saving');

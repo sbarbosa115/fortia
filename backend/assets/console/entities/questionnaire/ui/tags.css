@@ -1,0 +1,42 @@
+/* A questionnaire's tags: small neutral chips with the text in full contrast. */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  min-height: 22px;
+  padding: 1px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-hover);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.tag-chip__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-chip:has(.tag-chip__remove) {
+  padding-right: 2px;
+}
+
+.tag-chip .btn--icon.btn--sm.tag-chip__remove {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  padding: 0;
+}

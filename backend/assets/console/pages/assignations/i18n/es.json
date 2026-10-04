@@ -1,62 +1,137 @@
 {
   "title": "Asignaciones",
-  "subtitle": "Envía un cuestionario a las personas de una organización y sigue sus respuestas.",
-  "count_one": "{{count}} asignación",
-  "count_other": "{{count}} asignaciones",
+  "subtitle": "Envía cuestionarios a una organización con una fecha límite. Aquí ves qué va respondido y qué te toca revisar.",
   "new": "Nueva asignación",
+  "loading": "Cargando asignaciones",
+  "empty": "Todavía no hay asignaciones. Crea una para enviar cuestionarios a una organización y seguir sus respuestas juntas.",
+  "emptyAction": "Crear la primera asignación",
+  "listLabel": "Lista de asignaciones",
+  "filtersLabel": "Filtrar por estado",
+  "searchLabel": "Buscar asignación u organización",
+  "searchPlaceholder": "Buscar asignación u organización",
+  "noResults": "Ninguna asignación coincide con este filtro.",
+  "noResultsSearch": "Ninguna asignación coincide con “{{query}}”.",
+  "clearFilters": "Quitar filtros",
   "tabs": {
-    "label": "Asignaciones por tipo",
     "all": "Todas",
-    "default": "Estándar",
-    "follow_up": "Seguimiento"
+    "review": "Por revisar",
+    "progress": "En progreso",
+    "correction": "En corrección",
+    "overdue": "Vencidas",
+    "completed": "Completadas"
   },
+  "status": {
+    "pending": "Sin respuestas",
+    "progress": "Respondiendo",
+    "review": "Por revisar",
+    "correction": "En corrección",
+    "approved": "Aprobada",
+    "overdue": "Vencida",
+    "empty": "Sin cuestionarios"
+  },
+  "projectStatus": {
+    "pending": "Sin empezar",
+    "progress": "En progreso",
+    "review": "Requiere tu revisión",
+    "correction": "En corrección",
+    "approved": "Completada",
+    "overdue": "Vencida",
+    "empty": "Sin cuestionarios"
+  },
+  "approvedOf": "{{approved}} de {{total}} aprobadas",
   "columns": {
-    "name": "Nombre",
-    "audience": "Audiencia",
-    "type": "Tipo",
-    "progress": "Progreso",
-    "due": "Vence",
-    "created": "Creada",
-    "active": "Activa",
+    "project": "Asignación",
+    "status": "Estado",
+    "assignations": "Cuestionarios",
+    "deadline": "Fecha límite",
+    "nextStep": "Siguiente paso",
+    "assignation": "Cuestionario",
+    "answers": "Respuestas",
+    "review": "Revisión",
     "actions": "Acciones"
   },
-  "attempt": "Intento {{n}}",
-  "progress": {
-    "respondents": "{{completed}} de {{total}} personas",
-    "questions": "{{completed}} de {{total}} preguntas",
-    "completed": "Completado",
-    "label": "Progreso de {{name}}"
+  "createdOn": "creada el {{date}}",
+  "noDeadline": "Sin fecha límite",
+  "due": {
+    "today": "vence hoy",
+    "inDays_one": "en {{count}} día",
+    "inDays_other": "en {{count}} días",
+    "overdue_one": "vencida hace {{count}} día",
+    "overdue_other": "vencida hace {{count}} días",
+    "done": "completada"
   },
-  "activeLabel": "Activa: {{name}}",
-  "activated": "«{{name}}» está activa",
-  "deactivated": "«{{name}}» está inactiva",
-  "actions": {
-    "view": "Ver {{name}}",
-    "edit": "Editar {{name}}",
-    "copyLink": "Copiar el enlace de {{name}}",
-    "delete": "Eliminar {{name}}",
-    "remind": "Enviar un recordatorio de {{name}}",
-    "remindDone": "Está completo: no hay nada que recordar"
+  "next": {
+    "review": "Revisar respuestas",
+    "overdue": "Ver vencida",
+    "correction": "Ver corrección",
+    "progress": "Ver avance",
+    "pending": "Ver avance",
+    "approved": "Ver resultados",
+    "empty": "Editar asignación"
   },
-  "delete": {
-    "title": "¿Eliminar la asignación?",
-    "body": "«{{name}}» se eliminará y su enlace dejará de funcionar. Las respuestas ya enviadas se conservan.",
-    "confirm": "Eliminar",
-    "done": "«{{name}}» se eliminó"
+  "open": {
+    "review": "Revisar",
+    "other": "Ver"
   },
-  "reminder": {
-    "title": "¿Enviar el recordatorio ahora?",
-    "body": "Se enviará un correo con el enlace a «{{name}}» a las personas que lo responden.",
-    "confirm": "Enviar recordatorio",
-    "done_one": "Recordatorio enviado a {{count}} destinatario",
-    "done_other": "Recordatorio enviado a {{count}} destinatarios"
+  "reviewText": {
+    "review": "{{reviewed}} de {{total}} revisadas",
+    "approved": "{{approved}} de {{total}} aprobadas",
+    "approvedPlain": "Revisión cerrada",
+    "correction_one": "{{count}} devuelta al cliente",
+    "correction_other": "{{count}} devueltas al cliente",
+    "notReady": "Aún no se puede revisar"
   },
-  "empty": {
-    "title": "Aún no hay asignaciones",
-    "body": "Asigna un cuestionario a una organización para recoger las respuestas de su gente."
+  "moreActions": "Más acciones de {{name}}",
+  "expand": "Mostrar los cuestionarios de {{name}}",
+  "collapse": "Ocultar los cuestionarios de {{name}}",
+  "edit": "Editar asignación",
+  "delete": "Borrar asignación",
+  "assignationsOf": "Cuestionarios de {{name}}",
+  "currentQuestion": "Pregunta {{number}} de {{total}}",
+  "followUpCompleted": "Completada",
+  "correctionAttempt": "Corrección · intento {{attempt}}",
+  "questionsProgress": "{{completed}} de {{total}} preguntas",
+  "questionsAnswered": "Preguntas respondidas",
+  "emptyProject": "Esta asignación no tiene cuestionarios.",
+  "openAssignation": "Abrir el cuestionario {{name}}",
+  "legend": {
+    "title": "¿Cómo avanza un cuestionario?",
+    "hint": "El estado de una asignación es el de su cuestionario más urgente.",
+    "pending": "Enviaste el enlace y nadie ha empezado.",
+    "progress": "El cliente contestó una parte. Faltan preguntas.",
+    "reviewYou": "Te toca a ti.",
+    "review": "Todo está respondido: aprueba o pide corrección.",
+    "approved": "Revisaste y aprobaste todas las respuestas.",
+    "correction": "Pediste corregir alguna respuesta; al volver, pasa otra vez a Por revisar.",
+    "overdue": "Pasó la fecha límite de la asignación sin terminar."
   },
-  "filtered": {
-    "title": "No hay asignaciones de este tipo",
-    "body": "Prueba otro tipo o quita el filtro."
-  }
+  "deleteDialog": {
+    "title": "¿Borrar esta asignación?",
+    "body": "Se borrará \"{{name}}\". Sus cuestionarios y sus respuestas se conservan.",
+    "deleting": "Borrando...",
+    "done": "Asignación borrada"
+  },
+  "form": {
+    "title": "Editar asignación",
+    "description": "Una asignación envía cuestionarios a una organización y muestra en qué pregunta va cada uno.",
+    "name": "Nombre de la asignación",
+    "namePlaceholder": "Ej: Software de Finanzas",
+    "organization": "Organización",
+    "organizationLocked": "La organización de una asignación no se puede cambiar.",
+    "descriptionLabel": "Descripción",
+    "optional": "(opcional)",
+    "descriptionPlaceholder": "De qué trata esta asignación. Solo la ve tu equipo.",
+    "deadline": "Fecha límite",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "saved": "Asignación actualizada",
+    "errors": {
+      "nameRequired": "El nombre de la asignación es obligatorio",
+      "nameTooLong": "Usa 200 caracteres o menos",
+      "descriptionTooLong": "Usa 2000 caracteres o menos",
+      "deadlineRequired": "Elige una fecha límite para la asignación",
+      "deadlineInvalid": "Escribe una fecha límite válida"
+    }
+  },
+  "editQuestionnaire": "Editar el cuestionario de {{name}}"
 }

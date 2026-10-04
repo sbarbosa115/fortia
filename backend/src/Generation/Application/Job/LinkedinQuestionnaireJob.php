@@ -71,6 +71,7 @@ final class LinkedinQuestionnaireJob implements JobHandler
             true,
             [],
             ['language' => $language, 'profile' => $profile->toArray()],
+            customerId: $owner,
         );
 
         $progress->stage('saving');

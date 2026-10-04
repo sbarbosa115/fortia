@@ -58,5 +58,6 @@
     "filteredBody": "Ningún cuestionario coincide con estos filtros.",
     "searchTitle": "Nada coincide con \"{{query}}\".",
     "searchBody": "Prueba con otras palabras o limpia la búsqueda."
-  }
+  },
+  "tags": "Etiquetas"
 }

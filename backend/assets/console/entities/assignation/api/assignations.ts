@@ -61,16 +61,6 @@ export function fetchAssignations(
   });
 }
 
-/** The assignation of a questionnaire, if any (the form's one-organization check, PRD §10.11 "Conflict"). */
-export async function fetchAssignationOfQuestionnaire(
-  questionnaireId: string,
-): Promise<Assignation | null> {
-  const page = await api.get<AssignationPage>('/assignations', {
-    query: {questionnaire_id: questionnaireId, page_size: 1},
-  });
-  return page.assignations[0] ?? null;
-}
-
 export function fetchAssignation(id: string): Promise<Assignation> {
   return api.get<Assignation>(`/assignations/${id}`);
 }

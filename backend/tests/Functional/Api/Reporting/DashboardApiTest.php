@@ -26,6 +26,7 @@ final class DashboardApiTest extends ApiTestCase
         self::assertSame($first, $second, 'PRD §7.10: chosen only once, then stored permanently');
         self::assertCount(1, $this->llm()->requests(), 'the LLM is asked only the first time');
         self::assertSame('dashboards--select-dashboard-type', $this->llm()->requests()[0]->purpose);
+        self::assertSame('ACME0001', $this->llm()->requests()[0]->customerId, "billed to the account's own OpenAI key when it saved one");
         self::assertStringNotContainsString('{dashboard_catalog}', $this->llm()->requests()[0]->system, 'the catalog placeholder is filled in');
         self::assertSame(['id', 'chart_type', 'title', 'question_ids', 'order'], array_keys($first['charts'][0]));
         self::assertSame('Customer survey', $first['title']);

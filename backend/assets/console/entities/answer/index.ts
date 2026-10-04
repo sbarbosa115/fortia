@@ -34,3 +34,5 @@ export type {
   DisplayValue,
   FileKind,
 } from './model/answers';
+export {TableAnswer, tableAnswerProps} from './ui/TableAnswer';
+export type {StructuredTable} from './ui/TableAnswer';

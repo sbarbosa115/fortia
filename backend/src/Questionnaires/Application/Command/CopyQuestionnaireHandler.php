@@ -57,6 +57,7 @@ final class CopyQuestionnaireHandler
             'landing_page' => $original->landingPage(),
             'on_completed' => $original->onCompleted(),
         ], $now);
+        $copy->retag($original->tags(), $now);
         $this->questionnaires->add($copy);
 
         $diagnosticId = null;

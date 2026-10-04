@@ -14,8 +14,10 @@ use App\Questionnaires\Application\Query\QuestionnaireDetails;
 use App\Responses\Application\Query\SessionQueries;
 use App\Shared\Application\Llm\LlmTool;
 use App\Shared\Application\Security\Caller;
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Error\Conflict;
 use App\Shared\Domain\Error\NotFound;
+use App\Shared\Domain\Error\Rejected;
 
 /**
  * The tools that build the draft (PRD §7.19 create and draft modes). They change only the draft the client keeps —
@@ -25,6 +27,8 @@ use App\Shared\Domain\Error\NotFound;
  */
 final class DraftTools
 {
+    /** The chat creates regular questionnaires only; a diagnostic or chain it loads to edit keeps its type. */
+    public const CREATABLE_TYPES = ['regular'];
     public const NAMES = ['update_draft', 'confirm_basics', 'set_questions', 'add_questions', 'update_question', 'remove_question', 'set_ending', 'request_review', 'load_questionnaire'];
 
     public function __construct(
@@ -56,14 +60,14 @@ final class DraftTools
         $tools = [
             new LlmTool('update_draft', 'Sets basics of the draft: only the fields sent. Use only what the user said in their own words; never invent a basic.', self::schema([
                 'title' => Schema::string('The questionnaire\'s title.', 200),
-                'type' => Schema::enum(ChatDraft::TYPES, 'regular, diagnostic (scored, with tiers) or chain (the next stage is generated from the answers).'),
+                'type' => Schema::enum(self::CREATABLE_TYPES, 'Always regular: the chat creates regular questionnaires only.'),
                 'topic' => Schema::string('What it is about.', 2000),
                 'description' => Schema::nullableString('A short description for the respondent.'),
                 'landing_page' => Schema::bool('Whether it starts with a landing page.'),
                 'has_disclaimer' => Schema::bool('Whether it shows a disclaimer first.'),
                 'disclaimer' => Schema::nullableString('The disclaimer\'s text.'),
                 'capture_user_data' => Schema::bool('Whether it asks for the respondent\'s data at the end.'),
-                'chain_prompt' => Schema::nullableString('Chains: the instructions that generate the next stage from the answers.'),
+                'tags' => Schema::list(['type' => 'string', 'maxLength' => QuestionnaireTags::MAX_LENGTH], 'The questionnaire\'s tags, all of them (this replaces the list): short labels the user asks for, e.g. "AP-03". At most '.QuestionnaireTags::MAX_TAGS.'.'),
             ], [])),
             new LlmTool('confirm_basics', 'Marks the basics as confirmed, after the user explicitly said yes to them in their last message. Then the questions phase starts.', self::schema([], [])),
             new LlmTool('set_questions', 'Replaces every question of the draft (at most 100).', self::schema(['questions' => Schema::list($question, 'The questions, in order.')], ['questions'])),
@@ -105,7 +109,7 @@ final class DraftTools
         $in = new ToolInput($input);
 
         return match ($name) {
-            'update_draft' => $draft->withBasics($in->only(['title', 'type', 'topic', 'description', 'landing_page', 'has_disclaimer', 'disclaimer', 'capture_user_data', 'chain_prompt'])),
+            'update_draft' => $draft->withBasics(self::creatable($draft, $in->only(['title', 'type', 'topic', 'description', 'landing_page', 'has_disclaimer', 'disclaimer', 'capture_user_data', 'tags']))),
             'confirm_basics' => Confirmation::Yes === $lastMessage ? $draft->confirmBasics() : throw new NotConfirmed('the basics'),
             'set_questions' => $draft->withQuestions(self::list($in, 'questions')),
             'add_questions' => $draft->withAddedQuestions(self::list($in, 'questions'), $in->has('position') ? $in->int('position', 0, 0, ChatDraft::MAX_QUESTIONS) : null),
@@ -147,6 +151,23 @@ final class DraftTools
         }
 
         return DraftFlow::draftOf($stored);
+    }
+
+    /**
+     * The basics of update_draft, refused when they would start anything other than a regular questionnaire.
+     *
+     * @param array<string, mixed> $fields
+     *
+     * @return array<string, mixed>
+     */
+    private static function creatable(ChatDraft $draft, array $fields): array
+    {
+        $type = $fields['type'] ?? null;
+        if (null !== $type && null === $draft->questionnaireId() && !\in_array($type, self::CREATABLE_TYPES, true)) {
+            throw new Rejected('TYPE_NOT_AVAILABLE', 'type: Only regular questionnaires can be created in the chat. Tell the user diagnostics, chains and quiz funnels are not available here, and offer to build a regular one.');
+        }
+
+        return $fields;
     }
 
     /** @return array<int|string, mixed> */

@@ -1,0 +1,57 @@
+{
+  "smtp": {
+    "title": "Email server (SMTP)",
+    "intro": "Send your account's emails (reminders, follow-up status, corrections) through your own server. Without one, Mappi's server sends them.",
+    "statusOwn": "Your server",
+    "statusPlatform": "Mappi's server",
+    "host": "Server",
+    "port": "Port",
+    "encryption": "Encryption",
+    "encryptions": {
+      "tls": "STARTTLS (587)",
+      "ssl": "SSL/TLS (465)",
+      "none": "None (25)"
+    },
+    "username": "Username",
+    "usernameHint": "Leave it empty if the server does not ask for a login.",
+    "password": "Password",
+    "passwordSaved": "A password is saved and stored encrypted. Leave this empty to keep it.",
+    "fromEmail": "Sender email",
+    "fromEmailHint": "The address your emails come from. Your server must allow it.",
+    "fromName": "Sender name",
+    "check": "Validate",
+    "checkSent": "Test email sent to {{email}}. Check your inbox.",
+    "checkFailed": {
+      "connection": "We couldn't connect to the server. Check the server name, the port and that it accepts connections from the internet.",
+      "tls": "The secure connection failed. Check the encryption and the port (STARTTLS with 587, SSL/TLS with 465).",
+      "authentication": "The server rejected the username or the password.",
+      "blocked": "That server points to a private network address, which can't be used.",
+      "refused": "The server refused the test email. Check the sender email and the server's settings."
+    },
+    "errors": {
+      "required": "This field is required.",
+      "host": "Enter only the server name, e.g. smtp.example.com.",
+      "port": "Enter a whole number from 1 to 65535.",
+      "email": "Enter a valid email address."
+    },
+    "saved": "Email server saved.",
+    "remove": "Use Mappi's server",
+    "removeTitle": "Stop using your email server?",
+    "removeBody": "Your account's emails will be sent by Mappi's server again. The saved server and its password are deleted.",
+    "removed": "Your emails are sent by Mappi's server again."
+  },
+  "openai": {
+    "title": "OpenAI API key",
+    "intro": "The AI features of your account (questionnaire generation, chat, dashboards, evaluations) run on OpenAI. With your own key, they are billed to your OpenAI account; without one, Mappi's key is used.",
+    "statusOwn": "Your key ····{{last4}}",
+    "statusPlatform": "Mappi's key",
+    "key": "API key",
+    "replaceKey": "Replace the key",
+    "keyHint": "Stored encrypted. Only its last 4 characters are ever shown.",
+    "saved": "OpenAI key saved.",
+    "remove": "Remove my key",
+    "removeTitle": "Remove your OpenAI key?",
+    "removeBody": "Your account's AI features will use Mappi's key again.",
+    "removed": "Your OpenAI key was removed."
+  }
+}

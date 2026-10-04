@@ -205,6 +205,7 @@ final class SessionApiTest extends ApiTestCase
         $request = $this->llm()->requests()[0] ?? null;
         self::assertNotNull($request);
         self::assertSame('quiz-funnel--rules-to-recommend-products', $request->purpose);
+        self::assertSame('ACME0001', $request->customerId, "billed to the account's own OpenAI key when it saved one");
     }
 
     public function testAQuizFunnelWithAnEmptyCatalogRecommendsNothingWithoutCallingTheModel(): void

@@ -14,6 +14,18 @@ reminder:
         overdue: 'It was due {days, plural, one {# day} other {# days}} ago ({date}).'
     button: 'Continue answering'
     ignore: 'If someone on your team already finished it, you can ignore this email.'
+reminder_digest:
+    subject: '{count, plural, one {You have # pending questionnaire} other {You have # pending questionnaires}}'
+    title: 'Your answers are still pending'
+    body: '{count, plural, one {# questionnaire is} other {# questionnaires are}} waiting for your answers. The most urgent come first.'
+    project: 'Project: {name}'
+    due:
+        no_date: 'No due date'
+        due_today: 'Due today'
+        due_in: 'Due in {days, plural, one {# day} other {# days}} ({date})'
+        overdue: 'Overdue by {days, plural, one {# day} other {# days}} ({date})'
+    button: 'Answer'
+    ignore: 'If someone on your team already finished one of them, you can ignore it.'
 status:
     subject: 'Status of "{name}": {percent}% answered'
     title: 'Follow-up status'

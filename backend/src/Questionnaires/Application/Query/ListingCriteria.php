@@ -6,7 +6,8 @@ use App\Shared\Domain\Error\Rejected;
 use App\Shared\Domain\Text;
 
 /**
- * The filters of GET /questionnaire (PRD §8.4): type, sort_by, order, is_active, parent, page, page_size, search.
+ * The filters of GET /questionnaire (PRD §8.4): type, sort_by, order, is_active, parent, page, page_size, search, and
+ * tag (one of the questionnaire's tags, matched whole without case or accents).
  * A bad type, sort, order or is_active is refused with its own code; page and page_size are clamped.
  */
 final class ListingCriteria
@@ -28,6 +29,7 @@ final class ListingCriteria
         public readonly string $order = 'desc',
         public readonly int $page = 1,
         public readonly int $pageSize = self::DEFAULT_PAGE_SIZE,
+        public readonly ?string $tag = null,
     ) {
     }
 
@@ -67,6 +69,7 @@ final class ListingCriteria
             $order,
             max(1, self::int($query, 'page') ?? 1),
             max(1, min(self::MAX_PAGE_SIZE, self::int($query, 'page_size') ?? self::DEFAULT_PAGE_SIZE)),
+            self::text($query, 'tag'),
         );
     }
 

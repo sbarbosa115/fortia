@@ -91,7 +91,7 @@ final class QuizFunnelJob implements JobHandler
 
         $progress->stage('generating_questionnaire');
         $language = QuizFunnel::language($this->accounts->find($customerId)['language'] ?? null);
-        $generated = $this->generate($variant, $language, $origin, $catalog);
+        $generated = $this->generate($customerId, $variant, $language, $origin, $catalog);
 
         $progress->stage('saving');
         $questionnaireId = $this->save($customerId, $origin, $generated);
@@ -112,7 +112,7 @@ final class QuizFunnelJob implements JobHandler
      *
      * @return array{title: string, description: string|null, questions: list<array<string, mixed>>}
      */
-    private function generate(string $variant, string $language, string $origin, array $catalog): array
+    private function generate(string $customerId, string $variant, string $language, string $origin, array $catalog): array
     {
         $purpose = QuizFunnel::purpose($variant);
         $system = $this->prompts->get('shared--basic-rules-to-create-a-questionnaire')."\n\n".$this->prompts->render($purpose);
@@ -135,7 +135,7 @@ final class QuizFunnelJob implements JobHandler
             'variant' => $variant,
             'store' => $origin,
             'product_names' => array_column($listed, 'name'),
-        ]);
+        ], $customerId);
 
         $fallbackTitle = ('en' === $language ? 'Find your product at ' : 'Encuentra tu producto en ').(string) parse_url($origin, \PHP_URL_HOST);
         for ($attempt = 1; $attempt <= self::ATTEMPTS; ++$attempt) {

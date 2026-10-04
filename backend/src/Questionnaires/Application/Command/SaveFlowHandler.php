@@ -21,6 +21,7 @@ use App\Shared\Application\Bus\EventBus;
 use App\Shared\Application\Storage\ObjectStorage;
 use App\Shared\Domain\Clock;
 use App\Shared\Domain\Document\FileTemplate;
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Ids;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -42,6 +43,7 @@ final class SaveFlowHandler
     public function __invoke(SaveFlow $command): string
     {
         $draft = FlowDraft::parse($command->states, $command->slug, $command->cta, $command->layout, $command->resultCopy);
+        QuestionnaireTags::normalize($command->tags);
         $draft->assertPromptKeysBelongTo($command->customerId);
         $draft->assertTemplateKeysBelongTo($command->customerId);
 
@@ -56,6 +58,7 @@ final class SaveFlowHandler
 
         $questionnaire = new Questionnaire($id, $command->customerId, $draft->title(), $draft->type, $this->questions($draft, $command->customerId), $now);
         $questionnaire->describe(self::fields($draft), $now);
+        $questionnaire->retag($command->tags ?? [], $now);
         $questionnaire->syncFlowCopies($slug, $draft->isChain());
         $this->questionnaires->add($questionnaire);
 
@@ -83,6 +86,9 @@ final class SaveFlowHandler
         $slug = $this->slugFor($draft, $flow);
 
         $questionnaire->describe(self::fields($draft), $now);
+        if (null !== $command->tags) {
+            $questionnaire->retag($command->tags, $now);
+        }
         $questionnaire->replaceQuestions($this->questions($draft, $command->customerId), $now);
         $questionnaire->syncFlowCopies($slug, $draft->isChain());
 

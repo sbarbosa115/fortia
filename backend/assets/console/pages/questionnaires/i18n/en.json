@@ -58,5 +58,6 @@
     "filteredBody": "No questionnaire matches these filters.",
     "searchTitle": "Nothing matches \"{{query}}\".",
     "searchBody": "Try other words, or clear the search."
-  }
+  },
+  "tags": "Tags"
 }

@@ -145,6 +145,7 @@ export function emptyDraft(kind: EditorKind): Draft {
     landingPage: true,
     disclaimerOn: false,
     disclaimer: '',
+    tags: [],
     questions: [newQuestion(kind)],
     captureUserData: false,
     ctaOn: false,

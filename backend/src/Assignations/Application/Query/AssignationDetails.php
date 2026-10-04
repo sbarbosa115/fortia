@@ -250,6 +250,7 @@ final class AssignationDetails
                 'title' => (string) ($question['title'] ?? ''),
                 'type' => (string) ($control['type'] ?? ''),
                 'answer' => self::answerText($value, $control),
+                'answer_table' => ControlType::Table->value === ($control['type'] ?? null) ? TableAnswer::structured($control['value'] ?? null, $control) : null,
                 'skipped' => $skipped && !Questions::isAnswered($question),
                 'answered_at' => Questions::isResolved($question) ? $answeredAt : null,
                 'locked' => $locked,

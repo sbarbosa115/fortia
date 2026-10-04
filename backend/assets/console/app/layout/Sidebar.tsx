@@ -27,7 +27,6 @@ const GROUPS: Array<{key: string; entries: Entry[]}> = [
     entries: [
       {to: '/organizations', key: 'organizations', icon: 'building-2'},
       {to: '/assignations', key: 'assignations', icon: 'list-checks'},
-      {to: '/projects', key: 'projects', icon: 'folder-kanban'},
     ],
   },
   {

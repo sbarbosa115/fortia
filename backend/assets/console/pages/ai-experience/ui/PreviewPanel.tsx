@@ -4,7 +4,7 @@ import {useEffect} from 'react';
 import {useTranslation} from 'react-i18next';
 import {tierColor} from '../model/preview';
 import {type AiExperience, PREVIEW_MEDIA_QUERY} from '../model/useAiExperience';
-import {DraftPreview} from './DraftPreview';
+import {DraftPreview, DraftTags} from './DraftPreview';
 
 /** The right-hand live preview: what the respondent will see, in a phone or browser frame. */
 export function PreviewPanel({chat}: {chat: AiExperience}) {
@@ -89,6 +89,8 @@ export function PreviewPanel({chat}: {chat: AiExperience}) {
             </div>
           </div>
         ) : null}
+
+        <DraftTags chat={chat} />
 
         {chat.showTierChips ? (
           <div

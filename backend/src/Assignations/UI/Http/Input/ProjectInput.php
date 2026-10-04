@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * POST /projects (group "create") and PUT /projects/{id} (group "update", partial), PRD §8.9. No extra fields.
- * Create: organization_id, name and due_date are required. Update: name, due_date and assignation_ids cannot be null;
+ * Create: organization_id, name and due_date are required; questionnaire_ids and registration_title only there. Update: name, due_date and assignation_ids cannot be null;
  * organization_id may be sent only unchanged (the handler checks it).
  */
 final class ProjectInput implements TracksProvidedFields
@@ -33,6 +33,14 @@ final class ProjectInput implements TracksProvidedFields
     #[Assert\All([new Assert\Type('string'), new Assert\Uuid(versions: [Assert\Uuid::V4_RANDOM])])]
     public ?array $assignation_ids = null;
 
+    /** @var list<string>|null create only: each one becomes a new follow-up of the organization */
+    #[Assert\All([new Assert\Type('string'), new Assert\Uuid(versions: [Assert\Uuid::V4_RANDOM])])]
+    public ?array $questionnaire_ids = null;
+
+    /** Create only: the title of the new follow-ups' registration slide, in the console's language. */
+    #[Assert\Length(max: 200)]
+    public ?string $registration_title = null;
+
     #[Assert\Callback(groups: ['create'])]
     public function validateCreate(ExecutionContextInterface $context): void
     {
@@ -41,8 +49,10 @@ final class ProjectInput implements TracksProvidedFields
                 $context->buildViolation('This value should not be null.')->atPath($field)->addViolation();
             }
         }
-        if ($this->wasProvided('assignation_ids') && null === $this->assignation_ids) {
-            $context->buildViolation('This value should not be null.')->atPath('assignation_ids')->addViolation();
+        foreach (['assignation_ids', 'questionnaire_ids'] as $field) {
+            if ($this->wasProvided($field) && null === $this->{$field}) {
+                $context->buildViolation('This value should not be null.')->atPath($field)->addViolation();
+            }
         }
     }
 
@@ -57,6 +67,17 @@ final class ProjectInput implements TracksProvidedFields
                 $context->buildViolation('This value should not be null.')->atPath($field)->addViolation();
             }
         }
+        foreach (['questionnaire_ids', 'registration_title'] as $field) {
+            if ($this->wasProvided($field)) {
+                $context->buildViolation('Only sent when creating.')->atPath($field)->addViolation();
+            }
+        }
+    }
+
+    /** @return list<string> */
+    public function questionnaireIds(): array
+    {
+        return $this->questionnaire_ids ?? [];
     }
 
     /** @return list<string> */

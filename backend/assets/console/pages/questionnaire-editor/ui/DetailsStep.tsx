@@ -1,3 +1,4 @@
+import {useViewer} from '@console/entities/viewer';
 import {publicFlowUrl} from '@shared/config';
 import {slugify} from '@shared/lib';
 import {Field, Icon, TextArea, TextInput} from '@shared/ui';
@@ -5,6 +6,7 @@ import {useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useEditorContext} from '../model/EditorContext';
 import {SwitchRow} from './SwitchRow';
+import {TagsField} from './TagsField';
 
 /** The fixed part of the public link ("https://…/f/"), absolute even when the respondent app shares this origin. */
 function linkPrefix(): string {
@@ -15,12 +17,13 @@ function linkPrefix(): string {
 
 /**
  * Step 1 (PRD §10.5), as in the admin console: the questionnaire's details (title, custom link with its copy button,
- * description), then "Before starting" (landing page, disclaimer).
+ * description, tags), then "Before starting" (landing page, disclaimer).
  */
 export function DetailsStep() {
   const {t} = useTranslation('pages.questionnaire-editor');
   const {draft, update, issuesOf, slugInUse, setPreviewTab} =
     useEditorContext();
+  const {canWrite} = useViewer();
   const [titleTouched, setTitleTouched] = useState(false);
   const [copied, setCopied] = useState(false);
   const slugIssue = issuesOf(1).find((issue) => issue.field === 'slug');
@@ -125,6 +128,13 @@ export function DetailsStep() {
             onChange={(e) => update({description: e.target.value})}
           />
         </Field>
+        <TagsField
+          tags={draft.tags}
+          onChange={(tags) => update({tags})}
+          disabledReason={
+            canWrite ? null : t('readOnly.change', {ns: 'shared'})
+          }
+        />
       </section>
 
       <section className="ccard" aria-labelledby="details-before">

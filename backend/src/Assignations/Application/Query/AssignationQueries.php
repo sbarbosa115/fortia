@@ -30,14 +30,6 @@ final class AssignationQueries
         return null === $assignation ? null : self::assignationData($assignation);
     }
 
-    /** @return array<string, mixed>|null */
-    public function findByQuestionnaire(string $questionnaireId): ?array
-    {
-        $assignation = $this->assignations->findByQuestionnaire($questionnaireId);
-
-        return null === $assignation ? null : self::assignationData($assignation);
-    }
-
     /** @return array<string, mixed> the PRD §6.14 shape */
     public static function assignationData(Assignation $a): array
     {

@@ -75,6 +75,8 @@
     "INVALID_PASSWORD": "Esa contraseña no cumple los requisitos.",
     "INVALID_CREDENTIALS": "Correo o contraseña incorrectos.",
     "CUSTOMER_NOT_FOUND": "La cuenta no existe.",
+    "INVALID_SMTP_SERVER": "Revisa el servidor de correo: necesita un nombre de servidor, un puerto, un cifrado y un correo de remitente válido.",
+    "SMTP_CHECK_FAILED": "No se pudo enviar el correo de prueba por este servidor.",
     "INVALID_TYPE": "Ese tipo no es válido.",
     "INVALID_SORT": "Ese orden no es válido.",
     "INVALID_ORDER": "Ese orden no es válido.",
@@ -94,8 +96,7 @@
     "TOKEN_EXCHANGE_FAILED": "No pudimos conectar tu tienda. Intenta de nuevo.",
     "DOMAIN_EMAIL_CONFLICT": "Otra organización ya usa ese dominio de correo.",
     "ORGANIZATION_NOT_FOUND": "Esta organización no existe.",
-    "ORGANIZATION_HAS_ASSIGNATIONS": "Esta organización tiene asignaciones o proyectos. Elimínalos primero.",
-    "QUESTIONNAIRE_ALREADY_ASSIGNED": "Este cuestionario ya está asignado a otra organización.",
+    "ORGANIZATION_HAS_ASSIGNATIONS": "Esta organización tiene asignaciones. Elimínalas primero.",
     "AUDIENCE_MEMBER_NOT_IN_ORGANIZATION": "Algunas de las personas elegidas no son miembros de esta organización.",
     "ASSIGNATION_IN_PROJECT": "Esta asignación pertenece a un proyecto, así que su organización no puede cambiar.",
     "ASSIGNATION_NOT_FOUND": "Esta asignación no existe.",
@@ -133,7 +134,6 @@
     "FILE_UNREADABLE": "No se pudo leer el archivo: puede estar dañado o protegido con contraseña."
   },
   "back": {
-    "projects": "Volver a Proyectos",
     "assignations": "Volver a Asignaciones",
     "assignation": "Volver a la asignación",
     "questionnaires": "Volver a Cuestionarios",

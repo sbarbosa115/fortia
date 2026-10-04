@@ -13,6 +13,8 @@ import {
   acceptFiles,
   keysOf,
   namePasted,
+  pastedFiles,
+  previewOf,
   type Upload,
   uploadsFromKeys,
 } from '../model/files';
@@ -20,7 +22,8 @@ import {
 type Notice = {key: string; count?: number} | null;
 
 /**
- * A file answer (PRD §9.9): choose several files, drag and drop them, or paste a screenshot anywhere on the page.
+ * A file answer (PRD §9.9): choose several files, drag and drop them, or paste a screenshot anywhere on the page
+ * (Ctrl+V, as many times as needed); an image shows its thumbnail.
  * Each file uploads with its progress, can be retried or removed; the saved value is the list of object keys. Next
  * waits until at least one file is uploaded and none is still uploading. A question with a template offers it first:
  * the respondent downloads it, fills it in and uploads it.
@@ -122,6 +125,7 @@ export function FileControl({
         progress: 0,
         key: null,
         file,
+        preview: previewOf(file),
       }));
       setUploads((list) => [...list, ...added]);
       added.forEach(send);
@@ -131,7 +135,7 @@ export function FileControl({
 
   useEffect(() => {
     const onPaste = (event: ClipboardEvent) => {
-      const files = Array.from(event.clipboardData?.files ?? []);
+      const files = pastedFiles(event.clipboardData);
       if (files.length > 0) {
         event.preventDefault();
         add(namePasted(files, new Date()));
@@ -140,6 +144,24 @@ export function FileControl({
     document.addEventListener('paste', onPaste);
     return () => document.removeEventListener('paste', onPaste);
   }, [add]);
+
+  const previews = useRef<string[]>([]);
+  useEffect(() => {
+    previews.current = uploads.flatMap((upload) =>
+      upload.preview ? [upload.preview] : [],
+    );
+  }, [uploads]);
+  useEffect(
+    () => () => previews.current.forEach((url) => URL.revokeObjectURL(url)),
+    [],
+  );
+
+  const remove = (upload: Upload) => {
+    if (upload.preview) {
+      URL.revokeObjectURL(upload.preview);
+    }
+    setUploads((list) => list.filter((u) => u.id !== upload.id));
+  };
 
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
@@ -230,7 +252,11 @@ export function FileControl({
         <ul className="files__list">
           {uploads.map((upload) => (
             <li key={upload.id} className="files__item">
-              <Icon name="file" />
+              {upload.preview ? (
+                <img className="files__thumb" src={upload.preview} alt="" />
+              ) : (
+                <Icon name="file" />
+              )}
               <div className="files__item-body">
                 <span className="files__name">{upload.name}</span>
                 {upload.status === 'uploading' ? (
@@ -266,9 +292,7 @@ export function FileControl({
                 label={t('remove', {name: upload.name})}
                 icon={<Icon name="close" />}
                 disabled={disabled || upload.status === 'uploading'}
-                onClick={() =>
-                  setUploads((list) => list.filter((u) => u.id !== upload.id))
-                }
+                onClick={() => remove(upload)}
               />
             </li>
           ))}

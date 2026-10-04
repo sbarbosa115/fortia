@@ -23,6 +23,8 @@ final class SaveFlow
      * @param list<string>|null         $layout
      * @param array<string, mixed>|null $resultCopy
      * @param string                    $source     console, copy, quiz_funnel, chat, linkedin (QuestionnaireCreated payload)
+     * @param list<mixed>|null          $tags       the owner's labels (Shared\Domain\Document\QuestionnaireTags); null
+     *                                              keeps them on an edit, and is none on a new questionnaire
      */
     public function __construct(
         public readonly string $customerId,
@@ -37,6 +39,7 @@ final class SaveFlow
         /** The store the flow belongs to (quiz funnel), matched by GET /questionnaire/find. */
         public readonly ?string $sourceUrl = null,
         public readonly string $source = 'console',
+        public readonly ?array $tags = null,
     ) {
     }
 }

@@ -22,7 +22,7 @@ export const PAGE_SIZE = 20;
 
 /**
  * The state of the hidden /products screen (PRD §10.19): the catalog listing (paginated and searched in the
- * database, D16/D17), its CRUD, and whether "Create Experience" (a quiz funnel) is allowed (write permission).
+ * database, D16/D17) and its CRUD (write permission).
  */
 export function useProducts() {
   const {t} = useTranslation('pages.products');
@@ -81,7 +81,6 @@ export function useProducts() {
   });
 
   const readOnlyReason = viewer.canWrite ? null : tShared('readOnly.change');
-  const funnelReason = viewer.canWrite ? null : tShared('readOnly.create');
 
   return {
     listing,
@@ -95,7 +94,6 @@ export function useProducts() {
       setPage(1);
     },
     readOnlyReason,
-    funnelReason,
     editing,
     startCreate: () => setEditing('new'),
     startEdit: (product: CatalogProduct) => setEditing(product),

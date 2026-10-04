@@ -65,7 +65,15 @@
     "beforeStart": "Before starting",
     "disclaimerPlaceholder": "Enter the disclaimer respondents must accept to continue",
     "disclaimerRequired": "Write the disclaimer text to continue.",
-    "movedNote": "Capture user data and Call to action are in the last step, next to what is shown at the end."
+    "movedNote": "Capture user data and Call to action are in the last step, next to what is shown at the end.",
+    "tagsLabel": "Tags",
+    "tagsHint": "Labels to find it again, e.g. AP-03. Press Enter or a comma to add one (up to {{max}}).",
+    "tagsPlaceholder": "Type a tag and press Enter",
+    "removeTag": "Remove tag {{tag}}",
+    "tagsErrors": {
+      "tooMany": "A questionnaire has at most {{max}} tags.",
+      "tooLong": "A tag has at most {{max}} characters."
+    }
   },
   "questions": {
     "title": "Questions",

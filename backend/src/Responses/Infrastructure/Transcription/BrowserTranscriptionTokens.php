@@ -13,7 +13,7 @@ final class BrowserTranscriptionTokens implements TranscriptionTokens
 {
     public const PROVIDER = 'browser';
 
-    public function issue(): TranscriptionToken
+    public function issue(?string $customerId = null): TranscriptionToken
     {
         return new TranscriptionToken('browser.'.bin2hex(random_bytes(16)), self::PROVIDER, 60);
     }

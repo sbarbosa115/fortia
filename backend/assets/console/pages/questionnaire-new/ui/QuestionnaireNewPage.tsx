@@ -5,9 +5,12 @@ import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router';
 import './questionnaire-new.css';
 
-type CardKey = 'regular' | 'diagnostic' | 'quizFunnel' | 'chaining';
+type CardKey = 'regular';
 
-/** The four cards of PRD §10.5: the editor each opens and its icons (as in the admin console). */
+/**
+ * The kinds the console creates (PRD §10.5): only regular questionnaires. Diagnostics, chains and quiz funnels are
+ * not offered here any more (the editors still open the existing ones).
+ */
 const CARDS: {
   key: CardKey;
   to: string;
@@ -21,24 +24,6 @@ const CARDS: {
     icon: 'clipboard-list',
     tagIcon: 'list',
     isDefault: true,
-  },
-  {
-    key: 'diagnostic',
-    to: '/questionnaires/create/diagnostic',
-    icon: 'gauge',
-    tagIcon: 'target',
-  },
-  {
-    key: 'quizFunnel',
-    to: '/questionnaires/create/quizfunnel',
-    icon: 'filter',
-    tagIcon: 'shopping-bag',
-  },
-  {
-    key: 'chaining',
-    to: '/questionnaires/create/chaining',
-    icon: 'sparkles',
-    tagIcon: 'wand',
   },
 ];
 

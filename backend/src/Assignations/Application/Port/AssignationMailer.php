@@ -8,7 +8,8 @@ use App\Shared\Application\Mail\MailNotSent;
  * The emails of assignations (PRD §7.13, §7.11 retry, §7.21), in the account's language (`es` | `en`). Each method
  * sends one message to each address in $to (respondents never see each other) and throws when one is not sent.
  *
- * $assignation: {assignations_id, name, organization_name, due_date}; $timing: ReminderTiming::of().
+ * $assignation: {assignations_id, customer_id, name, organization_name, due_date}; they go through the
+ * account's own SMTP server when it has one; $timing: ReminderTiming::of().
  */
 interface AssignationMailer
 {
@@ -22,6 +23,16 @@ interface AssignationMailer
      * @throws MailNotSent
      */
     public function sendReminder(array $assignation, array $to, string $locale, array $timing): void;
+
+    /**
+     * One reminder for a respondent with several pending follow-ups in the same account (the daily run, PRD §7.13):
+     * a single email listing each one (name, organization, project, due date, link to /a/{id}) in the given order.
+     *
+     * @param list<array{assignation: array<string, mixed>, timing: array{kind: string, days: int}}> $pending at least one
+     *
+     * @throws MailNotSent
+     */
+    public function sendReminderDigest(string $to, array $pending, string $locale): void;
 
     /**
      * The status email to the account's root users: progress, percentage, due date, how many were reminded, and the

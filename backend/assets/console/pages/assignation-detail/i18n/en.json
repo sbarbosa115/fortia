@@ -4,7 +4,6 @@
   "backToList": "Back to Assignations",
   "back": "Assignations",
   "copyLink": "Copy link",
-  "edit": "Edit",
   "header": {
     "people": "{{loaded}}{{more}} of {{total}} people",
     "completed": "{{count}}{{more}} completed",

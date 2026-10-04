@@ -1,5 +1,6 @@
 import {
   displayValue,
+  TableAnswer,
   timeSpent,
   type StageSession,
   type Question,
@@ -7,7 +8,6 @@ import {
 import {Card, CardHeader, Table, type Column} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {FileAnswer} from './FileAnswer';
-import {TableAnswer} from './TableAnswer';
 
 type Row = {question: Question; seconds: number | null};
 

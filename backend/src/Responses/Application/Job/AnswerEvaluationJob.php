@@ -47,7 +47,8 @@ final class AnswerEvaluationJob implements JobHandler
         $sessionId = (string) ($payload['session_id'] ?? '');
         $questionId = (string) ($payload['question_id'] ?? '');
         $stored = null;
-        foreach ($this->sessions->get($sessionId)->questions() as $question) {
+        $session = $this->sessions->get($sessionId);
+        foreach ($session->questions() as $question) {
             if ((string) ($question['id'] ?? '') === $questionId) {
                 $stored = $question;
             }
@@ -64,7 +65,7 @@ final class AnswerEvaluationJob implements JobHandler
         }
 
         $progress->stage('evaluating');
-        $grading = $this->grade($question);
+        $grading = $this->grade($question, $session->customerId());
         $passed = AnswerEvaluation::passes($grading['related'], $grading['grades']);
         $recorded = $this->commands->dispatch(new RecordEvaluation(
             $sessionId,
@@ -85,7 +86,7 @@ final class AnswerEvaluationJob implements JobHandler
      *
      * @return array{related: bool, grades: list<float>, message: string}
      */
-    private function grade(array $question): array
+    private function grade(array $question, string $customerId): array
     {
         $criteria = array_values(array_map('strval', (array) ($question['acceptance_criteria'] ?? [])));
         $answer = AnswerEvaluation::answerText($question);
@@ -113,7 +114,7 @@ final class AnswerEvaluationJob implements JobHandler
             'required' => ['related', 'grades', 'improvement_message'],
             'additionalProperties' => false,
         ];
-        $json = $this->llm->complete(LlmRequest::single(self::PURPOSE, $this->prompts->render(self::PURPOSE), $user, $schema, LlmRequest::TIER_FAST, ['answer' => $answer, 'criteria' => $criteria]))->json ?? [];
+        $json = $this->llm->complete(LlmRequest::single(self::PURPOSE, $this->prompts->render(self::PURPOSE), $user, $schema, LlmRequest::TIER_FAST, ['answer' => $answer, 'criteria' => $criteria], $customerId))->json ?? [];
 
         $grades = [];
         foreach ((array) ($json['grades'] ?? []) as $grade) {

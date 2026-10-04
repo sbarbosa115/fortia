@@ -5,6 +5,7 @@ namespace App\Tests\Functional\Api\Assignations;
 use App\Assignations\Application\DailyReminders;
 use App\Shared\Application\Mail\OutgoingEmail;
 use App\Tests\Support\ApiTestCase;
+use App\Tests\Support\RecordingSmtpTransports;
 
 /**
  * PRD §7.13 reminders: the daily run at 13:00 UTC and the manual button. Respondents get the link, the account's root
@@ -44,6 +45,20 @@ final class ReminderTest extends ApiTestCase
         self::assertSame(2, $sent[2]->context['reminded']);
         self::assertSame('http://localhost:8080/console/assignations/'.$id, $sent[2]->context['link'], '§7.13: {ADMIN_URL}/assignations/{id}');
         self::assertNotNull($this->storedAssignation($id)->lastReminderSentAt(), 'both emails sent: the day is marked');
+    }
+
+    public function testAnAccountWithItsOwnSmtpServerSendsItsRemindersThroughIt(): void
+    {
+        $this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', ['smtp_host' => 'smtp.acme.test', 'smtp_port' => 587, 'smtp_encryption' => 'tls', 'smtp_from_email' => 'hello@acme.test', 'smtp_from_name' => 'Acme'], as: $this->owner);
+        $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['sales']]]);
+
+        $this->data($this->api('POST', '/api/v1/assignations/'.$id.'/reminders', as: $this->owner));
+
+        $relayed = static::getContainer()->get(RecordingSmtpTransports::class)->sent;
+        self::assertSame(['ana@acme.test', 'luis@acme.test', 'root@acme0001.test'], array_map(static fn (array $s): string => $s['email']->getTo()[0]->getAddress(), $relayed), "the account's emails go through its own server");
+        self::assertSame('smtp.acme.test', $relayed[0]['server']->host);
+        self::assertSame('hello@acme.test', $relayed[0]['email']->getFrom()[0]->getAddress(), "from the account's sender, not SUPPORT_EMAIL");
+        self::assertSame('ACME0001', $this->mailer()->sent[0]->customerId);
     }
 
     public function testAnOwnerWhoIsAlsoARespondentOnlyGetsTheReminder(): void
@@ -140,5 +155,75 @@ final class ReminderTest extends ApiTestCase
 
         self::assertSame(['sent' => 0, 'skipped' => 1, 'recipients' => 0], $summary, '§7.13: a failure counts as skipped');
         self::assertNull($this->storedAssignation($id)->lastReminderSentAt(), '…and the day is not marked');
+    }
+
+    public function testTheDailyRunSendsAPersonWithSeveralPendingFollowUpsOneDigest(): void
+    {
+        [$org] = $this->organizationWith('ACME0001', 'Acme Stores', [['ana', 'ana@acme.test', null, null, 'Sales'], ['luis', 'LUIS@acme.test', null, null, 'Ops']]);
+        $sales = ['audience' => ['type' => 'area', 'values' => ['sales']]];
+        $later = $this->createAssignation($this->owner, $org, $this->questionnaireOf('ACME0001'), $sales + ['due_date' => '2026-10-05']);
+        $overdue = $this->createAssignation($this->owner, $org, $this->questionnaireOf('ACME0001'), $sales + ['due_date' => '2026-09-28']);
+        $inProject = $this->createAssignation($this->owner, $org, $this->questionnaireOf('ACME0001'), $sales);
+        $this->data($this->api('POST', '/api/v1/projects', ['organization_id' => $org, 'name' => 'Q4', 'due_date' => '2026-10-02', 'assignation_ids' => [$inProject]], as: $this->owner), 201);
+        $ops = $this->createAssignation($this->owner, $org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['ops']]]);
+        $this->mailer()->clear();
+
+        $summary = static::getContainer()->get(DailyReminders::class)->run();
+
+        self::assertSame(['sent' => 4, 'skipped' => 0, 'recipients' => 4], $summary, 'each follow-up is still reminded and counted');
+        $toAna = array_values(array_filter($this->mailer()->sent, static fn (OutgoingEmail $e) => ['ana@acme.test'] === $e->to));
+        self::assertCount(1, $toAna, 'one email per person: Ana is in 3 follow-ups and gets a single email');
+        $digest = $toAna[0];
+        self::assertSame('emails/assignations/reminder_digest.html.twig', $digest->template);
+        self::assertSame('Tienes 3 cuestionarios pendientes', $digest->subject, "the digest says how many are pending, in the account's language");
+        self::assertSame(
+            ['http://localhost:8080/a/'.$overdue, 'http://localhost:8080/a/'.$inProject, 'http://localhost:8080/a/'.$later],
+            array_column($digest->context['items'], 'link'),
+            'each pending follow-up with its link to /a/{id}, the soonest due first',
+        );
+        self::assertSame('overdue', $digest->context['items'][0]['timing']['kind'], 'the overdue one is marked');
+        self::assertSame('Q4', $digest->context['items'][1]['assignation']['project_name'], 'with its project, due on the project\'s date');
+        self::assertSame('ACME0001', $digest->customerId, "through the account's sender");
+
+        $toLuis = array_values(array_filter($this->mailer()->sent, static fn (OutgoingEmail $e) => ['luis@acme.test'] === $e->to));
+        self::assertCount(1, $toLuis);
+        self::assertSame('emails/assignations/reminder.html.twig', $toLuis[0]->template, 'one pending follow-up: the usual reminder');
+        self::assertSame('http://localhost:8080/a/'.$ops, $toLuis[0]->context['link']);
+
+        $statuses = array_values(array_filter($this->mailer()->sent, static fn (OutgoingEmail $e) => 'emails/assignations/status.html.twig' === $e->template));
+        self::assertCount(4, $statuses, 'the root still gets one status per follow-up');
+        self::assertSame([1, 1, 1, 1], array_map(static fn (OutgoingEmail $e) => $e->context['reminded'], $statuses), 'reminded counts the people reminded for that follow-up, by digest or not');
+        foreach ([$later, $overdue, $inProject, $ops] as $id) {
+            self::assertNotNull($this->storedAssignation($id)->lastReminderSentAt(), 'every follow-up of the digest is marked');
+        }
+    }
+
+    public function testADigestThatFailsLeavesItsFollowUpsUnmarkedWithoutStoppingTheOthers(): void
+    {
+        [$org] = $this->organizationWith('ACME0001', 'Acme Stores', [['ana', 'ana@acme.test', null, null, 'Sales'], ['luis', 'luis@acme.test', null, null, 'Ops']]);
+        $first = $this->createAssignation($this->owner, $org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['sales']]]);
+        $second = $this->createAssignation($this->owner, $org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['sales']]]);
+        $ops = $this->createAssignation($this->owner, $org, $this->questionnaireOf('ACME0001'), ['audience' => ['type' => 'area', 'values' => ['ops']]]);
+        $this->mailer()->failingFor = ['ana@acme.test'];
+
+        $summary = static::getContainer()->get(DailyReminders::class)->run();
+
+        self::assertSame(['sent' => 1, 'skipped' => 2, 'recipients' => 1], $summary, '§7.13: a failure is counted as skipped and never stops the others');
+        self::assertNull($this->storedAssignation($first)->lastReminderSentAt(), 'the day is marked only when the reminders went out');
+        self::assertNull($this->storedAssignation($second)->lastReminderSentAt());
+        self::assertNotNull($this->storedAssignation($ops)->lastReminderSentAt());
+    }
+
+    public function testTheManualReminderStaysASingleReminderEvenWithOtherPendingFollowUps(): void
+    {
+        $sales = ['audience' => ['type' => 'area', 'values' => ['sales']]];
+        $id = $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), $sales);
+        $this->createAssignation($this->owner, $this->org, $this->questionnaireOf('ACME0001'), $sales);
+
+        $this->data($this->api('POST', '/api/v1/assignations/'.$id.'/reminders', as: $this->owner));
+
+        $templates = array_map(static fn (OutgoingEmail $e) => $e->template, $this->mailer()->sent);
+        self::assertNotContains('emails/assignations/reminder_digest.html.twig', $templates, 'the "Send reminder" button reminds that one follow-up only');
+        self::assertSame('http://localhost:8080/a/'.$id, $this->mailer()->sent[0]->context['link']);
     }
 }

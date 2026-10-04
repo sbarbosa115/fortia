@@ -132,7 +132,7 @@ final class ChatTurn
         $started = hrtime(true);
         try {
             for ($round = 0;; ++$round) {
-                $response = $this->llm->complete($this->request($mode, $conversation, $draft, $queue, $actions, $item, $language, $files));
+                $response = $this->llm->complete($this->request($caller->customerId, $mode, $conversation, $draft, $queue, $actions, $item, $language, $files));
                 if (!$response->wantsTools()) {
                     [$message, $quickReplies] = self::finalAnswer($response->json, $response->text);
                     break;
@@ -207,10 +207,10 @@ final class ChatTurn
         Permissions::adminGroups($caller);
         $payload = DraftFlow::payload($draft);
         if (null === $draft->questionnaireId()) {
-            return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], source: 'chat'));
+            return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], source: 'chat', tags: $payload['tags']));
         }
 
-        return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], questionnaireId: $draft->questionnaireId(), source: 'chat'));
+        return (string) $this->commands->dispatch(new SaveFlow($caller->customerId, $payload['states'], cta: $payload['cta'], layout: $payload['layout'], questionnaireId: $draft->questionnaireId(), source: 'chat', tags: $payload['tags']));
     }
 
     /**
@@ -219,7 +219,7 @@ final class ChatTurn
      * @param array{kind: string, id: string}|null $item
      * @param list<AttachedFile>                   $files        every file of the conversation (for the fake responder)
      */
-    private function request(string $mode, array $conversation, ChatDraft $draft, WriteQueue $queue, array $actions, ?array $item, string $language, array $files): LlmRequest
+    private function request(string $customerId, string $mode, array $conversation, ChatDraft $draft, WriteQueue $queue, array $actions, ?array $item, string $language, array $files): LlmRequest
     {
         $tools = $this->draftTools->definitions($mode);
         if ('create' === $mode) {
@@ -243,6 +243,7 @@ final class ChatTurn
             tier: LlmRequest::TIER_GENERATION,
             maxTokens: 16_000,
             context: ['mode' => $mode, 'draft' => $draft->toArray(), 'pending_writes' => $queue->items(), 'actions' => $actions, 'item' => $item, 'language' => $language, 'files' => array_map(static fn (AttachedFile $f): array => $f->toArray(), $files)],
+            customerId: $customerId,
         );
     }
 

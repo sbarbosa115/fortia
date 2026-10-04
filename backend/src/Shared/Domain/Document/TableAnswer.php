@@ -142,6 +142,41 @@ final class TableAnswer
     }
 
     /**
+     * The answer as a table to show (the console's follow-up): the columns in order and each row with its fixed label
+     * (null without fixed rows) and its cells by column key. Null when no cell is filled in.
+     *
+     * @param array<string, mixed> $control
+     *
+     * @return array{columns: list<array{key: string, label: string}>, rows: list<array{label: ?string, cells: array<string, string>}>}|null
+     */
+    public static function structured(mixed $value, array $control): ?array
+    {
+        $columns = self::columns($control);
+        $labels = self::rowLabels($control['rows'] ?? []);
+        $rows = [];
+        $filled = false;
+        foreach (\is_array($value) ? array_values($value) : [] as $i => $row) {
+            if (!\is_array($row)) {
+                continue;
+            }
+            $cells = [];
+            foreach (array_keys($columns) as $key) {
+                $cells[(string) $key] = \is_scalar($row[$key] ?? null) ? (string) $row[$key] : '';
+                $filled = $filled || '' !== trim($cells[(string) $key]);
+            }
+            $rows[] = ['label' => $labels[$i] ?? null, 'cells' => $cells];
+        }
+        if (!$filled) {
+            return null;
+        }
+
+        return [
+            'columns' => array_map(static fn (string|int $key, string $label): array => ['key' => (string) $key, 'label' => $label], array_keys($columns), $columns),
+            'rows' => $rows,
+        ];
+    }
+
+    /**
      * One line per row, "Column: value; Column: value" (a sheet's cell, an LLM's context).
      *
      * @param array<string, mixed> $control

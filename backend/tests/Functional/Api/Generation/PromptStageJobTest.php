@@ -44,6 +44,7 @@ final class PromptStageJobTest extends ApiTestCase
         self::assertSame('default', $stage->type(), 'a stage that does not end in a diagnostic is not scored');
 
         $request = $this->llm()->requests()[0];
+        self::assertSame('ACME0001', $request->customerId, "billed to the account's own OpenAI key when it saved one");
         self::assertSame('chain--rules-to-create-questionnaires', $request->purpose);
         self::assertSame('generation', $request->tier, '§13.3: generating questionnaires uses the most capable model');
         self::assertNotNull($request->jsonSchema, 'structured output');

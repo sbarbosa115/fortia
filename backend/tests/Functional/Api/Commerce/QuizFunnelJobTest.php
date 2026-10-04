@@ -118,6 +118,7 @@ final class QuizFunnelJobTest extends ApiTestCase
         ]]);
 
         $request = $this->llm()->requests()[0];
+        self::assertSame('ACME0001', $request->customerId, "billed to the account's own OpenAI key when it saved one");
         self::assertSame('quiz-funnel--rules-to-create-product-questionnaires', $request->purpose, '§7.17 step 3: the experience variant');
         self::assertSame('generation', $request->tier, '§13.3: the most capable model generates questionnaires');
         self::assertStringContainsString('Write every text in English', $request->messages[0]->content, '§7.17: in the account\'s language');

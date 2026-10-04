@@ -9,6 +9,8 @@ export type Upload = {
   /** The object key: the saved value (§9.9), once uploaded. */
   key: string | null;
   file: File | null;
+  /** A thumbnail (object URL) of an image added in this visit, so a pasted screenshot can be checked at a glance. */
+  preview: string | null;
 };
 
 /**
@@ -41,6 +43,32 @@ export function screenshotName(date: Date, extension: string, n = 0): string {
   return `screenshot-${stamp}${n > 0 ? `-${n}` : ''}.${extension}`;
 }
 
+/**
+ * The files of a paste: the clipboard's files, or, when a browser lists a copied screenshot only among its items,
+ * the items that are files.
+ */
+export function pastedFiles(data: DataTransfer | null): File[] {
+  if (!data) {
+    return [];
+  }
+  const files = Array.from(data.files ?? []);
+  if (files.length > 0) {
+    return files;
+  }
+  return Array.from(data.items ?? [])
+    .filter((item) => item.kind === 'file')
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => file !== null);
+}
+
+/** A thumbnail for an image file; none for other files or where the browser cannot make one. */
+export function previewOf(file: File): string | null {
+  return file.type.startsWith('image/') &&
+    typeof URL.createObjectURL === 'function'
+    ? URL.createObjectURL(file)
+    : null;
+}
+
 /** Pasted images get a screenshot name; other pasted files keep theirs. */
 export function namePasted(files: File[], date: Date): File[] {
   let n = 0;
@@ -71,6 +99,7 @@ export function uploadsFromKeys(value: unknown): Upload[] {
       progress: 100,
       key,
       file: null,
+      preview: null,
     }));
 }
 

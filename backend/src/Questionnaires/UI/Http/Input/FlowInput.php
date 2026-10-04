@@ -34,4 +34,8 @@ class FlowInput
 
     #[OA\Property(nullable: true)]
     public ?string $detail = null;
+
+    /** @var list<string>|null */
+    #[OA\Property(description: 'Free-text labels ("AP-03"): trimmed, repeats (any case) dropped, at most 20 of at most 40 characters. Omitted on PUT: the questionnaire keeps its tags', items: new OA\Items(type: 'string', maxLength: 40), maxItems: 20)]
+    public ?array $tags = null;
 }

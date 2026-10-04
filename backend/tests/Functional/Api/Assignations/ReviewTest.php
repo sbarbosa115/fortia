@@ -85,6 +85,14 @@ final class ReviewTest extends ApiTestCase
 
         self::assertSame("Altas — Nombre: Ana; Correo: ana@acme.test\nBajas — Nombre: Luis", $answers[0]['answer'], 'PRD §10.11: a table answer shows its rows, not "not answered"');
         self::assertSame('Se usará nombre, Clave', $answers[1]['answer'], 'PRD §10.11: a choice shows the option labels, not their values');
+        self::assertSame([
+            'columns' => [['key' => 'nombre', 'label' => 'Nombre'], ['key' => 'correo', 'label' => 'Correo']],
+            'rows' => [
+                ['label' => 'Altas', 'cells' => ['nombre' => 'Ana', 'correo' => 'ana@acme.test']],
+                ['label' => 'Bajas', 'cells' => ['nombre' => 'Luis', 'correo' => '']],
+            ],
+        ], $answers[0]['answer_table'], 'a table answer is previewed as a table: its columns and its rows with their cells');
+        self::assertNull($answers[1]['answer_table'], 'only a table question has a structured table');
     }
 
     public function testOnlyACompleteFollowUpIsReviewed(): void

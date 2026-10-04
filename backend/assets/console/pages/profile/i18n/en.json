@@ -1,3 +1,8 @@
 {
-  "title": "Profile"
+  "title": "Profile",
+  "sections": "Profile sections",
+  "tabs": {
+    "settings": "Settings",
+    "system": "System"
+  }
 }

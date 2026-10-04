@@ -15,3 +15,8 @@ recovery:
     cta: 'Elegir una contraseña nueva'
     expires: 'El código vence en {minutes} minutos.'
     ignore: 'Si no pediste restablecer tu contraseña, ignora este correo: tu contraseña sigue igual.'
+smtp_check:
+    subject: 'Tu servidor SMTP de Mappi funciona'
+    title: 'Tu servidor SMTP está listo'
+    intro: 'Este correo pasó por {host}:{port}. Cuando esté guardado en Perfil › Sistema, los correos de tu cuenta saldrán por él.'
+    sender: 'Se enviarán desde {email}.'

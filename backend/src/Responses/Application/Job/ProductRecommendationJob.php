@@ -54,7 +54,7 @@ final class ProductRecommendationJob implements JobHandler
 
         $progress->stage('recommending_products');
         $catalog = $this->products->catalogFor($rootId, $session->customerId());
-        $chosen = [] === $catalog ? [] : $this->choose(AnswerValues::of($session->questions()), $catalog);
+        $chosen = [] === $catalog ? [] : $this->choose(AnswerValues::of($session->questions()), $catalog, $session->customerId());
 
         $progress->stage('saving');
         $this->commands->dispatch(new RecordRecommendation($sessionId, $chosen));
@@ -68,7 +68,7 @@ final class ProductRecommendationJob implements JobHandler
      *
      * @return list<array<string, mixed>>
      */
-    private function choose(array $answers, array $catalog): array
+    private function choose(array $answers, array $catalog, string $customerId): array
     {
         $byId = [];
         $listed = [];
@@ -95,7 +95,7 @@ final class ProductRecommendationJob implements JobHandler
         ];
 
         try {
-            $response = $this->llm->complete(LlmRequest::single(self::PURPOSE, $this->prompts->render(self::PURPOSE), $user, $schema, LlmRequest::TIER_FAST, ['catalog_ids' => array_keys($byId)]));
+            $response = $this->llm->complete(LlmRequest::single(self::PURPOSE, $this->prompts->render(self::PURPOSE), $user, $schema, LlmRequest::TIER_FAST, ['catalog_ids' => array_keys($byId)], $customerId));
         } catch (LlmUnavailable $e) {
             $this->logger->warning('Product recommendation failed: {message}', ['message' => $e->getMessage()]);
 

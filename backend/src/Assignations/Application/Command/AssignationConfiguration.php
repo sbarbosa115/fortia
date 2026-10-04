@@ -6,9 +6,7 @@ use App\Assignations\Domain\Audience;
 use App\Assignations\Domain\Error\AssignationInProject;
 use App\Assignations\Domain\Error\AudienceMemberNotInOrganization;
 use App\Assignations\Domain\Error\InvalidAssignation;
-use App\Assignations\Domain\Error\QuestionnaireAlreadyAssigned;
 use App\Assignations\Domain\Model\Assignation;
-use App\Assignations\Domain\Repository\AssignationRepository;
 use App\Organizations\Application\Query\OrganizationQueries;
 use App\Questionnaires\Application\Query\QuestionnaireQueries;
 use App\Shared\Application\Security\Caller;
@@ -21,7 +19,7 @@ use App\Shared\Domain\Error\NotFound;
  *
  * - the organization and the questionnaire exist and are the caller's (404 ORGANIZATION_NOT_FOUND /
  *   QUESTIONNAIRE_NOT_FOUND), and both belong to the assignation's account;
- * - a questionnaire is assigned to one organization only (409 QUESTIONNAIRE_ALREADY_ASSIGNED);
+ * - a questionnaire can be assigned to any number of organizations (each assignation keeps its own answers);
  * - the organization does not change while the assignation is in a project (400 ASSIGNATION_IN_PROJECT);
  * - changing the organization resets a `members` audience that was not sent again;
  * - the audience is valid and its members belong to the organization (400 AUDIENCE_MEMBER_NOT_IN_ORGANIZATION);
@@ -30,7 +28,6 @@ use App\Shared\Domain\Error\NotFound;
 final class AssignationConfiguration
 {
     public function __construct(
-        private readonly AssignationRepository $assignations,
         private readonly OrganizationQueries $organizations,
         private readonly QuestionnaireQueries $questionnaires,
     ) {
@@ -73,13 +70,6 @@ final class AssignationConfiguration
         if (null === $questionnaire || $questionnaire->customerId() !== $assignation->customerId()) {
             throw new NotFound('QUESTIONNAIRE_NOT_FOUND', 'The questionnaire does not exist.');
         }
-        foreach ($this->assignations->listByQuestionnaire($questionnaireId) as $other) {
-            if ($other->assignationsId() !== $assignation->assignationsId() && $other->organizationId() !== $organizationId) {
-                $owner = $this->organizations->find($other->organizationId());
-                throw new QuestionnaireAlreadyAssigned($other->organizationId(), (string) ($owner['name'] ?? ''));
-            }
-        }
-
         $audience = \array_key_exists('audience', $fields)
             ? Audience::normalize(\is_array($fields['audience']) ? $fields['audience'] : null)
             : $assignation->audience();

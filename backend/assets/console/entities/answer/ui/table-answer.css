@@ -1,0 +1,48 @@
+/* A table answer: scrolls inside its own box when it is wide, never the page. */
+.answer-table {
+  max-width: 100%;
+  overflow: auto;
+  border-radius: 6px;
+}
+.answer-table:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.answer-table table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+/* Specific enough to win over a surrounding house table's cells (.table th / .table td). */
+.answer-table table th,
+.answer-table table td {
+  padding: 4px 10px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+  white-space: normal;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: inherit;
+  min-width: 6ch;
+  max-width: 24ch;
+  overflow-wrap: break-word;
+  background: var(--color-surface);
+}
+.answer-table table th {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* A preview in a cell of another table: smaller and bounded (it scrolls both ways inside). */
+.answer-table--compact {
+  max-width: min(28rem, 70vw);
+  max-height: 10rem;
+}
+.answer-table--compact table {
+  font-size: 12px;
+}
+.answer-table--compact table th,
+.answer-table--compact table td {
+  padding: 2px 8px;
+}

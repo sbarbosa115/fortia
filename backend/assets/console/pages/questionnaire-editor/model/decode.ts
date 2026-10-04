@@ -215,6 +215,7 @@ export function decodeDraft(
     landingPage: questionnaire.landing_page,
     disclaimerOn: Boolean(questionnaire.disclaimer),
     disclaimer: questionnaire.disclaimer ?? '',
+    tags: questionnaire.tags ?? [],
     questions: questionnaire.questions.map((q) => decodeQuestion(q, kind)),
     captureUserData: questionnaire.capture_user_data,
     ctaOn: cta !== null,

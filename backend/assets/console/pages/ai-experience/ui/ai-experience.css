@@ -292,6 +292,13 @@
   align-items: center;
   gap: 6px;
 }
+.ai-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.ai-tags__label,
 .ai-tiers__label {
   font-size: 11.5px;
   font-weight: 500;

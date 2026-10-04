@@ -92,6 +92,58 @@ final class ProjectApiTest extends ApiTestCase
         $this->assertApiError($this->api('POST', self::URL, $body($org, [$taken]), as: $owner), 409, 'ASSIGNATION_IN_OTHER_PROJECT', 'PRD §7.12: an assignation belongs to only one project');
     }
 
+    public function testCreatingWithQuestionnairesMakesAFollowUpOfEachOne(): void
+    {
+        $owner = $this->account('ACME0001');
+        $org = $this->organization('ACME0001', 'Acme Retail');
+        $q1 = $this->questionnaire('ACME0001', type: 'default');
+        $q2 = $this->questionnaire('ACME0001', type: 'diagnostic');
+
+        $project = $this->data($this->api('POST', self::URL, [
+            'organization_id' => $org,
+            'name' => 'Q4 audits',
+            'due_date' => '2026-12-15',
+            'questionnaire_ids' => [$q1, $q2, strtoupper($q1)],
+            'registration_title' => 'Cuéntanos quién eres',
+        ], as: $owner), 201);
+
+        self::assertSame(2, $project['total_assignations'], 'the console wizard: one follow-up per questionnaire, deduplicated');
+        $names = array_column($project['assignations'], 'name');
+        sort($names);
+        self::assertSame(['Questionnaire default', 'Questionnaire diagnostic'], $names, 'each follow-up is named after its questionnaire');
+        foreach ($project['assignations'] as $item) {
+            $assignation = $this->storedAssignation($item['assignations_id']);
+            self::assertTrue($assignation->isFollowUp(), 'PRD §7.12: a project holds follow-ups');
+            self::assertSame($org, $assignation->organizationId());
+            self::assertSame('2026-12-15', $assignation->dueDate(), "the follow-up's due date is the assignation's deadline");
+            self::assertSame(['type' => 'all', 'values' => []], $assignation->audience(), 'everybody in the organization');
+            self::assertSame('Cuéntanos quién eres', $assignation->questions()[0]['title'], 'the registration slide in the console language');
+            self::assertSame(['name', 'email'], array_column($assignation->questions()[0]['options'], 'name'), 'PRD §10.11 default registration');
+        }
+    }
+
+    public function testCreatingWithQuestionnairesChecksEachOne(): void
+    {
+        $owner = $this->account('ACME0001');
+        $this->account('GLOBEX01');
+        $org = $this->organization('ACME0001', 'Acme');
+        $otherOrg = $this->organization('ACME0001', 'Acme Two');
+        $body = static fn (array $ids): array => ['organization_id' => $org, 'name' => 'P', 'due_date' => '2026-12-01', 'questionnaire_ids' => $ids];
+
+        $this->assertApiError($this->api('POST', self::URL, $body(['nope']), as: $owner), 400, 'VALIDATION_ERROR', 'questionnaire ids are UUIDs');
+        $this->assertApiError($this->api('POST', self::URL, $body([Ids::uuid4()]), as: $owner), 404, 'QUESTIONNAIRE_NOT_FOUND');
+        $theirs = $this->questionnaire('GLOBEX01');
+        $this->assertApiError($this->api('POST', self::URL, $body([$theirs]), as: $owner), 404, 'QUESTIONNAIRE_NOT_FOUND', "another account's questionnaire is 404");
+        self::assertSame(0, $this->data($this->api('GET', self::URL, as: $owner))['pagination']['total_items'], 'a refusal saves nothing');
+        $shared = $this->storedAssignation($this->followUp('ACME0001', $otherOrg, 'Elsewhere'))->questionnaireId();
+        $created = $this->data($this->api('POST', self::URL, $body([$shared]), as: $owner), 201);
+        $assigned = array_map(fn (array $item): string => $this->storedAssignation($item['assignations_id'])->questionnaireId(), $created['assignations']);
+        self::assertSame([$shared], $assigned, 'PRD §6.14: a questionnaire another organization has is assigned as is, never copied');
+
+        $project = $this->data($this->api('POST', self::URL, ['organization_id' => $org, 'name' => 'P', 'due_date' => '2026-12-01'], as: $owner), 201);
+        $this->assertApiError($this->api('PUT', self::URL.'/'.$project['project_id'], ['questionnaire_ids' => []], as: $owner), 400, 'VALIDATION_ERROR', 'questionnaire_ids only when creating');
+    }
+
     public function testAReadOnlyUserCannotChangeProjects(): void
     {
         $owner = $this->account('ACME0001');
@@ -327,6 +379,21 @@ final class ProjectApiTest extends ApiTestCase
         self::assertNull($partial['description']);
         self::assertSame('Audit 2', $partial['name'], 'a partial update keeps the rest');
         self::assertCount(2, $partial['assignations']);
+    }
+
+    public function testMovingTheDeadlineMovesTheDueDateOfItsFollowUps(): void
+    {
+        $owner = $this->account('ACME0001');
+        $org = $this->organization('ACME0001', 'Acme');
+        $a1 = $this->followUp('ACME0001', $org, 'One', dueDate: '2026-12-01');
+        $a2 = $this->followUp('ACME0001', $org, 'Two', dueDate: '2026-12-01');
+        $project = $this->project('ACME0001', $org, 'Audit', '2026-12-01', [$a1, $a2]);
+
+        $this->data($this->api('PUT', self::URL.'/'.$project, ['due_date' => '2027-02-01'], as: $owner));
+
+        foreach ([$a1, $a2] as $id) {
+            self::assertSame('2027-02-01', $this->storedAssignation($id)->dueDate(), "the console's assignation: its questionnaires are due on its deadline");
+        }
     }
 
     public function testUpdatingRefusesNullsAndAnotherOrganization(): void

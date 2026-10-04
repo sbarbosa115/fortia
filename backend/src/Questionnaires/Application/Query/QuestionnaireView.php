@@ -5,7 +5,7 @@ namespace App\Questionnaires\Application\Query;
 /**
  * A questionnaire as other contexts read it: $data has the PRD §6.5 shape (questionnaire_id, customer_id, title,
  * description, disclaimer, capture_user_data, landing_page, type, is_active, on_completed, parent,
- * origin_session_id, questions, question_count, is_chain, slug, created_at, updated_at).
+ * origin_session_id, questions, question_count, is_chain, slug, tags, created_at, updated_at).
  */
 final class QuestionnaireView
 {

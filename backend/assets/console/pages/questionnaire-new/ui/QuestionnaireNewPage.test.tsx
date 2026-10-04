@@ -15,6 +15,10 @@ function renderPage() {
             path="/questionnaires/new"
             element={<QuestionnaireNewPage />}
           />
+          <Route
+            path="/questionnaires/create/regular"
+            element={<p>{'at the regular editor'}</p>}
+          />
           <Route path="*" element={<p>{'at another page'}</p>} />
         </Routes>
       </MemoryRouter>
@@ -23,7 +27,7 @@ function renderPage() {
 }
 
 describe('QuestionnaireNewPage', () => {
-  it('offers the four types with their descriptions and labels', () => {
+  it('offers only the regular type, selected by default', () => {
     renderPage();
 
     expect(
@@ -34,27 +38,19 @@ describe('QuestionnaireNewPage', () => {
       'A classic questionnaire that ends with a custom thank-you message of your choice.',
     );
     expect(regular).toHaveTextContent('Default');
-    expect(screen.getByRole('radio', {name: /Diagnostic/})).toHaveTextContent(
-      'Best for assessments',
-    );
-    expect(screen.getByRole('radio', {name: /Quiz Funnel/})).toHaveTextContent(
-      'Imports from your store',
-    );
-    expect(screen.getByRole('radio', {name: /Chaining/})).toHaveTextContent(
-      'Best for AI generation',
-    );
+    expect(regular).toBeChecked();
+    expect(screen.getAllByRole('radio')).toHaveLength(1);
+    expect(screen.queryByText(/Diagnostic/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Quiz Funnel/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Chaining/)).not.toBeInTheDocument();
   });
 
-  it('opens the editor of the chosen type on Continue', async () => {
+  it('opens the regular editor on Continue', async () => {
     renderPage();
-
-    await userEvent.click(screen.getByRole('radio', {name: /Chaining/}));
-    expect(screen.getByRole('radio', {name: /Chaining/})).toBeChecked();
-    expect(screen.queryByText('at another page')).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', {name: /Continue/}));
 
-    expect(screen.getByText('at another page')).toBeInTheDocument();
+    expect(screen.getByText('at the regular editor')).toBeInTheDocument();
   });
 
   it('clears the selection with Back, which disables Continue', async () => {

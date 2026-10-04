@@ -34,14 +34,19 @@ final class FilesController
     ) {
     }
 
-    /** An ephemeral secret for one recording (~1 min, §13.4). P, rate limited. */
+    /**
+     * An ephemeral secret for one recording (~1 min, §13.4). P, rate limited. customer_id: the account of the session,
+     * whose own OpenAI key is used when it saved one.
+     */
     #[Route('/transcription/token', name: 'api_transcription_token', methods: ['GET'])]
+    #[OA\Parameter(name: 'customer_id', in: 'query', required: false, schema: new OA\Schema(type: 'string', pattern: '^[A-Za-z0-9]{1,16}$'))]
     #[OA\Response(response: 200, description: 'The token', content: new Model(type: TranscriptionTokenOutput::class))]
     #[OA\Response(response: 502, description: 'INTERNAL_ERROR (the provider did not issue one)')]
     public function transcriptionToken(Request $request): JsonResponse
     {
         $this->rateLimit->consume($request);
-        $token = $this->transcription->issue();
+        $customerId = $request->query->getString('customer_id');
+        $token = $this->transcription->issue(1 === preg_match('/^[A-Za-z0-9]{1,16}$/', $customerId) ? $customerId : null);
 
         return ApiResponse::ok(new TranscriptionTokenOutput($token->token, $token->provider, $token->expiresIn));
     }

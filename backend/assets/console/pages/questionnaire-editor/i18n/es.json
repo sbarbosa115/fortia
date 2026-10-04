@@ -65,7 +65,15 @@
     "beforeStart": "Antes de empezar",
     "disclaimerPlaceholder": "Escribe el aviso que los usuarios deben aceptar para continuar",
     "disclaimerRequired": "Escribe el texto del aviso para continuar.",
-    "movedNote": "Capturar datos del usuario y Call to action están en el último paso, junto a lo que se ve al terminar."
+    "movedNote": "Capturar datos del usuario y Call to action están en el último paso, junto a lo que se ve al terminar.",
+    "tagsLabel": "Etiquetas",
+    "tagsHint": "Etiquetas para encontrarlo después, p. ej. AP-03. Pulsa Enter o una coma para agregar una (hasta {{max}}).",
+    "tagsPlaceholder": "Escribe una etiqueta y pulsa Enter",
+    "removeTag": "Quitar la etiqueta {{tag}}",
+    "tagsErrors": {
+      "tooMany": "Un cuestionario tiene como máximo {{max}} etiquetas.",
+      "tooLong": "Una etiqueta tiene como máximo {{max}} caracteres."
+    }
   },
   "questions": {
     "title": "Preguntas",

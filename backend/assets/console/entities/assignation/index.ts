@@ -1,6 +1,5 @@
 export {
   fetchAssignations,
-  fetchAssignationOfQuestionnaire,
   fetchAssignation,
   createAssignation,
   updateAssignation,

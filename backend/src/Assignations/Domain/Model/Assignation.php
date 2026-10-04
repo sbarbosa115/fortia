@@ -115,6 +115,15 @@ class Assignation
         $this->updatedAt = $at;
     }
 
+    /** A follow-up's due date follows its project's deadline; other types have none. */
+    public function moveDueDate(string $dueDate, \DateTimeImmutable $at): void
+    {
+        if (self::FOLLOW_UP === $this->type && $dueDate !== $this->dueDate) {
+            $this->dueDate = $dueDate;
+            $this->updatedAt = $at;
+        }
+    }
+
     public function joinProject(?string $projectId, \DateTimeImmutable $at): void
     {
         $this->projectId = $projectId;

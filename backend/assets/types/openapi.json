@@ -43,6 +43,26 @@
                 }
             }
         },
+        "/api/v1/questionnaire/tags": {
+            "get": {
+                "tags": [
+                    "Questionnaires"
+                ],
+                "operationId": "get_api_questionnaire_tags",
+                "responses": {
+                    "200": {
+                        "description": "Every tag of the account's questionnaires once, sorted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuestionnaireTagsOutput"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/assignations": {
             "get": {
                 "tags": [
@@ -139,9 +159,6 @@
                     },
                     "404": {
                         "description": "ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
-                    },
-                    "409": {
-                        "description": "QUESTIONNAIRE_ALREADY_ASSIGNED (details: organization_id, organization_name)"
                     }
                 }
             }
@@ -226,9 +243,6 @@
                     },
                     "404": {
                         "description": "ASSIGNATION_NOT_FOUND, ORGANIZATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
-                    },
-                    "409": {
-                        "description": "QUESTIONNAIRE_ALREADY_ASSIGNED"
                     }
                 }
             },
@@ -542,6 +556,7 @@
                 "tags": [
                     "Projects"
                 ],
+                "summary": "questionnaire_ids: each one becomes a new follow-up of the organization (the console's assignation wizard).",
                 "operationId": "post_api_projects_create",
                 "requestBody": {
                     "content": {
@@ -570,7 +585,7 @@
                         "description": "FORBIDDEN"
                     },
                     "404": {
-                        "description": "ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND"
+                        "description": "ORGANIZATION_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
                     },
                     "409": {
                         "description": "ASSIGNATION_IN_OTHER_PROJECT"
@@ -2030,6 +2045,128 @@
                 }
             }
         },
+        "/api/v1/customer/{customer_id}/system-settings": {
+            "get": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "get_api_system_settings_get",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[A-Za-z0-9]{1,16}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SystemSettings",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SystemSettingsOutput"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "UNAUTHORIZED"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "AG.",
+                "operationId": "patch_api_system_settings_patch",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[A-Za-z0-9]{1,16}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SystemSettings after the change",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SystemSettingsOutput"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    },
+                    "422": {
+                        "description": "INVALID_SMTP_SERVER"
+                    }
+                }
+            }
+        },
+        "/api/v1/customer/{customer_id}/system-settings/smtp-check": {
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "summary": "AG. Sends a test email through the form's server to the user who asked (rate limited). Nothing is saved.",
+                "operationId": "post_api_system_settings_smtp_check",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "[A-Za-z0-9]{1,16}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The test email was accepted by the server"
+                    },
+                    "400": {
+                        "description": "VALIDATION_ERROR"
+                    },
+                    "403": {
+                        "description": "FORBIDDEN"
+                    },
+                    "404": {
+                        "description": "CUSTOMER_NOT_FOUND"
+                    },
+                    "422": {
+                        "description": "INVALID_SMTP_SERVER"
+                    },
+                    "429": {
+                        "description": "TOO_MANY_ATTEMPTS"
+                    },
+                    "502": {
+                        "description": "SMTP_CHECK_FAILED (details.reason: connection, tls, authentication, blocked, refused)"
+                    }
+                }
+            }
+        },
         "/api/v1/users": {
             "get": {
                 "tags": [
@@ -2407,6 +2544,15 @@
                         "schema": {
                             "type": "string",
                             "maxLength": 200
+                        }
+                    },
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "description": "One of the questionnaire's tags, whole, ignoring case and accents",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 40
                         }
                     }
                 ],
@@ -2859,8 +3005,19 @@
                 "tags": [
                     "Files and transcription"
                 ],
-                "summary": "An ephemeral secret for one recording (~1 min, \u00a713.4). P, rate limited.",
+                "summary": "An ephemeral secret for one recording (~1 min, \u00a713.4). P, rate limited. customer_id: the account of the session,\nwhose own OpenAI key is used when it saved one.",
                 "operationId": "get_api_transcription_token",
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9]{1,16}$"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "The token",
@@ -3808,6 +3965,14 @@
                     "updated_at": {
                         "type": "string",
                         "nullable": true
+                    },
+                    "tags": {
+                        "description": "The owner's free-text labels",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": []
                     }
                 },
                 "type": "object"
@@ -4350,6 +4515,20 @@
                 },
                 "type": "object"
             },
+            "QuestionnaireTagsOutput": {
+                "required": [
+                    "tags"
+                ],
+                "properties": {
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "AudienceOutput": {
                 "required": [
                     "type",
@@ -4369,6 +4548,60 @@
                         "type": "array",
                         "items": {
                             "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "TableAnswerColumnOutput": {
+                "required": [
+                    "key",
+                    "label"
+                ],
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "TableAnswerRowOutput": {
+                "required": [
+                    "cells"
+                ],
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "cells": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "TableAnswerOutput": {
+                "required": [
+                    "columns",
+                    "rows"
+                ],
+                "properties": {
+                    "columns": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TableAnswerColumnOutput"
+                        }
+                    },
+                    "rows": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TableAnswerRowOutput"
                         }
                     }
                 },
@@ -4402,6 +4635,15 @@
                         "title": "The answer as text (option labels, \"7 / 10\", file names); null when unanswered.",
                         "type": "string",
                         "nullable": true
+                    },
+                    "answer_table": {
+                        "title": "A table question's answer as a table (its columns and rows); null for other questions or when unanswered.",
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TableAnswerOutput"
+                            }
+                        ]
                     },
                     "skipped": {
                         "type": "boolean"
@@ -5230,6 +5472,20 @@
                             "type": "string"
                         },
                         "nullable": true
+                    },
+                    "questionnaire_ids": {
+                        "title": "create only: each one becomes a new follow-up of the organization",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "registration_title": {
+                        "title": "Create only: the title of the new follow-ups' registration slide, in the console's language.",
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200
                     }
                 },
                 "type": "object"
@@ -5598,6 +5854,14 @@
                         "description": "Chains: the instructions that generate the next stage",
                         "type": "string",
                         "nullable": true
+                    },
+                    "tags": {
+                        "description": "Free-text labels the user asked for (\"AP-03\")",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": []
                     }
                 },
                 "type": "object"
@@ -6483,6 +6747,56 @@
                 },
                 "type": "object"
             },
+            "SystemSettingsOutput": {
+                "required": [
+                    "smtp_password_set",
+                    "openai_api_key_set"
+                ],
+                "properties": {
+                    "smtp_host": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "smtp_port": {
+                        "type": "integer",
+                        "nullable": true,
+                        "maximum": 65535,
+                        "minimum": 1
+                    },
+                    "smtp_encryption": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "tls",
+                            "ssl",
+                            "none"
+                        ]
+                    },
+                    "smtp_username": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "smtp_password_set": {
+                        "type": "boolean"
+                    },
+                    "smtp_from_email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "smtp_from_name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "openai_api_key_set": {
+                        "type": "boolean"
+                    },
+                    "openai_api_key_last4": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "UserOutput": {
                 "required": [
                     "email",
@@ -6709,7 +7023,8 @@
                     "capture_user_data",
                     "question_count",
                     "is_chain",
-                    "type"
+                    "type",
+                    "tags"
                 ],
                 "properties": {
                     "questionnaire_id": {
@@ -6786,6 +7101,13 @@
                             "diagnostic",
                             "prompt"
                         ]
+                    },
+                    "tags": {
+                        "description": "The owner's free-text labels",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "type": "object"
@@ -6873,6 +7195,16 @@
                     "detail": {
                         "type": "string",
                         "nullable": true
+                    },
+                    "tags": {
+                        "description": "Free-text labels (\"AP-03\"): trimmed, repeats (any case) dropped, at most 20 of at most 40 characters. Omitted on PUT: the questionnaire keeps its tags",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 40
+                        },
+                        "nullable": true,
+                        "maxItems": 20
                     }
                 },
                 "type": "object"
@@ -6926,6 +7258,16 @@
                     "detail": {
                         "type": "string",
                         "nullable": true
+                    },
+                    "tags": {
+                        "description": "Free-text labels (\"AP-03\"): trimmed, repeats (any case) dropped, at most 20 of at most 40 characters. Omitted on PUT: the questionnaire keeps its tags",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 40
+                        },
+                        "nullable": true,
+                        "maxItems": 20
                     }
                 },
                 "type": "object"
@@ -7851,6 +8193,9 @@
             "name": "Flows"
         },
         {
+            "name": "Questionnaires"
+        },
+        {
             "name": "Assignations"
         },
         {
@@ -7891,9 +8236,6 @@
         },
         {
             "name": "Organizations"
-        },
-        {
-            "name": "Questionnaires"
         },
         {
             "name": "Reporting"

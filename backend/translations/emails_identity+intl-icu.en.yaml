@@ -15,3 +15,8 @@ recovery:
     cta: 'Choose a new password'
     expires: 'The code expires in {minutes} minutes.'
     ignore: "If you didn't ask to reset your password, you can ignore this email: your password stays the same."
+smtp_check:
+    subject: 'Your Mappi SMTP server works'
+    title: 'Your SMTP server is ready'
+    intro: 'This email went through {host}:{port}. Once it is saved in Profile › System, your account''s emails go through it.'
+    sender: 'They will be sent from {email}.'
