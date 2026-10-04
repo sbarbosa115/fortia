@@ -22,7 +22,10 @@
     "question": "Choose one or more questionnaires",
     "search": "Search by name…",
     "tagLabel": "Filter by tag",
-    "allTags": "All",
+    "tagSearch": "Search a tag…",
+    "noTags": "No tags yet",
+    "noTagMatches": "No tag matches",
+    "clearTag": "Clear tag",
     "tags": "Tags",
     "listLabel": "Questionnaires",
     "types": {

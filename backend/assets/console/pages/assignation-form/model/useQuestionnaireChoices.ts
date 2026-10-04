@@ -21,6 +21,7 @@ const BATCH = 20;
  */
 export function useQuestionnaireChoices() {
   const [search, setSearch] = useState('');
+  const [tagQuery, setTagQuery] = useState('');
   const [tag, setTag] = useState<string | null>(null);
   const term = useDebouncedValue(search.trim(), 300);
   const tagsQuery = useQuery({
@@ -58,11 +59,15 @@ export function useQuestionnaireChoices() {
     setSearch,
     /** The account's tags to filter by; empty while they load or when no questionnaire has one. */
     tags: tagsQuery.data?.tags ?? [],
+    /** The text typed in the tag field; only a picked tag filters. */
+    tagQuery,
+    setTagQuery,
     tag,
     setTag,
     filtered: search.trim() !== '' || tag !== null,
     clearFilters: () => {
       setSearch('');
+      setTagQuery('');
       setTag(null);
     },
     items,

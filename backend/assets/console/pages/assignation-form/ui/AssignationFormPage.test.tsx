@@ -190,8 +190,20 @@ describe('AssignationFormPage', () => {
       screen.queryByRole('button', {name: 'Regular'}),
       'there is no type filter',
     ).not.toBeInTheDocument();
-    const tags = screen.getByRole('group', {name: 'Filter by tag'});
-    await userEvent.click(within(tags).getByRole('button', {name: 'AP-03'}));
+    const tagField = screen.getByRole('combobox', {name: 'Filter by tag'});
+    await userEvent.type(tagField, 'ap');
+    const options = screen.getByRole('listbox', {name: 'Tags'});
+    expect(
+      within(options)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+      'the tag field lists the account tags that contain the text',
+    ).toEqual(['AP-03']);
+    expect(fetchQuestionnaires).not.toHaveBeenLastCalledWith(
+      expect.objectContaining({tag: 'ap'}),
+    );
+    await userEvent.keyboard('{ArrowDown}{Enter}');
+    expect(tagField).toHaveValue('AP-03');
     await waitFor(() =>
       expect(fetchQuestionnaires).toHaveBeenLastCalledWith(
         expect.objectContaining({search: 'warehouse', tag: 'AP-03'}),
@@ -204,6 +216,17 @@ describe('AssignationFormPage', () => {
     expect(
       await screen.findByRole('checkbox', {name: /Store audit/}),
     ).toBeInTheDocument();
+    expect(tagField).toHaveValue('');
+  });
+
+  it('keeps the tag field visible but disabled, with the reason, when no questionnaire has tags', async () => {
+    vi.mocked(fetchQuestionnaireTags).mockResolvedValue({tags: []});
+    renderPage();
+    await screen.findByRole('checkbox', {name: /Store audit/});
+
+    const tagField = screen.getByRole('combobox', {name: 'Filter by tag'});
+    expect(tagField).toBeDisabled();
+    expect(tagField).toHaveAttribute('placeholder', 'No tags yet');
   });
 
   it('creates the assignation for the organization with the name and the deadline', async () => {

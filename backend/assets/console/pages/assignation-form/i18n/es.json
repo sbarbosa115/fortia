@@ -22,7 +22,10 @@
     "question": "Elige uno o varios cuestionarios",
     "search": "Buscar por nombre…",
     "tagLabel": "Filtrar por etiqueta",
-    "allTags": "Todas",
+    "tagSearch": "Buscar una etiqueta…",
+    "noTags": "Aún no hay etiquetas",
+    "noTagMatches": "Ninguna etiqueta coincide",
+    "clearTag": "Quitar etiqueta",
     "tags": "Etiquetas",
     "listLabel": "Cuestionarios",
     "types": {

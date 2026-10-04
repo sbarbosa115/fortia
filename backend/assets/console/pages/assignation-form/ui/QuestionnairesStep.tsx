@@ -4,11 +4,11 @@ import type {UIEvent} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {AssignationWizardState} from '../model/useAssignationWizard';
 import {useQuestionnaireChoices} from '../model/useQuestionnaireChoices';
+import {TagFilter} from './TagFilter';
 
 /**
  * Step 1: the questionnaires the organization will answer — one checkbox each, searched by name and filtered by
- * one of the account's tags (the chips show only when some questionnaire has tags). A questionnaire without questions
- * can't be picked.
+ * one of the account's tags, searched in its own field. A questionnaire without questions can't be picked.
  */
 export function QuestionnairesStep({wizard}: {wizard: AssignationWizardState}) {
   const {t} = useTranslation('pages.assignation-form');
@@ -45,46 +45,28 @@ export function QuestionnairesStep({wizard}: {wizard: AssignationWizardState}) {
         ) : null}
       </div>
 
-      <label className="asg-wiz__search">
-        <span className="visually-hidden">{t('questionnaires.search')}</span>
-        <Icon name="search" size={16} />
-        <input
-          type="search"
-          className="asg-wiz__input asg-wiz__input--search"
-          value={choices.search}
-          onChange={(event) => choices.setSearch(event.target.value)}
-          placeholder={t('questionnaires.search')}
-          autoComplete="off"
-        />
-      </label>
+      <div className="asg-wiz__finders">
+        <label className="asg-wiz__search">
+          <span className="visually-hidden">{t('questionnaires.search')}</span>
+          <Icon name="search" size={16} />
+          <input
+            type="search"
+            className="asg-wiz__input asg-wiz__input--search"
+            value={choices.search}
+            onChange={(event) => choices.setSearch(event.target.value)}
+            placeholder={t('questionnaires.search')}
+            autoComplete="off"
+          />
+        </label>
 
-      {choices.tags.length > 0 ? (
-        <div
-          role="group"
-          aria-label={t('questionnaires.tagLabel')}
-          className="asg-wiz__filters"
-        >
-          <button
-            type="button"
-            className="asg-wiz__filter"
-            aria-pressed={choices.tag === null}
-            onClick={() => choices.setTag(null)}
-          >
-            {t('questionnaires.allTags')}
-          </button>
-          {choices.tags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              className="asg-wiz__filter"
-              aria-pressed={choices.tag === tag}
-              onClick={() => choices.setTag(tag)}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      ) : null}
+        <TagFilter
+          tags={choices.tags}
+          query={choices.tagQuery}
+          onQueryChange={choices.setTagQuery}
+          tag={choices.tag}
+          onTagChange={choices.setTag}
+        />
+      </div>
 
       {choices.loading ? (
         <p className="asg-wiz__loading">

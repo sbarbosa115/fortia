@@ -1010,39 +1010,6 @@
 }
 
 /* Step 1: the tag filter and the questionnaire checklist */
-.asg-wiz__filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.asg-wiz__filter {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  background: var(--color-surface);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text);
-  cursor: pointer;
-}
-.asg-wiz__filter:hover {
-  background: var(--color-bg);
-}
-.asg-wiz__filter[aria-pressed='true'] {
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-  color: var(--color-primary);
-  font-weight: 600;
-}
-.asg-wiz__filter:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--color-primary) 30%, transparent);
-}
 .asg-wiz__check input {
   flex-shrink: 0;
   width: 18px;
@@ -1086,4 +1053,86 @@
 }
 .asg-wiz__date {
   max-width: 220px;
+}
+
+/* Step 1: the name search and the tag search, side by side */
+.asg-wiz__finders {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .asg-wiz__finders {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.asg-wiz__tag-filter {
+  position: relative;
+}
+.asg-wiz__tag-filter .asg-wiz__input--search {
+  padding-right: 40px;
+}
+.asg-wiz__tag-filter .asg-wiz__input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.asg-wiz__tag-clear {
+  position: absolute;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.asg-wiz__tag-clear:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+.asg-wiz__tag-clear:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+.asg-wiz__tag-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+}
+.asg-wiz__tag-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.asg-wiz__tag-option[data-active] {
+  background: var(--color-bg);
+}
+.asg-wiz__tag-option[aria-selected='true'] {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.asg-wiz__tag-none {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--color-text-muted);
 }
