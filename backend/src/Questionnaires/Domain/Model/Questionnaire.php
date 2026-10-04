@@ -2,6 +2,7 @@
 
 namespace App\Questionnaires\Domain\Model;
 
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Document\Questions;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,7 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  * questions are a JSON document (Shared\Domain\Document\Questions). The generated stages of a chain point to their
  * root through $parent and to the session that produced them through $originSessionId.
  *
- * question_count, is_chain and slug are denormalized copies for listings.
+ * question_count, is_chain and slug are denormalized copies for listings. Tags are the owner's free-text labels
+ * (Shared\Domain\Document\QuestionnaireTags).
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'questionnaire')]
@@ -59,6 +61,10 @@ class Questionnaire
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $slug = null;
+
+    /** @var list<string> */
+    #[ORM\Column(type: Types::JSON)]
+    private array $tags = [];
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $updatedAt;
@@ -129,6 +135,17 @@ class Questionnaire
     {
         $this->parent = $rootQuestionnaireId;
         $this->originSessionId = $originSessionId;
+    }
+
+    /**
+     * Replaces the tags, normalized (trimmed, without empties or repeats).
+     *
+     * @throws \App\Shared\Domain\Error\Rejected VALIDATION_ERROR: more than 20 tags, or one over 40 characters
+     */
+    public function retag(mixed $tags, \DateTimeImmutable $at): void
+    {
+        $this->tags = QuestionnaireTags::normalize($tags);
+        $this->updatedAt = $at;
     }
 
     public function setActive(bool $active, \DateTimeImmutable $at): void
@@ -229,6 +246,12 @@ class Questionnaire
     public function slug(): ?string
     {
         return $this->slug;
+    }
+
+    /** @return list<string> */
+    public function tags(): array
+    {
+        return QuestionnaireTags::fromStored($this->tags);
     }
 
     public function createdAt(): \DateTimeImmutable

@@ -37,7 +37,7 @@ final class QuestionnaireListTest extends ApiTestCase
         $item = $this->data($this->api('GET', '/api/v1/questionnaire', as: $owner))['items'][0];
 
         self::assertSame(
-            ['questionnaire_id', 'customer_id', 'parent', 'origin_session_id', 'title', 'description', 'created_at', 'updated_at', 'is_active', 'on_completed', 'status', 'landing_page', 'capture_user_data', 'question_count', 'is_chain', 'slug', 'type'],
+            ['questionnaire_id', 'customer_id', 'parent', 'origin_session_id', 'title', 'description', 'created_at', 'updated_at', 'is_active', 'on_completed', 'status', 'landing_page', 'capture_user_data', 'question_count', 'is_chain', 'slug', 'type', 'tags'],
             array_keys($item),
             'PRD §8.4: the item fields, and no questions',
         );

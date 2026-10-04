@@ -124,6 +124,7 @@ final class QuestionnaireQueries
             'question_count' => $q->questionCount(),
             'is_chain' => $q->isChain(),
             'slug' => $q->slug(),
+            'tags' => $q->tags(),
             'questions' => $q->questions(),
             'created_at' => Iso::datetime($q->createdAt()),
             'updated_at' => Iso::datetime($q->updatedAt()),

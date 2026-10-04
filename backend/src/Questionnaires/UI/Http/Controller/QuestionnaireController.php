@@ -20,6 +20,7 @@ use App\Questionnaires\UI\Http\Output\QuestionnaireListItemOutput;
 use App\Questionnaires\UI\Http\Output\QuestionnaireListOutput;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\Caller;
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Error\NotAllowed;
 use App\Shared\UI\Http\Output\Document\QuestionnaireOutput;
 use App\Shared\UI\Http\Request\Payload;
@@ -85,6 +86,7 @@ final class QuestionnaireController
             $input->layout,
             $input->result_copy,
             detail: $input->detail,
+            tags: $input->tags,
         ));
 
         return ApiResponse::created(new QuestionnaireIdOutput($id));
@@ -113,6 +115,7 @@ final class QuestionnaireController
             $input->result_copy,
             (string) $questionnaire['questionnaire_id'],
             $input->detail,
+            tags: $input->tags,
         ));
 
         return ApiResponse::ok(null, 'Saved');
@@ -194,6 +197,9 @@ final class QuestionnaireController
 
     private static function draft(FlowInput $input): FlowDraft
     {
-        return FlowDraft::parse((array) $input->states, $input->slug, $input->cta, $input->layout, $input->result_copy);
+        $draft = FlowDraft::parse((array) $input->states, $input->slug, $input->cta, $input->layout, $input->result_copy);
+        QuestionnaireTags::normalize($input->tags);
+
+        return $draft;
     }
 }

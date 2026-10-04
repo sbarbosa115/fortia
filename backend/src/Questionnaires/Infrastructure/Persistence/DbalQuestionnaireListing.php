@@ -4,6 +4,7 @@ namespace App\Questionnaires\Infrastructure\Persistence;
 
 use App\Questionnaires\Application\Query\ListingCriteria;
 use App\Questionnaires\Application\Query\QuestionnaireListing;
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Iso;
 use App\Shared\Domain\Text;
 use Doctrine\DBAL\Connection;
@@ -17,7 +18,7 @@ use Doctrine\DBAL\Query\QueryBuilder;
  */
 final class DbalQuestionnaireListing implements QuestionnaireListing
 {
-    private const COLUMNS = 'q.questionnaire_id, q.customer_id, q.parent, q.origin_session_id, q.title, q.description, q.created_at, q.updated_at, q.is_active, q.on_completed, q.landing_page, q.capture_user_data, q.question_count, q.is_chain, q.slug, q.type';
+    private const COLUMNS = 'q.questionnaire_id, q.customer_id, q.parent, q.origin_session_id, q.title, q.description, q.created_at, q.updated_at, q.is_active, q.on_completed, q.landing_page, q.capture_user_data, q.question_count, q.is_chain, q.slug, q.type, q.tags';
     private const KIND = "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(q.on_completed, '$.type')), CASE WHEN q.type = 'diagnostic' THEN 'diagnostic' WHEN q.type IN ('quiz_funnel', 'ecommerce') THEN 'quiz_funnel' ELSE 'default' END)";
 
     public function __construct(private readonly Connection $connection)
@@ -103,6 +104,7 @@ final class DbalQuestionnaireListing implements QuestionnaireListing
             'is_chain' => (bool) $row['is_chain'],
             'slug' => null === $row['slug'] ? null : (string) $row['slug'],
             'type' => (string) $row['type'],
+            'tags' => QuestionnaireTags::fromStored($row['tags']),
         ];
     }
 

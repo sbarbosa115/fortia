@@ -2,6 +2,7 @@
 
 namespace App\Questionnaires\UI\Http\Output;
 
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Document\QuestionnaireType;
 use App\Shared\UI\Http\Output\Document\OnCompletedOutput;
 use OpenApi\Attributes as OA;
@@ -30,6 +31,9 @@ final class QuestionnaireListItemOutput
         public readonly ?string $slug,
         #[OA\Property(enum: QuestionnaireType::VALUES)]
         public readonly string $type,
+        /** @var list<string> */
+        #[OA\Property(description: 'The owner\'s free-text labels', type: 'array', items: new OA\Items(type: 'string'))]
+        public readonly array $tags,
     ) {
     }
 
@@ -54,6 +58,7 @@ final class QuestionnaireListItemOutput
             (bool) $row['is_chain'],
             isset($row['slug']) ? (string) $row['slug'] : null,
             (string) $row['type'],
+            QuestionnaireTags::fromStored($row['tags'] ?? null),
         );
     }
 }

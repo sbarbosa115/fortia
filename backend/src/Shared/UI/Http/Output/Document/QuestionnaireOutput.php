@@ -2,6 +2,7 @@
 
 namespace App\Shared\UI\Http\Output\Document;
 
+use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Document\QuestionnaireType;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
@@ -9,7 +10,10 @@ use OpenApi\Attributes as OA;
 /** A full questionnaire (PRD §6.5, §8.4 GET /questionnaire/{id}). */
 final class QuestionnaireOutput
 {
-    /** @param list<QuestionOutput> $questions */
+    /**
+     * @param list<QuestionOutput> $questions
+     * @param list<string>         $tags
+     */
     public function __construct(
         public readonly string $questionnaire_id,
         public readonly string $customer_id,
@@ -35,6 +39,8 @@ final class QuestionnaireOutput
         public readonly array $questions,
         public readonly ?string $created_at,
         public readonly ?string $updated_at,
+        #[OA\Property(description: 'The owner\'s free-text labels', type: 'array', items: new OA\Items(type: 'string'))]
+        public readonly array $tags = [],
     ) {
     }
 
@@ -65,6 +71,7 @@ final class QuestionnaireOutput
             QuestionOutput::list((array) ($q['questions'] ?? [])),
             isset($q['created_at']) ? (string) $q['created_at'] : null,
             isset($q['updated_at']) ? (string) $q['updated_at'] : null,
+            QuestionnaireTags::fromStored($q['tags'] ?? null),
         );
     }
 }
