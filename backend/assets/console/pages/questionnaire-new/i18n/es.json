@@ -1,28 +1,13 @@
 {
   "eyebrow": "Nuevo Cuestionario",
   "title": "¿Qué quieres crear?",
-  "subtitle": "Elige un tipo: lo configuras a la izquierda y ves el resultado en vivo a la derecha.",
+  "subtitle": "Lo configuras a la izquierda y ves el resultado en vivo a la derecha.",
   "defaultBadge": "Predeterminado",
   "cards": {
     "regular": {
       "title": "Regular",
       "body": "Un cuestionario clásico que termina con un mensaje de agradecimiento personalizado.",
       "label": "Ideal para encuestas"
-    },
-    "diagnostic": {
-      "title": "Diagnóstico",
-      "body": "Califica a cada persona y ubícala en niveles, cada uno con su propio resultado y plan de acción.",
-      "label": "Ideal para evaluaciones"
-    },
-    "quizFunnel": {
-      "title": "Quiz Funnel",
-      "body": "Convierte a los visitantes de tu tienda en compradores con un quiz guiado que recomienda el producto ideal al final.",
-      "label": "Importa desde tu tienda"
-    },
-    "chaining": {
-      "title": "Encadenamiento",
-      "body": "Agrega tus preguntas y un prompt; las respuestas y el prompt se usan para generar un cuestionario a medida.",
-      "label": "Ideal para generación con IA"
     }
   }
 }

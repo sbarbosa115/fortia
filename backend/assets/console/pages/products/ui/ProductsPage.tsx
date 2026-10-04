@@ -27,20 +27,19 @@ import {
   Table,
 } from '@shared/ui';
 import {useTranslation} from 'react-i18next';
-import {useNavigate} from 'react-router';
 import {PAGE_SIZE, useProducts} from '../model/useProducts';
 import {ProductFormModal} from './ProductFormModal';
 import './products.css';
 
 /**
  * /products, a hidden screen (PRD §10.19): the account's product catalog with its CRUD, the e-commerce platform card
- * (Authorize, Install, "Sync Products Now") and "Create Experience", which creates a quiz funnel.
+ * (Authorize, Install, "Sync Products Now"). The console no longer creates quiz funnels, so there is no "Create
+ * Experience" here.
  */
 export function ProductsPage() {
   const {t} = useTranslation('pages.products');
   const {t: tShared} = useTranslation('shared');
   useDocumentTitle(`Mappi - ${t('title')}`);
-  const navigate = useNavigate();
   const state = useProducts();
   const shopify = useShopifyConnection(null);
 
@@ -51,16 +50,6 @@ export function ProductsPage() {
       onClick={state.startCreate}
     >
       {t('new')}
-    </Button>
-  );
-  const experienceButton = (
-    <Button
-      variant="primary"
-      icon={<Icon name="sparkles" size={16} />}
-      disabledReason={state.funnelReason}
-      onClick={() => navigate('/questionnaires/create/quizfunnel')}
-    >
-      {t('createExperience')}
     </Button>
   );
 
@@ -193,12 +182,7 @@ export function ProductsPage() {
       <PageHeader
         title={t('title')}
         subtitle={t('subtitle')}
-        actions={
-          <>
-            {newButton}
-            {experienceButton}
-          </>
-        }
+        actions={newButton}
       />
       <ShopifyCard state={shopify} />
       <FilterBar>

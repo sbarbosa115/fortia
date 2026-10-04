@@ -95,8 +95,8 @@ describe('ProductsPage (PRD §10.19)', () => {
     expect(screen.getByText('mugs.example.com')).toBeInTheDocument();
     expect(document.querySelector('script')).toBeNull();
     expect(
-      screen.getByRole('button', {name: 'Create Experience'}),
-    ).toBeEnabled();
+      screen.queryByRole('button', {name: 'Create Experience'}),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole('heading', {name: 'Shopify'})).toBeInTheDocument();
   });
 
