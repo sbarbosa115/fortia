@@ -7,6 +7,9 @@ import {
   smtpPatch,
 } from './systemForm';
 
+// A made-up fixture, not a credential.
+const TYPED = 'typed-in-the-form';
+
 const SAVED: SystemSettings = {
   smtp_host: 'smtp.acme.test',
   smtp_port: 587,
@@ -72,9 +75,7 @@ describe('the SMTP form', () => {
   it('sends the password only when one is typed, so the saved one is kept', () => {
     const form = smtpFormFrom(SAVED);
     expect(smtpPatch(form)).not.toHaveProperty('smtp_password');
-    expect(smtpPatch({...form, password: 'new-pass'}).smtp_password).toBe(
-      'new-pass',
-    );
+    expect(smtpPatch({...form, password: TYPED}).smtp_password).toBe(TYPED);
   });
 
   it('sends the server with a numeric port and empty optional fields as null', () => {

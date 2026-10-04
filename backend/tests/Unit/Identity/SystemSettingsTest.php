@@ -9,7 +9,10 @@ use PHPUnit\Framework\TestCase;
 
 final class SystemSettingsTest extends TestCase
 {
-    private function smtp(string $host = 'smtp.acme.test', int $port = 587, string $encryption = 'tls', ?string $username = 'mailer', ?string $password = 'sealed', string $fromEmail = 'hello@acme.test', ?string $fromName = 'Acme'): SmtpConfiguration
+    /** Stands for a SecretBox-sealed value; a made-up fixture. */
+    private const SEALED = 'sealed-fixture';
+
+    private function smtp(string $host = 'smtp.acme.test', int $port = 587, string $encryption = 'tls', ?string $username = 'mailer', ?string $password = self::SEALED, string $fromEmail = 'hello@acme.test', ?string $fromName = 'Acme'): SmtpConfiguration
     {
         return new SmtpConfiguration($host, $port, $encryption, $username, $password, $fromEmail, $fromName);
     }

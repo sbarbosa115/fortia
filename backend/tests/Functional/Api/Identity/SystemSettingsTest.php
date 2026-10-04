@@ -15,12 +15,15 @@ use Symfony\Component\Mime\Address;
  */
 final class SystemSettingsTest extends ApiTestCase
 {
+    /** A made-up fixture, not a credential. */
+    private const FIXTURE_SMTP_PASS = 'fixture-value-for-tests';
+
     private const SERVER = [
         'smtp_host' => 'smtp.acme.test',
         'smtp_port' => 587,
         'smtp_encryption' => 'tls',
         'smtp_username' => 'mailer@acme.test',
-        'smtp_password' => 'smtp-secret-pass',
+        'smtp_password' => self::FIXTURE_SMTP_PASS,
         'smtp_from_email' => 'hello@acme.test',
         'smtp_from_name' => 'Acme',
     ];
@@ -58,10 +61,10 @@ final class SystemSettingsTest extends ApiTestCase
         self::assertSame('smtp.acme.test', $saved['smtp_host']);
         self::assertSame(587, $saved['smtp_port']);
         self::assertTrue($saved['smtp_password_set'], 'the console knows a password is saved');
-        self::assertStringNotContainsString('smtp-secret-pass', json_encode($saved) ?: '', 'the password is never returned');
+        self::assertStringNotContainsString(self::FIXTURE_SMTP_PASS, json_encode($saved) ?: '', 'the password is never returned');
         $row = $this->em()->getConnection()->fetchAssociative('SELECT smtp_password FROM customer_system_settings WHERE customer_id = ?', ['ACME0001']);
         self::assertIsArray($row);
-        self::assertStringNotContainsString('smtp-secret-pass', (string) $row['smtp_password'], 'the password is stored encrypted');
+        self::assertStringNotContainsString(self::FIXTURE_SMTP_PASS, (string) $row['smtp_password'], 'the password is stored encrypted');
     }
 
     public function testAFieldNotSentKeepsItsValueAndAnEmptyHostRemovesTheServer(): void
@@ -142,7 +145,7 @@ final class SystemSettingsTest extends ApiTestCase
         self::assertCount(1, $this->transports()->sent);
         $sent = $this->transports()->sent[0];
         self::assertSame('smtp.acme.test', $sent['server']->host);
-        self::assertSame('smtp-secret-pass', $sent['server']->password, 'the password typed in the form');
+        self::assertSame(self::FIXTURE_SMTP_PASS, $sent['server']->password, 'the password typed in the form');
         self::assertSame([$owner], array_map(static fn (Address $a): string => $a->getAddress(), $sent['email']->getTo()), 'sent to the user who pressed Validate');
         self::assertSame('hello@acme.test', $sent['email']->getFrom()[0]->getAddress(), 'from the server\'s sender');
         self::assertSame('Your Mappi SMTP server works', $sent['email']->getSubject(), 'in the account\'s language');
@@ -159,7 +162,7 @@ final class SystemSettingsTest extends ApiTestCase
 
         $this->api('POST', '/api/v1/customer/ACME0001/system-settings/smtp-check', $form, as: $owner);
 
-        self::assertSame('smtp-secret-pass', $this->transports()->sent[0]['server']->password ?? null, 'the saved password is never sent back to the browser, so the check reuses it');
+        self::assertSame(self::FIXTURE_SMTP_PASS, $this->transports()->sent[0]['server']->password ?? null, 'the saved password is never sent back to the browser, so the check reuses it');
     }
 
     public function testAFailedCheckSaysWhereItFailedWithoutEchoingTheServer(): void
@@ -180,7 +183,7 @@ final class SystemSettingsTest extends ApiTestCase
         $this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', self::SERVER, as: $owner);
         $servers = static::getContainer()->get(CustomerMailServers::class);
 
-        self::assertSame('smtp-secret-pass', $servers->serverFor('ACME0001')?->password, 'the mailer opens the account\'s server');
+        self::assertSame(self::FIXTURE_SMTP_PASS, $servers->serverFor('ACME0001')?->password, 'the mailer opens the account\'s server');
         self::assertNull($servers->serverFor('GLOBEX01'), 'an account without its own server uses the platform one');
     }
 }
