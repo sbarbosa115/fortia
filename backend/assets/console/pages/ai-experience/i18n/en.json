@@ -29,7 +29,8 @@
       "welcome": "Welcome",
       "questions": "Questions",
       "result": "Result"
-    }
+    },
+    "tags": "Tags"
   },
   "shopper": {
     "untitled": "Untitled",
@@ -61,9 +62,6 @@
     "actionPlan": "Action plan",
     "defaultEndTitle": "Your answers have been sent successfully.",
     "defaultEndMessage": "Thank you for completing the questionnaire. We saved your answers and the team can now review them.",
-    "generatingEyebrow": "One moment",
-    "generatingTitle": "Preparing your next questions",
-    "generatingSubtitle": "We're tailoring the next step from your answers.",
     "filePlaceholder": "Upload your files",
     "template": "Template: {{name}}"
   }

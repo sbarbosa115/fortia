@@ -413,6 +413,7 @@ describe('decoding a stored questionnaire', () => {
     question_count: 2,
     is_chain: false,
     slug: 'maturity',
+    tags: [],
     questions: [
       {
         id: 'x1',

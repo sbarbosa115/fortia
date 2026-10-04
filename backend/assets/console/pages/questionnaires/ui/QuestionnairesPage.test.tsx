@@ -47,6 +47,7 @@ function row(overrides: Partial<QuestionnaireRow> = {}): QuestionnaireRow {
     is_chain: false,
     slug: 'customer-survey',
     type: 'default',
+    tags: [],
     ...overrides,
   };
 }

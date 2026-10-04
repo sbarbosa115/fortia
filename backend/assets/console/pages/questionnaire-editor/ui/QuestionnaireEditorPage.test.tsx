@@ -75,6 +75,7 @@ const stored = {
   question_count: 1,
   is_chain: false,
   slug: 'customer-survey',
+  tags: [],
   questions: [
     {
       id: 'x1',

@@ -3,6 +3,7 @@ import {
   questionnairePublicUrl,
   type QuestionnaireRow,
   type SortBy,
+  TagList,
 } from '@console/entities/questionnaire';
 import {ActiveToggle} from '@console/features/toggle-questionnaire-active';
 import {formatDateTime, type TimeZoneMode} from '@shared/lib';
@@ -13,7 +14,7 @@ import {RowActions} from './RowActions';
 
 /**
  * The columns of PRD §10.6: title (to the editor, or to the public page for read-only users) with its question
- * count, type, the Active toggle, the date the list is sorted by, and the actions.
+ * count and its tags, type, the Active toggle, the date the list is sorted by, and the actions.
  */
 export function QuestionnaireTable({
   rows,
@@ -51,6 +52,7 @@ export function QuestionnaireTable({
           <span className="muted">
             {t('questionCount', {count: row.question_count})}
           </span>
+          <TagList tags={row.tags} label={t('tags')} />
         </div>
       ),
     },

@@ -36,6 +36,7 @@ const DRAFT: ChatDraft = {
   disclaimer: null,
   capture_user_data: false,
   basics_confirmed: true,
+  tags: [],
   questions: [
     {
       title: 'How happy are you?',
@@ -171,6 +172,43 @@ describe('AiExperiencePage', () => {
         {role: 'user', content: 'Yes'},
       ],
     });
+  });
+
+  it('shows the tags of the draft above the preview, and none without tags', async () => {
+    vi.mocked(sendChatTurn)
+      .mockResolvedValueOnce(
+        turn({
+          message: 'Tagged',
+          draft: {...DRAFT, type: 'regular', tags: ['AP-03', 'NP-12']},
+        }),
+      )
+      .mockResolvedValueOnce(turn({message: 'Untagged', draft: DRAFT}));
+    renderPage();
+
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Tag it AP-03 and NP-12{Enter}',
+    );
+    await screen.findByText('Tagged');
+
+    const preview = screen.getByRole('complementary', {name: 'Live preview'});
+    const tags = within(preview).getByRole('list', {name: 'Tags'});
+    expect(
+      within(tags)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['AP-03', 'NP-12']);
+
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Remove them{Enter}',
+    );
+    await screen.findByText('Untagged');
+    expect(
+      within(
+        screen.getByRole('complementary', {name: 'Live preview'}),
+      ).queryByRole('list', {name: 'Tags'}),
+    ).not.toBeInTheDocument();
   });
 
   it('asks about a record clicked in an answer, sending the record with the turn', async () => {

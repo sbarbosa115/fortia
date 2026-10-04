@@ -212,6 +212,8 @@ export type Draft = {
   landingPage: boolean;
   disclaimerOn: boolean;
   disclaimer: string;
+  /** The owner's free-text labels ("AP-03"). */
+  tags: string[];
   // Step 2
   questions: DraftQuestion[];
   // Step 3 — shared

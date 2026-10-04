@@ -34,3 +34,6 @@ export type {
 } from './api/authoring';
 export {questionnaireKind, questionnairePublicUrl} from './lib/kind';
 export type {QuestionnaireKind} from './lib/kind';
+export {addTags, cleanTag, MAX_TAGS, MAX_TAG_LENGTH} from './lib/tags';
+export type {TagsResult} from './lib/tags';
+export {TagList} from './ui/TagList';

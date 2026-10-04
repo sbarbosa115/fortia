@@ -23,6 +23,7 @@ export type FlowPayload = {
   } | null;
   layout: LayoutBlock[] | null;
   result_copy: Record<string, string> | null;
+  tags: string[];
 };
 
 /** Fields a question only has in a session; never sent back. */
@@ -261,6 +262,13 @@ export function encodeFlow(
   draft: Draft,
   promptKeys: string[] = [],
 ): FlowPayload {
+  return {...encodeStates(draft, promptKeys), tags: draft.tags};
+}
+
+function encodeStates(
+  draft: Draft,
+  promptKeys: string[],
+): Omit<FlowPayload, 'tags'> {
   const start: FlowState = {
     state_id: 'start',
     type: 'questionnaire',

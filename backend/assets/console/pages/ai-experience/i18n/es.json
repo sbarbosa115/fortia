@@ -29,7 +29,8 @@
       "welcome": "Bienvenida",
       "questions": "Preguntas",
       "result": "Resultado"
-    }
+    },
+    "tags": "Etiquetas"
   },
   "shopper": {
     "untitled": "Sin título",
@@ -61,9 +62,6 @@
     "actionPlan": "Plan de acción",
     "defaultEndTitle": "Tus respuestas se han enviado correctamente.",
     "defaultEndMessage": "Gracias por completar el cuestionario. Guardamos tus respuestas y el equipo ya puede revisarlas.",
-    "generatingEyebrow": "Un momento",
-    "generatingTitle": "Preparando tus siguientes preguntas",
-    "generatingSubtitle": "Estamos personalizando el siguiente paso con tus respuestas.",
     "filePlaceholder": "Sube tus archivos",
     "template": "Plantilla: {{name}}"
   }
