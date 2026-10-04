@@ -34,6 +34,25 @@ final class TwigAssignationMailer implements AssignationMailer
         ]);
     }
 
+    public function sendReminderDigest(string $to, array $pending, string $locale): void
+    {
+        $items = [];
+        foreach ($pending as $reminder) {
+            /** @var array{due_date?: string|null} $assignation */
+            $assignation = $reminder['assignation'];
+            $items[] = [
+                'assignation' => $reminder['assignation'],
+                'timing' => $reminder['timing'],
+                'due_date' => self::longDate($assignation['due_date'] ?? null, $locale),
+                'link' => $this->respondentLink($reminder['assignation']),
+            ];
+        }
+        $count = \count($items);
+        $subject = $this->translator->trans('reminder_digest.subject', ['count' => $count], self::DOMAIN, $locale);
+        $customerId = $pending[0]['assignation']['customer_id'] ?? null;
+        $this->mailer->send(new OutgoingEmail([$to], $subject, 'emails/assignations/reminder_digest.html.twig', ['count' => $count, 'items' => $items], $locale, [], \is_string($customerId) ? $customerId : null));
+    }
+
     public function sendStatus(array $assignation, array $to, string $locale, array $timing, array $progress, int $reminded): void
     {
         $subject = $this->translator->trans('status.subject', ['name' => $assignation['name'], 'percent' => $progress['percent']], self::DOMAIN, $locale);

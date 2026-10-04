@@ -25,6 +25,16 @@ interface AssignationMailer
     public function sendReminder(array $assignation, array $to, string $locale, array $timing): void;
 
     /**
+     * One reminder for a respondent with several pending follow-ups in the same account (the daily run, PRD §7.13):
+     * a single email listing each one (name, organization, project, due date, link to /a/{id}) in the given order.
+     *
+     * @param list<array{assignation: array<string, mixed>, timing: array{kind: string, days: int}}> $pending at least one
+     *
+     * @throws MailNotSent
+     */
+    public function sendReminderDigest(string $to, array $pending, string $locale): void;
+
+    /**
      * The status email to the account's root users: progress, percentage, due date, how many were reminded, and the
      * link to the console's /assignations/{id}.
      *

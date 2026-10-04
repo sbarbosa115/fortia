@@ -1,0 +1,29 @@
+{# The daily reminder to a respondent with several pending follow-ups: one email listing them all (PRD §7.13). #}
+{% extends 'emails/layout.html.twig' %}
+{% set domain = 'emails_assignations' %}
+
+{% block title %}{{ 'reminder_digest.subject'|trans({count: count}, domain, locale) }}{% endblock %}
+
+{% block content %}
+    <h1 style="margin:0 0 12px;font-size:20px;">{{ 'reminder_digest.title'|trans({}, domain, locale) }}</h1>
+    <p style="margin:0 0 16px;">{{ 'reminder_digest.body'|trans({count: count}, domain, locale) }}</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 0 16px;">
+        {% for item in items %}
+            <tr>
+                <td style="padding:12px 0;border-top:1px solid #ecebf1;vertical-align:top;">
+                    <div style="font-weight:600;">{{ item.assignation.name }}</div>
+                    <div style="font-size:13px;color:#5e5c6b;">
+                        {{ item.assignation.organization_name }}{% if item.assignation.project_name %} · {{ 'reminder_digest.project'|trans({name: item.assignation.project_name}, domain, locale) }}{% endif %}
+                    </div>
+                    <div style="font-size:13px;{{ item.timing.kind == 'overdue' ? 'color:#b42318;font-weight:600;' : 'color:#5e5c6b;' }}">
+                        {{ ('reminder_digest.due.' ~ item.timing.kind)|trans({days: item.timing.days, date: item.due_date}, domain, locale) }}
+                    </div>
+                </td>
+                <td style="padding:12px 0 12px 12px;border-top:1px solid #ecebf1;text-align:right;vertical-align:middle;white-space:nowrap;">
+                    <a href="{{ item.link }}" style="display:inline-block;background:#8249df;color:#ffffff;text-decoration:none;font-weight:600;padding:8px 18px;border-radius:999px;">{{ 'reminder_digest.button'|trans({}, domain, locale) }}</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <p style="margin:12px 0 0;font-size:13px;color:#5e5c6b;">{{ 'reminder_digest.ignore'|trans({}, domain, locale) }}</p>
+{% endblock %}

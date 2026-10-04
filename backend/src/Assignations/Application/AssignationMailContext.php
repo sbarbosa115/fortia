@@ -49,14 +49,17 @@ final class AssignationMailContext
         return $emails;
     }
 
-    /** @return array{assignations_id: string, name: string, organization_name: string, due_date: string|null} */
+    /** @return array{assignations_id: string, customer_id: string, name: string, organization_name: string, project_name: string|null, due_date: string|null} */
     public function view(Assignation $assignation): array
     {
+        $projectId = $assignation->projectId();
+
         return [
             'assignations_id' => $assignation->assignationsId(),
             'customer_id' => $assignation->customerId(),
             'name' => $assignation->name(),
             'organization_name' => (string) ($this->organizations->find($assignation->organizationId())['name'] ?? ''),
+            'project_name' => null === $projectId ? null : $this->projects->find($projectId)?->name(),
             'due_date' => $this->dueDate($assignation),
         ];
     }
