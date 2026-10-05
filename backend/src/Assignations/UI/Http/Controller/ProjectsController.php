@@ -95,13 +95,13 @@ final class ProjectsController
         return ApiResponse::created($this->present($caller, $id));
     }
 
-    /** Partial. assignation_ids replaces the set; organization_id may only be sent unchanged. */
+    /** Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups; organization_id may only be sent unchanged. */
     #[Route('/projects/{id}', name: 'api_projects_update', methods: ['PUT'])]
     #[OA\RequestBody(content: new Model(type: ProjectInput::class))]
     #[OA\Response(response: 200, description: 'The enriched project', content: new Model(type: ProjectOutput::class))]
     #[OA\Response(response: 400, description: 'VALIDATION_ERROR, INVALID_UUID, ASSIGNATION_ORGANIZATION_MISMATCH, ASSIGNATION_NOT_FOLLOW_UP')]
     #[OA\Response(response: 403, description: 'FORBIDDEN')]
-    #[OA\Response(response: 404, description: 'PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND')]
+    #[OA\Response(response: 404, description: 'PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND')]
     #[OA\Response(response: 409, description: 'ASSIGNATION_IN_OTHER_PROJECT')]
     public function update(Caller $caller, string $id, #[Payload(allowExtraFields: false, groups: ['Default', 'update'])] ProjectInput $input): JsonResponse
     {

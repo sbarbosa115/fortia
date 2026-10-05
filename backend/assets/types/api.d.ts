@@ -168,7 +168,7 @@ export interface paths {
         };
         /** The enriched project, with the follow-ups that may join it (available_assignations). */
         get: operations["get_api_projects_get"];
-        /** Partial. assignation_ids replaces the set; organization_id may only be sent unchanged. */
+        /** Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups; organization_id may only be sent unchanged. */
         put: operations["put_api_projects_update"];
         post?: never;
         /** 204. Its assignations are unlinked, not deleted. */
@@ -1680,13 +1680,13 @@ export interface components {
             description?: string | null;
             due_date?: string | null;
             assignation_ids?: string[] | null;
-            /** create only: each one becomes a new follow-up of the organization */
+            /** each one becomes a new follow-up of the organization that joins the project */
             questionnaire_ids?: string[] | null;
             /** Whether its follow-ups go to review once complete (true when not sent on create), or are simply completed. */
             requires_review?: boolean | null;
             /**
-             * create only: those of questionnaire_ids whose follow-ups go to review once complete; the
-             *     others are simply completed. Not sent: requires_review decides for all of them.
+             * those of questionnaire_ids whose follow-ups go to review once complete; the others are
+             *     simply completed. Not sent: requires_review decides (on update, true when not sent).
              */
             review_questionnaire_ids?: string[] | null;
             /**
@@ -1694,7 +1694,7 @@ export interface components {
              *     simply completed (ids outside the project are ignored)
              */
             review_assignation_ids?: string[] | null;
-            /** Create only: the title of the new follow-ups' registration slide, in the console's language. */
+            /** The title of the new follow-ups' registration slide, in the console's language. */
             registration_title?: string | null;
         };
         RespondentLoginInput: {
@@ -3032,7 +3032,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND */
+            /** @description PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND */
             404: {
                 headers: {
                     [name: string]: unknown;

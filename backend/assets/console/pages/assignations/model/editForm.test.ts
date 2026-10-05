@@ -1,5 +1,14 @@
 import {describe, expect, it} from 'vitest';
-import {draftFrom, editErrors, toPayload, withReview} from './editForm';
+import {
+  draftFrom,
+  editErrors,
+  toPayload,
+  withAdded,
+  withAddedReview,
+  withoutAdded,
+  withRemoved,
+  withReview,
+} from './editForm';
 
 const project = {
   name: 'Store opening Q4',
@@ -18,6 +27,9 @@ describe('the edit dialog form (PRD §10.12)', () => {
       description: '',
       dueDate: '2026-12-01',
       reviewIds: ['a-1'],
+      assignationIds: ['a-1', 'a-2'],
+      removedIds: [],
+      added: [],
     });
   });
 
@@ -61,17 +73,49 @@ describe('the edit dialog form (PRD §10.12)', () => {
 
   it('sends the trimmed fields, an empty description as null, and leaves its questionnaires alone', () => {
     expect(
-      toPayload({
-        name: '  Q4  ',
-        description: '  ',
-        dueDate: '2027-01-15',
-        reviewIds: ['a-2'],
-      }),
+      toPayload(
+        {
+          ...draftFrom(project),
+          name: '  Q4  ',
+          description: '  ',
+          dueDate: '2027-01-15',
+          reviewIds: ['a-2'],
+        },
+        'Tell us who you are',
+      ),
     ).toEqual({
       name: 'Q4',
       description: null,
       due_date: '2027-01-15',
       review_assignation_ids: ['a-2'],
     });
+  });
+
+  it('sends the questionnaires kept when one is taken out, and the ones added with their review', () => {
+    let draft = withRemoved(draftFrom(project), 'a-1', true);
+    draft = withAdded(draft, {questionnaireId: 'q-9', title: 'Audit'});
+    draft = withAdded(draft, {questionnaireId: 'q-8', title: 'Survey'});
+    draft = withAdded(draft, {questionnaireId: 'q-9', title: 'Audit'});
+    draft = withAddedReview(draft, 'q-8', false);
+
+    expect(draft.added, 'a questionnaire is added once').toHaveLength(2);
+    expect(toPayload(draft, 'Tell us who you are')).toEqual({
+      name: 'Store opening Q4',
+      description: null,
+      due_date: '2026-12-01',
+      review_assignation_ids: [],
+      assignation_ids: ['a-2'],
+      questionnaire_ids: ['q-9', 'q-8'],
+      review_questionnaire_ids: ['q-9'],
+      registration_title: 'Tell us who you are',
+    });
+    expect(
+      toPayload(withRemoved(draft, 'a-1', false), 'x').assignation_ids,
+      'undoing the removal keeps the set as it was',
+    ).toBeUndefined();
+    expect(
+      toPayload(withoutAdded(withoutAdded(draft, 'q-8'), 'q-9'), 'x')
+        .questionnaire_ids,
+    ).toBeUndefined();
   });
 });

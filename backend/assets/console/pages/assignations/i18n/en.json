@@ -139,10 +139,29 @@
       "deadlineRequired": "Choose a deadline for the assignation",
       "deadlineInvalid": "Enter a valid deadline"
     },
-    "review": "Review",
-    "reviewHint": "Once completed, the questionnaires switched on go to “Pending review”; the others are marked “Completed”.",
+    "reviewHint": "Switch on the ones whose answers you'll review: once completed they go to “Pending review”; the others are marked “Completed”.",
     "reviewOn": "Requires review",
-    "reviewOff": "No review"
+    "reviewOff": "No review",
+    "questionnaires": "Questionnaires",
+    "new": "New",
+    "removeOne": "Remove {{name}}",
+    "willRemove": "Will be removed",
+    "undoRemove": "Undo",
+    "undoRemoveOne": "Keep {{name}}",
+    "removeHint": "Removing a questionnaire keeps the answers it already has.",
+    "noQuestionnaires": "This assignation has no questionnaires. Add one so the organization can answer it.",
+    "addQuestionnaires": "Add questionnaires",
+    "addOne": "Add {{name}}",
+    "pickerSearch": "Search questionnaire by name or tag",
+    "pickerLabel": "Questionnaires you can add",
+    "pickerLoading": "Loading questionnaires...",
+    "pickerNone": "There are no more questionnaires to add.",
+    "pickerNoMatches": "No questionnaire matches “{{query}}”.",
+    "pickerDone": "Done",
+    "noQuestions": "No questions yet",
+    "questions_one": "{{count}} question",
+    "questions_other": "{{count}} questions",
+    "registrationTitle": "Tell us who you are"
   },
   "editQuestionnaire": "Edit the questionnaire of {{name}}"
 }

@@ -634,7 +634,7 @@
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Partial. assignation_ids replaces the set; organization_id may only be sent unchanged.",
+                "summary": "Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups; organization_id may only be sent unchanged.",
                 "operationId": "put_api_projects_update",
                 "parameters": [
                     {
@@ -673,7 +673,7 @@
                         "description": "FORBIDDEN"
                     },
                     "404": {
-                        "description": "PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND"
+                        "description": "PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
                     },
                     "409": {
                         "description": "ASSIGNATION_IN_OTHER_PROJECT"
@@ -5506,7 +5506,7 @@
                         "nullable": true
                     },
                     "questionnaire_ids": {
-                        "title": "create only: each one becomes a new follow-up of the organization",
+                        "title": "each one becomes a new follow-up of the organization that joins the project",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -5519,7 +5519,7 @@
                         "nullable": true
                     },
                     "review_questionnaire_ids": {
-                        "title": "create only: those of questionnaire_ids whose follow-ups go to review once complete; the\nothers are simply completed. Not sent: requires_review decides for all of them.",
+                        "title": "those of questionnaire_ids whose follow-ups go to review once complete; the others are\nsimply completed. Not sent: requires_review decides (on update, true when not sent).",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -5535,7 +5535,7 @@
                         "nullable": true
                     },
                     "registration_title": {
-                        "title": "Create only: the title of the new follow-ups' registration slide, in the console's language.",
+                        "title": "The title of the new follow-ups' registration slide, in the console's language.",
                         "type": "string",
                         "nullable": true,
                         "maxLength": 200

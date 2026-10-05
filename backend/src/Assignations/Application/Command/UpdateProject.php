@@ -7,7 +7,8 @@ use App\Shared\Application\Security\Caller;
 /**
  * Changes a project (PRD §8.9 PUT /projects/{id}), partially: $fields holds only what was sent, with the PRD's
  * names — name, description, due_date, requires_review (set on all its follow-ups), review_assignation_ids (its follow-ups that
- * require review; the others do not), assignation_ids (replaces the set) and organization_id (accepted only when
+ * require review; the others do not), assignation_ids (replaces the set), questionnaire_ids (each one a new
+ * follow-up that joins it, like CreateProject's; review_questionnaire_ids and registration_title go with them) and organization_id (accepted only when
  * it is the project's own: the organization never changes, 400 otherwise).
  *
  * 404 PROJECT_NOT_FOUND for another account's project (unless Admin). The caller checks write permission.
