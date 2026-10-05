@@ -6,7 +6,7 @@ use App\Shared\Application\Security\Caller;
 
 /**
  * Changes a project (PRD §8.9 PUT /projects/{id}), partially: $fields holds only what was sent, with the PRD's
- * names — name, description, due_date, assignation_ids (replaces the set) and organization_id (accepted only when
+ * names — name, description, due_date, requires_review (copied onto its follow-ups), assignation_ids (replaces the set) and organization_id (accepted only when
  * it is the project's own: the organization never changes, 400 otherwise).
  *
  * 404 PROJECT_NOT_FOUND for another account's project (unless Admin). The caller checks write permission.

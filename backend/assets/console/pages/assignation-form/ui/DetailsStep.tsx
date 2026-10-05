@@ -1,9 +1,12 @@
-import {Field, TextInput} from '@shared/ui';
+import {Field, TextInput, Toggle} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import type {AssignationWizardState} from '../model/useAssignationWizard';
 import {detailsErrors} from '../model/wizard';
 
-/** Step 3: the assignation's name and its deadline (today or later); its questionnaires follow that deadline. */
+/**
+ * Step 3: the assignation's name, its deadline (today or later; its questionnaires follow it) and whether a completed
+ * questionnaire goes to review or is simply completed.
+ */
 export function DetailsStep({wizard}: {wizard: AssignationWizardState}) {
   const {t} = useTranslation('pages.assignation-form');
   const errors = wizard.showMissing
@@ -43,6 +46,20 @@ export function DetailsStep({wizard}: {wizard: AssignationWizardState}) {
           onChange={(event) => wizard.setDueDate(event.target.value)}
         />
       </Field>
+      <div className="asg-wiz__review">
+        <Toggle
+          label={t('details.requiresReview')}
+          checked={wizard.requiresReview}
+          onChange={wizard.setRequiresReview}
+        />
+        <p className="asg-wiz__small-muted">
+          {t(
+            wizard.requiresReview
+              ? 'details.requiresReviewOn'
+              : 'details.requiresReviewOff',
+          )}
+        </p>
+      </div>
     </section>
   );
 }

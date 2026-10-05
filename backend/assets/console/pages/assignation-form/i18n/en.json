@@ -91,7 +91,10 @@
     "namePlaceholder": "E.g. Q4 audit",
     "nameHint": "Only your team sees it.",
     "deadline": "Deadline",
-    "deadlineHint": "Every questionnaire is due on this date. Members get a daily reminder until they finish."
+    "deadlineHint": "Every questionnaire is due on this date. Members get a daily reminder until they finish.",
+    "requiresReview": "Requires review",
+    "requiresReviewOn": "When a questionnaire is completed it goes to “Pending review”: you approve its answers or send it for correction.",
+    "requiresReviewOff": "When a questionnaire is completed it is marked “Completed”, with no review."
   },
   "summary": {
     "title": "What we're going to create",

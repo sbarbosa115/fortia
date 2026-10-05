@@ -119,6 +119,7 @@ export function useAssignationWizard() {
 
   const [name, setName] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [requiresReview, setRequiresReview] = useState(true);
 
   // --- Steps -----------------------------------------------------------------------------------------------
 
@@ -156,6 +157,7 @@ export function useAssignationWizard() {
           name,
           dueDate,
           registrationTitle: t('registrationTitle'),
+          requiresReview,
         },
         progress,
         DEPS,
@@ -223,6 +225,8 @@ export function useAssignationWizard() {
     setName,
     dueDate,
     setDueDate,
+    requiresReview,
+    setRequiresReview,
     // Create
     submit,
     creating: create.isPending,

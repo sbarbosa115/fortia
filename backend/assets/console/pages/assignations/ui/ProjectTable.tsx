@@ -83,10 +83,15 @@ export function ProjectTable({
             const open = expanded.has(project.project_id);
             const panelId = `project-${project.project_id}-assignations`;
             const created = shortDay(project.created_at, i18n.language);
-            const approvalLabel = t('approvedOf', {
-              approved: project.approved_assignations,
-              total: project.total_assignations,
-            });
+            const approvalLabel = project.requires_review
+              ? t('approvedOf', {
+                  approved: project.approved_assignations,
+                  total: project.total_assignations,
+                })
+              : t('completedOf', {
+                  completed: project.completed_assignations,
+                  total: project.total_assignations,
+                });
             const percent = approvalPercent(project);
             const nextStep = (
               <div data-row-actions>
@@ -170,7 +175,10 @@ export function ProjectTable({
                   <td className="projects-table__deadline">
                     <Deadline
                       dueDate={project.due_date}
-                      completed={project.state === 'approved'}
+                      completed={
+                        project.state === 'approved' ||
+                        project.state === 'completed'
+                      }
                     />
                   </td>
                   <td className="projects-table__next">{nextStep}</td>

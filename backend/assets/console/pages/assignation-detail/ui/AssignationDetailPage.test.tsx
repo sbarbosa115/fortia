@@ -73,6 +73,7 @@ function assignation(overrides: Partial<Assignation> = {}): Assignation {
     customer_id: 'ACME0001',
     organization_id: 'o-1',
     organization_name: 'Acme Retail',
+    requires_review: true,
     questionnaire_id: 'q-1',
     questionnaire_name: 'Safety',
     questionnaire_url: 'http://localhost:8080/a/a-1',
@@ -208,6 +209,28 @@ describe('AssignationDetailPage (PRD §10.11)', () => {
       'href',
       `/questionnaires/q-1/edit?from=${encodeURIComponent('/assignations/a-1')}`,
     );
+  });
+
+  it('shows a completed follow-up of an assignation without review: no review column nor correction', async () => {
+    vi.mocked(fetchAssignation).mockResolvedValue(
+      assignation({requires_review: false, review_status: 'completed'}),
+    );
+    renderPage();
+
+    expect(
+      await screen.findByRole('heading', {name: 'Safety audit'}),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Completed. This assignation does not require review, so its answers are final.',
+      ),
+    ).toBeInTheDocument();
+    const table = screen.getByRole('table', {name: 'Answers of attempt 1'});
+    expect(within(table).queryByText('Not reviewed')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {name: 'Send for correction'}),
+    ).not.toBeInTheDocument();
   });
 
   it('goes back to the assignations list it was opened from, and the editor comes back here with that way back', async () => {

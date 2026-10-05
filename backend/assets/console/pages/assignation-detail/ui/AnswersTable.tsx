@@ -21,14 +21,19 @@ export function AnswerState({answer}: {answer: FollowUpAnswer}) {
   );
 }
 
-/** The shared session's table (PRD §10.11): #, Question, Answer, Answered, Review and "View answer". */
+/**
+ * The shared session's table (PRD §10.11): #, Question, Answer, Answered, Review (only when the assignation requires
+ * review) and "View answer".
+ */
 export function AnswersTable({
   answers,
   attempt,
+  reviewed = true,
   onView,
 }: {
   answers: FollowUpAnswer[];
   attempt: number;
+  reviewed?: boolean;
   onView: (index: number) => void;
 }) {
   const {t, i18n} = useTranslation('pages.assignation-detail');
@@ -73,11 +78,15 @@ export function AnswersTable({
         </span>
       ),
     },
-    {
-      key: 'review',
-      header: t('followUp.table.review'),
-      render: (row) => <AnswerState answer={row} />,
-    },
+    ...(reviewed
+      ? [
+          {
+            key: 'review',
+            header: t('followUp.table.review'),
+            render: (row: FollowUpAnswer) => <AnswerState answer={row} />,
+          },
+        ]
+      : []),
     {
       key: 'actions',
       header: (

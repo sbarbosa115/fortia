@@ -153,6 +153,8 @@ export type CreatePlan = {
   name: string;
   dueDate: string;
   registrationTitle: string;
+  /** A completed questionnaire goes to "Pending review"; without it, it is simply completed. */
+  requiresReview: boolean;
 };
 
 /** The API calls of Create, injected so the order and the retry are tested without a server. */
@@ -195,6 +197,7 @@ export async function runCreate(
     due_date: plan.dueDate.trim(),
     questionnaire_ids: plan.questionnaireIds,
     registration_title: plan.registrationTitle,
+    requires_review: plan.requiresReview,
   });
   return {projectId: created.project_id};
 }

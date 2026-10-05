@@ -96,7 +96,7 @@ describe('the tabs and tones', () => {
       ['progress', 'progress'],
       ['correction', 'correction'],
       ['overdue', 'overdue'],
-      ['completed', 'approved'],
+      ['completed', 'completed'],
     ]);
   });
 

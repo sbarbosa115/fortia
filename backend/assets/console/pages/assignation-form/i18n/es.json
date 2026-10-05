@@ -91,7 +91,10 @@
     "namePlaceholder": "Ej: Auditoría Q4",
     "nameHint": "Solo lo ve tu equipo.",
     "deadline": "Fecha límite",
-    "deadlineHint": "Todos los cuestionarios vencen en esta fecha. Los miembros reciben un recordatorio diario hasta terminar."
+    "deadlineHint": "Todos los cuestionarios vencen en esta fecha. Los miembros reciben un recordatorio diario hasta terminar.",
+    "requiresReview": "Requiere revisión",
+    "requiresReviewOn": "Cuando un cuestionario se completa pasa a “Pendiente de revisión”: apruebas sus respuestas o lo envías a corrección.",
+    "requiresReviewOff": "Cuando un cuestionario se completa queda como “Completado”, sin revisión."
   },
   "summary": {
     "title": "Lo que vamos a crear",

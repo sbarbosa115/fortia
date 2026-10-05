@@ -43,7 +43,7 @@ final class ProjectsController
     #[Route('/projects', name: 'api_projects_list', methods: ['GET'])]
     #[OA\Parameter(name: 'page', in: 'query', schema: new OA\Schema(type: 'integer', minimum: 1))]
     #[OA\Parameter(name: 'page_size', in: 'query', schema: new OA\Schema(type: 'integer', default: 10, maximum: 100))]
-    #[OA\Parameter(name: 'status', in: 'query', description: 'progress includes pending', schema: new OA\Schema(type: 'string', enum: ['review', 'progress', 'correction', 'overdue', 'approved']))]
+    #[OA\Parameter(name: 'status', in: 'query', description: 'progress includes pending, completed includes approved', schema: new OA\Schema(type: 'string', enum: ['review', 'progress', 'correction', 'overdue', 'completed', 'approved']))]
     #[OA\Parameter(name: 'q', in: 'query', description: "Every word in the project's or its organization's name", schema: new OA\Schema(type: 'string', maxLength: 200))]
     #[OA\Response(response: 200, description: '{projects, pagination}', content: new Model(type: ProjectListOutput::class))]
     #[OA\Response(response: 400, description: 'INVALID_PROJECT_STATUS')]
@@ -88,6 +88,7 @@ final class ProjectsController
             $input->assignationIds(),
             $input->questionnaireIds(),
             $input->registration_title,
+            $input->requires_review ?? true,
         ));
 
         return ApiResponse::created($this->present($caller, $id));

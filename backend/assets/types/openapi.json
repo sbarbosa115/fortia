@@ -514,7 +514,7 @@
                     {
                         "name": "status",
                         "in": "query",
-                        "description": "progress includes pending",
+                        "description": "progress includes pending, completed includes approved",
                         "schema": {
                             "type": "string",
                             "enum": [
@@ -522,6 +522,7 @@
                                 "progress",
                                 "correction",
                                 "overdue",
+                                "completed",
                                 "approved"
                             ]
                         }
@@ -4714,7 +4715,8 @@
                             "not_ready",
                             "in_review",
                             "changes_requested",
-                            "approved"
+                            "approved",
+                            "completed"
                         ]
                     },
                     "answers": {
@@ -4871,7 +4873,8 @@
                             "not_ready",
                             "in_review",
                             "changes_requested",
-                            "approved"
+                            "approved",
+                            "completed"
                         ]
                     },
                     "created_at": {
@@ -4881,6 +4884,11 @@
                     "updated_at": {
                         "type": "string",
                         "nullable": true
+                    },
+                    "requires_review": {
+                        "title": "A complete follow-up goes to review; false: it is simply completed.",
+                        "type": "boolean",
+                        "default": true
                     }
                 },
                 "type": "object"
@@ -5172,7 +5180,8 @@
                             "not_ready",
                             "in_review",
                             "changes_requested",
-                            "approved"
+                            "approved",
+                            "completed"
                         ]
                     }
                 },
@@ -5281,6 +5290,7 @@
                             "correction",
                             "progress",
                             "pending",
+                            "completed",
                             "approved"
                         ]
                     },
@@ -5294,7 +5304,8 @@
                             "not_ready",
                             "in_review",
                             "changes_requested",
-                            "approved"
+                            "approved",
+                            "completed"
                         ]
                     },
                     "attempt": {
@@ -5395,6 +5406,7 @@
                             "correction",
                             "progress",
                             "pending",
+                            "completed",
                             "approved",
                             "empty"
                         ]
@@ -5424,6 +5436,11 @@
                         },
                         "nullable": true,
                         "default": null
+                    },
+                    "requires_review": {
+                        "title": "Its follow-ups go to review once complete; false: they are simply completed.",
+                        "type": "boolean",
+                        "default": true
                     }
                 },
                 "type": "object"
@@ -5479,6 +5496,11 @@
                         "items": {
                             "type": "string"
                         },
+                        "nullable": true
+                    },
+                    "requires_review": {
+                        "title": "Whether its follow-ups go to review once complete (true when not sent on create), or are simply completed.",
+                        "type": "boolean",
                         "nullable": true
                     },
                     "registration_title": {

@@ -30,7 +30,7 @@ import {ReviewDialog} from './ReviewDialog';
 
 /**
  * /assignations/:id for a follow-up (PRD §10.11): the review state, due date, the main action ("Send reminder" while
- * open, "Send for correction" once complete), where the shared session stands, the attempt selector (?attempt=N;
+ * open, "Send for correction" once complete and only when it requires review), where the shared session stands, the attempt selector (?attempt=N;
  * earlier attempts are read-only), the answers with their review dialog, the next-step notices and the members.
  */
 export function FollowUpDetail({assignation}: {assignation: Assignation}) {
@@ -52,7 +52,9 @@ export function FollowUpDetail({assignation}: {assignation: Assignation}) {
   const selected = attempts.find((a) => a.number === requested) ?? current;
   const isCurrent = selected !== null && selected.number === current?.number;
   const answers = selected?.answers ?? [];
-  const canReview = viewer.canWrite && isCurrent && assignation.completed;
+  const reviewed = assignation.requires_review;
+  const canReview =
+    viewer.canWrite && isCurrent && assignation.completed && reviewed;
   const changeReason = viewer.canWrite ? null : tShared('readOnly.change');
 
   const refresh = () =>
@@ -142,7 +144,16 @@ export function FollowUpDetail({assignation}: {assignation: Assignation}) {
   const left = unreviewed(answers).length;
   const rejectedAnswers = rejected(answers);
 
-  const mainAction = assignation.completed ? (
+  const mainAction = !assignation.completed ? (
+    <Button
+      variant="primary"
+      icon={<Icon name="bell" size={16} />}
+      disabledReason={changeReason}
+      onClick={() => setConfirm('remind')}
+    >
+      {t('followUp.remind')}
+    </Button>
+  ) : reviewed ? (
     <Button
       variant="primary"
       icon={<Icon name="send" size={16} />}
@@ -156,16 +167,7 @@ export function FollowUpDetail({assignation}: {assignation: Assignation}) {
     >
       {t('followUp.correct')}
     </Button>
-  ) : (
-    <Button
-      variant="primary"
-      icon={<Icon name="bell" size={16} />}
-      disabledReason={changeReason}
-      onClick={() => setConfirm('remind')}
-    >
-      {t('followUp.remind')}
-    </Button>
-  );
+  ) : null;
 
   return (
     <>
@@ -196,11 +198,13 @@ export function FollowUpDetail({assignation}: {assignation: Assignation}) {
       ) : null}
       {isCurrent && assignation.completed ? (
         <div className="asg-detail__notice" role="status">
-          {assignation.review_status === 'changes_requested'
-            ? t('followUp.rejectedNotice', {count: rejectedAnswers.length})
-            : assignation.review_status === 'approved'
-              ? t('followUp.approvedNotice')
-              : t('followUp.reviewNotice', {count: left})}
+          {!reviewed
+            ? t('followUp.completedNotice')
+            : assignation.review_status === 'changes_requested'
+              ? t('followUp.rejectedNotice', {count: rejectedAnswers.length})
+              : assignation.review_status === 'approved'
+                ? t('followUp.approvedNotice')
+                : t('followUp.reviewNotice', {count: left})}
         </div>
       ) : null}
       <Card>
@@ -210,6 +214,7 @@ export function FollowUpDetail({assignation}: {assignation: Assignation}) {
           <AnswersTable
             answers={answers}
             attempt={selected?.number ?? 1}
+            reviewed={reviewed}
             onView={(index) => setDialog({index, finished: false})}
           />
         )}

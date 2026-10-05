@@ -104,6 +104,7 @@ const plan: CreatePlan = {
   name: '  Q4 audits ',
   dueDate: '2026-12-15',
   registrationTitle: 'Tell us who you are',
+  requiresReview: true,
 };
 
 describe('Create', () => {
@@ -122,7 +123,18 @@ describe('Create', () => {
       due_date: '2026-12-15',
       questionnaire_ids: ['q-1', 'q-2'],
       registration_title: 'Tell us who you are',
+      requires_review: true,
     });
+  });
+
+  it('creates an assignation without review when the owner switches it off', async () => {
+    const api = deps();
+
+    await runCreate({...plan, requiresReview: false}, {}, api, () => {});
+
+    expect(api.createProject).toHaveBeenCalledWith(
+      expect.objectContaining({requires_review: false}),
+    );
   });
 
   it('saves a new organization first and assigns the questionnaires themselves, never copies', async () => {

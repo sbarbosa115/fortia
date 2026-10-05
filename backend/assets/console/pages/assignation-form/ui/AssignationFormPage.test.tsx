@@ -371,11 +371,40 @@ describe('AssignationFormPage', () => {
       due_date: '2099-12-15',
       questionnaire_ids: ['q-1', 'q-2'],
       registration_title: 'Tell us who you are',
+      requires_review: true,
     });
     expect(
       copyQuestionnaire,
       'PRD §6.14: questionnaires are assigned as they are, never copied',
     ).not.toHaveBeenCalled();
+  });
+
+  it('creates an assignation without review when its switch is turned off', async () => {
+    renderPage();
+    await pickTwoAndContinue();
+    await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
+    await userEvent.click(continueButton());
+
+    const review = screen.getByRole('switch', {name: 'Requires review'});
+    expect(review, 'an assignation requires review by default').toBeChecked();
+    expect(screen.getByText(/goes to “Pending review”/)).toBeInTheDocument();
+    await userEvent.click(review);
+    expect(review).not.toBeChecked();
+    expect(
+      screen.getByText(/it is marked “Completed”, with no review/),
+    ).toBeInTheDocument();
+
+    await userEvent.type(
+      screen.getByRole('textbox', {name: /Assignation name/}),
+      'Q4 audits',
+    );
+    await userEvent.type(screen.getByLabelText(/Deadline/), '2099-12-15');
+    await userEvent.click(screen.getByRole('button', {name: 'Create'}));
+
+    await screen.findByText('Assignations list');
+    expect(createProject).toHaveBeenCalledWith(
+      expect.objectContaining({requires_review: false}),
+    );
   });
 
   it('lists what is missing when Create is pressed too early', async () => {

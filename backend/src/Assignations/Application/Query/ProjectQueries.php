@@ -130,6 +130,7 @@ final class ProjectQueries
             'name' => $project->name(),
             'description' => $project->description(),
             'due_date' => $project->dueDate(),
+            'requires_review' => $project->requiresReview(),
             'created_at' => Iso::datetime($project->createdAt()),
             'updated_at' => Iso::datetime($project->updatedAt()),
             'state' => ProjectStatus::ofProject($states),

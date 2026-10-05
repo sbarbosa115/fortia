@@ -5,6 +5,7 @@ export type EditDraft = {
   name: string;
   description: string;
   dueDate: string;
+  requiresReview: boolean;
 };
 
 /** Keys of `edit.errors.*` in the page's translations. */
@@ -25,11 +26,13 @@ export function draftFrom(project: {
   name: string;
   description?: string | null;
   due_date?: string | null;
+  requires_review?: boolean;
 }): EditDraft {
   return {
     name: project.name,
     description: project.description ?? '',
     dueDate: project.due_date ?? '',
+    requiresReview: project.requires_review ?? true,
   };
 }
 
@@ -74,5 +77,6 @@ export function toPayload(draft: EditDraft): ProjectPayload {
     name: draft.name.trim(),
     description: description === '' ? null : description,
     due_date: draft.dueDate.trim(),
+    requires_review: draft.requiresReview,
   };
 }

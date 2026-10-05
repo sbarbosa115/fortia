@@ -47,6 +47,7 @@ final class AssignationQueries
             'audience' => $a->audience(),
             'questions' => $a->questions(),
             'project_id' => $a->projectId(),
+            'requires_review' => $a->requiresReview(),
             'shared_session_id' => $a->sharedSessionId(),
             'attempts' => $a->attempts(),
             'last_reminder_sent_at' => Iso::datetime($a->lastReminderSentAt()),

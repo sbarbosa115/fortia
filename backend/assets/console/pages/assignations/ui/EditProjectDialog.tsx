@@ -10,6 +10,7 @@ import {
   Modal,
   TextArea,
   TextInput,
+  Toggle,
   useToast,
 } from '@shared/ui';
 import {useMutation, useQueryClient} from '@tanstack/react-query';
@@ -24,7 +25,7 @@ import {
 
 /**
  * Edit an assignation: name (required, ≤ 200), the organization (fixed), the deadline (required: it moves, never
- * clears; its questionnaires follow it) and the description (≤ 2000). Its questionnaires are set by the wizard.
+ * clears; its questionnaires follow it), the description (≤ 2000) and whether its completed questionnaires go to review. Its questionnaires are set by the wizard.
  */
 export function EditProjectDialog({
   project,
@@ -155,6 +156,20 @@ export function EditProjectDialog({
             onChange={(event) => set('description', event.target.value)}
           />
         </Field>
+        <div className="project-form__review">
+          <Toggle
+            label={t('form.requiresReview')}
+            checked={draft.requiresReview}
+            onChange={(value) => set('requiresReview', value)}
+          />
+          <span className="field__hint">
+            {t(
+              draft.requiresReview
+                ? 'form.requiresReviewOn'
+                : 'form.requiresReviewOff',
+            )}
+          </span>
+        </div>
       </form>
     </Modal>
   );

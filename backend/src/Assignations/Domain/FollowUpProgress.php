@@ -11,7 +11,8 @@ use App\Shared\Domain\Document\Questions;
  *
  * Review state (`review_status`): `not_ready` until the follow-up is complete; then `in_review` while some answerable
  * question has no review of the current attempt, `changes_requested` when every one is reviewed and some are
- * rejected, `approved` when every one is approved. A locked question (approved in an earlier attempt) counts as
+ * rejected, `approved` when every one is approved. A follow-up that does not require review is `completed` once it is
+ * complete, whatever its reviews say. A locked question (approved in an earlier attempt) counts as
  * approved, and a review only counts for the attempt in which it was made.
  *
  *     $progress = FollowUpProgress::ofSession($session->questions(), $session->isEnded(), $session->attempt());
@@ -24,6 +25,8 @@ final class FollowUpProgress
     public const IN_REVIEW = 'in_review';
     public const CHANGES_REQUESTED = 'changes_requested';
     public const APPROVED = 'approved';
+    /** Complete, and its assignation does not require review. */
+    public const COMPLETED = 'completed';
 
     private function __construct(
         /** Answerable questions answered or skipped. */
@@ -40,14 +43,17 @@ final class FollowUpProgress
         public readonly int $approved,
         /** Rejected in the current attempt: "sent back to the client". */
         public readonly int $rejected,
+        /** Its assignation sends it to review once complete. */
+        public readonly bool $requiresReview = true,
     ) {
     }
 
     /**
-     * @param list<array<string, mixed>> $questions the shared session's questions
-     * @param int                        $attempt   the session's attempt (1 on the first, n+1 after each retry)
+     * @param list<array<string, mixed>> $questions      the shared session's questions
+     * @param int                        $attempt        the session's attempt (1 on the first, n+1 after each retry)
+     * @param bool                       $requiresReview false: complete means `completed`, not reviewed
      */
-    public static function ofSession(array $questions, bool $ended, int $attempt): self
+    public static function ofSession(array $questions, bool $ended, int $attempt, bool $requiresReview = true): self
     {
         $completed = 0;
         $total = 0;
@@ -74,18 +80,19 @@ final class FollowUpProgress
         $reviewed = $approved + $rejected;
         $status = match (true) {
             !$ended => self::NOT_READY,
+            !$requiresReview => self::COMPLETED,
             $reviewed < $total => self::IN_REVIEW,
             $rejected > 0 => self::CHANGES_REQUESTED,
             default => self::APPROVED,
         };
 
-        return new self($completed, $total, $current, $ended, $status, $reviewed, $approved, $rejected);
+        return new self($completed, $total, $current, $ended, $status, $reviewed, $approved, $rejected, $requiresReview);
     }
 
     /** A follow-up nobody has opened yet: no shared session, $answerable questions in its questionnaire. */
-    public static function notStarted(int $answerable): self
+    public static function notStarted(int $answerable, bool $requiresReview = true): self
     {
-        return new self(0, $answerable, $answerable > 0 ? 1 : null, false, self::NOT_READY, 0, 0, 0);
+        return new self(0, $answerable, $answerable > 0 ? 1 : null, false, self::NOT_READY, 0, 0, 0, $requiresReview);
     }
 
     /** completed / total as a percentage; a complete follow-up counts as 100 (§7.12). */

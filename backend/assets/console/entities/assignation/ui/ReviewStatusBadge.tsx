@@ -7,6 +7,7 @@ const TONES: Record<ReviewStatus, Tone> = {
   in_review: 'accent',
   changes_requested: 'warning',
   approved: 'success',
+  completed: 'success',
 };
 
 /** A follow-up's review state (PRD §7.11), always with its label. */

@@ -26,6 +26,7 @@
     "review": "Por revisar",
     "correction": "En corrección",
     "approved": "Aprobada",
+    "completed": "Completado",
     "overdue": "Vencida",
     "empty": "Sin cuestionarios"
   },
@@ -35,10 +36,12 @@
     "review": "Requiere tu revisión",
     "correction": "En corrección",
     "approved": "Completada",
+    "completed": "Completada",
     "overdue": "Vencida",
     "empty": "Sin cuestionarios"
   },
   "approvedOf": "{{approved}} de {{total}} aprobadas",
+  "completedOf": "{{completed}} de {{total}} completados",
   "columns": {
     "project": "Asignación",
     "status": "Estado",
@@ -67,6 +70,7 @@
     "progress": "Ver avance",
     "pending": "Ver avance",
     "approved": "Ver resultados",
+    "completed": "Ver resultados",
     "empty": "Editar asignación"
   },
   "open": {
@@ -77,6 +81,7 @@
     "review": "{{reviewed}} de {{total}} revisadas",
     "approved": "{{approved}} de {{total}} aprobadas",
     "approvedPlain": "Revisión cerrada",
+    "noReview": "Sin revisión",
     "correction_one": "{{count}} devuelta al cliente",
     "correction_other": "{{count}} devueltas al cliente",
     "notReady": "Aún no se puede revisar"
@@ -102,6 +107,7 @@
     "reviewYou": "Te toca a ti.",
     "review": "Todo está respondido: aprueba o pide corrección.",
     "approved": "Revisaste y aprobaste todas las respuestas.",
+    "completed": "Todo está respondido y la asignación no requiere revisión.",
     "correction": "Pediste corregir alguna respuesta; al volver, pasa otra vez a Por revisar.",
     "overdue": "Pasó la fecha límite de la asignación sin terminar."
   },
@@ -122,6 +128,9 @@
     "optional": "(opcional)",
     "descriptionPlaceholder": "De qué trata esta asignación. Solo la ve tu equipo.",
     "deadline": "Fecha límite",
+    "requiresReview": "Requiere revisión",
+    "requiresReviewOn": "Un cuestionario completado pasa a “Pendiente de revisión”.",
+    "requiresReviewOff": "Un cuestionario completado queda como “Completado”, sin revisión.",
     "save": "Guardar",
     "saving": "Guardando...",
     "saved": "Asignación actualizada",

@@ -48,10 +48,12 @@ final class AssignationOutput
         public readonly ?string $last_reminder_sent_at,
         public readonly AssignationProgressOutput $progress,
         public readonly bool $completed,
-        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved'], nullable: true)]
+        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved', 'completed'], nullable: true)]
         public readonly ?string $review_status,
         public readonly ?string $created_at,
         public readonly ?string $updated_at,
+        /** A complete follow-up goes to review; false: it is simply completed. */
+        public readonly bool $requires_review = true,
     ) {
     }
 
@@ -94,6 +96,7 @@ final class AssignationOutput
             self::string($d['review_status']),
             self::string($d['created_at']),
             self::string($d['updated_at']),
+            (bool) ($d['requires_review'] ?? true),
         );
     }
 

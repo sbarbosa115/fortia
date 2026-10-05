@@ -1270,3 +1270,8 @@
   margin-top: 4px;
   font-size: 12px;
 }
+.asg-wiz__review {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

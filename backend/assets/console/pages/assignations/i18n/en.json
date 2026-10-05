@@ -26,6 +26,7 @@
     "review": "To review",
     "correction": "In correction",
     "approved": "Approved",
+    "completed": "Completed",
     "overdue": "Overdue",
     "empty": "No questionnaires"
   },
@@ -35,10 +36,12 @@
     "review": "Needs your review",
     "correction": "In correction",
     "approved": "Completed",
+    "completed": "Completed",
     "overdue": "Overdue",
     "empty": "No questionnaires"
   },
   "approvedOf": "{{approved}} of {{total}} approved",
+  "completedOf": "{{completed}} of {{total}} completed",
   "columns": {
     "project": "Assignation",
     "status": "Status",
@@ -67,6 +70,7 @@
     "progress": "See progress",
     "pending": "See progress",
     "approved": "See results",
+    "completed": "See results",
     "empty": "Edit assignation"
   },
   "open": {
@@ -77,6 +81,7 @@
     "review": "{{reviewed}} of {{total}} reviewed",
     "approved": "{{approved}} of {{total}} approved",
     "approvedPlain": "Review closed",
+    "noReview": "No review needed",
     "correction_one": "{{count}} sent back to the client",
     "correction_other": "{{count}} sent back to the client",
     "notReady": "Not ready for review yet"
@@ -102,6 +107,7 @@
     "reviewYou": "Your turn.",
     "review": "Everything is answered: approve it or ask for a correction.",
     "approved": "You reviewed and approved every answer.",
+    "completed": "Everything is answered and the assignation does not require review.",
     "correction": "You asked to correct an answer; once back, it returns to To review.",
     "overdue": "The assignation's deadline passed before it was finished."
   },
@@ -122,6 +128,9 @@
     "optional": "(optional)",
     "descriptionPlaceholder": "What this assignation is about. Only your team sees it.",
     "deadline": "Deadline",
+    "requiresReview": "Requires review",
+    "requiresReviewOn": "A completed questionnaire goes to “Pending review”.",
+    "requiresReviewOff": "A completed questionnaire is marked “Completed”, with no review.",
     "save": "Save",
     "saving": "Saving...",
     "saved": "Assignation updated",

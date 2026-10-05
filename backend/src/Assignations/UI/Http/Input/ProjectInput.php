@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * POST /projects (group "create") and PUT /projects/{id} (group "update", partial), PRD §8.9. No extra fields.
- * Create: organization_id, name and due_date are required; questionnaire_ids and registration_title only there. Update: name, due_date and assignation_ids cannot be null;
+ * Create: organization_id, name and due_date are required, requires_review defaults to true; questionnaire_ids and registration_title only there. Update: name, due_date and assignation_ids cannot be null;
  * organization_id may be sent only unchanged (the handler checks it).
  */
 final class ProjectInput implements TracksProvidedFields
@@ -37,6 +37,9 @@ final class ProjectInput implements TracksProvidedFields
     #[Assert\All([new Assert\Type('string'), new Assert\Uuid(versions: [Assert\Uuid::V4_RANDOM])])]
     public ?array $questionnaire_ids = null;
 
+    /** Whether its follow-ups go to review once complete (true when not sent on create), or are simply completed. */
+    public ?bool $requires_review = null;
+
     /** Create only: the title of the new follow-ups' registration slide, in the console's language. */
     #[Assert\Length(max: 200)]
     public ?string $registration_title = null;
@@ -49,7 +52,7 @@ final class ProjectInput implements TracksProvidedFields
                 $context->buildViolation('This value should not be null.')->atPath($field)->addViolation();
             }
         }
-        foreach (['assignation_ids', 'questionnaire_ids'] as $field) {
+        foreach (['assignation_ids', 'questionnaire_ids', 'requires_review'] as $field) {
             if ($this->wasProvided($field) && null === $this->{$field}) {
                 $context->buildViolation('This value should not be null.')->atPath($field)->addViolation();
             }
@@ -62,7 +65,7 @@ final class ProjectInput implements TracksProvidedFields
         if ([] === $this->providedFields()) {
             $context->buildViolation('Send at least one field to change.')->addViolation();
         }
-        foreach (['organization_id', 'name', 'due_date', 'assignation_ids'] as $field) {
+        foreach (['organization_id', 'name', 'due_date', 'assignation_ids', 'requires_review'] as $field) {
             if ($this->wasProvided($field) && null === $this->{$field}) {
                 $context->buildViolation('This value should not be null.')->atPath($field)->addViolation();
             }
@@ -90,7 +93,7 @@ final class ProjectInput implements TracksProvidedFields
     public function fields(): array
     {
         $fields = [];
-        foreach (['organization_id', 'name', 'description', 'due_date', 'assignation_ids'] as $field) {
+        foreach (['organization_id', 'name', 'description', 'due_date', 'assignation_ids', 'requires_review'] as $field) {
             if ($this->wasProvided($field)) {
                 $fields[$field] = $this->{$field};
             }

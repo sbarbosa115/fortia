@@ -6,14 +6,15 @@ namespace App\Assignations\Domain;
  * The state rules of a project (PRD §7.12).
  *
  * State of an assignation within the project, first matching rule:
- *   1. complete → `review` if in_review, `correction` if changes_requested, otherwise `approved`;
+ *   1. complete → `completed` when its assignation does not require review, else `review` if in_review, `correction`
+ *      if changes_requested, otherwise `approved`;
  *   2. overdue → `overdue` ("today" in UTC−12, so the due date itself is never overdue in any time zone);
  *   3. changes requested or attempt > 1 → `correction`;
  *   4. some progress → `progress`;
  *   5. otherwise → `pending`.
  *
  * Project state: the first found among its assignations in the order review, overdue, correction, progress, pending,
- * approved; `empty` without assignations. progress_percent: the rounded average of each assignation's percent.
+ * completed, approved; `empty` without assignations. progress_percent: the rounded average of each assignation's percent.
  */
 final class ProjectStatus
 {
@@ -22,14 +23,15 @@ final class ProjectStatus
     public const CORRECTION = 'correction';
     public const PROGRESS = 'progress';
     public const PENDING = 'pending';
+    public const COMPLETED = 'completed';
     public const APPROVED = 'approved';
     public const EMPTY = 'empty';
 
     /** The project state's priority (§7.12). */
-    public const PRIORITY = [self::REVIEW, self::OVERDUE, self::CORRECTION, self::PROGRESS, self::PENDING, self::APPROVED];
+    public const PRIORITY = [self::REVIEW, self::OVERDUE, self::CORRECTION, self::PROGRESS, self::PENDING, self::COMPLETED, self::APPROVED];
 
-    /** The `status` filter of GET /projects (§8.9); `progress` includes `pending`. */
-    public const FILTERS = [self::REVIEW, self::PROGRESS, self::CORRECTION, self::OVERDUE, self::APPROVED];
+    /** The `status` filter of GET /projects (§8.9); `progress` includes `pending`, `completed` includes `approved`. */
+    public const FILTERS = [self::REVIEW, self::PROGRESS, self::CORRECTION, self::OVERDUE, self::COMPLETED, self::APPROVED];
 
     /** "Today" for the overdue rule: the calendar date in UTC−12, the last time zone on Earth to reach a date. */
     public static function todayForOverdue(\DateTimeImmutable $now): string
@@ -54,6 +56,7 @@ final class ProjectStatus
             return match ($progress->reviewStatus) {
                 FollowUpProgress::IN_REVIEW => self::REVIEW,
                 FollowUpProgress::CHANGES_REQUESTED => self::CORRECTION,
+                FollowUpProgress::COMPLETED => self::COMPLETED,
                 default => self::APPROVED,
             };
         }
@@ -93,6 +96,8 @@ final class ProjectStatus
     /** Whether a project in $state is listed under the `status` filter $filter (§8.9). */
     public static function matchesFilter(string $state, string $filter): bool
     {
-        return $state === $filter || (self::PROGRESS === $filter && self::PENDING === $state);
+        return $state === $filter
+            || (self::PROGRESS === $filter && self::PENDING === $state)
+            || (self::COMPLETED === $filter && self::APPROVED === $state);
     }
 }

@@ -15,7 +15,8 @@
     "not_ready": "Not complete yet",
     "in_review": "In review",
     "changes_requested": "Changes requested",
-    "approved": "Approved"
+    "approved": "Approved",
+    "completed": "Completed"
   },
   "noDue": "No due date",
   "urgency": {

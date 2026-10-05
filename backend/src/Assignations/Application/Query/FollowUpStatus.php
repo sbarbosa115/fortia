@@ -14,7 +14,7 @@ use App\Shared\Domain\Document\Questions;
  *
  *     $progress = $followUpStatus->of($assignation);
  *     $progress->ended;          // complete: the shared session has ended_at
- *     $progress->reviewStatus;   // not_ready | in_review | changes_requested | approved
+ *     $progress->reviewStatus;   // not_ready | in_review | changes_requested | approved | completed (no review)
  */
 final class FollowUpStatus
 {
@@ -29,11 +29,11 @@ final class FollowUpStatus
         $sessionId = $assignation->sharedSessionId();
         $session = null === $sessionId ? null : $this->sessions->find($sessionId);
         if (null !== $session) {
-            return FollowUpProgress::ofSession($session->questions(), $session->isEnded(), $session->attempt());
+            return FollowUpProgress::ofSession($session->questions(), $session->isEnded(), $session->attempt(), $assignation->requiresReview());
         }
         $questionnaire = $this->questionnaires->find($assignation->questionnaireId());
         $questions = null === $questionnaire ? [] : $questionnaire->questions();
 
-        return FollowUpProgress::notStarted(\count(array_filter($questions, Questions::isAnswerable(...))));
+        return FollowUpProgress::notStarted(\count(array_filter($questions, Questions::isAnswerable(...))), $assignation->requiresReview());
     }
 }

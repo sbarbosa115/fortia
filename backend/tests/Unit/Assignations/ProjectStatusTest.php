@@ -104,6 +104,15 @@ final class ProjectStatusTest extends TestCase
         self::assertSame(2, $progress->approved);
     }
 
+    public function testACompleteFollowUpThatDoesNotRequireReviewIsCompleted(): void
+    {
+        $questions = [self::q('q1', 'a', review: 'rejected', reviewAttempt: 1)];
+
+        self::assertSame(FollowUpProgress::COMPLETED, FollowUpProgress::ofSession($questions, ended: true, attempt: 1, requiresReview: false)->reviewStatus, 'no review: complete means completed, whatever the reviews say');
+        self::assertSame(FollowUpProgress::NOT_READY, FollowUpProgress::ofSession($questions, ended: false, attempt: 1, requiresReview: false)->reviewStatus);
+        self::assertFalse(FollowUpProgress::notStarted(2, false)->requiresReview);
+    }
+
     public function testAReviewOfAnEarlierAttemptDoesNotCount(): void
     {
         $progress = FollowUpProgress::ofSession([
@@ -147,6 +156,18 @@ final class ProjectStatusTest extends TestCase
         self::assertSame(ProjectStatus::REVIEW, ProjectStatus::ofAssignation($inReview, 1, '2026-01-01', $today), 'rule 1 wins over overdue');
         self::assertSame(ProjectStatus::CORRECTION, ProjectStatus::ofAssignation($changes, 1, null, $today));
         self::assertSame(ProjectStatus::APPROVED, ProjectStatus::ofAssignation($approved, 1, '2026-01-01', $today));
+    }
+
+    public function testACompleteAssignationWithoutReviewIsCompleted(): void
+    {
+        $completed = FollowUpProgress::ofSession([self::q('q1', 'a')], true, 1, false);
+
+        self::assertSame(ProjectStatus::COMPLETED, ProjectStatus::ofAssignation($completed, 1, '2026-01-01', '2026-09-30'), 'rule 1: completed wins over overdue');
+        self::assertSame(ProjectStatus::PENDING, ProjectStatus::ofProject(['completed', 'pending']), 'completed comes after pending');
+        self::assertSame(ProjectStatus::COMPLETED, ProjectStatus::ofProject(['approved', 'completed']), 'and before approved');
+        self::assertTrue(ProjectStatus::matchesFilter(ProjectStatus::COMPLETED, 'completed'));
+        self::assertTrue(ProjectStatus::matchesFilter(ProjectStatus::APPROVED, 'completed'), 'the completed filter includes approved ones');
+        self::assertFalse(ProjectStatus::matchesFilter(ProjectStatus::COMPLETED, 'approved'));
     }
 
     public function testAnOverdueAssignationIsOverdueBeforeCorrectionAndProgress(): void

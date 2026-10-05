@@ -13,6 +13,7 @@ describe('the edit dialog form (PRD §10.12)', () => {
       name: 'Store opening Q4',
       description: '',
       dueDate: '2026-12-01',
+      requiresReview: true,
     });
   });
 
@@ -54,11 +55,13 @@ describe('the edit dialog form (PRD §10.12)', () => {
         name: '  Q4  ',
         description: '  ',
         dueDate: '2027-01-15',
+        requiresReview: false,
       }),
     ).toEqual({
       name: 'Q4',
       description: null,
       due_date: '2027-01-15',
+      requires_review: false,
     });
   });
 });
