@@ -47,6 +47,17 @@ final class ChatTurnTest extends ApiTestCase
         self::assertStringContainsString('Mappi assistant', $request->system, 'the system text comes from SystemPrompts (chat--conversation-rules)');
     }
 
+    public function testTheAssistantIsToldToStayOnMappiWhateverTheEditablePromptSays(): void
+    {
+        foreach (['create', 'draft'] as $mode) {
+            $result = $this->reply(['¿Quién es Messi?'], ['mode' => $mode]);
+
+            self::assertStringNotContainsString('futbolista', $result['message'], "$mode: PRD §7.19: the assistant only helps with Mappi");
+            $requests = $this->llm()->requests();
+            self::assertStringContainsString('- Scope: you only help with Mappi', end($requests)->system, "$mode: the scope is a platform rule, not only the editable prompt");
+        }
+    }
+
     public function testTheCreateModeBuildsTheDraftPhaseByPhaseAndCreatesItOnlyWhenTheUserApproves(): void
     {
         $before = $this->roots();
