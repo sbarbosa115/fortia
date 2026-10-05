@@ -56,6 +56,7 @@ function assignation(
     state: 'progress',
     completed: false,
     review_status: 'not_ready',
+    requires_review: true,
     attempt: 1,
     due_date: '2099-12-01',
     overdue: false,
@@ -82,6 +83,7 @@ function project(overrides: Partial<Project> = {}): Project {
     progress_percent: 69,
     completed_assignations: 1,
     approved_assignations: 0,
+    done_assignations: 0,
     total_assignations: 2,
     assignations: [
       assignation(),

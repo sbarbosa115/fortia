@@ -42,6 +42,7 @@
   },
   "approvedOf": "{{approved}} of {{total}} approved",
   "completedOf": "{{completed}} of {{total}} completed",
+  "doneOf": "{{done}} of {{total}} done",
   "columns": {
     "project": "Assignation",
     "status": "Status",
@@ -128,9 +129,6 @@
     "optional": "(optional)",
     "descriptionPlaceholder": "What this assignation is about. Only your team sees it.",
     "deadline": "Deadline",
-    "requiresReview": "Requires review",
-    "requiresReviewOn": "A completed questionnaire goes to “Pending review”.",
-    "requiresReviewOff": "A completed questionnaire is marked “Completed”, with no review.",
     "save": "Save",
     "saving": "Saving...",
     "saved": "Assignation updated",
@@ -140,7 +138,11 @@
       "descriptionTooLong": "Use 2000 characters or fewer",
       "deadlineRequired": "Choose a deadline for the assignation",
       "deadlineInvalid": "Enter a valid deadline"
-    }
+    },
+    "review": "Review",
+    "reviewHint": "Once completed, the questionnaires switched on go to “Pending review”; the others are marked “Completed”.",
+    "reviewOn": "Requires review",
+    "reviewOff": "No review"
   },
   "editQuestionnaire": "Edit the questionnaire of {{name}}"
 }

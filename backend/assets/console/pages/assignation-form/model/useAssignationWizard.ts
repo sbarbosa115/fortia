@@ -19,6 +19,7 @@ import {
   type NewOrganization,
   type PickedQuestionnaire,
   type Progress,
+  reviewedIds,
   runCreate,
   type Step,
   stepErrors,
@@ -115,11 +116,26 @@ export function useAssignationWizard() {
     forget(['organizationId']);
   };
 
-  // --- Step 3: the name and the deadline ---------------------------------------------------------------------
+  // --- Step 3: the name, the deadline and which questionnaires are reviewed ---------------------------------
 
   const [name, setName] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [requiresReview, setRequiresReview] = useState(true);
+  // Review is chosen per questionnaire: every picked one requires it unless switched off here.
+  const [withoutReview, setWithoutReview] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  const reviewIds = reviewedIds(questionnaires, withoutReview);
+  const setReview = (id: string, on: boolean) =>
+    setWithoutReview((current) => {
+      const next = new Set(current);
+      if (on) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const setAllReviews = (on: boolean) =>
+    setWithoutReview(
+      on ? new Set() : new Set(questionnaires.map((item) => item.id)),
+    );
 
   // --- Steps -----------------------------------------------------------------------------------------------
 
@@ -157,7 +173,7 @@ export function useAssignationWizard() {
           name,
           dueDate,
           registrationTitle: t('registrationTitle'),
-          requiresReview,
+          reviewQuestionnaireIds: reviewIds,
         },
         progress,
         DEPS,
@@ -225,8 +241,9 @@ export function useAssignationWizard() {
     setName,
     dueDate,
     setDueDate,
-    requiresReview,
-    setRequiresReview,
+    reviewIds,
+    setReview,
+    setAllReviews,
     // Create
     submit,
     creating: create.isPending,

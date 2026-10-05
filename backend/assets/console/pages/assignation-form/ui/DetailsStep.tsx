@@ -4,8 +4,8 @@ import type {AssignationWizardState} from '../model/useAssignationWizard';
 import {detailsErrors} from '../model/wizard';
 
 /**
- * Step 3: the assignation's name, its deadline (today or later; its questionnaires follow it) and whether a completed
- * questionnaire goes to review or is simply completed.
+ * Step 3: the assignation's name, its deadline (today or later; its questionnaires follow it) and, for each of its
+ * questionnaires, whether it goes to review once completed or is simply completed.
  */
 export function DetailsStep({wizard}: {wizard: AssignationWizardState}) {
   const {t} = useTranslation('pages.assignation-form');
@@ -46,20 +46,63 @@ export function DetailsStep({wizard}: {wizard: AssignationWizardState}) {
           onChange={(event) => wizard.setDueDate(event.target.value)}
         />
       </Field>
-      <div className="asg-wiz__review">
-        <Toggle
-          label={t('details.requiresReview')}
-          checked={wizard.requiresReview}
-          onChange={wizard.setRequiresReview}
-        />
-        <p className="asg-wiz__small-muted">
-          {t(
-            wizard.requiresReview
-              ? 'details.requiresReviewOn'
-              : 'details.requiresReviewOff',
-          )}
-        </p>
-      </div>
+      <ReviewChoices wizard={wizard} />
     </section>
+  );
+}
+
+/** Which questionnaires go to "Pending review" once completed: chosen one by one, on by default. */
+function ReviewChoices({wizard}: {wizard: AssignationWizardState}) {
+  const {t} = useTranslation('pages.assignation-form');
+  const reviewed = new Set(wizard.reviewIds);
+  const total = wizard.questionnaires.length;
+
+  return (
+    <fieldset className="asg-wiz__review">
+      <legend className="asg-wiz__review-title">{t('details.review')}</legend>
+      <p className="asg-wiz__small-muted">{t('details.reviewHint')}</p>
+      {total > 1 ? (
+        <div className="asg-wiz__review-bar">
+          <span className="asg-wiz__small-muted">
+            {t('details.reviewCount', {count: reviewed.size, total})}
+          </span>
+          <span className="asg-wiz__review-actions">
+            <button
+              type="button"
+              className="asg-wiz__link-button"
+              disabled={reviewed.size === total}
+              onClick={() => wizard.setAllReviews(true)}
+            >
+              {t('details.reviewAll')}
+            </button>
+            <button
+              type="button"
+              className="asg-wiz__link-button"
+              disabled={reviewed.size === 0}
+              onClick={() => wizard.setAllReviews(false)}
+            >
+              {t('details.reviewNone')}
+            </button>
+          </span>
+        </div>
+      ) : null}
+      <ul className="asg-wiz__review-list">
+        {wizard.questionnaires.map((questionnaire) => {
+          const on = reviewed.has(questionnaire.id);
+          return (
+            <li key={questionnaire.id} className="asg-wiz__review-item">
+              <Toggle
+                label={questionnaire.title}
+                checked={on}
+                onChange={(value) => wizard.setReview(questionnaire.id, value)}
+              />
+              <span className="asg-wiz__review-state" data-on={on || undefined}>
+                {t(on ? 'details.reviewOn' : 'details.reviewOff')}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </fieldset>
   );
 }

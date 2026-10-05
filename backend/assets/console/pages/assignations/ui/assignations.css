@@ -1176,5 +1176,48 @@
 .project-form__review {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.project-form__review > legend {
+  padding: 0;
+}
+.project-form__review-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.project-form__review-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  min-width: 0;
+}
+.project-form__review-item + .project-form__review-item {
+  border-top: 1px solid var(--color-border);
+}
+.project-form__review-item .toggle {
+  min-width: 0;
+  font-size: 14px;
+  text-align: left;
+}
+.project-form__review-state {
+  flex: none;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.project-form__review-state[data-on] {
+  color: var(--color-primary);
+  font-weight: 600;
 }

@@ -92,9 +92,14 @@
     "nameHint": "Solo lo ve tu equipo.",
     "deadline": "Fecha límite",
     "deadlineHint": "Todos los cuestionarios vencen en esta fecha. Los miembros reciben un recordatorio diario hasta terminar.",
-    "requiresReview": "Requiere revisión",
-    "requiresReviewOn": "Cuando un cuestionario se completa pasa a “Pendiente de revisión”: apruebas sus respuestas o lo envías a corrección.",
-    "requiresReviewOff": "Cuando un cuestionario se completa queda como “Completado”, sin revisión."
+    "review": "Revisión",
+    "reviewHint": "Elige qué cuestionarios revisas. Al completarse, los activados pasan a “Pendiente de revisión”: apruebas sus respuestas o los envías a corrección. Los demás quedan como “Completado”.",
+    "reviewCount_one": "{{count}} de {{total}} requiere revisión",
+    "reviewCount_other": "{{count}} de {{total}} requieren revisión",
+    "reviewAll": "Revisar todos",
+    "reviewNone": "Ninguno",
+    "reviewOn": "Requiere revisión",
+    "reviewOff": "Sin revisión"
   },
   "summary": {
     "title": "Lo que vamos a crear",

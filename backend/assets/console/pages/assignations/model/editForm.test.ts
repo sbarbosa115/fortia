@@ -1,10 +1,14 @@
 import {describe, expect, it} from 'vitest';
-import {draftFrom, editErrors, toPayload} from './editForm';
+import {draftFrom, editErrors, toPayload, withReview} from './editForm';
 
 const project = {
   name: 'Store opening Q4',
   description: null,
   due_date: '2026-12-01',
+  assignations: [
+    {assignations_id: 'a-1', requires_review: true},
+    {assignations_id: 'a-2', requires_review: false},
+  ],
 };
 
 describe('the edit dialog form (PRD §10.12)', () => {
@@ -13,8 +17,14 @@ describe('the edit dialog form (PRD §10.12)', () => {
       name: 'Store opening Q4',
       description: '',
       dueDate: '2026-12-01',
-      requiresReview: true,
+      reviewIds: ['a-1'],
     });
+  });
+
+  it('switches review on each questionnaire on its own', () => {
+    const draft = draftFrom(project);
+    expect(withReview(draft, 'a-2', true).reviewIds).toEqual(['a-1', 'a-2']);
+    expect(withReview(draft, 'a-1', false).reviewIds).toEqual([]);
   });
 
   it('accepts a complete draft', () => {
@@ -55,13 +65,13 @@ describe('the edit dialog form (PRD §10.12)', () => {
         name: '  Q4  ',
         description: '  ',
         dueDate: '2027-01-15',
-        requiresReview: false,
+        reviewIds: ['a-2'],
       }),
     ).toEqual({
       name: 'Q4',
       description: null,
       due_date: '2027-01-15',
-      requires_review: false,
+      review_assignation_ids: ['a-2'],
     });
   });
 });

@@ -42,6 +42,7 @@
   },
   "approvedOf": "{{approved}} de {{total}} aprobadas",
   "completedOf": "{{completed}} de {{total}} completados",
+  "doneOf": "{{done}} de {{total}} terminados",
   "columns": {
     "project": "Asignación",
     "status": "Estado",
@@ -128,9 +129,6 @@
     "optional": "(opcional)",
     "descriptionPlaceholder": "De qué trata esta asignación. Solo la ve tu equipo.",
     "deadline": "Fecha límite",
-    "requiresReview": "Requiere revisión",
-    "requiresReviewOn": "Un cuestionario completado pasa a “Pendiente de revisión”.",
-    "requiresReviewOff": "Un cuestionario completado queda como “Completado”, sin revisión.",
     "save": "Guardar",
     "saving": "Guardando...",
     "saved": "Asignación actualizada",
@@ -140,7 +138,11 @@
       "descriptionTooLong": "Usa 2000 caracteres o menos",
       "deadlineRequired": "Elige una fecha límite para la asignación",
       "deadlineInvalid": "Escribe una fecha límite válida"
-    }
+    },
+    "review": "Revisión",
+    "reviewHint": "Al completarse, los cuestionarios activados pasan a “Pendiente de revisión”; los demás quedan como “Completado”.",
+    "reviewOn": "Requiere revisión",
+    "reviewOff": "Sin revisión"
   },
   "editQuestionnaire": "Editar el cuestionario de {{name}}"
 }

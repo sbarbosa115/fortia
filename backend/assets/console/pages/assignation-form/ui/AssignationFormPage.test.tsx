@@ -371,7 +371,7 @@ describe('AssignationFormPage', () => {
       due_date: '2099-12-15',
       questionnaire_ids: ['q-1', 'q-2'],
       registration_title: 'Tell us who you are',
-      requires_review: true,
+      review_questionnaire_ids: ['q-1', 'q-2'],
     });
     expect(
       copyQuestionnaire,
@@ -379,19 +379,32 @@ describe('AssignationFormPage', () => {
     ).not.toHaveBeenCalled();
   });
 
-  it('creates an assignation without review when its switch is turned off', async () => {
+  it('chooses review for each questionnaire, not for the whole assignation', async () => {
     renderPage();
     await pickTwoAndContinue();
     await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
     await userEvent.click(continueButton());
 
-    const review = screen.getByRole('switch', {name: 'Requires review'});
-    expect(review, 'an assignation requires review by default').toBeChecked();
-    expect(screen.getByText(/goes to “Pending review”/)).toBeInTheDocument();
-    await userEvent.click(review);
-    expect(review).not.toBeChecked();
+    const review = screen.getByRole('group', {name: 'Review'});
+    const store = within(review).getByRole('switch', {name: 'Store audit'});
+    const warehouse = within(review).getByRole('switch', {
+      name: 'Warehouse audit',
+    });
     expect(
-      screen.getByText(/it is marked “Completed”, with no review/),
+      store,
+      'every questionnaire requires review by default',
+    ).toBeChecked();
+    expect(warehouse).toBeChecked();
+    expect(
+      within(review).getByText('2 of 2 require review'),
+    ).toBeInTheDocument();
+
+    await userEvent.click(store);
+    expect(store).not.toBeChecked();
+    expect(warehouse, 'the others keep their own review').toBeChecked();
+    expect(within(review).getByText('No review')).toBeInTheDocument();
+    expect(
+      within(review).getByText('1 of 2 requires review'),
     ).toBeInTheDocument();
 
     await userEvent.type(
@@ -403,8 +416,27 @@ describe('AssignationFormPage', () => {
 
     await screen.findByText('Assignations list');
     expect(createProject).toHaveBeenCalledWith(
-      expect.objectContaining({requires_review: false}),
+      expect.objectContaining({review_questionnaire_ids: ['q-2']}),
     );
+  });
+
+  it('switches review on or off for every questionnaire at once', async () => {
+    renderPage();
+    await pickTwoAndContinue();
+    await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
+    await userEvent.click(continueButton());
+    const review = screen.getByRole('group', {name: 'Review'});
+
+    await userEvent.click(within(review).getByRole('button', {name: 'None'}));
+    within(review)
+      .getAllByRole('switch')
+      .forEach((item) => expect(item).not.toBeChecked());
+    await userEvent.click(
+      within(review).getByRole('button', {name: 'Review all'}),
+    );
+    within(review)
+      .getAllByRole('switch')
+      .forEach((item) => expect(item).toBeChecked());
   });
 
   it('lists what is missing when Create is pressed too early', async () => {

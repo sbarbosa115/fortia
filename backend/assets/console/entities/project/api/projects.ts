@@ -20,6 +20,8 @@ export type ProjectPayload = {
   due_date?: string;
   assignation_ids?: string[];
   requires_review?: boolean;
+  /** Its follow-ups that go to review once completed; the others are simply completed. */
+  review_assignation_ids?: string[];
 };
 
 /** Every cached project query starts with this key: invalidate it after any change. */
@@ -60,6 +62,8 @@ export type NewProjectPayload = {
   assignation_ids?: string[];
   questionnaire_ids?: string[];
   requires_review?: boolean;
+  /** Those of questionnaire_ids that go to review once completed (not sent: requires_review decides for all). */
+  review_questionnaire_ids?: string[];
   registration_title?: string;
 };
 

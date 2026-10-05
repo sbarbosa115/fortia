@@ -138,6 +138,54 @@ final class ProjectApiTest extends ApiTestCase
         $this->assertApiError($this->api('POST', self::URL, [...$body, 'requires_review' => null], as: $owner), 400, 'VALIDATION_ERROR');
     }
 
+    public function testReviewIsChosenForEachQuestionnaireOfTheAssignation(): void
+    {
+        $owner = $this->account('ACME0001');
+        $org = $this->organization('ACME0001', 'Acme Retail');
+        $a = $this->questionnaire('ACME0001', type: 'default');
+        $b = $this->questionnaire('ACME0001', type: 'diagnostic');
+        $c = $this->questionnaire('ACME0001', type: 'quiz_funnel');
+        $body = ['organization_id' => $org, 'name' => 'Q4 audits', 'due_date' => '2026-12-15', 'questionnaire_ids' => [$a, $b, $c]];
+
+        $project = $this->data($this->api('POST', self::URL, [...$body, 'review_questionnaire_ids' => [strtoupper($b)]], as: $owner), 201);
+
+        $reviewed = [];
+        foreach ($project['assignations'] as $item) {
+            $reviewed[$item['questionnaire_id']] = $item['requires_review'];
+            self::assertSame($item['requires_review'], $this->storedAssignation($item['assignations_id'])->requiresReview());
+        }
+        self::assertSame([$a => false, $b => true, $c => false], [$a => $reviewed[$a], $b => $reviewed[$b], $c => $reviewed[$c]], 'only the questionnaires the owner marks go to review');
+        self::assertTrue($project['requires_review'], 'the assignation requires review when any of its questionnaires does');
+
+        $none = $this->data($this->api('POST', self::URL, [...$body, 'review_questionnaire_ids' => []], as: $owner), 201);
+        self::assertFalse($none['requires_review'], 'an empty list: none of them is reviewed');
+        $this->assertApiError($this->api('POST', self::URL, [...$body, 'review_questionnaire_ids' => null], as: $owner), 400, 'VALIDATION_ERROR');
+        $this->assertApiError($this->api('POST', self::URL, [...$body, 'review_assignation_ids' => []], as: $owner), 400, 'VALIDATION_ERROR');
+    }
+
+    public function testEditingSetsReviewOnEachQuestionnaireAndOtherChangesKeepIt(): void
+    {
+        $owner = $this->account('ACME0001');
+        $org = $this->organization('ACME0001', 'Acme');
+        $a = $this->followUp('ACME0001', $org, 'A', questions: 2);
+        $b = $this->followUp('ACME0001', $org, 'B', questions: 2);
+        $this->answer($a, answered: 2, ended: true);
+        $this->answer($b, answered: 2, ended: true);
+        $project = $this->project('ACME0001', $org, 'Audit', '2026-12-01', [$a, $b]);
+
+        $data = $this->data($this->api('PUT', self::URL.'/'.$project, ['review_assignation_ids' => [$b]], as: $owner));
+
+        self::assertFalse($this->storedAssignation($a)->requiresReview(), 'a questionnaire left out is simply completed');
+        self::assertTrue($this->storedAssignation($b)->requiresReview());
+        self::assertSame(1, $data['done_assignations'], 'done: A completed without review; B waits for its review');
+        self::assertSame('review', $data['state']);
+
+        $this->data($this->api('PUT', self::URL.'/'.$project, ['name' => 'Audit 2', 'due_date' => '2026-12-20'], as: $owner));
+        self::assertFalse($this->storedAssignation($a)->requiresReview(), 'renaming or moving the deadline keeps each questionnaire\'s review');
+        self::assertTrue($this->storedAssignation($b)->requiresReview());
+        $this->assertApiError($this->api('PUT', self::URL.'/'.$project, ['review_assignation_ids' => null], as: $owner), 400, 'VALIDATION_ERROR');
+    }
+
     public function testCreatingWithQuestionnairesChecksEachOne(): void
     {
         $owner = $this->account('ACME0001');

@@ -55,15 +55,19 @@ final class CreateProjectHandler
         // The project belongs to its organization's account (an Admin may create one for any account).
         $project = new Project($id, $customerId, $command->organizationId, trim($command->name), $command->dueDate, $now);
         $project->change(trim($command->name), self::description($command->description), $command->dueDate, $now);
-        $project->requireReview($command->requiresReview, $now);
         $this->projects->add($project);
         foreach ($created as $assignation) {
             $this->assignationRepository->add($assignation);
         }
         $this->assignations->replace($id, [...$assignations, ...$created], $now);
-        foreach ([...$assignations, ...$created] as $assignation) {
+        foreach ($assignations as $assignation) {
             $assignation->requireReview($command->requiresReview, $now);
         }
+        $reviewed = null === $command->reviewQuestionnaireIds ? null : array_map('strtolower', $command->reviewQuestionnaireIds);
+        foreach ($created as $assignation) {
+            $assignation->requireReview(null === $reviewed ? $command->requiresReview : \in_array($assignation->questionnaireId(), $reviewed, true), $now);
+        }
+        $project->requireReview(ProjectReview::any([...$assignations, ...$created], $command->requiresReview), $now);
         foreach ($created as $assignation) {
             $this->events->publish(AssignationCreated::of($customerId, $assignation->assignationsId()));
         }

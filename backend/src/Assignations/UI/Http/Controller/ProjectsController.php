@@ -89,6 +89,7 @@ final class ProjectsController
             $input->questionnaireIds(),
             $input->registration_title,
             $input->requires_review ?? true,
+            $input->reviewQuestionnaireIds(),
         ));
 
         return ApiResponse::created($this->present($caller, $id));

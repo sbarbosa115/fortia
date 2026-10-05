@@ -21,11 +21,13 @@ import {
   type EditDraft,
   editErrors,
   toPayload,
+  withReview,
 } from '../model/editForm';
 
 /**
  * Edit an assignation: name (required, ≤ 200), the organization (fixed), the deadline (required: it moves, never
- * clears; its questionnaires follow it), the description (≤ 2000) and whether its completed questionnaires go to review. Its questionnaires are set by the wizard.
+ * clears; its questionnaires follow it), the description (≤ 2000) and, for each of its questionnaires, whether it goes
+ * to review once completed. Its questionnaires are set by the wizard.
  */
 export function EditProjectDialog({
   project,
@@ -156,20 +158,39 @@ export function EditProjectDialog({
             onChange={(event) => set('description', event.target.value)}
           />
         </Field>
-        <div className="project-form__review">
-          <Toggle
-            label={t('form.requiresReview')}
-            checked={draft.requiresReview}
-            onChange={(value) => set('requiresReview', value)}
-          />
-          <span className="field__hint">
-            {t(
-              draft.requiresReview
-                ? 'form.requiresReviewOn'
-                : 'form.requiresReviewOff',
-            )}
-          </span>
-        </div>
+        {project.assignations.length > 0 ? (
+          <fieldset className="project-form__review">
+            <legend className="field__label">{t('form.review')}</legend>
+            <span className="field__hint">{t('form.reviewHint')}</span>
+            <ul className="project-form__review-list">
+              {project.assignations.map((item) => {
+                const on = draft.reviewIds.includes(item.assignations_id);
+                return (
+                  <li
+                    key={item.assignations_id}
+                    className="project-form__review-item"
+                  >
+                    <Toggle
+                      label={item.name}
+                      checked={on}
+                      onChange={(value) =>
+                        setDraft((current) =>
+                          withReview(current, item.assignations_id, value),
+                        )
+                      }
+                    />
+                    <span
+                      className="project-form__review-state"
+                      data-on={on || undefined}
+                    >
+                      {t(on ? 'form.reviewOn' : 'form.reviewOff')}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </fieldset>
+        ) : null}
       </form>
     </Modal>
   );

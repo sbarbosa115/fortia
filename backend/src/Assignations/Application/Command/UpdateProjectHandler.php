@@ -39,13 +39,21 @@ final class UpdateProjectHandler
             $members = $this->assignations->resolve($command->caller, $project->organizationId(), $project->projectId(), $ids);
             $this->assignations->replace($project->projectId(), $members, $now);
         }
+        // Review is per follow-up: requires_review sets it on all of them, review_assignation_ids one by one.
+        $members ??= $this->assignationRepository->listByProject($project->projectId());
         if (\array_key_exists('requires_review', $fields)) {
-            $project->requireReview((bool) $fields['requires_review'], $now);
+            foreach ($members as $assignation) {
+                $assignation->requireReview((bool) $fields['requires_review'], $now);
+            }
         }
-        // Its follow-ups (the new set when it changed) take the project's review requirement.
-        foreach ($members ?? $this->assignationRepository->listByProject($project->projectId()) as $assignation) {
-            $assignation->requireReview($project->requiresReview(), $now);
+        if (\array_key_exists('review_assignation_ids', $fields)) {
+            $reviewed = array_map(static fn (mixed $id): string => strtolower((string) $id), (array) $fields['review_assignation_ids']);
+            foreach ($members as $assignation) {
+                $assignation->requireReview(\in_array($assignation->assignationsId(), $reviewed, true), $now);
+            }
         }
+        $fallback = \array_key_exists('requires_review', $fields) ? (bool) $fields['requires_review'] : $project->requiresReview();
+        $project->requireReview(ProjectReview::any($members, $fallback), $now);
         $project->change(
             \array_key_exists('name', $fields) ? trim((string) $fields['name']) : $project->name(),
             \array_key_exists('description', $fields) ? CreateProjectHandler::description(null === $fields['description'] ? null : (string) $fields['description']) : $project->description(),

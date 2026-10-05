@@ -92,9 +92,14 @@
     "nameHint": "Only your team sees it.",
     "deadline": "Deadline",
     "deadlineHint": "Every questionnaire is due on this date. Members get a daily reminder until they finish.",
-    "requiresReview": "Requires review",
-    "requiresReviewOn": "When a questionnaire is completed it goes to “Pending review”: you approve its answers or send it for correction.",
-    "requiresReviewOff": "When a questionnaire is completed it is marked “Completed”, with no review."
+    "review": "Review",
+    "reviewHint": "Choose which questionnaires you review. Once completed, the ones switched on go to “Pending review”: you approve their answers or send them for correction. The others are marked “Completed”.",
+    "reviewCount_one": "{{count}} of {{total}} requires review",
+    "reviewCount_other": "{{count}} of {{total}} require review",
+    "reviewAll": "Review all",
+    "reviewNone": "None",
+    "reviewOn": "Requires review",
+    "reviewOff": "No review"
   },
   "summary": {
     "title": "What we're going to create",

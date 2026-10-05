@@ -1628,6 +1628,11 @@ export interface components {
             percent: number;
             progress: components["schemas"]["ProjectAssignationProgressOutput"];
             review: components["schemas"]["ProjectReviewCountsOutput"];
+            /**
+             * Once complete it goes to review; false: it is simply completed.
+             * @default true
+             */
+            requires_review: boolean;
         };
         ProjectAvailableAssignationOutput: {
             assignations_id: string;
@@ -1655,10 +1660,15 @@ export interface components {
             /** @default null */
             available_assignations: components["schemas"]["ProjectAvailableAssignationOutput"][] | null;
             /**
-             * Its follow-ups go to review once complete; false: they are simply completed.
+             * Any of its follow-ups goes to review once complete (each one says so in assignations[].requires_review).
              * @default true
              */
             requires_review: boolean;
+            /**
+             * Its follow-ups that are done: approved when reviewed, complete otherwise.
+             * @default 0
+             */
+            done_assignations: number;
         };
         ProjectListOutput: {
             projects: components["schemas"]["ProjectOutput"][];
@@ -1674,6 +1684,16 @@ export interface components {
             questionnaire_ids?: string[] | null;
             /** Whether its follow-ups go to review once complete (true when not sent on create), or are simply completed. */
             requires_review?: boolean | null;
+            /**
+             * create only: those of questionnaire_ids whose follow-ups go to review once complete; the
+             *     others are simply completed. Not sent: requires_review decides for all of them.
+             */
+            review_questionnaire_ids?: string[] | null;
+            /**
+             * update only: the project's follow-ups that go to review once complete; its other ones are
+             *     simply completed (ids outside the project are ignored)
+             */
+            review_assignation_ids?: string[] | null;
             /** Create only: the title of the new follow-ups' registration slide, in the console's language. */
             registration_title?: string | null;
         };

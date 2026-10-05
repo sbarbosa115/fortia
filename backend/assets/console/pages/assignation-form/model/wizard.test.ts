@@ -5,6 +5,7 @@ import {
   detailsErrors,
   isReachable,
   type Progress,
+  reviewedIds,
   runCreate,
   stepErrors,
   togglePicked,
@@ -104,7 +105,7 @@ const plan: CreatePlan = {
   name: '  Q4 audits ',
   dueDate: '2026-12-15',
   registrationTitle: 'Tell us who you are',
-  requiresReview: true,
+  reviewQuestionnaireIds: ['q-1', 'q-2'],
 };
 
 describe('Create', () => {
@@ -123,18 +124,35 @@ describe('Create', () => {
       due_date: '2026-12-15',
       questionnaire_ids: ['q-1', 'q-2'],
       registration_title: 'Tell us who you are',
-      requires_review: true,
+      review_questionnaire_ids: ['q-1', 'q-2'],
     });
   });
 
-  it('creates an assignation without review when the owner switches it off', async () => {
+  it('sends review only for the questionnaires that require it', async () => {
     const api = deps();
 
-    await runCreate({...plan, requiresReview: false}, {}, api, () => {});
+    await runCreate(
+      {...plan, reviewQuestionnaireIds: ['q-2']},
+      {},
+      api,
+      () => {},
+    );
 
     expect(api.createProject).toHaveBeenCalledWith(
-      expect.objectContaining({requires_review: false}),
+      expect.objectContaining({review_questionnaire_ids: ['q-2']}),
     );
+  });
+
+  it('reviews every picked questionnaire except those switched off', () => {
+    const picked = [
+      {id: 'q-1', title: 'A', questionCount: 1},
+      {id: 'q-2', title: 'B', questionCount: 1},
+      {id: 'q-3', title: 'C', questionCount: 1},
+    ];
+    expect(reviewedIds(picked, new Set(['q-2', 'q-9']))).toEqual([
+      'q-1',
+      'q-3',
+    ]);
   });
 
   it('saves a new organization first and assigns the questionnaires themselves, never copies', async () => {

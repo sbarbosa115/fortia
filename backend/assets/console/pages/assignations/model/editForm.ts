@@ -5,7 +5,8 @@ export type EditDraft = {
   name: string;
   description: string;
   dueDate: string;
-  requiresReview: boolean;
+  /** Its questionnaires (follow-ups) that go to review once completed; the others are simply completed. */
+  reviewIds: string[];
 };
 
 /** Keys of `edit.errors.*` in the page's translations. */
@@ -26,14 +27,26 @@ export function draftFrom(project: {
   name: string;
   description?: string | null;
   due_date?: string | null;
-  requires_review?: boolean;
+  assignations?: {assignations_id: string; requires_review?: boolean}[];
 }): EditDraft {
   return {
     name: project.name,
     description: project.description ?? '',
     dueDate: project.due_date ?? '',
-    requiresReview: project.requires_review ?? true,
+    reviewIds: (project.assignations ?? [])
+      .filter((item) => item.requires_review ?? true)
+      .map((item) => item.assignations_id),
   };
+}
+
+/** Switches review on or off for one questionnaire of the draft. */
+export function withReview(
+  draft: EditDraft,
+  id: string,
+  on: boolean,
+): EditDraft {
+  const others = draft.reviewIds.filter((item) => item !== id);
+  return {...draft, reviewIds: on ? [...others, id] : others};
 }
 
 function isRealDate(value: string): boolean {
@@ -70,13 +83,13 @@ export function editErrors(draft: EditDraft): EditErrors {
   return errors;
 }
 
-/** PUT /projects/{id}: its questionnaires (assignation_ids) are left as they are. */
+/** PUT /projects/{id}: its questionnaires (assignation_ids) are left as they are; review is set on each one. */
 export function toPayload(draft: EditDraft): ProjectPayload {
   const description = draft.description.trim();
   return {
     name: draft.name.trim(),
     description: description === '' ? null : description,
     due_date: draft.dueDate.trim(),
-    requires_review: draft.requiresReview,
+    review_assignation_ids: draft.reviewIds,
   };
 }
