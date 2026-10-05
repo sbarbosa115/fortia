@@ -1275,31 +1275,59 @@
   flex-direction: column;
   gap: 8px;
   min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
 }
 .asg-wiz__review-title {
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: -4px;
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text);
 }
-.asg-wiz__review-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.asg-wiz__review-actions {
+.asg-wiz__info {
   display: inline-flex;
-  gap: 16px;
-}
-.asg-wiz__review-actions .asg-wiz__link-button:disabled {
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
   color: var(--color-text-muted);
-  cursor: default;
-  text-decoration: none;
+  cursor: help;
+}
+.asg-wiz__info:hover,
+.asg-wiz__info:focus-visible {
+  color: var(--color-primary);
+}
+.asg-wiz__segmented {
+  display: inline-flex;
+  align-self: flex-start;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 8px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+}
+.asg-wiz__segment {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.asg-wiz__segment:hover {
+  color: var(--color-text);
+}
+.asg-wiz__segment[aria-checked='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgb(19 17 29 / 12%);
 }
 .asg-wiz__review-list {
   display: flex;
@@ -1328,12 +1356,14 @@
   font-size: 14px;
   text-align: left;
 }
-.asg-wiz__review-state {
+.asg-wiz__review-item .badge {
   flex: none;
-  font-size: 12px;
-  color: var(--color-text-muted);
 }
-.asg-wiz__review-state[data-on] {
-  color: var(--color-primary);
-  font-weight: 600;
+.asg-wiz__review-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-text-muted);
 }

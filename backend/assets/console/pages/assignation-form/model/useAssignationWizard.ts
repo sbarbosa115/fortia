@@ -124,7 +124,10 @@ export function useAssignationWizard() {
   const [withoutReview, setWithoutReview] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  const reviewIds = reviewedIds(questionnaires, withoutReview);
+  // "No, close them automatically" turns review off for all of them, keeping the per-questionnaire choices.
+  const [reviewEnabled, setReviewEnabledState] = useState(true);
+  const reviewChoices = reviewedIds(questionnaires, withoutReview);
+  const reviewIds = reviewEnabled ? reviewChoices : [];
   const setReview = (id: string, on: boolean) =>
     setWithoutReview((current) => {
       const next = new Set(current);
@@ -132,10 +135,11 @@ export function useAssignationWizard() {
       else next.add(id);
       return next;
     });
-  const setAllReviews = (on: boolean) =>
-    setWithoutReview(
-      on ? new Set() : new Set(questionnaires.map((item) => item.id)),
-    );
+  const setReviewEnabled = (on: boolean) => {
+    setReviewEnabledState(on);
+    // Back to "Yes" with every one switched off: start again from all of them.
+    if (on && reviewChoices.length === 0) setWithoutReview(new Set());
+  };
 
   // --- Steps -----------------------------------------------------------------------------------------------
 
@@ -241,9 +245,10 @@ export function useAssignationWizard() {
     setName,
     dueDate,
     setDueDate,
+    reviewEnabled,
+    setReviewEnabled,
     reviewIds,
     setReview,
-    setAllReviews,
     // Create
     submit,
     creating: create.isPending,

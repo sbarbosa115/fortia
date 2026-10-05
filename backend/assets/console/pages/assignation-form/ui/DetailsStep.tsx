@@ -1,4 +1,4 @@
-import {Field, TextInput, Toggle} from '@shared/ui';
+import {Badge, Field, Icon, TextInput, Toggle, Tooltip} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import type {AssignationWizardState} from '../model/useAssignationWizard';
 import {detailsErrors} from '../model/wizard';
@@ -51,58 +51,86 @@ export function DetailsStep({wizard}: {wizard: AssignationWizardState}) {
   );
 }
 
-/** Which questionnaires go to "Pending review" once completed: chosen one by one, on by default. */
+/**
+ * Whether answers are reviewed before they are closed (Yes / No, close automatically) and, on Yes, which
+ * questionnaires: all of them by default, each one switched off on its own.
+ */
 function ReviewChoices({wizard}: {wizard: AssignationWizardState}) {
   const {t} = useTranslation('pages.assignation-form');
   const reviewed = new Set(wizard.reviewIds);
   const total = wizard.questionnaires.length;
+  const modes = [
+    {value: true, label: t('details.reviewYes')},
+    {value: false, label: t('details.reviewNo')},
+  ];
 
   return (
-    <fieldset className="asg-wiz__review">
-      <legend className="asg-wiz__review-title">{t('details.review')}</legend>
-      <p className="asg-wiz__small-muted">{t('details.reviewHint')}</p>
-      {total > 1 ? (
-        <div className="asg-wiz__review-bar">
-          <span className="asg-wiz__small-muted">
+    <div
+      className="asg-wiz__review"
+      role="group"
+      aria-labelledby="asg-wiz-review-title"
+    >
+      <div className="asg-wiz__review-title">
+        <span id="asg-wiz-review-title">{t('details.review')}</span>
+        <Tooltip content={t('details.reviewHint')}>
+          <button
+            type="button"
+            className="asg-wiz__info"
+            aria-label={t('details.reviewInfo')}
+          >
+            <Icon name="info" size={14} />
+          </button>
+        </Tooltip>
+      </div>
+      <p className="asg-wiz__small-muted" id="asg-wiz-review-question">
+        {t('details.reviewQuestion')}
+      </p>
+      <div
+        className="asg-wiz__segmented"
+        role="radiogroup"
+        aria-labelledby="asg-wiz-review-question"
+      >
+        {modes.map((mode) => (
+          <button
+            key={String(mode.value)}
+            type="button"
+            role="radio"
+            className="asg-wiz__segment"
+            aria-checked={wizard.reviewEnabled === mode.value}
+            onClick={() => wizard.setReviewEnabled(mode.value)}
+          >
+            {mode.label}
+          </button>
+        ))}
+      </div>
+      {wizard.reviewEnabled ? (
+        <>
+          <p className="asg-wiz__small-muted">
             {t('details.reviewCount', {count: reviewed.size, total})}
-          </span>
-          <span className="asg-wiz__review-actions">
-            <button
-              type="button"
-              className="asg-wiz__link-button"
-              disabled={reviewed.size === total}
-              onClick={() => wizard.setAllReviews(true)}
-            >
-              {t('details.reviewAll')}
-            </button>
-            <button
-              type="button"
-              className="asg-wiz__link-button"
-              disabled={reviewed.size === 0}
-              onClick={() => wizard.setAllReviews(false)}
-            >
-              {t('details.reviewNone')}
-            </button>
-          </span>
-        </div>
-      ) : null}
-      <ul className="asg-wiz__review-list">
-        {wizard.questionnaires.map((questionnaire) => {
-          const on = reviewed.has(questionnaire.id);
-          return (
-            <li key={questionnaire.id} className="asg-wiz__review-item">
-              <Toggle
-                label={questionnaire.title}
-                checked={on}
-                onChange={(value) => wizard.setReview(questionnaire.id, value)}
-              />
-              <span className="asg-wiz__review-state" data-on={on || undefined}>
-                {t(on ? 'details.reviewOn' : 'details.reviewOff')}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </fieldset>
+          </p>
+          <ul className="asg-wiz__review-list">
+            {wizard.questionnaires.map((questionnaire) => {
+              const on = reviewed.has(questionnaire.id);
+              return (
+                <li key={questionnaire.id} className="asg-wiz__review-item">
+                  <Toggle
+                    label={questionnaire.title}
+                    checked={on}
+                    onChange={(value) =>
+                      wizard.setReview(questionnaire.id, value)
+                    }
+                  />
+                  <Badge tone={on ? 'accent' : 'neutral'}>
+                    {t(on ? 'details.reviewOn' : 'details.reviewOff')}
+                  </Badge>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      ) : (
+        <p className="asg-wiz__review-note">{t('details.reviewOffNote')}</p>
+      )}
+    </div>
   );
 }
