@@ -22,7 +22,8 @@ use App\Shared\Infrastructure\Llm\Fake\FakeLlmResponder;
  * - a message with an attached document, or with three or more questions pasted → update_draft with its title; then
  *   "sí" → its questions (see DocumentQuestions)
  *   instead of the three; with the questions under way, its questions are added;
- * - with a draft, "el título que sea X" / "ponle de título X" / "llámalo X" / "change the title to X" → update_draft with that
+ * - with a draft, "el título que sea X" / "ponle de título X" / "llámalo X" / "change the title to X" (before the basics
+ *   are confirmed, "ponle X" alone too) → update_draft with that
  *   basic (the basics are shown again to confirm); anything else it doesn't follow → it asks again, keeping the draft;
  * - with the questions under way, "agrega una tabla" / "add a table" and "agrega un archivo con plantilla" / "add a
  *   file with a template" → add_questions (a table, a file question with a CSV template) and request_review;
@@ -194,7 +195,7 @@ final class ChatResponder implements FakeLlmResponder
             return [['update_draft', ['tags' => array_values(array_merge(array_filter((array) ($draft['tags'] ?? []), 'is_string'), $tags))]]];
         }
         // With a draft: "el título que sea X", "cambia el tema a X", "change the title to X".
-        if (null !== ($draft['title'] ?? null) && null !== ($basic = self::basicChange($original))) {
+        if (null !== ($draft['title'] ?? null) && null !== ($basic = self::basicChange($original, !($draft['basics_confirmed'] ?? false)))) {
             return [['update_draft', $basic]];
         }
         // With the questions under way: "agrega una tabla" / "add a table", "agrega un archivo con plantilla" / "add a
@@ -337,14 +338,15 @@ final class ChatResponder implements FakeLlmResponder
 
     /**
      * The basic the user asks to change, in their words: "el título que sea X", "cambia el tema a X", "title: X",
-     * "ponle de título X", "set the title X", "llámalo X".
+     * "ponle de título X", "set the title X", "llámalo X"; with $bare (the basics are not confirmed yet) a verb alone
+     * names the title too: "ponle X", "cámbialo a X", "make it X".
      *
      * @return array<string, string>|null
      */
-    private static function basicChange(string $original): ?array
+    private static function basicChange(string $original, bool $bare = false): ?array
     {
         $typed = self::withoutFiles($original);
-        $field = '(t[ií]tulo|title|tema|topic)';
+        $field = '(t[ií]tulo|title|nombre|name|tema|topic)';
         $of = '(?:\s+(?:del|de|of the|of)\s+(?:cuestionario|questionnaire|borrador|draft|encuesta|survey))?';
         $connector = '(?:[:=]|(?:que\s+)?(?:sea|ser[aá]|debe\s+ser|es|por|a|como|should\s+be|must\s+be|be|is|to|as)\b)';
         // A verb that asks for a change ("ponle", "pongle", "cambia", "set"…): then the field needs no connector.
@@ -356,6 +358,9 @@ final class ChatResponder implements FakeLlmResponder
             || 1 === preg_match('/'.$verb.$filler.'\s+'.$field.'\b'.$of.'\s*(?:'.$connector.')?\s*(.+)$/iu', $typed, $m)) {
             [$name, $value] = [$m[1], $m[2]];
         } elseif (1 === preg_match('/'.$naming.'\s*(.+)$/iu', $typed, $m)) {
+            [$name, $value] = ['title', $m[1]];
+        } elseif ($bare && 1 === preg_match('/^\s*(?:p[oó]n(?:le|lo|la|gle)?|c[aá]mbi(?:a|ale|alo)(?:\s+(?:a|por))?|make\s+it|change\s+it\s+to)\s+(.+)$/iu', $typed, $m)) {
+            // "ponle Cuestionario 4 oct" before the basics are confirmed: the field is the title.
             [$name, $value] = ['title', $m[1]];
         } else {
             return null;

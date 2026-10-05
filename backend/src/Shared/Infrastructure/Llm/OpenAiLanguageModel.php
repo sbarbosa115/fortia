@@ -22,6 +22,8 @@ final class OpenAiLanguageModel implements LanguageModel
 {
     private const URL = 'https://api.openai.com/v1/responses';
     private const TIMEOUT_SECONDS = 300;
+    /** The model when LLM_MODEL is empty. */
+    public const DEFAULT_MODEL = 'gpt-5.6-terra';
 
     public function __construct(
         private readonly HttpClientInterface $http,
@@ -38,7 +40,7 @@ final class OpenAiLanguageModel implements LanguageModel
         }
 
         $body = [
-            'model' => $request->model ?? $this->model,
+            'model' => self::model($request->model, $this->model),
             'input' => $this->input($request),
             'max_output_tokens' => $request->maxTokens,
             'reasoning' => ['effort' => LlmRequest::TIER_FAST === $request->tier ? 'low' : 'medium'],
@@ -73,6 +75,18 @@ final class OpenAiLanguageModel implements LanguageModel
         }
 
         return $this->response($request, $data);
+    }
+
+    /** The call's own model, else LLM_MODEL, else DEFAULT_MODEL (an empty value counts as not set). */
+    public static function model(?string $requested, string $configured): string
+    {
+        foreach ([$requested, $configured] as $model) {
+            if (null !== $model && '' !== trim($model)) {
+                return trim($model);
+            }
+        }
+
+        return self::DEFAULT_MODEL;
     }
 
     /**

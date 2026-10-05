@@ -130,6 +130,10 @@ final class ChatFileTest extends ApiTestCase
             'Llámalo «Barista»' => ['title', 'Barista'],
             'set the title Coffee survey' => ['title', 'Coffee survey'],
             'pon de tema el café de especialidad' => ['topic', 'El café de especialidad'],
+            'Ponle cuestionario 4 oct' => ['title', 'Cuestionario 4 oct'],
+            'ponle de nombre Encuesta Q4' => ['title', 'Encuesta Q4'],
+            'cámbialo a Barista 2026' => ['title', 'Barista 2026'],
+            'make it Coffee 2026' => ['title', 'Coffee 2026'],
         ];
         foreach ($cases as $said => [$field, $value]) {
             $second = $this->reply(['Crea un cuestionario sobre café', $first['message'], $said], ['draft' => $first['draft']]);
