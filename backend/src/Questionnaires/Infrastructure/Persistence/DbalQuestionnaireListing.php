@@ -91,7 +91,9 @@ final class DbalQuestionnaireListing implements QuestionnaireListing
             $qb->andWhere('q.is_active = :active')->setParameter('active', $criteria->isActive ? 1 : 0);
         }
         if (null !== $criteria->tag) {
-            $qb->andWhere('EXISTS (SELECT 1 FROM '.self::TAGS.' WHERE t.tag = :tag)')->setParameter('tag', $criteria->tag);
+            // A count, not EXISTS: MySQL 8.4 turns a lone EXISTS into a semijoin that reads the JSON_TABLE before q
+            // (FirstMatch) and loses the correlation, so on a real-sized table the filter finds nothing.
+            $qb->andWhere('(SELECT COUNT(*) FROM '.self::TAGS.' WHERE t.tag = :tag) > 0')->setParameter('tag', $criteria->tag);
         }
         foreach ($criteria->searchWords as $i => $word) {
             // A word may be in the title or in one of the tags ("AP-03", "rrhh").
