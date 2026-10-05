@@ -124,8 +124,8 @@ export function useAssignationWizard() {
   const [withoutReview, setWithoutReview] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  // "No, close them automatically" turns review off for all of them, keeping the per-questionnaire choices.
-  const [reviewEnabled, setReviewEnabledState] = useState(true);
+  // No review by default ("No, close automatically"); on Yes each questionnaire is reviewed unless switched off.
+  const [reviewEnabled, setReviewEnabledState] = useState(false);
   const reviewChoices = reviewedIds(questionnaires, withoutReview);
   const reviewIds = reviewEnabled ? reviewChoices : [];
   const setReview = (id: string, on: boolean) =>

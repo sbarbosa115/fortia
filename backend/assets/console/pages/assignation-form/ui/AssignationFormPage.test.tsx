@@ -371,7 +371,7 @@ describe('AssignationFormPage', () => {
       due_date: '2099-12-15',
       questionnaire_ids: ['q-1', 'q-2'],
       registration_title: 'Tell us who you are',
-      review_questionnaire_ids: ['q-1', 'q-2'],
+      review_questionnaire_ids: [],
     });
     expect(
       copyQuestionnaire,
@@ -386,13 +386,16 @@ describe('AssignationFormPage', () => {
     await userEvent.click(continueButton());
 
     const review = screen.getByRole('group', {name: /^Review/});
+    await userEvent.click(
+      within(review).getByRole('radio', {name: 'Yes, I want to review them'}),
+    );
     const store = within(review).getByRole('switch', {name: 'Store audit'});
     const warehouse = within(review).getByRole('switch', {
       name: 'Warehouse audit',
     });
     expect(
       store,
-      'every questionnaire requires review by default',
+      'on Yes, every questionnaire requires review until switched off',
     ).toBeChecked();
     expect(warehouse).toBeChecked();
     expect(
@@ -422,20 +425,22 @@ describe('AssignationFormPage', () => {
     );
   });
 
-  it('closes every questionnaire automatically when the owner does not want to review', async () => {
+  it('closes every questionnaire automatically unless the owner wants to review', async () => {
     renderPage();
     await pickTwoAndContinue();
     await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
     await userEvent.click(continueButton());
     const review = screen.getByRole('group', {name: /^Review/});
-    expect(
-      within(review).getByRole('radio', {name: 'Yes, I want to review them'}),
-      'review is on by default',
-    ).toBeChecked();
+    const no = within(review).getByRole('radio', {
+      name: 'No, close automatically',
+    });
+    expect(no, 'no review by default').toBeChecked();
 
     await userEvent.click(
-      within(review).getByRole('radio', {name: 'No, close automatically'}),
+      within(review).getByRole('radio', {name: 'Yes, I want to review them'}),
     );
+    expect(within(review).getAllByRole('switch')).toHaveLength(2);
+    await userEvent.click(no);
     expect(within(review).queryAllByRole('switch')).toHaveLength(0);
     expect(
       within(review).getByText(/each questionnaire is marked “Completed”/),
