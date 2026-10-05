@@ -71,6 +71,7 @@
     "reviewNotice_one": "Review every answer to approve the follow-up or send it for correction · {{count}} left",
     "reviewNotice_other": "Review every answer to approve the follow-up or send it for correction · {{count}} left",
     "approvedNotice": "Every answer of this attempt is approved.",
+    "completedNotice": "Completed. This assignation does not require review, so its answers are final.",
     "table": {
       "caption": "Answers of attempt {{n}}",
       "number": "#",

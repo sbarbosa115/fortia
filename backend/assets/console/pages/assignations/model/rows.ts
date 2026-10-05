@@ -9,14 +9,18 @@ import {
 export type ProjectStatus = Project['state'];
 export type AssignationStatus = ProjectAssignation['state'];
 
-/** The path an assignation takes when nothing goes wrong, then its two detours (the legend). */
+/** The path an assignation takes when nothing goes wrong, then its detours and the end without review (the legend). */
 export const LEGEND_STEPS: AssignationStatus[] = [
   'pending',
   'progress',
   'review',
   'approved',
 ];
-export const LEGEND_DETOURS: AssignationStatus[] = ['correction', 'overdue'];
+export const LEGEND_DETOURS: AssignationStatus[] = [
+  'correction',
+  'overdue',
+  'completed',
+];
 
 /** What the row proposes to do next: open the assignation that needs it, or add assignations (edit). */
 export type NextStep =
@@ -86,6 +90,8 @@ export function reviewTextOf(item: ProjectAssignation): {
         key: 'reviewText.review',
         values: {reviewed: review.reviewed, total: review.total},
       };
+    case 'completed':
+      return {key: 'reviewText.noReview'};
     case 'approved':
       return review.total > 0
         ? {
@@ -150,10 +156,15 @@ export function shortDay(
 }
 
 /** 0–100: the project's assignations approved, out of all of them. */
+/** The questionnaires that are done: approved ones, or completed ones when the assignation does not require review. */
+export function doneCount(project: Project): number {
+  return project.requires_review
+    ? project.approved_assignations
+    : project.completed_assignations;
+}
+
 export function approvalPercent(project: Project): number {
   return project.total_assignations > 0
-    ? Math.round(
-        (project.approved_assignations / project.total_assignations) * 100,
-      )
+    ? Math.round((doneCount(project) / project.total_assignations) * 100)
     : 0;
 }

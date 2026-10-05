@@ -504,11 +504,13 @@
 .status-pill[data-status='correction'] .status-pill__dot {
   background: #ea580c;
 }
-.status-pill[data-status='approved'] {
+.status-pill[data-status='approved'],
+.status-pill[data-status='completed'] {
   background: #d1fae5;
   color: #065f46;
 }
-.status-pill[data-status='approved'] .status-pill__dot {
+.status-pill[data-status='approved'] .status-pill__dot,
+.status-pill[data-status='completed'] .status-pill__dot {
   background: #059669;
 }
 .status-pill[data-status='overdue'] {
@@ -1170,4 +1172,9 @@
 .projects-sub__table td.projects-sub__action .projects-sub__edit {
   margin-right: 4px;
   vertical-align: middle;
+}
+.project-form__review {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }

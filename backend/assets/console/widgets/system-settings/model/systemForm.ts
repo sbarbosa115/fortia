@@ -88,3 +88,37 @@ export function checkBody(
 ): Record<string, string | number | null> {
   return smtpPatch(form);
 }
+
+/** The analytics card as typed: the service's base URL (filled in from the server) and a new key (never filled in). */
+export type AnalyticsForm = {baseUrl: string; apiKey: string};
+
+export function analyticsFormFrom(settings: SystemSettings): AnalyticsForm {
+  return {baseUrl: settings.analytics_base_url ?? '', apiKey: ''};
+}
+
+/** An http(s) URL, or empty (the platform service). The backend checks the same and answers 400. */
+export function analyticsUrlError(form: AnalyticsForm): 'url' | null {
+  const value = form.baseUrl.trim();
+  if (value === '') {
+    return null;
+  }
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? null : 'url';
+  } catch {
+    return 'url';
+  }
+}
+
+/** PATCH body of the analytics card: the base URL (empty → null, the platform's); the key only when one was typed. */
+export function analyticsPatch(
+  form: AnalyticsForm,
+): Record<string, string | null> {
+  const body: Record<string, string | null> = {
+    analytics_base_url: optional(form.baseUrl),
+  };
+  if (form.apiKey.trim() !== '') {
+    body.analytics_api_key = form.apiKey.trim();
+  }
+  return body;
+}

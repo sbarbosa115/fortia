@@ -7,12 +7,13 @@ export type ProjectState =
   | 'correction'
   | 'progress'
   | 'pending'
+  | 'completed'
   | 'approved'
   | 'empty';
 
-/** The `status` filter of GET /projects (§8.9); `progress` includes `pending`. */
+/** The `status` filter of GET /projects (§8.9); `progress` includes `pending`, `completed` includes `approved`. */
 export type ProjectStatusFilter =
-  'review' | 'progress' | 'correction' | 'overdue' | 'approved';
+  'review' | 'progress' | 'correction' | 'overdue' | 'completed' | 'approved';
 
 export type ProjectTab =
   'all' | 'review' | 'progress' | 'correction' | 'overdue' | 'completed';
@@ -27,7 +28,7 @@ export const PROJECT_TABS: {
   {key: 'progress', status: 'progress'},
   {key: 'correction', status: 'correction'},
   {key: 'overdue', status: 'overdue'},
-  {key: 'completed', status: 'approved'},
+  {key: 'completed', status: 'completed'},
 ];
 
 /** Every state, in the order of the legend. */
@@ -37,6 +38,7 @@ export const PROJECT_STATES: ProjectState[] = [
   'review',
   'correction',
   'approved',
+  'completed',
   'overdue',
   'empty',
 ];
@@ -47,6 +49,7 @@ const TONES: Record<ProjectState, Tone> = {
   correction: 'warning',
   progress: 'neutral',
   pending: 'neutral',
+  completed: 'success',
   approved: 'success',
   empty: 'neutral',
 };
@@ -74,6 +77,7 @@ const NEXT_STEPS: Record<ProjectState, NextStep> = {
   correction: 'seeCorrection',
   progress: 'seeProgress',
   pending: 'seeProgress',
+  completed: 'seeResults',
   approved: 'seeResults',
   empty: 'addAssignations',
 };

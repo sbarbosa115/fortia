@@ -14,7 +14,8 @@
   },
   "chip": {
     "draft": "Draft · saved when you create it",
-    "editing": "Editing · saved when you save changes"
+    "editing": "Editing · saved when you save changes",
+    "locked": "Locked · read-only"
   },
   "steps": {
     "label": "Steps",
@@ -141,17 +142,9 @@
     "rangeMax": "Max",
     "maxScore": "Max score: {{max}}",
     "categoryMax": "{{category}}: up to {{max}} points",
-    "columns": "Columns",
-    "columnLabel": "Column {{n}}",
-    "addColumn": "Add column",
-    "removeColumn": "Remove column {{n}}",
-    "tableRows": "Rows",
     "fixedRows": "Fixed rows",
-    "fixedRowsHint": "The respondent fills in each of these rows.",
-    "freeRowsHint": "The respondent adds the rows they need (up to {{max}}).",
-    "rowLabel": "Row {{n}}",
+    "fixedRowsHint": "Name each row in its first cell; the respondent fills in every one.",
     "addRow": "Add row",
-    "removeRow": "Remove row {{n}}",
     "template": "Template (optional)",
     "templateHint": "A file the respondent downloads, fills in and uploads back (up to 20 MB).",
     "templateUpload": "Upload template",
@@ -178,7 +171,49 @@
     "hasProblem": "This question has something to complete",
     "cannotRemove": "A questionnaire must have at least one question.",
     "categoryMaxShort": "max {{max}} pts",
-    "assignCategory": "Give these questions a category."
+    "assignCategory": "Give these questions a category.",
+    "table": {
+      "legend": "Table",
+      "region": "Table of question {{n}}",
+      "freeHint": "Type on the headers to name the columns. This is how the respondent will see it.",
+      "rowsHeader": "Row",
+      "columnN": "Column {{n}}",
+      "columnName": "Name of column {{n}}",
+      "columnActions": "Options of column {{name}}",
+      "dragColumn": "Drag column {{name}}",
+      "rename": "Rename",
+      "moveLeft": "Move left",
+      "moveRight": "Move right",
+      "addColumn": "Add column",
+      "maxColumns": "The table has the maximum of {{max}} columns.",
+      "deleteColumn": "Delete column",
+      "lastColumn": "The table needs at least one column.",
+      "deleteColumnTitle": "Delete the column “{{name}}”?",
+      "deleteColumnBody": "The column leaves the table and what was already answered in it is no longer shown.",
+      "repeated": "Two columns have the same name: each column needs its own.",
+      "sampleCell": "The respondent fills in here",
+      "respondentAdds": "The respondent may add rows",
+      "maxShort": "max.",
+      "maxRowsLabel": "Most rows the respondent may add",
+      "rowN": "Row {{n}}",
+      "rowPlaceholder": "E.g. Employee {{n}}",
+      "rowName": "Name of row {{n}}",
+      "rowActions": "Options of row {{name}}",
+      "dragRow": "Drag row {{name}}",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "duplicateRow": "Duplicate row",
+      "deleteRow": "Delete row",
+      "maxRows": "The table has the maximum of {{max}} rows.",
+      "leaveFixedTitle": "Remove the fixed rows?",
+      "leaveFixedBody_one": "The row you created will be lost and the respondent will add their own rows.",
+      "leaveFixedBody_other": "The {{count}} rows you created will be lost and the respondent will add their own rows.",
+      "leaveFixed": "Remove fixed rows"
+    },
+    "templateDrop": "Drop a file here or click to choose one",
+    "templateDownload": "Download template",
+    "templateUploading": "Uploading…",
+    "templateKind": "{{ext}} file · the respondent downloads it from the question"
   },
   "end": {
     "title": "When it ends",
@@ -329,14 +364,14 @@
     "crumb": "Done"
   },
   "locked": {
-    "badge": "Locked",
     "title": "Locked to preserve answers",
-    "body": "This questionnaire already has answers, so it can't be edited. Create a copy to change it.",
+    "body": "This questionnaire has already been answered, so its questions stay fixed to avoid altering the data already collected. Create an editable copy — the current answers stay intact.",
     "copy": "Create a copy",
     "confirmTitle": "Create a copy?",
     "confirmBody": "A new questionnaire is created in your account, with no answers, ready to edit.",
     "confirmYes": "Yes, create copy",
-    "copied": "Copy created"
+    "copied": "Copy created",
+    "saveBlocked": "This questionnaire already has answers: create a copy to change it."
   },
   "generic": {
     "title": "Edit questionnaire",
@@ -382,7 +417,8 @@
     "upload": "We couldn't upload the prompts. Please try again.",
     "noColumns": "Question {{n}} needs at least one column.",
     "columnLabel": "All columns in question \"{{title}}\" must have a name.",
-    "uniqueColumns": "The columns in question \"{{title}}\" must have different names."
+    "uniqueColumns": "The columns in question \"{{title}}\" must have different names.",
+    "rowLabel": "Name every row of the table \"{{title}}\"."
   },
   "stepSubtitles": {
     "regular": "Build what your customer sees when they finish the questionnaire.",
@@ -433,6 +469,8 @@
       "phone": "Your phone number"
     },
     "defaultEndTitle": "Your answers have been sent successfully.",
-    "defaultEndMessage": "Thank you for completing the questionnaire. We saved your answers and the team can now review them."
+    "defaultEndMessage": "Thank you for completing the questionnaire. We saved your answers and the team can now review them.",
+    "addRow": "Add row",
+    "maxRows": "max. {{max}}"
   }
 }

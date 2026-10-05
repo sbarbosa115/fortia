@@ -12,11 +12,11 @@ final class ProjectAssignationOutput
         public readonly string $name,
         public readonly string $questionnaire_id,
         public readonly bool $active,
-        #[OA\Property(enum: ['review', 'overdue', 'correction', 'progress', 'pending', 'approved'])]
+        #[OA\Property(enum: ['review', 'overdue', 'correction', 'progress', 'pending', 'completed', 'approved'])]
         public readonly string $state,
         /** The shared session has ended. */
         public readonly bool $completed,
-        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved'])]
+        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved', 'completed'])]
         public readonly string $review_status,
         public readonly int $attempt,
         /** Its own due date, or the project's. */

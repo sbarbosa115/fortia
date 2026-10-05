@@ -1832,7 +1832,9 @@ All reads and writes are fault-tolerant. 24 h expiration.
   - Enter sends; Shift+Enter inserts a line break.
   - Maximum 20,000 characters; the counter appears past 90 %.
   - Placeholder "Type your message…".
-- Cap of **40 messages**: "This conversation reached its message limit. Refresh the page to start over."
+- No cap on the conversation: the screen keeps every message, and each turn sends only the **last 40** (the oldest
+  dropped first, the window starting with a user message). The draft and the pending writes travel apart, so they are
+  never dropped.
 
 **Each turn:**
 

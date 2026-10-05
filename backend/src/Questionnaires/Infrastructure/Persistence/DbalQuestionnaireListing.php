@@ -13,8 +13,8 @@ use Doctrine\DBAL\Query\QueryBuilder;
 /**
  * GET /questionnaire in SQL: one query for the page (never the questions document) and one for the total. The
  * listing "type" filter is the kind a row shows as: its on_completed type, else its own type (quiz funnel and
- * diagnostic), else "default". Search: every word in the title, with LIKE escaped; the table's utf8mb4_0900_ai_ci
- * collation ignores case and accents (PRD §8.1). Tag: one of the row's tags, whole, also without case or accents.
+ * diagnostic), else "default". Search: every word in the title or in one of the tags, with LIKE escaped; the table's
+ * utf8mb4_0900_ai_ci collation ignores case and accents (PRD §8.1). Tag: one of the row's tags, whole, also without case or accents.
  */
 final class DbalQuestionnaireListing implements QuestionnaireListing
 {
@@ -94,7 +94,8 @@ final class DbalQuestionnaireListing implements QuestionnaireListing
             $qb->andWhere('EXISTS (SELECT 1 FROM '.self::TAGS.' WHERE t.tag = :tag)')->setParameter('tag', $criteria->tag);
         }
         foreach ($criteria->searchWords as $i => $word) {
-            $qb->andWhere("q.title LIKE :word$i")->setParameter("word$i", '%'.Text::escapeLike($word).'%');
+            // A word may be in the title or in one of the tags ("AP-03", "rrhh").
+            $qb->andWhere("(q.title LIKE :word$i OR EXISTS (SELECT 1 FROM ".self::TAGS." WHERE t.tag LIKE :word$i))")->setParameter("word$i", '%'.Text::escapeLike($word).'%');
         }
 
         return $qb;

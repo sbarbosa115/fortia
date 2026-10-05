@@ -20,7 +20,7 @@ import {
 import {FollowUpsFields} from './FollowUpsFields';
 import {OptionsEditor} from './OptionsEditor';
 import {RangeFields} from './RangeFields';
-import {TableRowsFields} from './TableRowsFields';
+import {TableEditor} from './TableEditor';
 import {TemplateField} from './TemplateField';
 import {TextFormatFields} from './TextFormatFields';
 
@@ -174,11 +174,10 @@ export function QuestionCard({
           <TextFormatFields question={question} />
         ) : null}
         {question.type === 'range' ? <RangeFields question={question} /> : null}
-        {hasOptions(question.type) ? (
-          <OptionsEditor question={question} number={number} />
-        ) : null}
         {question.type === 'table' ? (
-          <TableRowsFields question={question} />
+          <TableEditor question={question} number={number} />
+        ) : hasOptions(question.type) ? (
+          <OptionsEditor question={question} number={number} />
         ) : null}
         {question.type === 'file' ? (
           <TemplateField question={question} />

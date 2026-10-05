@@ -46,6 +46,10 @@ class Assignation
     #[ORM\Column(length: 36, nullable: true)]
     private ?string $projectId = null;
 
+    /** A follow-up that requires review goes to review once complete; without it, it is simply completed. */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $requiresReview = true;
+
     #[ORM\Column(length: 36, nullable: true)]
     private ?string $sharedSessionId = null;
 
@@ -122,6 +126,20 @@ class Assignation
             $this->dueDate = $dueDate;
             $this->updatedAt = $at;
         }
+    }
+
+    /** A follow-up's review requirement follows its project's. */
+    public function requireReview(bool $requiresReview, \DateTimeImmutable $at): void
+    {
+        if ($requiresReview !== $this->requiresReview) {
+            $this->requiresReview = $requiresReview;
+            $this->updatedAt = $at;
+        }
+    }
+
+    public function requiresReview(): bool
+    {
+        return $this->requiresReview;
     }
 
     public function joinProject(?string $projectId, \DateTimeImmutable $at): void

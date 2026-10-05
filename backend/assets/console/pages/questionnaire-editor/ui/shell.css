@@ -1332,20 +1332,96 @@ button.pv-button:disabled {
 .pv-drop svg {
   color: var(--color-primary);
 }
-.pv-table {
-  display: grid;
-  grid-auto-flow: column;
-  gap: 1px;
+/* A table question, as the respondent sees it: column names on a tinted header, plain cells on thin lines and "Add a
+   row" in the footer; wider than the frame it scrolls sideways with the first column pinned. */
+.pv-sheet {
   overflow: hidden;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-border);
+  border-radius: 12px;
+  background: #fff;
+}
+.pv-sheet__scroll {
+  overflow-x: auto;
+}
+.pv-sheet__table {
+  width: 100%;
+  min-width: calc(32px + var(--columns, 1) * 104px);
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
   font-size: 11.5px;
+}
+.pv-sheet__table th,
+.pv-sheet__table td {
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+.pv-sheet__table td,
+.pv-sheet__table thead th + th {
+  border-left: 1px solid var(--color-border);
+}
+.pv-sheet__table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.pv-sheet__table thead th {
+  padding: 9px 10px;
+  background: color-mix(in srgb, var(--color-hover) 55%, #fff);
+  color: color-mix(in srgb, var(--color-text) 75%, transparent);
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  vertical-align: bottom;
+}
+.pv-sheet__table td {
+  height: 36px;
+}
+.pv-sheet__table tbody th {
+  padding: 0 10px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.pv-sheet__table tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #fff;
+}
+.pv-sheet__table thead tr > :first-child {
+  background: color-mix(in srgb, var(--color-hover) 55%, #fff);
+}
+.pv-sheet__table .pv-sheet__index {
+  width: 32px;
+  padding: 0;
+  color: var(--color-text-muted);
+  text-align: center;
+  vertical-align: middle;
+}
+.pv-sheet__table .pv-sheet__first {
+  width: 92px;
+}
+.pv-sheet__add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--color-border);
+  font-size: 12px;
   font-weight: 600;
 }
-.pv-table span {
-  padding: var(--space-2);
-  background: var(--color-hover);
+.pv-sheet__add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: #fff;
+}
+.pv-sheet__limit {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-weight: 400;
 }
 .pv-nav {
   position: sticky;

@@ -9,7 +9,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * PATCH /customer/{customer_id}/system-settings: at least one field, no extra fields. openai_api_key: empty or null
- * removes the account's key (the platform key is used again).
+ * removes the account's key (the platform key is used again). analytics_base_url: the account's usage/analytics
+ * service, an http(s) URL (empty or null: the platform's ANALYTICS_BASE_URL is used); analytics_api_key: its key
+ * (empty or null removes it).
  */
 final class SystemSettingsInput implements TracksProvidedFields
 {
@@ -18,6 +20,13 @@ final class SystemSettingsInput implements TracksProvidedFields
 
     #[Assert\Length(max: 512)]
     public ?string $openai_api_key = null;
+
+    #[Assert\Length(max: 255)]
+    #[Assert\Url(protocols: ['http', 'https'], requireTld: false)]
+    public ?string $analytics_base_url = null;
+
+    #[Assert\Length(max: 512)]
+    public ?string $analytics_api_key = null;
 
     #[Assert\Callback]
     public function validateProvided(ExecutionContextInterface $context): void

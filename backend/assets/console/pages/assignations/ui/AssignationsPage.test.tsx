@@ -72,6 +72,7 @@ function project(overrides: Partial<Project> = {}): Project {
     customer_id: 'ACME0001',
     organization_id: 'o-1',
     organization_name: 'Acme Retail',
+    requires_review: true,
     name: 'Store opening Q4',
     description: null,
     due_date: '2099-12-01',
@@ -226,7 +227,7 @@ describe('AssignationsPage', () => {
     await userEvent.click(screen.getByRole('button', {name: 'Completed'}));
     await waitFor(() =>
       expect(fetchMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({status: 'approved'}),
+        expect.objectContaining({status: 'completed'}),
       ),
     );
 
@@ -238,7 +239,7 @@ describe('AssignationsPage', () => {
     );
     await waitFor(() =>
       expect(fetchMock).toHaveBeenLastCalledWith(
-        expect.objectContaining({q: 'retail', status: 'approved'}),
+        expect.objectContaining({q: 'retail', status: 'completed'}),
       ),
     );
   });

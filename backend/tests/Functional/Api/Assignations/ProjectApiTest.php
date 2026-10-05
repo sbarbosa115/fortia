@@ -122,6 +122,22 @@ final class ProjectApiTest extends ApiTestCase
         }
     }
 
+    public function testCreatingWithoutReviewMarksTheProjectAndItsFollowUps(): void
+    {
+        $owner = $this->account('ACME0001');
+        $org = $this->organization('ACME0001', 'Acme Retail');
+        $body = ['organization_id' => $org, 'name' => 'Q4 audits', 'due_date' => '2026-12-15', 'questionnaire_ids' => [$this->questionnaire('ACME0001')]];
+
+        $default = $this->data($this->api('POST', self::URL, $body, as: $owner), 201);
+        $withoutReview = $this->data($this->api('POST', self::URL, [...$body, 'requires_review' => false], as: $owner), 201);
+
+        self::assertTrue($default['requires_review'], 'an assignation requires review unless the owner says otherwise');
+        self::assertTrue($this->storedAssignation($default['assignations'][0]['assignations_id'])->requiresReview());
+        self::assertFalse($withoutReview['requires_review']);
+        self::assertFalse($this->storedAssignation($withoutReview['assignations'][0]['assignations_id'])->requiresReview(), "each follow-up takes its assignation's review requirement");
+        $this->assertApiError($this->api('POST', self::URL, [...$body, 'requires_review' => null], as: $owner), 400, 'VALIDATION_ERROR');
+    }
+
     public function testCreatingWithQuestionnairesChecksEachOne(): void
     {
         $owner = $this->account('ACME0001');
@@ -210,6 +226,30 @@ final class ProjectApiTest extends ApiTestCase
         self::assertSame('correction', $data['state']);
         self::assertSame('changes_requested', $data['assignations'][0]['review_status']);
         self::assertSame(1, $data['assignations'][0]['review']['rejected'], '"1 sent back to the client"');
+    }
+
+    public function testAFollowUpThatDoesNotRequireReviewIsCompletedOnceItEnds(): void
+    {
+        $owner = $this->account('ACME0001');
+        $org = $this->organization('ACME0001', 'Acme');
+        $done = $this->followUp('ACME0001', $org, 'Done', questions: 2);
+        $this->answer($done, answered: 2, ended: true);
+        $project = $this->project('ACME0001', $org, 'Audit', '2026-12-01', [$done]);
+
+        $data = $this->data($this->api('PUT', self::URL.'/'.$project, ['requires_review' => false], as: $owner));
+
+        self::assertFalse($data['requires_review']);
+        self::assertFalse($this->storedAssignation($done)->requiresReview(), 'its follow-ups follow the assignation');
+        self::assertSame('completed', $data['state'], 'without review a complete follow-up is completed, not pending review');
+        self::assertSame('completed', $data['assignations'][0]['state']);
+        self::assertSame('completed', $data['assignations'][0]['review_status']);
+        self::assertSame('completed', $this->data($this->api('GET', '/api/v1/assignations/'.$done, as: $owner))['review_status']);
+        $this->assertApiError($this->api('PUT', '/api/v1/assignations/'.$done.'/reviews/q1', ['status' => 'approved'], as: $owner), 409, 'REVIEW_NOT_REQUIRED');
+        $this->assertApiError($this->api('POST', '/api/v1/assignations/'.$done.'/retries', [], as: $owner), 409, 'REVIEW_NOT_REQUIRED');
+        self::assertSame([$project], array_column($this->data($this->api('GET', self::URL.'?status=completed', as: $owner))['projects'], 'project_id'), 'the completed filter');
+
+        $again = $this->data($this->api('PUT', self::URL.'/'.$project, ['requires_review' => true], as: $owner));
+        self::assertSame('review', $again['state'], 'turning review back on sends it to review');
     }
 
     public function testOverdueIsComputedWithTodayInUtcMinus12(): void

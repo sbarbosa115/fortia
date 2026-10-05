@@ -14,7 +14,8 @@
   },
   "chip": {
     "draft": "Borrador · se guarda al crear",
-    "editing": "Editando · se guarda al guardar cambios"
+    "editing": "Editando · se guarda al guardar cambios",
+    "locked": "Bloqueado · solo lectura"
   },
   "steps": {
     "label": "Pasos",
@@ -141,17 +142,9 @@
     "rangeMax": "Máximo",
     "maxScore": "Puntaje máximo: {{max}}",
     "categoryMax": "{{category}}: hasta {{max}} puntos",
-    "columns": "Columnas",
-    "columnLabel": "Columna {{n}}",
-    "addColumn": "Agregar columna",
-    "removeColumn": "Quitar columna {{n}}",
-    "tableRows": "Filas",
     "fixedRows": "Filas fijas",
-    "fixedRowsHint": "La persona completa cada una de estas filas.",
-    "freeRowsHint": "La persona agrega las filas que necesite (hasta {{max}}).",
-    "rowLabel": "Fila {{n}}",
+    "fixedRowsHint": "Escribe el nombre de cada fila en su primera celda; la persona completa cada una.",
     "addRow": "Agregar fila",
-    "removeRow": "Quitar fila {{n}}",
     "template": "Plantilla (opcional)",
     "templateHint": "Un archivo que la persona descarga, completa y vuelve a subir (hasta 20 MB).",
     "templateUpload": "Subir plantilla",
@@ -178,7 +171,49 @@
     "hasProblem": "Esta pregunta tiene algo por completar",
     "cannotRemove": "Un cuestionario debe tener al menos una pregunta.",
     "categoryMaxShort": "máx {{max}} pts",
-    "assignCategory": "Asigna una categoría a estas preguntas."
+    "assignCategory": "Asigna una categoría a estas preguntas.",
+    "table": {
+      "legend": "Tabla",
+      "region": "Tabla de la pregunta {{n}}",
+      "freeHint": "Escribe sobre los encabezados para nombrar las columnas. Así la verá quien responde.",
+      "rowsHeader": "Fila",
+      "columnN": "Columna {{n}}",
+      "columnName": "Nombre de la columna {{n}}",
+      "columnActions": "Opciones de la columna {{name}}",
+      "dragColumn": "Arrastrar la columna {{name}}",
+      "rename": "Renombrar",
+      "moveLeft": "Mover a la izquierda",
+      "moveRight": "Mover a la derecha",
+      "addColumn": "Agregar columna",
+      "maxColumns": "La tabla tiene el máximo de {{max}} columnas.",
+      "deleteColumn": "Eliminar columna",
+      "lastColumn": "La tabla necesita al menos una columna.",
+      "deleteColumnTitle": "¿Eliminar la columna «{{name}}»?",
+      "deleteColumnBody": "La columna desaparece de la tabla y lo que ya se respondió en ella deja de mostrarse.",
+      "repeated": "Dos columnas tienen el mismo nombre: cada columna necesita uno distinto.",
+      "sampleCell": "La persona llenará aquí",
+      "respondentAdds": "La persona podrá agregar filas",
+      "maxShort": "máx.",
+      "maxRowsLabel": "Máximo de filas que la persona puede agregar",
+      "rowN": "Fila {{n}}",
+      "rowPlaceholder": "Ej. Colaborador {{n}}",
+      "rowName": "Nombre de la fila {{n}}",
+      "rowActions": "Opciones de la fila {{name}}",
+      "dragRow": "Arrastrar la fila {{name}}",
+      "moveUp": "Mover arriba",
+      "moveDown": "Mover abajo",
+      "duplicateRow": "Duplicar fila",
+      "deleteRow": "Eliminar fila",
+      "maxRows": "La tabla tiene el máximo de {{max}} filas.",
+      "leaveFixedTitle": "¿Quitar las filas fijas?",
+      "leaveFixedBody_one": "Se perderá la fila que creaste y la persona agregará sus propias filas.",
+      "leaveFixedBody_other": "Se perderán las {{count}} filas que creaste y la persona agregará sus propias filas.",
+      "leaveFixed": "Quitar filas fijas"
+    },
+    "templateDrop": "Arrastra un archivo aquí o haz clic para elegirlo",
+    "templateDownload": "Descargar plantilla",
+    "templateUploading": "Subiendo…",
+    "templateKind": "Archivo {{ext}} · la persona lo descarga desde la pregunta"
   },
   "end": {
     "title": "Al terminar",
@@ -329,14 +364,14 @@
     "crumb": "Listo"
   },
   "locked": {
-    "badge": "Bloqueado",
     "title": "Bloqueado para conservar las respuestas",
-    "body": "Este cuestionario ya tiene respuestas, así que no se puede editar. Crea una copia para cambiarlo.",
+    "body": "Este cuestionario ya ha sido respondido, así que sus preguntas quedan fijas para no alterar los datos ya recolectados. Crea una copia editable — las respuestas actuales se mantienen intactas.",
     "copy": "Crear una copia",
     "confirmTitle": "¿Crear una copia?",
     "confirmBody": "Se crea un cuestionario nuevo en tu cuenta, sin respuestas y listo para editar.",
     "confirmYes": "Sí, crear copia",
-    "copied": "Copia creada"
+    "copied": "Copia creada",
+    "saveBlocked": "Este cuestionario ya tiene respuestas: crea una copia para cambiarlo."
   },
   "generic": {
     "title": "Editar cuestionario",
@@ -382,7 +417,8 @@
     "upload": "No pudimos subir los prompts. Inténtalo de nuevo.",
     "noColumns": "La pregunta {{n}} necesita al menos una columna.",
     "columnLabel": "Todas las columnas de la pregunta \"{{title}}\" deben tener un nombre.",
-    "uniqueColumns": "Las columnas de la pregunta \"{{title}}\" deben tener nombres distintos."
+    "uniqueColumns": "Las columnas de la pregunta \"{{title}}\" deben tener nombres distintos.",
+    "rowLabel": "Ponle nombre a cada fila de la tabla \"{{title}}\"."
   },
   "stepSubtitles": {
     "regular": "Arma lo que verá tu cliente cuando termine el cuestionario.",
@@ -433,6 +469,8 @@
       "phone": "Tu número de teléfono"
     },
     "defaultEndTitle": "Tus respuestas se han enviado correctamente.",
-    "defaultEndMessage": "Gracias por completar el cuestionario. Guardamos tus respuestas y el equipo ya puede revisarlas."
+    "defaultEndMessage": "Gracias por completar el cuestionario. Guardamos tus respuestas y el equipo ya puede revisarlas.",
+    "addRow": "Agregar fila",
+    "maxRows": "máx. {{max}}"
   }
 }

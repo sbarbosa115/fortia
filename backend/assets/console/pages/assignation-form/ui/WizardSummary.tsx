@@ -1,5 +1,6 @@
 import {formatDate, joinClasses} from '@shared/lib';
-import {Icon, type IconName} from '@shared/ui';
+import {Icon, IconButton, type IconName} from '@shared/ui';
+import {type ReactNode, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import type {AssignationWizardState} from '../model/useAssignationWizard';
 
@@ -11,14 +12,56 @@ type Item = {
   done: boolean;
   title: string;
   detail: string;
+  /** Shown under the piece (the picked questionnaires). */
+  more?: ReactNode;
 };
+
+/** Picked questionnaires listed before "Show all" folds the rest away. */
+const FOLDED = 5;
+
+/** The picked questionnaires by name, each with its × to unpick it; past {@link FOLDED} the rest fold away. */
+function PickedList({wizard}: {wizard: AssignationWizardState}) {
+  const {t} = useTranslation('pages.assignation-form');
+  const [unfolded, setUnfolded] = useState(false);
+  const picked = wizard.questionnaires;
+  const listed = unfolded ? picked : picked.slice(0, FOLDED);
+  return (
+    <>
+      <ul className="asg-wiz__picked" aria-label={t('summary.pickedLabel')}>
+        {listed.map((q) => (
+          <li key={q.id}>
+            <span title={q.title}>{q.title}</span>
+            <IconButton
+              size="sm"
+              variant="ghost"
+              label={t('summary.unpick', {title: q.title})}
+              icon={<Icon name="close" size={12} />}
+              onClick={() => wizard.unpickQuestionnaires([q.id])}
+            />
+          </li>
+        ))}
+      </ul>
+      {picked.length > FOLDED ? (
+        <button
+          type="button"
+          className="asg-wiz__link-button"
+          aria-expanded={unfolded}
+          onClick={() => setUnfolded(!unfolded)}
+        >
+          {unfolded
+            ? t('summary.showLess')
+            : t('summary.showAll', {count: picked.length})}
+        </button>
+      ) : null}
+    </>
+  );
+}
 
 /** "What we're going to create": the questionnaires, the organization and the assignation, pending ones dashed. */
 export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
   const {t, i18n} = useTranslation('pages.assignation-form');
   const {questionnaires, organization, errors} = wizard;
   const pending = (step: number) => t('summary.step', {number: step});
-  const titles = questionnaires.map((q) => q.title);
 
   const items: Item[] = [
     {
@@ -27,13 +70,19 @@ export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
       icon: 'clipboard-list',
       done: errors[0] === null,
       title:
-        titles.length > 0
-          ? titles.join(', ')
+        questionnaires.length > 0
+          ? t('summary.questionnaireCount', {count: questionnaires.length})
           : t('summary.questionnairesPending'),
       detail:
-        titles.length > 0
-          ? t('summary.questionnaireCount', {count: titles.length})
+        questionnaires.length > 0
+          ? t('summary.questions', {
+              count: questionnaires.reduce(
+                (sum, q) => sum + q.questionCount,
+                0,
+              ),
+            })
           : pending(1),
+      more: questionnaires.length > 0 ? <PickedList wizard={wizard} /> : null,
     },
     {
       key: 'organization',
@@ -80,7 +129,7 @@ export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
             <span className="asg-wiz__piece-icon" aria-hidden>
               <Icon name={item.icon} size={16} />
             </span>
-            <span className="asg-wiz__piece-text">
+            <div className="asg-wiz__piece-text">
               <span className="asg-wiz__piece-label">
                 {t(`summary.${item.key}`)}
               </span>
@@ -88,7 +137,8 @@ export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
                 {item.title}
               </span>
               <span className="asg-wiz__piece-detail">{item.detail}</span>
-            </span>
+              {item.more}
+            </div>
             {item.done ? (
               <span className="asg-wiz__piece-done">
                 <Icon name="check" size={16} />

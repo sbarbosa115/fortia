@@ -6,7 +6,7 @@ import {useEditorContext} from '../model/EditorContext';
 import {CtaFields} from './CtaFields';
 import {DetailsStep} from './DetailsStep';
 import {IssueList} from './IssueList';
-import {LockedView} from './LockedView';
+import {LockedBanner} from './LockedBanner';
 import {Preview} from './Preview';
 import {QuestionOutline} from './QuestionOutline';
 import {QuestionsStep} from './QuestionsStep';
@@ -23,17 +23,6 @@ export function GenericEditor() {
   const {draft, update} = editor;
   useDocumentTitle(`Mappi - ${draft.title || t('title')}`);
 
-  if (editor.locked && editor.questionnaireId) {
-    return (
-      <LockedView
-        questionnaire={{
-          questionnaire_id: editor.questionnaireId,
-          title: draft.title,
-          questions: draft.questions.map((q) => ({title: q.title})),
-        }}
-      />
-    );
-  }
   if (editor.saved) {
     return <SuccessScreen />;
   }
@@ -85,37 +74,42 @@ export function GenericEditor() {
         }
       >
         <main className="editor__main stack">
-          <DetailsStep />
-          <section className="editor__step">
-            <h2 className="editor__step-title">{t('questions.title')}</h2>
-            <div className="generic-questions">
-              <div className="ccard generic-questions__outline">
-                <QuestionOutline />
+          {editor.locked && editor.questionnaireId ? (
+            <LockedBanner questionnaireId={editor.questionnaireId} />
+          ) : null}
+          <fieldset disabled={editor.locked} className="lock-fieldset stack">
+            <DetailsStep />
+            <section className="editor__step">
+              <h2 className="editor__step-title">{t('questions.title')}</h2>
+              <div className="generic-questions">
+                <div className="ccard generic-questions__outline">
+                  <QuestionOutline />
+                </div>
+                <div className="generic-questions__card">
+                  <QuestionsStep />
+                </div>
               </div>
-              <div className="generic-questions__card">
-                <QuestionsStep />
+            </section>
+            <section className="editor__step">
+              <h2 className="editor__step-title">{t('generic.end')}</h2>
+              <div className="stack">
+                <EndBlock
+                  label={t('end.cta')}
+                  hint={t('end.ctaHint')}
+                  checked={draft.ctaOn}
+                  onChange={(ctaOn) => update({ctaOn})}
+                >
+                  <CtaFields />
+                </EndBlock>
+                <EndBlock
+                  label={t('end.capture')}
+                  hint={t('end.captureHint')}
+                  checked={draft.captureUserData}
+                  onChange={(captureUserData) => update({captureUserData})}
+                />
               </div>
-            </div>
-          </section>
-          <section className="editor__step">
-            <h2 className="editor__step-title">{t('generic.end')}</h2>
-            <div className="stack">
-              <EndBlock
-                label={t('end.cta')}
-                hint={t('end.ctaHint')}
-                checked={draft.ctaOn}
-                onChange={(ctaOn) => update({ctaOn})}
-              >
-                <CtaFields />
-              </EndBlock>
-              <EndBlock
-                label={t('end.capture')}
-                hint={t('end.captureHint')}
-                checked={draft.captureUserData}
-                onChange={(captureUserData) => update({captureUserData})}
-              />
-            </div>
-          </section>
+            </section>
+          </fieldset>
           <IssueList issues={editor.allIssues} />
           <div className="row">{updateButton}</div>
         </main>

@@ -71,6 +71,7 @@
     "reviewNotice_one": "Revisa todas las respuestas para aprobar el seguimiento o enviarlo a corrección · falta {{count}}",
     "reviewNotice_other": "Revisa todas las respuestas para aprobar el seguimiento o enviarlo a corrección · faltan {{count}}",
     "approvedNotice": "Todas las respuestas de este intento están aprobadas.",
+    "completedNotice": "Completado. Esta asignación no requiere revisión, así que sus respuestas son definitivas.",
     "table": {
       "caption": "Respuestas del intento {{n}}",
       "number": "#",

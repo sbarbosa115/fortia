@@ -196,7 +196,7 @@ final class AssignationDetails
         $out = [];
         foreach ($assignation->attempts() as $attempt) {
             $session = $this->sessions->find($attempt['session_id']);
-            $progress = null === $session ? null : FollowUpProgress::ofSession($session->questions(), $session->isEnded(), $session->attempt());
+            $progress = null === $session ? null : FollowUpProgress::ofSession($session->questions(), $session->isEnded(), $session->attempt(), $assignation->requiresReview());
             $out[] = [
                 'number' => $attempt['number'],
                 'session_id' => $attempt['session_id'],

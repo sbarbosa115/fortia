@@ -60,6 +60,7 @@ function assignation(partial: Partial<Assignation> = {}): Assignation {
     customer_id: 'ACME0001',
     organization_id: 'o',
     organization_name: 'Acme Retail',
+    requires_review: true,
     questionnaire_id: QID,
     questionnaire_name: 'Monthly store report',
     questionnaire_url: `http://localhost/a/${ID}`,

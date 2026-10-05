@@ -379,37 +379,497 @@
 
 /* Preview */
 
-/* Success and Locked */
-.editor--success,
-.editor--locked {
+/* Success */
+.editor--success {
   max-width: 880px;
   margin: 0 auto;
   padding: var(--space-6) 0;
 }
 
-.locked__questions {
-  margin: 0;
-  padding-left: var(--space-5);
+/* Locked (it has answers): an orange banner above the editor, which stays visible but read-only. */
+.locked-banner {
+  --locked: #ea580c;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  align-items: center;
+  gap: 16px;
+  margin-bottom: var(--space-6);
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, #fed7aa 80%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, #fff7ed 80%, transparent);
 }
-
-/* A file question's template: its name opens it; replace or remove it. */
-.template-field__name {
+.locked-banner__icon {
+  display: inline-flex;
+  flex: none;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--locked);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+}
+.locked-banner__text {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  border: 0;
-  background: none;
+}
+.locked-banner__title {
+  margin: 0;
+  color: #431407;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.locked-banner__body {
+  margin: 4px 0 0;
+  color: color-mix(in srgb, #7c2d12 80%, transparent);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.locked-banner .locked-banner__copy.btn {
+  flex: none;
+  border-color: var(--locked);
+  background: var(--locked);
+  color: #fff;
+}
+.locked-banner .locked-banner__copy.btn:hover:not(:disabled) {
+  border-color: #c2410c;
+  background: #c2410c;
+}
+@media (max-width: 640px) {
+  .locked-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+/* The read-only editor: a plain wrapper that disables every control in it at once. */
+.lock-fieldset {
+  min-width: 0;
+  margin: 0;
   padding: 0;
-  color: var(--color-primary);
-  font: inherit;
-  text-align: left;
-  text-decoration: underline;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
+  border: 0;
+}
+.lock-fieldset:disabled {
+  cursor: default;
 }
 
-/* The preview of a table question and of a file question's template. */
+/* A file question's template: a drop area to upload it, then a file card (download, replace, remove). */
+.template-drop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.template-drop:hover:not(:disabled),
+.template-drop[data-dragging] {
+  border-color: var(--color-primary);
+  background: color-mix(
+    in srgb,
+    var(--color-primary-soft) 55%,
+    var(--color-surface)
+  );
+}
+.template-drop:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.template-drop:disabled {
+  cursor: progress;
+}
+.template-drop__icon,
+.template-card__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.template-drop__text,
+.template-card__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.template-drop__text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.template-drop__text span,
+.template-card__meta {
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+}
+.template-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+.template-card__name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.template-card__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+.template-card__remove.btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
+@media (max-width: 560px) {
+  .template-card {
+    flex-wrap: wrap;
+  }
+  .template-card__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* A table question, built on the table itself (as in Notion or Sheets): grey bold headers typed in place, thin cell
+   lines, the first column pinned when it scrolls sideways, a violet ring on the cell being edited, a red one on a cell
+   with a problem, and the cell's tools floating next to it on hover. */
+.table-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.table-editor__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.table-editor__top .toggle {
+  font-size: 13px;
+}
+.table-editor__hint {
+  margin: 0 0 4px;
+}
+.table-editor__box {
+  --table-line: color-mix(in srgb, var(--color-border) 80%, transparent);
+  --table-head: color-mix(
+    in srgb,
+    var(--color-hover) 65%,
+    var(--color-surface)
+  );
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+.table-editor__scroll {
+  overflow-x: auto;
+}
+.table-editor__table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+.table-editor__table th,
+.table-editor__table td {
+  height: 44px;
+  padding: 0;
+  border-right: 1px solid var(--table-line);
+  border-bottom: 1px solid var(--table-line);
+  background: var(--color-surface);
+  text-align: left;
+  vertical-align: middle;
+  transition:
+    background-color 0.15s,
+    box-shadow 0.15s;
+}
+.table-editor__table thead th {
+  position: relative;
+  background: var(--table-head);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.table-editor__table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.table-editor__table tr > :last-child {
+  border-right: 0;
+}
+.table-editor__table .table-editor__sticky {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  box-shadow: 1px 0 0 var(--table-line);
+}
+.table-editor__table .table-editor__index {
+  width: 48px;
+  min-width: 48px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.table-editor__table .table-editor__corner {
+  min-width: 200px;
+  padding: 0 14px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+.table-editor__column {
+  min-width: 170px;
+}
+.table-editor__table .table-editor__row-head {
+  min-width: 200px;
+  font-weight: 500;
+}
+.table-editor__head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  padding: 0 6px 0 4px;
+}
+.table-editor__grip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: grab;
+  opacity: 0;
+  touch-action: none;
+  transition: opacity 0.15s;
+}
+.table-editor__grip:active {
+  cursor: grabbing;
+}
+.table-editor__grip:focus-visible {
+  opacity: 1;
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.table-editor__input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  outline: none;
+}
+.table-editor__input:focus,
+.table-editor__input:focus-visible {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+.table-editor__input::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 60%, transparent);
+  font-weight: 500;
+}
+
+/* Hover, selected (violet ring), with a problem (red ring), being dragged. */
+.table-editor__table .table-editor__column:hover {
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--table-head));
+}
+.table-editor__table .table-editor__row-head:hover {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+}
+:is(.table-editor__column, .table-editor__row-head):is(:hover, :focus-within)
+  .table-editor__grip {
+  opacity: 1;
+}
+.table-editor__table
+  :is(.table-editor__column, .table-editor__row-head):has(
+    .table-editor__input:focus
+  ) {
+  box-shadow:
+    inset 0 0 0 2px var(--color-primary),
+    1px 0 0 var(--table-line);
+}
+.table-editor__table
+  :is(.table-editor__column, .table-editor__row-head)[data-invalid] {
+  background: color-mix(in srgb, var(--color-danger) 6%, var(--color-surface));
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--color-danger) 70%, transparent),
+    1px 0 0 var(--table-line);
+}
+.table-editor__table .table-editor__column[data-dragging],
+.table-editor__table .table-editor__fixed-row[data-dragging] > * {
+  z-index: 4;
+  background: var(--color-surface);
+  box-shadow:
+    inset 0 0 0 2px var(--color-primary),
+    0 8px 20px rgb(16 24 40 / 12%);
+}
+.table-editor__fixed-row[data-dragging] {
+  position: relative;
+  z-index: 4;
+}
+
+/* The cells the respondent fills in: greyed, not editable here. */
+.table-editor__table .table-editor__sample {
+  padding: 0 14px;
+  background: color-mix(in srgb, var(--color-hover) 30%, var(--color-surface));
+  color: color-mix(in srgb, var(--color-text-muted) 55%, transparent);
+  font-size: 12.5px;
+  white-space: nowrap;
+  cursor: default;
+}
+.table-editor__table .table-editor__sample-row .table-editor__index {
+  color: color-mix(in srgb, var(--color-text-muted) 60%, transparent);
+}
+.table-editor__table :is(.table-editor__filler, .table-editor__add-column) {
+  width: 52px;
+  min-width: 52px;
+  text-align: center;
+}
+.table-editor__add-column .btn {
+  color: var(--color-primary);
+}
+.table-editor__add-column .btn:hover:not(:disabled) {
+  background: var(--color-primary-soft);
+}
+
+/* A cell's tools, floating: under a column's header, to the right of a row's name. */
+.table-editor__menu {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: 0 6px 16px rgb(16 24 40 / 10%);
+  font-weight: 400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.table-editor__menu .btn--icon.btn--sm {
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-muted);
+}
+.table-editor__menu .btn--icon.btn--sm:hover:not(:disabled) {
+  color: var(--color-text);
+}
+.table-editor__menu .table-editor__danger.btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
+.table-editor__menu--column {
+  top: calc(100% - 6px);
+  right: 6px;
+}
+.table-editor__menu--row {
+  top: 50%;
+  left: calc(100% + 6px);
+  transform: translateY(-50%);
+}
+:is(.table-editor__column, .table-editor__row-head):is(:hover, :focus-within)
+  > .table-editor__menu {
+  opacity: 1;
+  pointer-events: auto;
+}
+[data-dragging] .table-editor__menu,
+[data-dragging] > .table-editor__menu {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Under the table: "+ Add row", or how many rows the respondent may add. */
+.table-editor__foot {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 8px;
+  border-top: 1px solid var(--table-line);
+}
+.table-editor__foot .btn {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.table-editor__foot .btn:hover:not(:disabled) {
+  background: var(--color-primary-soft);
+}
+.table-editor__growth {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.table-editor__growth > svg {
+  color: var(--color-primary);
+}
+.table-editor__max {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.table-editor__max input {
+  width: 64px;
+  height: 30px;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  outline: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.table-editor__max input:hover {
+  border-color: var(--color-text-muted);
+}
+.table-editor__max input:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+.table-editor .field__error {
+  margin: 0;
+}

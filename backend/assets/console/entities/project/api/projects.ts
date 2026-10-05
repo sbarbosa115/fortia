@@ -19,6 +19,7 @@ export type ProjectPayload = {
   description?: string | null;
   due_date?: string;
   assignation_ids?: string[];
+  requires_review?: boolean;
 };
 
 /** Every cached project query starts with this key: invalidate it after any change. */
@@ -58,6 +59,7 @@ export type NewProjectPayload = {
   due_date: string;
   assignation_ids?: string[];
   questionnaire_ids?: string[];
+  requires_review?: boolean;
   registration_title?: string;
 };
 

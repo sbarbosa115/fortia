@@ -32,11 +32,19 @@ final class UpdateProjectHandler
         }
 
         $now = $this->clock->now();
+        $members = null;
         if (\array_key_exists('assignation_ids', $fields)) {
             /** @var list<string> $ids */
             $ids = (array) $fields['assignation_ids'];
-            $resolved = $this->assignations->resolve($command->caller, $project->organizationId(), $project->projectId(), $ids);
-            $this->assignations->replace($project->projectId(), $resolved, $now);
+            $members = $this->assignations->resolve($command->caller, $project->organizationId(), $project->projectId(), $ids);
+            $this->assignations->replace($project->projectId(), $members, $now);
+        }
+        if (\array_key_exists('requires_review', $fields)) {
+            $project->requireReview((bool) $fields['requires_review'], $now);
+        }
+        // Its follow-ups (the new set when it changed) take the project's review requirement.
+        foreach ($members ?? $this->assignationRepository->listByProject($project->projectId()) as $assignation) {
+            $assignation->requireReview($project->requiresReview(), $now);
         }
         $project->change(
             \array_key_exists('name', $fields) ? trim((string) $fields['name']) : $project->name(),

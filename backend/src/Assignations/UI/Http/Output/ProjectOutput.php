@@ -25,7 +25,7 @@ final class ProjectOutput
         public readonly ?string $due_date,
         public readonly ?string $created_at,
         public readonly ?string $updated_at,
-        #[OA\Property(enum: ['review', 'overdue', 'correction', 'progress', 'pending', 'approved', 'empty'])]
+        #[OA\Property(enum: ['review', 'overdue', 'correction', 'progress', 'pending', 'completed', 'approved', 'empty'])]
         public readonly string $state,
         public readonly int $progress_percent,
         public readonly int $completed_assignations,
@@ -35,6 +35,8 @@ final class ProjectOutput
         public readonly array $assignations,
         #[OA\Property(type: 'array', nullable: true, items: new OA\Items(ref: new Model(type: ProjectAvailableAssignationOutput::class)))]
         public readonly ?array $available_assignations = null,
+        /** Its follow-ups go to review once complete; false: they are simply completed. */
+        public readonly bool $requires_review = true,
     ) {
     }
 
@@ -63,6 +65,7 @@ final class ProjectOutput
             (int) $data['total_assignations'],
             array_map(ProjectAssignationOutput::of(...), $assignations),
             null === $available ? null : array_map(ProjectAvailableAssignationOutput::of(...), $available),
+            (bool) ($data['requires_review'] ?? true),
         );
     }
 }

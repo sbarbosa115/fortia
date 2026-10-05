@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {decodeDraft, editorKindOf} from './decode';
-import {emptyDraft, newOption, newQuestion} from './draft';
+import {emptyDraft, newOption, newQuestion, newTableRow} from './draft';
 import {encodeFlow} from './encode';
 import type {Draft, DraftQuestion} from './types';
 
@@ -153,7 +153,7 @@ describe('a table and a file template', () => {
       draftWith({
         type: 'table',
         options: [newOption('Name'), newOption('Role')],
-        tableRows: ['Q1', ' ', 'Q2'],
+        tableRows: [newTableRow('Q1'), newTableRow(' '), newTableRow('Q2')],
       }),
     );
     expect(questionnaireOf(flow).questions[0]!.options[0]).toMatchObject({
@@ -164,6 +164,20 @@ describe('a table and a file template', () => {
       ],
       rows: ['Q1', 'Q2'],
     });
+  });
+
+  it('sends a lowered row limit only for a table without fixed rows', () => {
+    const control = (patch: Partial<DraftQuestion>) =>
+      questionnaireOf(
+        encodeFlow(
+          draftWith({type: 'table', options: [newOption('A')], ...patch}),
+        ),
+      ).questions[0]!.options[0] as Record<string, unknown>;
+    expect(control({tableMaxRows: 10})['max_rows']).toBe(10);
+    expect(control({tableMaxRows: 50})).not.toHaveProperty('max_rows');
+    expect(
+      control({tableMaxRows: 10, tableRows: [newTableRow('Q1')]}),
+    ).not.toHaveProperty('max_rows');
   });
 
   it('sends a file question’s template, and nothing once it is removed', () => {
@@ -232,7 +246,7 @@ describe('a table and a file template', () => {
     );
     expect(draft.questions[0]).toMatchObject({
       type: 'table',
-      tableRows: ['Jan'],
+      tableRows: [{label: 'Jan'}],
       options: [{label: 'Sales'}],
     });
     expect(draft.questions[1]!.template).toEqual({

@@ -18,14 +18,13 @@
   },
   "questionnaires": {
     "hero": "¿Qué cuestionarios?",
-    "subtitle": "Elige todos los cuestionarios que va a responder la organización. Búscalos por nombre o fíltralos por etiqueta.",
+    "subtitle": "Elige todos los cuestionarios que va a responder la organización. Búscalos por nombre o etiqueta, o fíltralos por una o varias etiquetas.",
     "question": "Elige uno o varios cuestionarios",
-    "search": "Buscar por nombre…",
+    "search": "Buscar por nombre o etiqueta…",
     "tagLabel": "Filtrar por etiqueta",
     "tagSearch": "Buscar una etiqueta…",
     "noTags": "Aún no hay etiquetas",
     "noTagMatches": "Ninguna etiqueta coincide",
-    "clearTag": "Quitar etiqueta",
     "tags": "Etiquetas",
     "listLabel": "Cuestionarios",
     "types": {
@@ -45,9 +44,33 @@
     "inactive": "Inactivo",
     "none": "Todavía no tienes cuestionarios. Crea uno primero en Cuestionarios.",
     "noMatches": "Ningún cuestionario coincide con estos filtros.",
-    "clearFilters": "Quitar filtros",
-    "loadMore": "Cargar más",
-    "loadingMore": "Cargando más..."
+    "clearFilters": "Limpiar filtros",
+    "tagLabelCount_one": "Filtrar por etiqueta, {{count}} elegida",
+    "tagLabelCount_other": "Filtrar por etiqueta, {{count}} elegidas",
+    "tagCount_one": "{{count}} cuestionario",
+    "tagCount_other": "{{count}} cuestionarios",
+    "tagAny": "Se muestran los cuestionarios con cualquiera de las etiquetas elegidas.",
+    "clearTags": "Quitar etiquetas",
+    "chosenTags": "Etiquetas elegidas",
+    "removeTag": "Quitar la etiqueta {{tag}}",
+    "sortLabel": "Ordenar por",
+    "sort": {
+      "recent": "Más recientes",
+      "name": "Nombre (A–Z)",
+      "questions": "Más preguntas"
+    },
+    "counter_one": "{{shown}} de {{count}} cuestionario",
+    "counter_other": "{{shown}} de {{count}} cuestionarios",
+    "total_one": "{{count}} cuestionario",
+    "total_other": "{{count}} cuestionarios",
+    "onlyPicked": "Ver solo seleccionados",
+    "pickVisible_one": "Seleccionar el visible",
+    "pickVisible_other": "Seleccionar los {{count}} visibles",
+    "unpickVisible_one": "Quitar el visible",
+    "unpickVisible_other": "Quitar los {{count}} visibles",
+    "noMatchesHint": "Prueba con otras palabras o quita alguna etiqueta. Lo que ya elegiste sigue elegido.",
+    "showMore_one": "Mostrar {{count}} más",
+    "showMore_other": "Mostrar {{count}} más"
   },
   "organization": {
     "hero": "¿Para quién es?",
@@ -68,7 +91,10 @@
     "namePlaceholder": "Ej: Auditoría Q4",
     "nameHint": "Solo lo ve tu equipo.",
     "deadline": "Fecha límite",
-    "deadlineHint": "Todos los cuestionarios vencen en esta fecha. Los miembros reciben un recordatorio diario hasta terminar."
+    "deadlineHint": "Todos los cuestionarios vencen en esta fecha. Los miembros reciben un recordatorio diario hasta terminar.",
+    "requiresReview": "Requiere revisión",
+    "requiresReviewOn": "Cuando un cuestionario se completa pasa a “Pendiente de revisión”: apruebas sus respuestas o lo envías a corrección.",
+    "requiresReviewOff": "Cuando un cuestionario se completa queda como “Completado”, sin revisión."
   },
   "summary": {
     "title": "Lo que vamos a crear",
@@ -87,7 +113,11 @@
     "members_one": "{{count}} miembro",
     "members_other": "{{count}} miembros",
     "due": "vence {{date}}",
-    "nothingSaved": "No se guarda nada hasta que pulses Crear. Cada cuestionario es un seguimiento: los miembros comparten una sesión y reciben un recordatorio diario hasta completarlo."
+    "nothingSaved": "No se guarda nada hasta que pulses Crear. Cada cuestionario es un seguimiento: los miembros comparten una sesión y reciben un recordatorio diario hasta completarlo.",
+    "pickedLabel": "Cuestionarios elegidos",
+    "unpick": "Quitar {{title}}",
+    "showAll": "Ver los {{count}}",
+    "showLess": "Ver menos"
   },
   "missing": {
     "title": "Falta completar antes de crear:",

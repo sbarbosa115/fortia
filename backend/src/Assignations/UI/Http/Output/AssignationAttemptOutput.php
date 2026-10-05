@@ -20,7 +20,7 @@ final class AssignationAttemptOutput
         public readonly ?string $started_at,
         public readonly ?string $ended_at,
         public readonly bool $completed,
-        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved'])]
+        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved', 'completed'])]
         public readonly string $review_status,
         #[OA\Property(type: 'array', nullable: true, items: new OA\Items(ref: new Model(type: FollowUpAnswerOutput::class)))]
         public readonly ?array $answers,

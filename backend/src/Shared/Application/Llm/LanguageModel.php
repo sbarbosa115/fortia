@@ -7,7 +7,7 @@ namespace App\Shared\Application\Llm;
  *
  * Two adapters: OpenAI's Responses API (LLM_PROVIDER=openai, one model: LLM_MODEL) and a deterministic fake for
  * dev and tests (LLM_PROVIDER=fake), which answers each request through the FakeLlmResponder registered for its
- * purpose.
+ * purpose. LLM_PROVIDER=auto picks OpenAI per call when the account or the platform has a key, else the fake.
  */
 interface LanguageModel
 {

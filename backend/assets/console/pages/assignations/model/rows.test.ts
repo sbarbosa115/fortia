@@ -32,6 +32,7 @@ function project(
     customer_id: 'C',
     organization_id: 'o-1',
     organization_name: 'Acme Retail',
+    requires_review: true,
     name: 'Q4',
     state,
     progress_percent: 0,
@@ -88,6 +89,18 @@ describe('where the review of an assignation stands', () => {
     expect(
       reviewTextOf(assignation({state: 'correction', attempt: 2})),
     ).toEqual({key: 'correctionAttempt', values: {attempt: 2}});
+  });
+
+  it('needs no review once an assignation without review is completed', () => {
+    expect(
+      reviewTextOf(
+        assignation({
+          state: 'completed',
+          completed: true,
+          review_status: 'completed',
+        }),
+      ),
+    ).toEqual({key: 'reviewText.noReview'});
   });
 
   it('is not ready before the follow-up is complete', () => {

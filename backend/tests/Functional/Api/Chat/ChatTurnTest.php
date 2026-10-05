@@ -180,6 +180,8 @@ final class ChatTurnTest extends ApiTestCase
         self::assertSame('done', $done['actions'][0]['status'], 'PRD §7.19: they run when the user says yes');
         self::assertSame(['Acme Norte'], $this->organizations());
         self::assertSame([], $done['pending_writes'], 'the queue is emptied');
+        self::assertStringContainsString('Acme Norte', $done['message'], 'the answer says what was done');
+        self::assertStringNotContainsString('¡Hola!', $done['message'], 'never the greeting after a yes');
     }
 
     public function testANoDropsTheQueuedWrites(): void

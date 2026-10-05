@@ -9,7 +9,7 @@ import {ChainPromptsStep} from './ChainPromptsStep';
 import {DetailsStep} from './DetailsStep';
 import {DiagnosticResultsStep} from './DiagnosticResultsStep';
 import {IssueList} from './IssueList';
-import {LockedView} from './LockedView';
+import {LockedBanner} from './LockedBanner';
 import {Preview} from './Preview';
 import {QuestionOutline} from './QuestionOutline';
 import {QuestionsStep} from './QuestionsStep';
@@ -36,17 +36,6 @@ export function CreationEditor() {
     `Mappi - ${mode === 'create' ? t('breadcrumb.new', {kind: kindName}) : draft.title || t('title')}`,
   );
 
-  if (editor.locked && editor.questionnaireId) {
-    return (
-      <LockedView
-        questionnaire={{
-          questionnaire_id: editor.questionnaireId,
-          title: draft.title,
-          questions: draft.questions.map((q) => ({title: q.title})),
-        }}
-      />
-    );
-  }
   if (editor.saved) {
     return <SuccessScreen />;
   }
@@ -113,7 +102,11 @@ export function CreationEditor() {
           </nav>
           <span className="cshell__chip">
             <span className="cshell__chip-dot" aria-hidden />
-            {mode === 'create' ? t('chip.draft') : t('chip.editing')}
+            {mode === 'create'
+              ? t('chip.draft')
+              : editor.locked
+                ? t('chip.locked')
+                : t('chip.editing')}
           </span>
         </div>
         <div className="cshell__stepper">
@@ -152,9 +145,23 @@ export function CreationEditor() {
       </header>
 
       <div className="cshell__body">
-        {side ? <aside className="cshell__side">{side}</aside> : null}
+        {side ? (
+          <aside className="cshell__side">
+            {/* The outline still picks the question to look at (its add and delete are off while locked). */}
+            {step === 2 ? (
+              side
+            ) : (
+              <fieldset disabled={editor.locked} className="lock-fieldset">
+                {side}
+              </fieldset>
+            )}
+          </aside>
+        ) : null}
         <div key={step} className="cshell__main">
           <div className="cshell__column">
+            {editor.locked && editor.questionnaireId ? (
+              <LockedBanner questionnaireId={editor.questionnaireId} />
+            ) : null}
             <div className="step-heading">
               <span className="step-heading__kicker">
                 {t('steps.kicker', {n: step, type: kindName})}
@@ -162,15 +169,19 @@ export function CreationEditor() {
               <h1 className="step-heading__title">{heading.title}</h1>
               <p className="step-heading__subtitle">{heading.subtitle}</p>
             </div>
-            {step === 1 ? <DetailsStep /> : null}
-            {step === 2 ? <QuestionsStep /> : null}
-            {step === 3 && draft.kind === 'regular' ? <RegularEndStep /> : null}
-            {step === 3 && draft.kind === 'diagnostic' ? (
-              <DiagnosticResultsStep />
-            ) : null}
-            {step === 3 && draft.kind === 'chaining' ? (
-              <ChainPromptsStep />
-            ) : null}
+            <fieldset disabled={editor.locked} className="lock-fieldset">
+              {step === 1 ? <DetailsStep /> : null}
+              {step === 2 ? <QuestionsStep /> : null}
+              {step === 3 && draft.kind === 'regular' ? (
+                <RegularEndStep />
+              ) : null}
+              {step === 3 && draft.kind === 'diagnostic' ? (
+                <DiagnosticResultsStep />
+              ) : null}
+              {step === 3 && draft.kind === 'chaining' ? (
+                <ChainPromptsStep />
+              ) : null}
+            </fieldset>
             {step === 3 ? <IssueList issues={editor.issuesOf(3)} /> : null}
           </div>
         </div>

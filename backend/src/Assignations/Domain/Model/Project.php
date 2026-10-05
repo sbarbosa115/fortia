@@ -20,6 +20,10 @@ class Project
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeImmutable $updatedAt;
 
+    /** Its follow-ups go to review once complete; without it they are simply completed. */
+    #[ORM\Column(options: ['default' => true])]
+    private bool $requiresReview = true;
+
     public function __construct(
         #[ORM\Id]
         #[ORM\Column(length: 36)]
@@ -44,6 +48,17 @@ class Project
         $this->description = $description;
         $this->dueDate = $dueDate;
         $this->updatedAt = $at;
+    }
+
+    public function requireReview(bool $requiresReview, \DateTimeImmutable $at): void
+    {
+        $this->requiresReview = $requiresReview;
+        $this->updatedAt = $at;
+    }
+
+    public function requiresReview(): bool
+    {
+        return $this->requiresReview;
     }
 
     public function projectId(): string

@@ -267,13 +267,23 @@ describe('QuestionnaireEditorPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('locks a questionnaire with answers and offers a copy', async () => {
+  it('shows a questionnaire with answers in the editor, read-only under the Locked banner, and offers a copy', async () => {
     vi.mocked(fetchHasAnswers).mockResolvedValue(true);
     renderAt('/questionnaires/q1/edit');
 
     expect(
       await screen.findByText('Locked to preserve answers'),
     ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Enter questionnaire title'),
+      'the editor is shown, with its fields read-only',
+    ).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', {name: /When it ends/}));
+    expect(
+      screen.getByRole('button', {name: 'Save changes'}),
+      'a locked questionnaire is never saved',
+    ).toBeDisabled();
+    expect(updateQuestionnaire).not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole('button', {name: 'Create a copy'}));
     expect(
       screen.getByRole('dialog', {name: 'Create a copy?'}),

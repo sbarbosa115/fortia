@@ -23,6 +23,8 @@ import {
   type Step,
   stepErrors,
   togglePicked,
+  addPicked,
+  removePicked,
 } from './wizard';
 
 const DEPS: CreateDeps = {
@@ -117,6 +119,7 @@ export function useAssignationWizard() {
 
   const [name, setName] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [requiresReview, setRequiresReview] = useState(true);
 
   // --- Steps -----------------------------------------------------------------------------------------------
 
@@ -154,6 +157,7 @@ export function useAssignationWizard() {
           name,
           dueDate,
           registrationTitle: t('registrationTitle'),
+          requiresReview,
         },
         progress,
         DEPS,
@@ -199,6 +203,10 @@ export function useAssignationWizard() {
     // Step 1
     questionnaires,
     toggleQuestionnaire,
+    pickQuestionnaires: (list: PickedQuestionnaire[]) =>
+      setQuestionnaires((current) => addPicked(current, list)),
+    unpickQuestionnaires: (ids: string[]) =>
+      setQuestionnaires((current) => removePicked(current, ids)),
     clearQuestionnaires: () => setQuestionnaires([]),
     // Step 2
     organizations,
@@ -217,6 +225,8 @@ export function useAssignationWizard() {
     setName,
     dueDate,
     setDueDate,
+    requiresReview,
+    setRequiresReview,
     // Create
     submit,
     creating: create.isPending,

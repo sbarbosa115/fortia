@@ -1215,6 +1215,8 @@ export interface components {
             validations: components["schemas"]["ValidationOutput"][];
             /** @description A table's fixed rows (none: the respondent adds rows) */
             rows?: string[] | null;
+            /** @description Without fixed rows, the most rows the respondent may add (none: 50) */
+            max_rows?: number | null;
             template?: components["schemas"]["FileTemplateOutput"] | null;
             /** @default null */
             default_value: (string | number | boolean) | null;
@@ -1467,7 +1469,7 @@ export interface components {
             ended_at?: string | null;
             completed: boolean;
             /** @enum {string} */
-            review_status: "not_ready" | "in_review" | "changes_requested" | "approved";
+            review_status: "not_ready" | "in_review" | "changes_requested" | "approved" | "completed";
             answers?: components["schemas"]["FollowUpAnswerOutput"][] | null;
         };
         AssignationProgressOutput: {
@@ -1507,9 +1509,14 @@ export interface components {
             progress: components["schemas"]["AssignationProgressOutput"];
             completed: boolean;
             /** @enum {string|null} */
-            review_status?: "not_ready" | "in_review" | "changes_requested" | "approved" | null;
+            review_status?: "not_ready" | "in_review" | "changes_requested" | "approved" | "completed" | null;
             created_at?: string | null;
             updated_at?: string | null;
+            /**
+             * A complete follow-up goes to review; false: it is simply completed.
+             * @default true
+             */
+            requires_review: boolean;
         };
         ProjectPaginationOutput: {
             page: number;
@@ -1581,7 +1588,7 @@ export interface components {
             question_id: string;
             review: components["schemas"]["ReviewOutput"];
             /** @enum {string} */
-            review_status: "not_ready" | "in_review" | "changes_requested" | "approved";
+            review_status: "not_ready" | "in_review" | "changes_requested" | "approved" | "completed";
         };
         RetryOutput: {
             attempt: number;
@@ -1608,11 +1615,11 @@ export interface components {
             questionnaire_id: string;
             active: boolean;
             /** @enum {string} */
-            state: "review" | "overdue" | "correction" | "progress" | "pending" | "approved";
+            state: "review" | "overdue" | "correction" | "progress" | "pending" | "completed" | "approved";
             /** The shared session has ended. */
             completed: boolean;
             /** @enum {string} */
-            review_status: "not_ready" | "in_review" | "changes_requested" | "approved";
+            review_status: "not_ready" | "in_review" | "changes_requested" | "approved" | "completed";
             attempt: number;
             /** Its own due date, or the project's. */
             due_date?: string | null;
@@ -1639,7 +1646,7 @@ export interface components {
             created_at?: string | null;
             updated_at?: string | null;
             /** @enum {string} */
-            state: "review" | "overdue" | "correction" | "progress" | "pending" | "approved" | "empty";
+            state: "review" | "overdue" | "correction" | "progress" | "pending" | "completed" | "approved" | "empty";
             progress_percent: number;
             completed_assignations: number;
             approved_assignations: number;
@@ -1647,6 +1654,11 @@ export interface components {
             assignations: components["schemas"]["ProjectAssignationOutput"][];
             /** @default null */
             available_assignations: components["schemas"]["ProjectAvailableAssignationOutput"][] | null;
+            /**
+             * Its follow-ups go to review once complete; false: they are simply completed.
+             * @default true
+             */
+            requires_review: boolean;
         };
         ProjectListOutput: {
             projects: components["schemas"]["ProjectOutput"][];
@@ -1660,6 +1672,8 @@ export interface components {
             assignation_ids?: string[] | null;
             /** create only: each one becomes a new follow-up of the organization */
             questionnaire_ids?: string[] | null;
+            /** Whether its follow-ups go to review once complete (true when not sent on create), or are simply completed. */
+            requires_review?: boolean | null;
             /** Create only: the title of the new follow-ups' registration slide, in the console's language. */
             registration_title?: string | null;
         };
@@ -2020,6 +2034,9 @@ export interface components {
             smtp_from_name?: string | null;
             openai_api_key_set: boolean;
             openai_api_key_last4?: string | null;
+            analytics_base_url?: string | null;
+            analytics_api_key_set: boolean;
+            analytics_api_key_last4?: string | null;
         };
         UserOutput: {
             email: string;
@@ -2840,8 +2857,8 @@ export interface operations {
             query?: {
                 page?: number;
                 page_size?: number;
-                /** @description progress includes pending */
-                status?: "review" | "progress" | "correction" | "overdue" | "approved";
+                /** @description progress includes pending, completed includes approved */
+                status?: "review" | "progress" | "correction" | "overdue" | "completed" | "approved";
                 /** @description Every word in the project's or its organization's name */
                 q?: string;
             };

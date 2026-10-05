@@ -45,6 +45,18 @@ final class TableAndTemplateTest extends TestCase
         self::assertSame('February — Sales: 12', TableAnswer::toText([[], ['sales' => '12']], $control));
     }
 
+    public function testWithoutFixedRowsTheOwnerMayLowerTheMostRowsARespondentAdds(): void
+    {
+        $control = Questions::normalizeControl(['type' => 'table', 'options' => [['label' => 'Name', 'value' => 'name']], 'max_rows' => 3]);
+
+        self::assertSame(3, $control['max_rows'], 'a table without fixed rows keeps its row limit');
+        self::assertCount(3, (array) TableAnswer::clean(array_fill(0, 10, ['name' => 'x']), $control), 'the respondent adds at most max_rows rows');
+        self::assertArrayNotHasKey('max_rows', Questions::normalizeControl(['type' => 'table', 'options' => [['label' => 'A']], 'max_rows' => 50]), '50 is the default: not stored');
+        self::assertArrayNotHasKey('max_rows', Questions::normalizeControl(['type' => 'table', 'options' => [['label' => 'A']], 'max_rows' => 0]), 'below 1 is ignored');
+        self::assertArrayNotHasKey('max_rows', Questions::normalizeControl(['type' => 'table', 'options' => [['label' => 'A']], 'rows' => ['One'], 'max_rows' => 3]), 'fixed rows set the count themselves');
+        self::assertArrayNotHasKey('max_rows', Questions::normalizeControl(['type' => 'text', 'max_rows' => 3]), 'only a table has a row limit');
+    }
+
     public function testAnAnswerIsStructuredAsATableToPreviewAndNullWhenNothingIsFilledIn(): void
     {
         $control = self::table([['label' => 'Sales', 'value' => 'sales'], ['label' => 'Notes']], ['January', 'February']);

@@ -11,7 +11,7 @@ final class AnswerReviewedOutput
     public function __construct(
         public readonly string $question_id,
         public readonly ReviewOutput $review,
-        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved'])]
+        #[OA\Property(enum: ['not_ready', 'in_review', 'changes_requested', 'approved', 'completed'])]
         public readonly string $review_status,
     ) {
     }

@@ -90,6 +90,24 @@ export function togglePicked(
     : [...picked, questionnaire];
 }
 
+/** Adds the questionnaires not picked yet, keeping the order they were picked in ("Select the visible ones"). */
+export function addPicked(
+  picked: PickedQuestionnaire[],
+  questionnaires: PickedQuestionnaire[],
+): PickedQuestionnaire[] {
+  const ids = new Set(picked.map((item) => item.id));
+  return [...picked, ...questionnaires.filter((item) => !ids.has(item.id))];
+}
+
+/** Takes these questionnaires out of the picked ones. */
+export function removePicked(
+  picked: PickedQuestionnaire[],
+  ids: string[],
+): PickedQuestionnaire[] {
+  const out = new Set(ids);
+  return picked.filter((item) => !out.has(item.id));
+}
+
 /** The new-organization dialog's problems: name required, and each member row's own rules. */
 export function newOrganizationErrors(organization: NewOrganization): {
   name: 'nameRequired' | null;
@@ -135,6 +153,8 @@ export type CreatePlan = {
   name: string;
   dueDate: string;
   registrationTitle: string;
+  /** A completed questionnaire goes to "Pending review"; without it, it is simply completed. */
+  requiresReview: boolean;
 };
 
 /** The API calls of Create, injected so the order and the retry are tested without a server. */
@@ -177,6 +197,7 @@ export async function runCreate(
     due_date: plan.dueDate.trim(),
     questionnaire_ids: plan.questionnaireIds,
     registration_title: plan.registrationTitle,
+    requires_review: plan.requiresReview,
   });
   return {projectId: created.project_id};
 }

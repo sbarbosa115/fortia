@@ -3,6 +3,7 @@
 namespace App\Tests\Functional\Api\Identity;
 
 use App\Identity\Domain\Model\SystemSettings;
+use App\Shared\Application\Analytics\AnalyticsEndpoints;
 use App\Shared\Application\Llm\OpenAiKeys;
 use App\Shared\Application\Mail\CustomerMailServers;
 use App\Tests\Support\ApiTestCase;
@@ -49,7 +50,44 @@ final class SystemSettingsTest extends ApiTestCase
             'smtp_from_name' => null,
             'openai_api_key_set' => false,
             'openai_api_key_last4' => null,
-        ], $settings, 'nothing of its own: emails and AI use the platform defaults');
+            'analytics_base_url' => null,
+            'analytics_api_key_set' => false,
+            'analytics_api_key_last4' => null,
+        ], $settings, 'nothing of its own: emails, AI and analytics use the platform defaults');
+    }
+
+    public function testTheAnalyticsServiceIsSavedWithItsKeyEncryptedAndNeverReturned(): void
+    {
+        $owner = $this->account('ACME0001');
+
+        $saved = $this->data($this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', ['analytics_base_url' => 'https://stats.acme.test/v1/', 'analytics_api_key' => ' acme-analytics-key-4321 '], as: $owner));
+
+        self::assertSame('https://stats.acme.test/v1', $saved['analytics_base_url'], 'the base URL is kept without its trailing slash');
+        self::assertTrue($saved['analytics_api_key_set']);
+        self::assertSame('4321', $saved['analytics_api_key_last4']);
+        self::assertStringNotContainsString('acme-analytics-key-4321', json_encode($saved) ?: '', 'the key is never returned');
+        $row = $this->em()->getConnection()->fetchAssociative('SELECT analytics_api_key FROM customer_system_settings WHERE customer_id = ?', ['ACME0001']);
+        self::assertIsArray($row);
+        self::assertStringNotContainsString('acme-analytics-key-4321', (string) $row['analytics_api_key'], 'the key is stored encrypted');
+        $endpoint = static::getContainer()->get(AnalyticsEndpoints::class)->endpointFor('ACME0001');
+        self::assertSame('https://stats.acme.test/v1/events', $endpoint?->eventsUrl(), 'the account\'s events go to its own service (§13.8 POST /events)');
+        self::assertSame('acme-analytics-key-4321', $endpoint->apiKey);
+
+        $removed = $this->data($this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', ['analytics_base_url' => '', 'analytics_api_key' => null], as: $owner));
+        self::assertNull($removed['analytics_base_url']);
+        self::assertFalse($removed['analytics_api_key_set']);
+        self::assertNull(static::getContainer()->get(AnalyticsEndpoints::class)->endpointFor('ACME0001'), 'without its own service, the platform one (unset in tests): nothing is sent');
+    }
+
+    public function testTheAnalyticsBaseUrlMustBeAnHttpUrlAndOnlyItsAccountMayChangeIt(): void
+    {
+        $owner = $this->account('ACME0001');
+        $globex = $this->account('GLOBEX01');
+
+        $this->assertApiError($this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', ['analytics_base_url' => 'ftp://stats.acme.test'], as: $owner), 400, 'VALIDATION_ERROR', 'an http or https URL');
+        $this->assertApiError($this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', ['analytics_base_url' => 'stats acme'], as: $owner), 400, 'VALIDATION_ERROR', 'not a URL');
+        $this->assertApiError($this->api('PATCH', '/api/v1/customer/ACME0001/system-settings', ['analytics_base_url' => 'https://evil.test'], as: $globex), 404, 'CUSTOMER_NOT_FOUND', 'another tenant\'s id is 404, never 403');
+        self::assertNull($this->data($this->api('GET', '/api/v1/customer/ACME0001/system-settings', as: $owner))['analytics_base_url']);
     }
 
     public function testTheSmtpServerIsSavedWithoutEverReturningThePassword(): void

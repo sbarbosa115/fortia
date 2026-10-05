@@ -238,10 +238,16 @@ export function FileControl({
         <span className="files__help">{t('help')}</span>
       </div>
 
-      <div className="files__meta">
-        <span>{t('counter', {count: uploads.length, max})}</span>
-        {full ? <span role="status">{t('limit', {max})}</span> : null}
-      </div>
+      {/* How many are attached; the limit only once it is reached (it is a cap, not a target). */}
+      {uploads.length > 0 ? (
+        <div className="files__meta">
+          {full ? (
+            <span role="status">{t('limit', {max})}</span>
+          ) : (
+            <span>{t('counter', {count: uploads.length})}</span>
+          )}
+        </div>
+      ) : null}
       {notice ? (
         <p className="answer-error" role="alert">
           {t(notice.key, {count: notice.count ?? 0, max})}

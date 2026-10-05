@@ -19,6 +19,9 @@ const EMPTY = {
   smtp_from_name: null,
   openai_api_key_set: false,
   openai_api_key_last4: null,
+  analytics_base_url: null,
+  analytics_api_key_set: false,
+  analytics_api_key_last4: null,
 };
 
 const SAVED = {
@@ -226,6 +229,76 @@ describe('SystemSettings (/profile › System)', () => {
     );
     expect(screen.getByLabelText(/^Server/)).toBeDisabled();
     expect(screen.getByLabelText('Replace the key')).toBeDisabled();
+    expect(screen.getByLabelText('Endpoint (base URL)')).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Validate'})).toBeDisabled();
+  });
+
+  it('saves the analytics endpoint and its key, and never shows the key back', async () => {
+    signInAs(['Customer-Admin']);
+    const fetchMock = stubApi(EMPTY);
+    renderWidget();
+    const user = userEvent.setup();
+
+    expect(await screen.findByText("Mappi's service")).toBeInTheDocument();
+    const url = screen.getByLabelText('Endpoint (base URL)');
+    await user.type(url, 'https://stats.acme.test');
+    const key = screen.getByLabelText('Analytics API key');
+    expect(key).toHaveAttribute('type', 'password');
+    await user.type(key, 'acme-key-4321');
+    await user.click(
+      within(url.closest('form')!).getByRole('button', {name: 'Save'}),
+    );
+
+    expect(bodyOf(fetchMock, 'PATCH')).toEqual({
+      analytics_base_url: 'https://stats.acme.test',
+      analytics_api_key: 'acme-key-4321',
+    });
+    expect(
+      await screen.findByText('Analytics service saved.'),
+    ).toBeInTheDocument();
+  });
+
+  it('refuses an endpoint that is not an http(s) URL', async () => {
+    signInAs(['Customer-Admin']);
+    stubApi(EMPTY);
+    renderWidget();
+    const user = userEvent.setup();
+
+    const url = await screen.findByLabelText('Endpoint (base URL)');
+    await user.type(url, 'ftp://stats.acme.test');
+
+    expect(
+      screen.getByText('Enter a full URL starting with https:// or http://.'),
+    ).toBeInTheDocument();
+    expect(
+      within(url.closest('form')!).getByRole('button', {name: 'Save'}),
+    ).toBeDisabled();
+  });
+
+  it('keeps the saved analytics key when only the endpoint changes', async () => {
+    signInAs(['Customer-Admin']);
+    const fetchMock = stubApi({
+      ...SAVED,
+      analytics_base_url: 'https://stats.acme.test',
+      analytics_api_key_set: true,
+      analytics_api_key_last4: '4321',
+    });
+    renderWidget();
+    const user = userEvent.setup();
+
+    expect(await screen.findByText('Your service')).toBeInTheDocument();
+    expect(
+      screen.getByText(/A key ending in ····4321 is saved/),
+    ).toBeInTheDocument();
+    const url = screen.getByLabelText('Endpoint (base URL)');
+    await user.clear(url);
+    await user.type(url, 'https://stats2.acme.test');
+    await user.click(
+      within(url.closest('form')!).getByRole('button', {name: 'Save'}),
+    );
+
+    expect(bodyOf(fetchMock, 'PATCH')).toEqual({
+      analytics_base_url: 'https://stats2.acme.test',
+    });
   });
 });

@@ -2,10 +2,12 @@ import {
   type Draft,
   type DraftOption,
   type DraftQuestion,
+  type DraftTableRow,
   type EditorKind,
   type FieldType,
   LAYOUT_BLOCKS,
   type LayoutBlock,
+  MAX_TABLE_ROWS,
   OPTION_FIELD_TYPES,
   SCORABLE_FIELD_TYPES,
 } from './types';
@@ -20,6 +22,10 @@ export function newKey(prefix = 'k'): string {
 
 export function newOption(label = '', score = ''): DraftOption {
   return {key: newKey('o'), label, score, base: {}};
+}
+
+export function newTableRow(label = ''): DraftTableRow {
+  return {key: newKey('r'), label};
 }
 
 export function isOptionType(type: FieldType): boolean {
@@ -76,6 +82,7 @@ export function newQuestion(
     rangeMin: '0',
     rangeMax: '10',
     tableRows: [],
+    tableMaxRows: MAX_TABLE_ROWS,
     template: null,
     rawType: null,
     base: {},
@@ -122,7 +129,7 @@ export function duplicateQuestion(question: DraftQuestion): DraftQuestion {
     controlName: null,
     options: question.options.map((option) => ({...option, key: newKey('o')})),
     criteria: [...question.criteria],
-    tableRows: [...question.tableRows],
+    tableRows: question.tableRows.map((row) => newTableRow(row.label)),
     base: {},
     controlBase: {},
   };

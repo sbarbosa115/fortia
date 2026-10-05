@@ -3,7 +3,7 @@ import {
   uploadTemplate,
 } from '@console/entities/questionnaire';
 import {useViewer} from '@console/entities/viewer';
-import {Button, Icon, IconButton, useToast} from '@shared/ui';
+import {Button, Icon, IconButton, Spinner, useToast} from '@shared/ui';
 import {useId, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useEditorContext} from '../model/EditorContext';
@@ -13,8 +13,9 @@ import type {DraftQuestion} from '../model/types';
 const MAX_TEMPLATE_BYTES = 20 * 1024 * 1024;
 
 /**
- * A file question's template (optional): a file the respondent downloads, fills in and uploads back. It is uploaded
- * at once, and the question keeps its key.
+ * A file question's template (optional): a file the respondent downloads, fills in and uploads back. Chosen or dropped
+ * on the drop area, it is uploaded at once and shown as a file card (download, replace, remove); the question keeps
+ * its key.
  */
 export function TemplateField({question}: {question: DraftQuestion}) {
   const {t} = useTranslation('pages.questionnaire-editor');
@@ -47,8 +48,12 @@ export function TemplateField({question}: {question: DraftQuestion}) {
     }
   };
 
+  const pick = () => inputRef.current?.click();
+  const [dragging, setDragging] = useState(false);
+  const extension = template?.filename.split('.').pop()?.toUpperCase() ?? '';
+
   return (
-    <fieldset className="options">
+    <fieldset className="options template-field">
       <legend className="field__label">{t('questions.template')}</legend>
       <span className="field__hint">{t('questions.templateHint')}</span>
       <input
@@ -66,39 +71,84 @@ export function TemplateField({question}: {question: DraftQuestion}) {
         }}
       />
       {template ? (
-        <div className="options__row template-field">
-          <Icon name="file" size={16} />
-          <button type="button" className="template-field__name" onClick={open}>
-            {template.filename}
-          </button>
-          <Button
-            size="sm"
-            variant="ghost"
-            loading={uploading}
-            onClick={() => inputRef.current?.click()}
-          >
-            {t('questions.templateReplace')}
-          </Button>
-          <IconButton
-            size="sm"
-            label={t('questions.templateRemove', {name: template.filename})}
-            icon={<Icon name="close" />}
-            onClick={() =>
-              editor.updateQuestion(question.key, {template: null})
-            }
-          />
+        <div className="template-card" aria-busy={uploading || undefined}>
+          <span className="template-card__icon" aria-hidden>
+            {uploading ? <Spinner size={18} /> : <Icon name="file" size={18} />}
+          </span>
+          <span className="template-card__text">
+            <span className="template-card__name" title={template.filename}>
+              {template.filename}
+            </span>
+            <span className="template-card__meta">
+              {uploading
+                ? t('questions.templateUploading')
+                : t('questions.templateKind', {ext: extension})}
+            </span>
+          </span>
+          <span className="template-card__actions">
+            <IconButton
+              size="sm"
+              label={t('questions.templateDownload')}
+              icon={<Icon name="download" size={16} />}
+              onClick={open}
+            />
+            <Button
+              size="sm"
+              icon={<Icon name="refresh" size={14} />}
+              disabled={uploading}
+              onClick={pick}
+            >
+              {t('questions.templateReplace')}
+            </Button>
+            <IconButton
+              size="sm"
+              className="template-card__remove"
+              label={t('questions.templateRemove', {name: template.filename})}
+              icon={<Icon name="trash" size={16} />}
+              disabled={uploading}
+              onClick={() =>
+                editor.updateQuestion(question.key, {template: null})
+              }
+            />
+          </span>
         </div>
       ) : (
-        <div>
-          <Button
-            size="sm"
-            icon={<Icon name="upload" />}
-            loading={uploading}
-            onClick={() => inputRef.current?.click()}
-          >
-            {t('questions.templateUpload')}
-          </Button>
-        </div>
+        <button
+          type="button"
+          className="template-drop"
+          data-dragging={dragging || undefined}
+          disabled={uploading}
+          onClick={pick}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(event) => {
+            event.preventDefault();
+            setDragging(false);
+            const file = event.dataTransfer.files[0];
+            if (file) {
+              upload(file);
+            }
+          }}
+        >
+          <span className="template-drop__icon" aria-hidden>
+            {uploading ? (
+              <Spinner size={18} />
+            ) : (
+              <Icon name="upload" size={18} />
+            )}
+          </span>
+          <span className="template-drop__text">
+            <strong>
+              {uploading
+                ? t('questions.templateUploading')
+                : t('questions.templateUpload')}
+            </strong>
+            <span>{t('questions.templateDrop')}</span>
+          </span>
+        </button>
       )}
     </fieldset>
   );

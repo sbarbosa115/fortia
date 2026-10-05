@@ -9,14 +9,21 @@ export function EditorProvider({
   initial,
   mode,
   questionnaireId,
+  locked = false,
   children,
 }: {
   initial: Draft;
   mode: EditorMode;
   questionnaireId: string | null;
+  locked?: boolean;
   children: ReactNode;
 }) {
-  const editor = useEditor({initial, mode, questionnaireId});
+  const editor = useEditor({
+    initial,
+    mode,
+    questionnaireId,
+    initialLocked: locked,
+  });
   return (
     <EditorContext.Provider value={editor}>{children}</EditorContext.Provider>
   );

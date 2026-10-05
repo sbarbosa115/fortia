@@ -1,7 +1,7 @@
 import {publicFlowUrl} from '@shared/config';
 import {slugify} from '@shared/lib';
 import {Icon} from '@shared/ui';
-import {type ReactNode, useEffect, useState} from 'react';
+import {type CSSProperties, type ReactNode, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {isOptionType} from '../model/draft';
 import {useEditorContext} from '../model/EditorContext';
@@ -335,13 +335,7 @@ function PreviewQuestion({
       </span>
     );
   } else if (type === 'table') {
-    control = (
-      <div className="pv-table">
-        {question.options.map((option, i) => (
-          <span key={option.key}>{label(option.label, i)}</span>
-        ))}
-      </div>
-    );
+    control = <PreviewTable question={question} />;
   } else if (type === 'message') {
     control = <p className="pv-small">{t('shopper.message')}</p>;
   }
@@ -393,6 +387,76 @@ function PreviewQuestion({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * A table as the respondent gets it: a sheet with the column names on top, numbered rows (or the fixed rows' names)
+ * and "Add a row" under it; wider than the screen it scrolls sideways with the first column in view.
+ */
+function PreviewTable({question}: {question: DraftQuestion}) {
+  const {t} = useTranslation('pages.questionnaire-editor');
+  const columns = question.options.map(
+    (option, i) =>
+      option.label.trim() || t('questions.table.columnN', {n: i + 1}),
+  );
+  const fixed = question.tableRows.length > 0;
+  const rows = fixed
+    ? question.tableRows.map(
+        (row, i) => row.label.trim() || t('questions.table.rowN', {n: i + 1}),
+      )
+    : ['1'];
+  return (
+    <div className="pv-sheet">
+      <div className="pv-sheet__scroll">
+        <table
+          className="pv-sheet__table"
+          style={{'--columns': columns.length} as CSSProperties}
+        >
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                className={fixed ? 'pv-sheet__first' : 'pv-sheet__index'}
+              >
+                {fixed ? '' : '#'}
+              </th>
+              {columns.map((column, i) => (
+                <th key={i} scope="col">
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, r) => (
+              <tr key={r}>
+                <th
+                  scope="row"
+                  className={fixed ? 'pv-sheet__first' : 'pv-sheet__index'}
+                >
+                  {row}
+                </th>
+                {columns.map((_, c) => (
+                  <td key={c} />
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {fixed ? null : (
+        <div className="pv-sheet__add">
+          <span className="pv-sheet__add-icon" aria-hidden>
+            <Icon name="plus" size={12} />
+          </span>
+          {t('shopper.addRow')}
+          <span className="pv-sheet__limit">
+            {t('shopper.maxRows', {max: question.tableMaxRows})}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

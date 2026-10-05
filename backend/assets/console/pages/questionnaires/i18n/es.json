@@ -5,7 +5,7 @@
   "new": "Nuevo cuestionario",
   "toolbar": {
     "search": "Buscar cuestionarios",
-    "searchPlaceholder": "Buscar por título… (Ctrl+K)",
+    "searchPlaceholder": "Buscar por título o etiqueta… (Ctrl+K)",
     "type": "Tipo",
     "status": "Estado",
     "sortBy": "Ordenar por",
@@ -46,8 +46,7 @@
     "copyLink": "Copiar el enlace de {{title}}",
     "edit": "Editar {{title}}",
     "answers": "Respuestas",
-    "analytics": "Analítica",
-    "new": "Nuevo"
+    "analytics": "Analítica de {{title}}"
   },
   "linkCopied": "Enlace copiado",
   "linkNotCopied": "No pudimos copiar el enlace. Abre el cuestionario y cópialo desde la barra de direcciones.",

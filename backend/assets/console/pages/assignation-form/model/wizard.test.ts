@@ -8,6 +8,8 @@ import {
   runCreate,
   stepErrors,
   togglePicked,
+  addPicked,
+  removePicked,
 } from './wizard';
 
 const TODAY = '2026-10-04';
@@ -51,6 +53,16 @@ describe('the steps of the assignation wizard', () => {
     expect(togglePicked(two, q1).map((q) => q.id)).toEqual(['q-2']);
   });
 
+  it('adds the visible questionnaires once, and takes several out at a time', () => {
+    const q3 = {id: 'q-3', title: 'Office audit', questionCount: 1};
+    const all = addPicked([q2], [q1, q2, q3]);
+    expect(
+      all.map((q) => q.id),
+      'q-2 is not added twice',
+    ).toEqual(['q-2', 'q-1', 'q-3']);
+    expect(removePicked(all, ['q-1', 'q-3']).map((q) => q.id)).toEqual(['q-2']);
+  });
+
   it('wants a name of at most 200 characters and a real deadline from today on', () => {
     const ok = {name: 'Q4', dueDate: TODAY};
     expect(detailsErrors(ok, TODAY)).toEqual({});
@@ -92,6 +104,7 @@ const plan: CreatePlan = {
   name: '  Q4 audits ',
   dueDate: '2026-12-15',
   registrationTitle: 'Tell us who you are',
+  requiresReview: true,
 };
 
 describe('Create', () => {
@@ -110,7 +123,18 @@ describe('Create', () => {
       due_date: '2026-12-15',
       questionnaire_ids: ['q-1', 'q-2'],
       registration_title: 'Tell us who you are',
+      requires_review: true,
     });
+  });
+
+  it('creates an assignation without review when the owner switches it off', async () => {
+    const api = deps();
+
+    await runCreate({...plan, requiresReview: false}, {}, api, () => {});
+
+    expect(api.createProject).toHaveBeenCalledWith(
+      expect.objectContaining({requires_review: false}),
+    );
   });
 
   it('saves a new organization first and assigns the questionnaires themselves, never copies', async () => {

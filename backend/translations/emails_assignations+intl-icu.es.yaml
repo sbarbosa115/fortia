@@ -18,7 +18,7 @@ reminder_digest:
     subject: '{count, plural, one {Tienes # cuestionario pendiente} other {Tienes # cuestionarios pendientes}}'
     title: 'Tus respuestas siguen pendientes'
     body: '{count, plural, one {# cuestionario espera} other {# cuestionarios esperan}} tus respuestas. Primero los más urgentes.'
-    project: 'Proyecto: {name}'
+    project: 'Asignación: {name}'
     due:
         no_date: 'Sin fecha límite'
         due_today: 'Vence hoy'
