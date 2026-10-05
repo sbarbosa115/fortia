@@ -141,7 +141,7 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         ],
         screenshot: {
           name: 'ai-experience',
-          alt: 'Experiencia IA con el chat y la vista previa en vivo',
+          alt: 'Experiencia IA, lista para tu primer mensaje',
         },
       },
       {
