@@ -6750,7 +6750,8 @@
             "SystemSettingsOutput": {
                 "required": [
                     "smtp_password_set",
-                    "openai_api_key_set"
+                    "openai_api_key_set",
+                    "analytics_api_key_set"
                 ],
                 "properties": {
                     "smtp_host": {
@@ -6791,6 +6792,17 @@
                         "type": "boolean"
                     },
                     "openai_api_key_last4": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "analytics_base_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "analytics_api_key_set": {
+                        "type": "boolean"
+                    },
+                    "analytics_api_key_last4": {
                         "type": "string",
                         "nullable": true
                     }

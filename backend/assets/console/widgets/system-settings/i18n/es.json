@@ -53,5 +53,25 @@
     "removeTitle": "¿Quitar tu clave de OpenAI?",
     "removeBody": "Las funciones de IA de tu cuenta volverán a usar la clave de Mappi.",
     "removed": "Se quitó tu clave de OpenAI."
+  },
+  "analytics": {
+    "title": "Servicio de analítica",
+    "intro": "Cada evento de tu cuenta (cuestionarios creados, respuestas, inicios de sesión…) se envía al servicio de uso y analítica. Configura tu propio endpoint y clave de API para recibirlos; sin ellos, se usa el servicio configurado por Mappi.",
+    "statusOwn": "Tu servicio",
+    "statusPlatform": "Servicio de Mappi",
+    "baseUrl": "Endpoint (URL base)",
+    "baseUrlHint": "Los eventos se envían a {URL base}/events.",
+    "key": "Clave de API de analítica",
+    "replaceKey": "Reemplazar la clave de analítica",
+    "keyHint": "Se envía como X-Api-Key y token Bearer. Se guarda cifrada; solo se muestran sus últimos 4 caracteres.",
+    "keySaved": "Hay una clave guardada que termina en ····{{last4}}. Déjalo vacío para conservarla.",
+    "errors": {
+      "url": "Escribe una URL completa que empiece por https:// o http://."
+    },
+    "saved": "Servicio de analítica guardado.",
+    "remove": "Usar el servicio de Mappi",
+    "removeTitle": "¿Dejar de usar tu servicio de analítica?",
+    "removeBody": "Los eventos de tu cuenta volverán al servicio de Mappi. Se borran el endpoint guardado y su clave.",
+    "removed": "Tus eventos vuelven al servicio de Mappi."
   }
 }

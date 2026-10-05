@@ -53,5 +53,25 @@
     "removeTitle": "Remove your OpenAI key?",
     "removeBody": "Your account's AI features will use Mappi's key again.",
     "removed": "Your OpenAI key was removed."
+  },
+  "analytics": {
+    "title": "Analytics service",
+    "intro": "Every event of your account (questionnaires created, answers, sign-ins…) is sent to the usage and analytics service. Set your own endpoint and API key to receive them; without one, Mappi's configured service is used.",
+    "statusOwn": "Your service",
+    "statusPlatform": "Mappi's service",
+    "baseUrl": "Endpoint (base URL)",
+    "baseUrlHint": "Events are sent to {base URL}/events.",
+    "key": "Analytics API key",
+    "replaceKey": "Replace the analytics key",
+    "keyHint": "Sent as X-Api-Key and Bearer token. Stored encrypted; only its last 4 characters are ever shown.",
+    "keySaved": "A key ending in ····{{last4}} is saved. Leave this empty to keep it.",
+    "errors": {
+      "url": "Enter a full URL starting with https:// or http://."
+    },
+    "saved": "Analytics service saved.",
+    "remove": "Use Mappi's service",
+    "removeTitle": "Stop using your analytics service?",
+    "removeBody": "Your account's events will go to Mappi's service again. The saved endpoint and its key are deleted.",
+    "removed": "Your events go to Mappi's service again."
   }
 }

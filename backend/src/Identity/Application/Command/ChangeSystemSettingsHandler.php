@@ -41,5 +41,17 @@ final class ChangeSystemSettingsHandler
                 $settings->changeOpenAiKey($this->box->seal($key), $key, $now);
             }
         }
+        if (\array_key_exists('analytics_base_url', $command->fields)) {
+            $url = $command->fields['analytics_base_url'];
+            $settings->changeAnalyticsBaseUrl(null === $url ? null : (string) $url, $now);
+        }
+        if (\array_key_exists('analytics_api_key', $command->fields)) {
+            $key = trim((string) $command->fields['analytics_api_key']);
+            if ('' === $key) {
+                $settings->changeAnalyticsKey(null, null, $now);
+            } else {
+                $settings->changeAnalyticsKey($this->box->seal($key), $key, $now);
+            }
+        }
     }
 }

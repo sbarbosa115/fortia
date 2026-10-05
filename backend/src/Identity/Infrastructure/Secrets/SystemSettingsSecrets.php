@@ -3,6 +3,8 @@
 namespace App\Identity\Infrastructure\Secrets;
 
 use App\Identity\Domain\Repository\SystemSettingsRepository;
+use App\Shared\Application\Analytics\AnalyticsEndpoint;
+use App\Shared\Application\Analytics\AnalyticsEndpoints;
 use App\Shared\Application\Llm\OpenAiKeys;
 use App\Shared\Application\Mail\CustomerMailServers;
 use App\Shared\Application\Mail\SmtpServer;
@@ -12,10 +14,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Opens an account's sealed secrets for the mailer and the language model. A secret that cannot be opened
- * (SETTINGS_ENCRYPTION_KEY changed) is logged and treated as not set, so the platform defaults keep working.
+ * Opens an account's sealed secrets for the mailer, the language model and the analytics service. A secret that
+ * cannot be opened (SETTINGS_ENCRYPTION_KEY changed) is logged and treated as not set, so the platform defaults keep
+ * working.
  */
-final class SystemSettingsSecrets implements CustomerMailServers, OpenAiKeys
+final class SystemSettingsSecrets implements CustomerMailServers, OpenAiKeys, AnalyticsEndpoints
 {
     public function __construct(
         private readonly SystemSettingsRepository $settings,
@@ -23,6 +26,10 @@ final class SystemSettingsSecrets implements CustomerMailServers, OpenAiKeys
         private readonly LoggerInterface $logger,
         #[Autowire(env: 'OPENAI_API_KEY')]
         private readonly string $platformOpenAiKey,
+        #[Autowire(env: 'ANALYTICS_BASE_URL')]
+        private readonly string $platformAnalyticsUrl,
+        #[Autowire(env: 'ANALYTICS_API_KEY')]
+        private readonly string $platformAnalyticsKey,
     ) {
     }
 
@@ -55,5 +62,22 @@ final class SystemSettingsSecrets implements CustomerMailServers, OpenAiKeys
         }
 
         return trim($this->platformOpenAiKey);
+    }
+
+    public function endpointFor(?string $customerId): ?AnalyticsEndpoint
+    {
+        $settings = null === $customerId ? null : $this->settings->find($customerId);
+        $accountUrl = $settings?->analyticsBaseUrl();
+        $accountKey = null;
+        $sealed = null === $settings || null === $accountUrl ? null : $settings->sealedAnalyticsKey();
+        if (null !== $sealed) {
+            try {
+                $accountKey = $this->box->open($sealed);
+            } catch (SecretNotReadable $e) {
+                $this->logger->error('The analytics key of account {customer} cannot be opened: {reason}', ['customer' => $customerId, 'reason' => $e->getMessage()]);
+            }
+        }
+
+        return AnalyticsEndpoint::resolve($accountUrl, $accountKey, $this->platformAnalyticsUrl, $this->platformAnalyticsKey);
     }
 }

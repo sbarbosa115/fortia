@@ -18,6 +18,10 @@ import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {type FormEvent, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
+  type AnalyticsForm,
+  analyticsFormFrom,
+  analyticsPatch,
+  analyticsUrlError,
   checkBody,
   ENCRYPTIONS,
   type Encryption,
@@ -37,8 +41,9 @@ function useSystemSettingsUrl() {
 }
 
 /**
- * The System tab of /profile: the account's own SMTP server (with a "Validate" that sends a test email) and its own
- * OpenAI API key. Without them, Mappi's platform server and key are used. Secrets are never shown back.
+ * The System tab of /profile: the account's own SMTP server (with a "Validate" that sends a test email), its own
+ * OpenAI API key and its own analytics service (endpoint + key). Without them, Mappi's platform server, key and
+ * service are used. Secrets are never shown back.
  */
 export function SystemSettings() {
   const viewer = useViewer();
@@ -64,6 +69,10 @@ export function SystemSettings() {
         settings={query.data}
       />
       <OpenAiCard settings={query.data} />
+      <AnalyticsCard
+        key={`analytics-${query.data.analytics_base_url ?? ''}`}
+        settings={query.data}
+      />
     </div>
   );
 }
@@ -409,6 +418,149 @@ function OpenAiCard({settings}: {settings: Settings}) {
         title={t('openai.removeTitle')}
         body={t('openai.removeBody')}
         confirmLabel={t('openai.remove')}
+        danger
+        loading={remove.isPending}
+        onConfirm={() => remove.mutate()}
+        onCancel={() => setConfirmRemove(false)}
+      />
+    </form>
+  );
+}
+
+function AnalyticsCard({settings}: {settings: Settings}) {
+  const {t} = useTranslation('widgets.system-settings');
+  const {t: ts} = useTranslation('shared');
+  const viewer = useViewer();
+  const toast = useToast();
+  const saveSettings = useSave();
+  const [form, setForm] = useState<AnalyticsForm>(() =>
+    analyticsFormFrom(settings),
+  );
+  const [touched, setTouched] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const lockedReason = viewer.canWrite ? null : ts('readOnly.change');
+  const locked = lockedReason !== null;
+  const urlError = analyticsUrlError(form);
+  const saved = Boolean(settings.analytics_base_url);
+  const keySet = settings.analytics_api_key_set;
+  const changed =
+    form.baseUrl.trim() !== (settings.analytics_base_url ?? '') ||
+    form.apiKey.trim() !== '';
+
+  const save = useMutation({
+    mutationFn: () => saveSettings(analyticsPatch(form)),
+    onSuccess: (next) => {
+      setForm(analyticsFormFrom(next));
+      setTouched(false);
+      toast.success(t('analytics.saved'));
+    },
+    onError: (error) => toast.apiError(error),
+  });
+  const remove = useMutation({
+    mutationFn: () =>
+      saveSettings({analytics_base_url: null, analytics_api_key: null}),
+    onSuccess: (next) => {
+      setForm(analyticsFormFrom(next));
+      setConfirmRemove(false);
+      toast.success(t('analytics.removed'));
+    },
+    onError: (error) => toast.apiError(error),
+  });
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    setTouched(true);
+    if (urlError === null && changed && !locked) {
+      save.mutate();
+    }
+  };
+
+  return (
+    <form onSubmit={submit} noValidate>
+      <Card>
+        <CardHeader
+          title={t('analytics.title')}
+          actions={
+            <Badge tone={saved ? 'success' : 'neutral'}>
+              {saved ? t('analytics.statusOwn') : t('analytics.statusPlatform')}
+            </Badge>
+          }
+        />
+        <CardBody>
+          <p className="muted system-settings__intro">{t('analytics.intro')}</p>
+          <div className="grid-2">
+            <Field
+              label={t('analytics.baseUrl')}
+              hint={t('analytics.baseUrlHint')}
+              error={
+                touched && urlError ? t(`analytics.errors.${urlError}`) : null
+              }
+            >
+              <TextInput
+                type="url"
+                autoComplete="off"
+                spellCheck={false}
+                disabled={locked}
+                placeholder="https://analytics.example.com"
+                maxLength={255}
+                value={form.baseUrl}
+                onChange={(e) => {
+                  setTouched(true);
+                  setForm((current) => ({...current, baseUrl: e.target.value}));
+                }}
+              />
+            </Field>
+            <Field
+              label={keySet ? t('analytics.replaceKey') : t('analytics.key')}
+              hint={
+                keySet
+                  ? t('analytics.keySaved', {
+                      last4: settings.analytics_api_key_last4 ?? '',
+                    })
+                  : t('analytics.keyHint')
+              }
+            >
+              <TextInput
+                type="password"
+                autoComplete="new-password"
+                spellCheck={false}
+                disabled={locked}
+                placeholder={keySet ? '••••••••' : ''}
+                maxLength={512}
+                value={form.apiKey}
+                onChange={(e) =>
+                  setForm((current) => ({...current, apiKey: e.target.value}))
+                }
+              />
+            </Field>
+          </div>
+          <div className="row system-settings__actions">
+            {saved || keySet ? (
+              <Button
+                variant="ghost"
+                disabledReason={lockedReason}
+                onClick={() => setConfirmRemove(true)}
+              >
+                {t('analytics.remove')}
+              </Button>
+            ) : null}
+            <Button
+              type="submit"
+              variant="primary"
+              loading={save.isPending}
+              disabled={!changed || urlError !== null}
+              disabledReason={lockedReason}
+            >
+              {ts('actions.save')}
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+      <ConfirmDialog
+        open={confirmRemove}
+        title={t('analytics.removeTitle')}
+        body={t('analytics.removeBody')}
+        confirmLabel={t('analytics.remove')}
         danger
         loading={remove.isPending}
         onConfirm={() => remove.mutate()}

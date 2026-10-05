@@ -2020,6 +2020,9 @@ export interface components {
             smtp_from_name?: string | null;
             openai_api_key_set: boolean;
             openai_api_key_last4?: string | null;
+            analytics_base_url?: string | null;
+            analytics_api_key_set: boolean;
+            analytics_api_key_last4?: string | null;
         };
         UserOutput: {
             email: string;

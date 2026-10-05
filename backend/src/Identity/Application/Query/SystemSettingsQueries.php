@@ -12,7 +12,7 @@ final class SystemSettingsQueries
     }
 
     /**
-     * @return array{smtp_host: string|null, smtp_port: int|null, smtp_encryption: string|null, smtp_username: string|null, smtp_password_set: bool, smtp_from_email: string|null, smtp_from_name: string|null, openai_api_key_set: bool, openai_api_key_last4: string|null}
+     * @return array{smtp_host: string|null, smtp_port: int|null, smtp_encryption: string|null, smtp_username: string|null, smtp_password_set: bool, smtp_from_email: string|null, smtp_from_name: string|null, openai_api_key_set: bool, openai_api_key_last4: string|null, analytics_base_url: string|null, analytics_api_key_set: bool, analytics_api_key_last4: string|null}
      */
     public function view(string $customerId): array
     {
@@ -29,6 +29,9 @@ final class SystemSettingsQueries
             'smtp_from_name' => $smtp?->fromName,
             'openai_api_key_set' => null !== $settings?->sealedOpenAiKey(),
             'openai_api_key_last4' => $settings?->openAiKeyHint(),
+            'analytics_base_url' => $settings?->analyticsBaseUrl(),
+            'analytics_api_key_set' => null !== $settings?->sealedAnalyticsKey(),
+            'analytics_api_key_last4' => $settings?->analyticsKeyHint(),
         ];
     }
 }

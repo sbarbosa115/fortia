@@ -1,6 +1,9 @@
 import {describe, expect, it} from 'vitest';
 import {
   type SystemSettings,
+  analyticsFormFrom,
+  analyticsPatch,
+  analyticsUrlError,
   checkBody,
   smtpErrors,
   smtpFormFrom,
@@ -20,6 +23,9 @@ const SAVED: SystemSettings = {
   smtp_from_name: 'Acme',
   openai_api_key_set: false,
   openai_api_key_last4: null,
+  analytics_base_url: null,
+  analytics_api_key_set: false,
+  analytics_api_key_last4: null,
 };
 
 const EMPTY: SystemSettings = {
@@ -32,6 +38,9 @@ const EMPTY: SystemSettings = {
   smtp_from_name: null,
   openai_api_key_set: false,
   openai_api_key_last4: null,
+  analytics_base_url: null,
+  analytics_api_key_set: false,
+  analytics_api_key_last4: null,
 };
 
 describe('the SMTP form', () => {
@@ -92,5 +101,36 @@ describe('the SMTP form', () => {
 
   it('checks the form as it is, with the saved password when none is typed', () => {
     expect(checkBody(smtpFormFrom(SAVED))).not.toHaveProperty('smtp_password');
+  });
+});
+
+describe('the analytics form', () => {
+  it('starts from the saved endpoint, never with the key', () => {
+    expect(
+      analyticsFormFrom({
+        ...SAVED,
+        analytics_base_url: 'https://stats.acme.test',
+      }),
+    ).toEqual({baseUrl: 'https://stats.acme.test', apiKey: ''});
+  });
+
+  it('accepts an http(s) URL or nothing (the platform service)', () => {
+    expect(analyticsUrlError({baseUrl: '', apiKey: ''})).toBeNull();
+    expect(
+      analyticsUrlError({baseUrl: 'https://x.test/v1', apiKey: ''}),
+    ).toBeNull();
+    expect(analyticsUrlError({baseUrl: 'ftp://x.test', apiKey: ''})).toBe(
+      'url',
+    );
+    expect(analyticsUrlError({baseUrl: 'stats acme', apiKey: ''})).toBe('url');
+  });
+
+  it('sends the key only when one is typed, and an empty endpoint as null', () => {
+    expect(analyticsPatch({baseUrl: ' ', apiKey: ''})).toEqual({
+      analytics_base_url: null,
+    });
+    expect(
+      analyticsPatch({baseUrl: 'https://x.test', apiKey: ' k-1 '}),
+    ).toEqual({analytics_base_url: 'https://x.test', analytics_api_key: 'k-1'});
   });
 });

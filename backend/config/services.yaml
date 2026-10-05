@@ -99,3 +99,4 @@ when@test:
         App\Shared\Infrastructure\Mail\SmtpTransports: '@App\Tests\Support\RecordingSmtpTransports'
         App\Shared\Application\Mail\CustomerMailServers: '@App\Identity\Infrastructure\Secrets\SystemSettingsSecrets'
         App\Shared\Application\Llm\OpenAiKeys: '@App\Identity\Infrastructure\Secrets\SystemSettingsSecrets'
+        App\Shared\Application\Analytics\AnalyticsEndpoints: '@App\Identity\Infrastructure\Secrets\SystemSettingsSecrets'

@@ -6,7 +6,8 @@ use OpenApi\Attributes as OA;
 
 /**
  * An account's system settings: its own SMTP server (null fields: the platform server is used) and whether it saved
- * an OpenAI key. Secrets are never returned: only whether they are set, and the key's last 4 characters.
+ * an OpenAI key, and its own usage/analytics service (a null base URL: the platform's is used). Secrets are never
+ * returned: only whether they are set, and the keys' last 4 characters.
  */
 final class SystemSettingsOutput
 {
@@ -22,11 +23,14 @@ final class SystemSettingsOutput
         public readonly ?string $smtp_from_name,
         public readonly bool $openai_api_key_set,
         public readonly ?string $openai_api_key_last4,
+        public readonly ?string $analytics_base_url,
+        public readonly bool $analytics_api_key_set,
+        public readonly ?string $analytics_api_key_last4,
     ) {
     }
 
     /**
-     * @param array{smtp_host: string|null, smtp_port: int|null, smtp_encryption: string|null, smtp_username: string|null, smtp_password_set: bool, smtp_from_email: string|null, smtp_from_name: string|null, openai_api_key_set: bool, openai_api_key_last4: string|null} $view
+     * @param array{smtp_host: string|null, smtp_port: int|null, smtp_encryption: string|null, smtp_username: string|null, smtp_password_set: bool, smtp_from_email: string|null, smtp_from_name: string|null, openai_api_key_set: bool, openai_api_key_last4: string|null, analytics_base_url: string|null, analytics_api_key_set: bool, analytics_api_key_last4: string|null} $view
      */
     public static function of(array $view): self
     {
@@ -40,6 +44,9 @@ final class SystemSettingsOutput
             $view['smtp_from_name'],
             $view['openai_api_key_set'],
             $view['openai_api_key_last4'],
+            $view['analytics_base_url'],
+            $view['analytics_api_key_set'],
+            $view['analytics_api_key_last4'],
         );
     }
 }
