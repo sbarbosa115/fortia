@@ -5,7 +5,7 @@
   "new": "New Questionnaire",
   "toolbar": {
     "search": "Search questionnaires",
-    "searchPlaceholder": "Search by title… (Ctrl+K)",
+    "searchPlaceholder": "Search by title or tag… (Ctrl+K)",
     "type": "Type",
     "status": "State",
     "sortBy": "Sort by",

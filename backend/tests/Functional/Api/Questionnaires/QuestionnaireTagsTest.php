@@ -86,6 +86,18 @@ final class QuestionnaireTagsTest extends ApiTestCase
         self::assertCount(3, $this->titles('tag=%20', $owner), 'an empty tag filters nothing');
     }
 
+    public function testTheSearchFindsAQuestionnaireByItsTagsToo(): void
+    {
+        $owner = $this->account('ACME0001');
+        $this->createQuestionnaire($owner, ['tags' => ['RRHH', 'CLI-02']] + self::regularFlow('Clima laboral'));
+        $this->createQuestionnaire($owner, ['tags' => ['Ventas']] + self::regularFlow('Satisfacción'));
+
+        self::assertSame(['Clima laboral'], $this->titles('search=rrhh', $owner), 'tags are "to find it later": the search reads them');
+        self::assertSame(['Clima laboral'], $this->titles('search=cli-02', $owner), 'a part of a tag is enough, like in the title');
+        self::assertSame(['Clima laboral'], $this->titles('search=clima%20rrhh', $owner), 'every word must match, in the title or a tag');
+        self::assertSame([], $this->titles('search=clima%20ventas', $owner), 'each word matches this questionnaire, not another');
+    }
+
     public function testTheTagsListIsTheAccountsDistinctTagsInOrder(): void
     {
         $owner = $this->account('ACME0001');

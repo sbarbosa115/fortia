@@ -120,6 +120,11 @@ final class ChatResponder implements FakeLlmResponder
         if ([] !== $last->toolResults) {
             return $this->afterTools($last, $draft, $request->context, $texts);
         }
+        // The user's yes made the queued changes: say what was done, never the greeting.
+        $made = array_values(array_filter((array) ($request->context['actions'] ?? []), static fn ($a): bool => \is_array($a) && 'declined' !== ($a['status'] ?? null)));
+        if ([] !== $made) {
+            return self::answer(\sprintf($texts['changes'], implode(', ', array_map(static fn (array $a): string => (string) ($a['label'] ?? $a['tool'] ?? ''), $made))), $texts['replies']);
+        }
 
         // What the user typed in every message (without the attached documents), for the questions they pasted.
         $typed = array_values(array_map(static fn (LlmMessage $m): string => self::withoutFiles($m->content), array_filter($request->messages, static fn (LlmMessage $m): bool => 'user' === $m->role && [] === $m->toolResults)));
