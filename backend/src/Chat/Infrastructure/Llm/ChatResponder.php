@@ -44,7 +44,7 @@ final class ChatResponder implements FakeLlmResponder
         'es' => [
             'greeting' => '¡Hola! Puedo crear cuestionarios contigo y ayudarte con tu cuenta: organizaciones, asignaciones, proyectos y más. ¿Qué quieres hacer?',
             'replies' => ['Crear un cuestionario', 'Ver mis cuestionarios', 'Ver mis organizaciones'],
-            'basics' => "Estos son los datos básicos:\n\n- **Título:** %s\n- **Tipo:** %s\n- **Tema:** %s\n- **Página de inicio:** no\n- **Aviso legal:** no\n- **Captura de datos:** no\n\n¿Los confirmas?",
+            'basics' => "Estos son los datos básicos:\n\n- **Título:** %s\n- **Tipo:** %s\n- **Tema:** %s\n- **Página de inicio:** no\n- **Aviso legal:** no\n- **Captura de datos:** no\n- **Etiquetas:** %s\n\n¿Quieres etiquetas para encontrarlo luego? Dime, por ejemplo, «etiquétalo SF-C00». Si no, ¿confirmas los datos?",
             'review' => "Este es el borrador completo de **%s** con %d preguntas:\n\n%s\n\n¿Lo creo?",
             'review_draft' => "Este es el borrador completo de **%s** con %d preguntas:\n\n%s\n\n¿Lo apruebas?",
             'queued' => 'Esto queda pendiente de tu confirmación: %s. ¿Lo hago?',
@@ -63,6 +63,7 @@ final class ChatResponder implements FakeLlmResponder
             'columns' => ['#', 'Pregunta', 'Tipo'],
             'controls' => ['radio' => 'Opción única', 'checkbox' => 'Opción múltiple', 'select' => 'Lista desplegable', 'text' => 'Texto', 'range' => 'Escala', 'table' => 'Tabla', 'file' => 'Archivo'],
             'untitled' => 'Mi cuestionario',
+            'no_tags' => 'ninguna',
             'not_understood' => 'No entendí qué quieres cambiar del borrador. Dime, por ejemplo, «ponle de título …» o «cambia el tema a …», o responde «Sí» para confirmar los datos básicos.',
             'table' => ['¿Quiénes integran tu equipo?', ['Nombre', 'Cargo', 'Correo']],
             'file' => ['Sube tu presupuesto con la plantilla', 'plantilla-presupuesto.csv', ['Concepto', 'Cantidad', 'Costo'], ['Licencias', '10', '500']],
@@ -70,7 +71,7 @@ final class ChatResponder implements FakeLlmResponder
         'en' => [
             'greeting' => 'Hi! I can build questionnaires with you and help with your account: organizations, assignations, projects and more. What would you like to do?',
             'replies' => ['Create a questionnaire', 'See my questionnaires', 'See my organizations'],
-            'basics' => "These are the basics:\n\n- **Title:** %s\n- **Type:** %s\n- **Topic:** %s\n- **Landing page:** no\n- **Disclaimer:** no\n- **Data capture:** no\n\nDo you confirm them?",
+            'basics' => "These are the basics:\n\n- **Title:** %s\n- **Type:** %s\n- **Topic:** %s\n- **Landing page:** no\n- **Disclaimer:** no\n- **Data capture:** no\n- **Tags:** %s\n\nWant tags to find it later? Tell me, for example, “tag it SF-C00”. If not, do you confirm the basics?",
             'review' => "Here is the complete draft of **%s** with %d questions:\n\n%s\n\nShall I create it?",
             'review_draft' => "Here is the complete draft of **%s** with %d questions:\n\n%s\n\nDo you approve it?",
             'queued' => 'This is waiting for your confirmation: %s. Shall I do it?',
@@ -89,6 +90,7 @@ final class ChatResponder implements FakeLlmResponder
             'columns' => ['#', 'Question', 'Type'],
             'controls' => ['radio' => 'Single choice', 'checkbox' => 'Multiple choice', 'select' => 'Dropdown', 'text' => 'Text', 'range' => 'Scale', 'table' => 'Table', 'file' => 'File'],
             'untitled' => 'My questionnaire',
+            'no_tags' => 'none',
             'not_understood' => 'I didn\'t get what to change in the draft. Tell me, for example, “set the title to …” or “change the topic to …”, or answer “Yes” to confirm the basics.',
             'table' => ['Who is on your team?', ['Name', 'Role', 'Email']],
             'file' => ['Upload your budget using the template', 'budget-template.csv', ['Item', 'Quantity', 'Cost'], ['Licenses', '10', '500']],
@@ -313,7 +315,8 @@ final class ChatResponder implements FakeLlmResponder
                 $lines[] = \sprintf('draft' === ($context['mode'] ?? null) ? $texts['review_draft'] : $texts['review'], $title, \count($questions), self::questionTable($questions, $texts));
                 $replies = [$texts['yes'], $texts['no']];
             } elseif (null !== ($draft['title'] ?? null) && !($draft['basics_confirmed'] ?? false)) {
-                $lines[] = \sprintf($texts['basics'], $title, $texts['types'][(string) ($draft['type'] ?? 'regular')] ?? '', (string) ($draft['topic'] ?? ''));
+                $tags = array_filter((array) ($draft['tags'] ?? []), 'is_string');
+                $lines[] = \sprintf($texts['basics'], $title, $texts['types'][(string) ($draft['type'] ?? 'regular')] ?? '', (string) ($draft['topic'] ?? ''), [] === $tags ? $texts['no_tags'] : implode(', ', $tags));
                 $replies = [$texts['yes'], $texts['no']];
             } else {
                 $lines[] = $texts['done'];

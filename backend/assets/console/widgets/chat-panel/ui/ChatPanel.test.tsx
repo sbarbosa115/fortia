@@ -108,6 +108,33 @@ describe('ChatPanel', () => {
     ).toBeInTheDocument();
   });
 
+  it('links a console page, like where to set the OpenAI key, to open it here', async () => {
+    vi.mocked(sendChatTurn).mockResolvedValue(
+      answer(
+        'Add it in [Profile › System](/profile?tab=system) or [OpenAI](https://platform.openai.com) — not [this](//evil.test).',
+      ),
+    );
+    renderPanel();
+    await userEvent.type(
+      screen.getByLabelText('Type your message…'),
+      'Hello{Enter}',
+    );
+
+    const profile = await screen.findByRole('link', {name: 'Profile › System'});
+    expect(profile).toHaveAttribute('href', '/profile?tab=system');
+    expect(profile, 'a console page opens in the console').not.toHaveAttribute(
+      'target',
+    );
+    expect(screen.getByRole('link', {name: 'OpenAI'})).toHaveAttribute(
+      'target',
+      '_blank',
+    );
+    expect(
+      screen.queryByRole('link', {name: 'this'}),
+      'a protocol-relative link is another site: no link',
+    ).toBeNull();
+  });
+
   it('offers the quick replies and a note from the screen', async () => {
     vi.mocked(sendChatTurn).mockResolvedValue(answer('Shall I?'));
     renderPanel(() => 'Saved it.');

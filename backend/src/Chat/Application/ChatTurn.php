@@ -15,6 +15,7 @@ use App\Platform\Application\SystemPrompts;
 use App\Questionnaires\Application\Command\SaveFlow;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Llm\LanguageModel;
+use App\Shared\Application\Llm\LlmKeyCheck;
 use App\Shared\Application\Llm\LlmMessage;
 use App\Shared\Application\Llm\LlmRequest;
 use App\Shared\Application\Llm\LlmToolResult;
@@ -53,6 +54,7 @@ final class ChatTurn
             'too_long' => 'Necesito más pasos para terminar lo que me pediste. ¿Sigo?',
             'keep_going' => 'Sigue',
             'no_answer' => 'Hice lo que me confirmaste, pero no pude escribir la respuesta. Revisa los cambios abajo.',
+            'missing_key' => 'Para usar el asistente hace falta configurar una API key de OpenAI. Agrégala en [Perfil › Sistema](/profile?tab=system) y vuelve a escribirme.',
             'yes' => 'Sí',
             'no' => 'No',
         ],
@@ -64,6 +66,7 @@ final class ChatTurn
             'too_long' => 'I need a few more steps to finish what you asked. Shall I keep going?',
             'keep_going' => 'Keep going',
             'no_answer' => 'I made the changes you confirmed, but I couldn\'t write my answer. Check the changes below.',
+            'missing_key' => 'To use the assistant, an OpenAI API key has to be set up. Add it in [Profile › System](/profile?tab=system) and write to me again.',
             'yes' => 'Yes',
             'no' => 'No',
         ],
@@ -71,6 +74,7 @@ final class ChatTurn
 
     public function __construct(
         private readonly LanguageModel $llm,
+        private readonly LlmKeyCheck $keys,
         private readonly SystemPrompts $prompts,
         private readonly ChatTools $tools,
         private readonly DraftTools $draftTools,
@@ -91,6 +95,10 @@ final class ChatTurn
     public function run(Caller $caller, string $mode, array $messages, ChatDraft $draft, ?array $item, WriteQueue $queue, string $language): array
     {
         $texts = self::TEXTS[$language];
+        // Without an OpenAI key the turn would go to the offline fake: say where to set one, change nothing.
+        if ($this->keys->missingKey($caller->customerId)) {
+            return $this->result('chat', $texts['missing_key'], [], $draft, [], $queue);
+        }
         $last = $messages[\count($messages) - 1]['content'] ?? '';
         $answer = Confirmation::of($last);
 
@@ -274,6 +282,7 @@ final class ChatTurn
             '- Account changes: call the write tools; each one is queued and runs only when the user says yes. Never say a change is done until it appears in <changes_made>.',
             '- Only the user\'s own message confirms: the platform reads their yes or no. Never confirm for them.',
             '- Basics come from the user\'s own words; ask for what is missing, one question at a time, then ask them to confirm the basics and call confirm_basics after their yes.',
+            '- Tags: before asking to confirm the basics, ask once whether they want tags to find the questionnaire later in the list (a code or a short label, e.g. "SF-C00"), unless the draft already has tags or they gave some; "no" means none. Set them with update_draft\'s tags, as the user wrote them, and show them among the basics ("'.('en' === $language ? 'Tags' : 'Etiquetas').'": the list, or "'.('en' === $language ? 'none' : 'ninguna').'").',
             '- When the user asks to change something of the draft, in whatever words, informal or misspelled ("ponle de título X", "pongle de titulo X", "que se llame X", "cambia el tema por X", "call it X"), make exactly that change at once with update_draft (the new value as they wrote it, its first letter upper-case), keep everything else, and show the basics again to confirm. Never ask them to rephrase a change you can understand; only when it is truly ambiguous, ask one short question naming the options (e.g. title or topic).',
             '- When the draft is complete, call request_review, show the whole draft and ask whether to '.('draft' === $mode ? 'approve it' : 'create it').'. The platform '.('draft' === $mode ? 'hands it back' : 'creates it').' when the user says yes. Show its questions as one Markdown table with the columns '.('en' === $language ? '"# | Question | Type"' : '"# | Pregunta | Tipo"').': one row per question, every one of them, in order, its number, its title as it is, and its type in the user\'s language (single choice, multiple choice, dropdown, text, scale, table, file); never a plain list.',
             '- Link records as [Name](item:<kind>/<id>), kind = questionnaire, organization, assignation or project.',
