@@ -54,10 +54,6 @@ export function ChatComposer({
         <p className="ai-composer__limit" role="status">
           {disabledReason}
         </p>
-      ) : chat.limitReached ? (
-        <p className="ai-composer__limit" role="status">
-          {t('limitReached')}
-        </p>
       ) : null}
       <div className="ai-composer__files">
         <AttachmentList attachments={chat.attachments} />

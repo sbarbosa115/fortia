@@ -78,10 +78,21 @@ export function historyOf(entries: ChatEntry[]): ChatMessage[] {
 }
 
 /**
+ * The messages sent with a turn: the last 40 of the conversation (PRD §8.10), the oldest dropped first. The window
+ * starts with a user message, as the models expect; the draft and the pending writes travel apart, so what the chat
+ * built is never dropped with them.
+ */
+export function recentHistoryOf(entries: ChatEntry[]): ChatMessage[] {
+  const recent = historyOf(entries).slice(-MAX_CHAT_MESSAGES);
+  const firstUser = recent.findIndex((message) => message.role === 'user');
+  return firstUser === -1 ? [] : recent.slice(firstUser);
+}
+
+/**
  * One conversation with the assistant (PRD §7.19, §10.4), the same in the AI Experience (create mode) and in
  * /projects/new (draft mode): the client keeps the messages with their attached documents, the draft and the pending
  * writes, and sends them with every turn; each turn is a `chat` job polled every 2 s. A failed turn can be retried;
- * a conversation holds 40 messages. The author can type, paste their questions or attach Word,
+ * the screen keeps the whole conversation, a turn sends its last 40 messages. The author can type, paste their questions or attach Word,
  * PDF or Markdown documents; a message with only documents asks for the questionnaire from them. `closed` ends the
  * conversation (the screen got what it wanted).
  */
@@ -131,7 +142,7 @@ export function useChat({
       try {
         const result = await sendChatTurn(
           {
-            messages: historyOf(lines),
+            messages: recentHistoryOf(lines),
             mode,
             draft,
             item: turnItem.current,
@@ -176,8 +187,7 @@ export function useChat({
     [mode, draft, pendingWrites, queryClient, i18n],
   );
 
-  const limitReached = historyOf(entries).length >= MAX_CHAT_MESSAGES - 1;
-  const disabled = status === 'sending' || limitReached || closed;
+  const disabled = status === 'sending' || closed;
   const canSend =
     !disabled &&
     !attachments.uploading &&
@@ -228,9 +238,8 @@ export function useChat({
     maxLength: MAX_CHAT_MESSAGE_LENGTH,
     showCounter: input.length >= MAX_CHAT_MESSAGE_LENGTH * COUNTER_THRESHOLD,
     canSend,
-    /** The composer is closed: a turn is under way, the conversation is full or over. */
+    /** The composer is closed: a turn is under way or the conversation is over. */
     disabled,
-    limitReached: limitReached && !closed,
     /** The documents for the next message. */
     attachments,
     send: () => sendText(input),

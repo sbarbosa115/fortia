@@ -6,7 +6,6 @@
   "error": "Algo salió mal al procesar tu mensaje.",
   "retry": "Reintentar",
   "quickReplies": "Respuestas rápidas",
-  "limitReached": "Esta conversación llegó a su límite de mensajes. Empieza un chat nuevo o recarga la página para empezar de nuevo.",
   "hintSend": "enviar",
   "hintNewline": "nueva línea",
   "counter": "{{count}} / {{max}}",

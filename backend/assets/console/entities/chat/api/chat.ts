@@ -21,7 +21,7 @@ export type ChatMessage = {
   files?: ChatFile[];
 };
 
-/** A conversation holds at most 40 messages (PRD §8.10, §10.4). */
+/** A turn sends at most the last 40 messages of the conversation (PRD §8.10, §10.4). */
 export const MAX_CHAT_MESSAGES = 40;
 /** A message is at most 20,000 characters (PRD §10.4). */
 export const MAX_CHAT_MESSAGE_LENGTH = 20000;

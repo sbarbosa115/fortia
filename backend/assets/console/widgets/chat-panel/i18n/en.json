@@ -6,7 +6,6 @@
   "error": "Something went wrong processing your message.",
   "retry": "Retry",
   "quickReplies": "Quick replies",
-  "limitReached": "This conversation reached its message limit. Start a new chat or refresh the page to start over.",
   "hintSend": "send",
   "hintNewline": "new line",
   "counter": "{{count}} / {{max}}",
