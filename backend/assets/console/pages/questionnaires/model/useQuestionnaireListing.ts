@@ -1,7 +1,8 @@
 import {
   fetchQuestionnaires,
+  fetchQuestionnaireTags,
   type ListingParams,
-  type ListingType,
+  QUESTIONNAIRE_TAGS_QUERY_KEY,
   questionnairesQueryKey,
   type SortBy,
   type SortOrder,
@@ -16,7 +17,6 @@ import {keepPreviousData, useQuery} from '@tanstack/react-query';
 import {useState} from 'react';
 
 export type StatusFilter = 'all' | 'active' | 'inactive';
-export type TypeFilter = ListingType | 'all';
 
 export const PAGE_SIZES = [10, 20, 50, 100];
 const DEFAULT_PAGE_SIZE = 10;
@@ -24,12 +24,13 @@ const DEFAULT_PAGE_SIZE = 10;
 export const TIME_ZONE_KEY = 'mappi.console.timeZone';
 
 /**
- * The state of the questionnaire listing (PRD §10.6): the toolbar's search (sent to the server, D16), type, state,
- * sort and time zone, and the page. Any filter change goes back to page 1.
+ * The state of the questionnaire listing (PRD §10.6): the toolbar's search (sent to the server, D16), tag, state,
+ * sort and time zone, and the page. Any filter change goes back to page 1. Every questionnaire is of the standard
+ * type, so there is no type filter; the tag filter offers the account's tags (GET /questionnaire/tags).
  */
 export function useQuestionnaireListing() {
   const [search, setSearchValue] = useState('');
-  const [type, setTypeValue] = useState<TypeFilter>('all');
+  const [tag, setTagValue] = useState('');
   const [status, setStatusValue] = useState<StatusFilter>('all');
   const [sortBy, setSortByValue] = useState<SortBy>('created_at');
   const [order, setOrderValue] = useState<SortOrder>('desc');
@@ -42,7 +43,8 @@ export function useQuestionnaireListing() {
 
   const params: ListingParams = {
     search: debouncedSearch,
-    type: type === 'all' ? null : type,
+    type: null,
+    tag: tag === '' ? null : tag,
     isActive: status === 'all' ? null : status === 'active',
     sortBy,
     order,
@@ -54,6 +56,10 @@ export function useQuestionnaireListing() {
     queryFn: () => fetchQuestionnaires(params),
     placeholderData: keepPreviousData,
   });
+  const tags = useQuery({
+    queryKey: QUESTIONNAIRE_TAGS_QUERY_KEY,
+    queryFn: fetchQuestionnaireTags,
+  });
 
   function resetting<T>(set: (value: T) => void) {
     return (value: T) => {
@@ -62,14 +68,16 @@ export function useQuestionnaireListing() {
     };
   }
 
-  const hasFilters = type !== 'all' || status !== 'all';
+  const hasFilters = tag !== '' || status !== 'all';
   return {
     query,
     rows: query.data?.items ?? [],
     total: query.data?.total ?? 0,
     search,
     appliedSearch: debouncedSearch,
-    type,
+    tag,
+    tags: tags.data?.tags ?? [],
+    tagsLoading: tags.isPending,
     status,
     sortBy,
     order,
@@ -78,7 +86,7 @@ export function useQuestionnaireListing() {
     timeZone,
     hasFilters,
     setSearch: resetting(setSearchValue),
-    setType: resetting(setTypeValue),
+    setTag: resetting(setTagValue),
     setStatus: resetting(setStatusValue),
     setSortBy: resetting(setSortByValue),
     setOrder: resetting(setOrderValue),
@@ -91,7 +99,7 @@ export function useQuestionnaireListing() {
     clearSearch: () => resetting(setSearchValue)(''),
     clearFilters: () => {
       setSearchValue('');
-      setTypeValue('all');
+      setTagValue('');
       setStatusValue('all');
       setPage(1);
     },

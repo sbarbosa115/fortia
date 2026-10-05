@@ -25,19 +25,22 @@ export function useToggleActive() {
       });
       queryClient.setQueriesData<QuestionnairePage>(
         {queryKey: QUESTIONNAIRES_QUERY_KEY},
+        // Only the listing's pages: the account's tags live under the same key.
         (page) =>
-          page && {
-            ...page,
-            items: page.items.map((row) =>
-              row.questionnaire_id === id
-                ? {
-                    ...row,
-                    is_active: isActive,
-                    status: isActive ? 'active' : 'inactive',
-                  }
-                : row,
-            ),
-          },
+          page && Array.isArray(page.items)
+            ? {
+                ...page,
+                items: page.items.map((row) =>
+                  row.questionnaire_id === id
+                    ? {
+                        ...row,
+                        is_active: isActive,
+                        status: isActive ? 'active' : 'inactive',
+                      }
+                    : row,
+                ),
+              }
+            : page,
       );
       return {snapshot};
     },

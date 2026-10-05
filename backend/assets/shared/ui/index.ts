@@ -25,6 +25,7 @@ export {EmptyState, ErrorState} from './States';
 export {Spinner, Skeleton, LoadingState} from './Spinner';
 export {Pagination, CursorPagination} from './Pagination';
 export {FilterBar, SearchInput} from './FilterBar';
+export {Combobox} from './Combobox';
 export {ChoiceCards} from './ChoiceCards';
 export type {Choice} from './ChoiceCards';
 export {Tooltip} from './Tooltip';

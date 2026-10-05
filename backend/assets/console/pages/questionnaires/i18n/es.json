@@ -6,14 +6,17 @@
   "toolbar": {
     "search": "Buscar cuestionarios",
     "searchPlaceholder": "Buscar por título o etiqueta… (Ctrl+K)",
-    "type": "Tipo",
+    "tag": "Etiqueta",
     "status": "Estado",
     "sortBy": "Ordenar por",
     "order": "Orden",
     "timeZone": "Zona horaria"
   },
   "filters": {
-    "allTypes": "Todos los tipos",
+    "allTags": "Todas las etiquetas",
+    "noTags": "Sin etiquetas",
+    "noTagMatches": "Ninguna etiqueta coincide",
+    "clearTag": "Quitar el filtro de etiqueta",
     "allStatus": "Todos los estados",
     "active": "Activos",
     "inactive": "Inactivos",
@@ -24,16 +27,8 @@
     "local": "Hora local",
     "utc": "UTC"
   },
-  "kind": {
-    "default": "Estándar",
-    "quiz_funnel": "Quiz funnel",
-    "diagnostic": "Diagnóstico",
-    "process_mapping": "Mapeo de procesos",
-    "chain": "Encadenado"
-  },
   "columns": {
     "title": "Título",
-    "type": "Tipo",
     "state": "Estado",
     "created": "Creado",
     "updated": "Actualizado",

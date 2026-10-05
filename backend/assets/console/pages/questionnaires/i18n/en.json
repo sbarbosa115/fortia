@@ -6,14 +6,17 @@
   "toolbar": {
     "search": "Search questionnaires",
     "searchPlaceholder": "Search by title or tag… (Ctrl+K)",
-    "type": "Type",
+    "tag": "Tag",
     "status": "State",
     "sortBy": "Sort by",
     "order": "Order",
     "timeZone": "Time zone"
   },
   "filters": {
-    "allTypes": "All types",
+    "allTags": "All tags",
+    "noTags": "No tags",
+    "noTagMatches": "No tag matches",
+    "clearTag": "Clear the tag filter",
     "allStatus": "All status",
     "active": "Active",
     "inactive": "Inactive",
@@ -24,16 +27,8 @@
     "local": "Local time",
     "utc": "UTC"
   },
-  "kind": {
-    "default": "Standard",
-    "quiz_funnel": "Quiz funnel",
-    "diagnostic": "Diagnostic",
-    "process_mapping": "Process mapping",
-    "chain": "Chaining"
-  },
   "columns": {
     "title": "Title",
-    "type": "Type",
     "state": "State",
     "created": "Created",
     "updated": "Updated",
