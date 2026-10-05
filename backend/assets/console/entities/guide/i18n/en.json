@@ -3,9 +3,9 @@
     "getting-started": "Getting started",
     "questionnaires": "Questionnaires",
     "organizations": "Organizations",
-    "projects": "Projects",
+    "assignations": "Assignations",
     "analytics": "Analytics",
-    "brand-integrations": "Brand and integrations",
+    "brand": "Brand",
     "account": "Account"
   },
   "readingTime_one": "{{count}} min read",
