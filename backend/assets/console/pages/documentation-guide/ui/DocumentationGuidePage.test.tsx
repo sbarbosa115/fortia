@@ -82,15 +82,12 @@ describe('DocumentationGuidePage (PRD §10.18)', () => {
     ).toHaveAttribute('href', '/documentation/guides/welcome');
     await user.click(
       within(pager).getByRole('link', {
-        name: /Next guide.*Create a questionnaire with AI/,
+        name: /Next guide.*Question types/,
       }),
     );
 
     expect(
-      screen.getByRole('heading', {
-        level: 1,
-        name: 'Create a questionnaire with AI',
-      }),
+      screen.getByRole('heading', {level: 1, name: 'Question types'}),
     ).toBeInTheDocument();
   });
 
@@ -99,7 +96,7 @@ describe('DocumentationGuidePage (PRD §10.18)', () => {
     expect(screen.queryByRole('link', {name: /Previous guide/})).toBeNull();
     unmount();
 
-    renderGuide('users-and-roles');
+    renderGuide('system-settings');
     expect(screen.queryByRole('link', {name: /Next guide/})).toBeNull();
     expect(
       screen.getByRole('link', {name: /Previous guide/}),
@@ -107,10 +104,13 @@ describe('DocumentationGuidePage (PRD §10.18)', () => {
   });
 
   it('shows the guide in Spanish with a breadcrumb back to the documentation', () => {
-    renderGuide('projects', 'es');
+    renderGuide('assignations', 'es');
 
     expect(
-      screen.getByRole('heading', {level: 1, name: 'Proyectos'}),
+      screen.getByRole('heading', {
+        level: 1,
+        name: 'Envía cuestionarios con asignaciones',
+      }),
     ).toBeInTheDocument();
     const crumbs = screen.getByRole('navigation', {name: 'Ruta de navegación'});
     expect(

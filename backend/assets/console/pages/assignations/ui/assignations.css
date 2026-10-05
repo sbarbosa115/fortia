@@ -1176,5 +1176,152 @@
 .project-form__review {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.project-form__review > legend {
+  padding: 0;
+}
+.project-form__review-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.project-form__review-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  min-width: 0;
+}
+.project-form__review-item + .project-form__review-item {
+  border-top: 1px solid var(--color-border);
+}
+.project-form__review-item .toggle {
+  min-width: 0;
+  font-size: 14px;
+  text-align: left;
+}
+.project-form__review-state {
+  flex: none;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.project-form__review-state[data-on] {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.project-form__review-item .toggle,
+.project-form__review-name {
+  flex: 1;
+}
+.project-form__review-item .btn--icon {
+  flex: none;
+  color: var(--color-text-muted);
+}
+.project-form__review-item .btn--icon:hover:not(:disabled) {
+  color: #ef4444;
+}
+.project-form__review-item[data-removed] .project-form__review-name {
+  min-width: 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+.project-form__review > div {
+  padding-top: 4px;
+}
+.project-form__picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-bg);
+}
+.project-form__picker-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--color-text-muted);
+}
+.project-form__picker-search:focus-within {
+  border-color: var(--color-primary);
+}
+.project-form__picker-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  outline: none;
+}
+.project-form__picker-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 220px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.project-form__picker-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  color: var(--color-primary);
+  text-align: left;
+  cursor: pointer;
+}
+.project-form__picker-item:hover:not(:disabled) {
+  background: #f3f5f7;
+}
+.project-form__picker-item:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+.project-form__picker-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.project-form__picker-name {
+  overflow: hidden;
+  font-size: 14px;
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-form__picker-detail {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.project-form__picker-foot {
+  display: flex;
+  justify-content: flex-end;
 }

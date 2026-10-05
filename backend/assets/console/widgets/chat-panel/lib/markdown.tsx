@@ -56,6 +56,13 @@ function inline(text: string, key: string, onAskItem?: AskItem): ReactNode[] {
             {label}
           </a>,
         );
+      } else if (/^\/(?!\/)/.test(href ?? '')) {
+        // A page of the console (e.g. /profile?tab=system), opened here.
+        nodes.push(
+          <a key={k} href={href}>
+            {label}
+          </a>,
+        );
       } else {
         nodes.push(<strong key={k}>{label}</strong>);
       }
@@ -84,8 +91,8 @@ const HEADING = /^\s*#{1,6}\s+(.*)$/;
 
 /**
  * The assistant's Markdown as React nodes, never as HTML (its text may quote what the owner typed): headings,
- * paragraphs, bullet and numbered lists, tables, **bold**, *italic*, `code` and links (http(s) open in a new tab; a
- * record link asks the chat about that record).
+ * paragraphs, bullet and numbered lists, tables, **bold**, *italic*, `code` and links (http(s) open in a new tab, a
+ * console path such as /profile opens here, a record link asks the chat about that record).
  */
 export function renderMarkdown(text: string, onAskItem?: AskItem): ReactNode[] {
   const lines = text.replace(/\r\n/g, '\n').trim().split('\n');

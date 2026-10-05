@@ -1,11 +1,6 @@
 {
   "title": "Documentación",
-  "subtitle": "Guías y videos para sacarle el máximo provecho a Mappi.",
-  "sections": "Secciones de la documentación",
-  "tabs": {
-    "guides": "Guías",
-    "videos": "Videos"
-  },
+  "subtitle": "Guías para sacarle el máximo provecho a Mappi.",
   "guides": {
     "search": "Buscar guías",
     "searchPlaceholder": "Buscar guías…",
@@ -16,16 +11,5 @@
     "read": "Leer la guía",
     "noMatches": "Ninguna guía coincide con tu búsqueda",
     "noMatchesBody": "Prueba con otras palabras u otro tema."
-  },
-  "videos": {
-    "loading": "Cargando videos…",
-    "empty": "Aún no hay videos",
-    "emptyBody": "Los videos en este idioma aparecerán aquí. Mientras tanto, las guías cubren cada parte de la consola.",
-    "readGuides": "Leer las guías",
-    "minutes_one": "{{count}} min",
-    "minutes_other": "{{count}} min",
-    "player": "Video: {{title}}",
-    "unavailable": "Este video no se puede reproducir aquí.",
-    "openOnYoutube": "Abrir en YouTube"
   }
 }

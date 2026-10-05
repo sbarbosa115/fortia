@@ -1,14 +1,13 @@
 import type {SortBy, SortOrder} from '@console/entities/questionnaire';
 import type {TimeZoneMode} from '@shared/lib';
-import {FilterBar, SearchInput, Select} from '@shared/ui';
+import {Combobox, FilterBar, SearchInput, Select} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import type {
   QuestionnaireListing,
   StatusFilter,
-  TypeFilter,
 } from '../model/useQuestionnaireListing';
 
-/** Search (⌘/Ctrl+K), type, state, sort and order, and the Local/UTC preference (PRD §10.6). */
+/** Search (⌘/Ctrl+K), tag, state, sort and order, and the Local/UTC preference (PRD §10.6). */
 export function ListingToolbar({listing}: {listing: QuestionnaireListing}) {
   const {t} = useTranslation('pages.questionnaires');
   return (
@@ -20,17 +19,19 @@ export function ListingToolbar({listing}: {listing: QuestionnaireListing}) {
         label={t('toolbar.search')}
         placeholder={t('toolbar.searchPlaceholder')}
       />
-      <Select
-        aria-label={t('toolbar.type')}
-        value={listing.type}
-        onChange={(e) => listing.setType(e.target.value as TypeFilter)}
-        options={[
-          {value: 'all', label: t('filters.allTypes')},
-          {value: 'default', label: t('kind.default')},
-          {value: 'quiz_funnel', label: t('kind.quiz_funnel')},
-          {value: 'diagnostic', label: t('kind.diagnostic')},
-          {value: 'process_mapping', label: t('kind.process_mapping')},
-        ]}
+      <Combobox
+        label={t('toolbar.tag')}
+        value={listing.tag}
+        onChange={listing.setTag}
+        options={listing.tags}
+        disabled={listing.tagsLoading || listing.tags.length === 0}
+        placeholder={
+          !listing.tagsLoading && listing.tags.length === 0
+            ? t('filters.noTags')
+            : t('filters.allTags')
+        }
+        noMatches={t('filters.noTagMatches')}
+        clearLabel={t('filters.clearTag')}
       />
       <Select
         aria-label={t('toolbar.status')}

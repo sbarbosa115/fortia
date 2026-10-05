@@ -1,5 +1,4 @@
 import {
-  questionnaireKind,
   questionnairePublicUrl,
   type QuestionnaireRow,
   type SortBy,
@@ -7,14 +6,14 @@ import {
 } from '@console/entities/questionnaire';
 import {ActiveToggle} from '@console/features/toggle-questionnaire-active';
 import {formatDateTime, type TimeZoneMode} from '@shared/lib';
-import {Badge, type Column, Table} from '@shared/ui';
+import {type Column, Table} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router';
 import {RowActions} from './RowActions';
 
 /**
  * The columns of PRD §10.6: title (to the editor, or to the public page for read-only users) with its question
- * count and its tags, type, the Active toggle, the date the list is sorted by, and the actions.
+ * count and its tags, the Active toggle, the date the list is sorted by, and the actions.
  */
 export function QuestionnaireTable({
   rows,
@@ -55,11 +54,6 @@ export function QuestionnaireTable({
           <TagList tags={row.tags} label={t('tags')} />
         </div>
       ),
-    },
-    {
-      key: 'type',
-      header: t('columns.type'),
-      render: (row) => <Badge>{t(`kind.${questionnaireKind(row)}`)}</Badge>,
     },
     {
       key: 'state',

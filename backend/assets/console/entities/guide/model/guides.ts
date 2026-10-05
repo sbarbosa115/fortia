@@ -17,17 +17,18 @@ export {GUIDE_TOPICS};
 const TOPIC_OF: Record<GuideId, GuideTopic> = {
   'welcome': 'getting-started',
   'first-questionnaire': 'getting-started',
+  'question-types': 'questionnaires',
   'create-with-ai': 'questionnaires',
   'edit-questionnaires': 'questionnaires',
   'share-and-collect': 'questionnaires',
   'organizations-and-members': 'organizations',
-  'assignations': 'organizations',
-  'projects': 'projects',
+  'assignations': 'assignations',
+  'review-and-corrections': 'assignations',
   'dashboard': 'analytics',
   'answers-and-exports': 'analytics',
-  'brand-customization': 'brand-integrations',
-  'store-quiz-funnel': 'brand-integrations',
+  'brand-customization': 'brand',
   'users-and-roles': 'account',
+  'system-settings': 'account',
 };
 
 const TEXTS: Record<Language, Record<GuideId, GuideText>> = {
@@ -35,7 +36,7 @@ const TEXTS: Record<Language, Record<GuideId, GuideText>> = {
   es: GUIDES_ES,
 };
 
-/** The 13 guides in one language, in reading order (PRD §10.18). */
+/** The 14 guides in one language, in reading order (PRD §10.18). */
 export function guidesFor(language: Language): Guide[] {
   return GUIDE_IDS.map((id) => ({
     id,

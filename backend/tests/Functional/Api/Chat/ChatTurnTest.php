@@ -13,6 +13,7 @@ use App\Shared\Application\Llm\LlmUnavailable;
 use App\Shared\Application\Storage\ObjectStorage;
 use App\Tests\Functional\Api\Responses\SessionFixtures;
 use App\Tests\Support\ApiTestCase;
+use App\Tests\Support\SwitchableLlmKeyCheck;
 
 /**
  * A turn of the chat assistant (PRD §7.19, §8.10, §10.4) with the offline, scripted language model: the turn job,
@@ -45,6 +46,29 @@ final class ChatTurnTest extends ApiTestCase
         self::assertSame('generation', $request->tier, 'PRD §13.3: chat with tools uses the most capable model');
         self::assertNotNull($request->jsonSchema, 'the final answer is structured');
         self::assertStringContainsString('Mappi assistant', $request->system, 'the system text comes from SystemPrompts (chat--conversation-rules)');
+    }
+
+    public function testWithoutAnOpenAiKeyTheChatSaysWhereToSetOneInsteadOfAnswering(): void
+    {
+        static::getContainer()->get(SwitchableLlmKeyCheck::class)->withoutKeys();
+
+        $result = $this->reply(['Crea un cuestionario sobre café']);
+
+        self::assertStringContainsString('API key de OpenAI', $result['message'], 'without a key the chat says one is needed');
+        self::assertStringContainsString('[Perfil › Sistema](/profile?tab=system)', $result['message'], 'and links where to set it');
+        self::assertNull($result['draft'], 'nothing is drafted');
+        self::assertSame([], $this->llm()->requests(), 'the offline fake is not used for a person chatting');
+    }
+
+    public function testTheAssistantIsToldToStayOnMappiWhateverTheEditablePromptSays(): void
+    {
+        foreach (['create', 'draft'] as $mode) {
+            $result = $this->reply(['¿Quién es Messi?'], ['mode' => $mode]);
+
+            self::assertStringNotContainsString('futbolista', $result['message'], "$mode: PRD §7.19: the assistant only helps with Mappi");
+            $requests = $this->llm()->requests();
+            self::assertStringContainsString('- Scope: you only help with Mappi', end($requests)->system, "$mode: the scope is a platform rule, not only the editable prompt");
+        }
     }
 
     public function testTheCreateModeBuildsTheDraftPhaseByPhaseAndCreatesItOnlyWhenTheUserApproves(): void
@@ -132,6 +156,19 @@ final class ChatTurnTest extends ApiTestCase
         $created = static::getContainer()->get(QuestionnaireDetails::class)->find($done['questionnaire_id']);
         self::assertNotNull($created);
         self::assertSame(['AP-03', 'NP-12'], $created['tags'], 'the questionnaire is saved with the tags of the draft');
+    }
+
+    public function testTheAssistantOffersTagsBeforeTheBasicsAreConfirmedAndShowsThemAmongThem(): void
+    {
+        $first = $this->reply(['Crea un cuestionario sobre software contable']);
+        self::assertStringContainsString('**Etiquetas:** ninguna', $first['message'], 'the basics show the tags');
+        self::assertStringContainsString('¿Quieres etiquetas para encontrarlo luego?', $first['message'], 'tags are offered before confirming, to find the questionnaire later');
+        self::assertStringContainsString('- Tags: before asking to confirm the basics, ask once', $this->llm()->requests()[0]->system, 'the model is told to offer them too');
+
+        $second = $this->reply(['Crea un cuestionario sobre software contable', $first['message'], 'Etiquétalo SF-C00'], ['draft' => $first['draft']]);
+        self::assertSame(['SF-C00'], $second['draft']['tags']);
+        self::assertFalse($second['draft']['basics_confirmed'], 'the basics still wait for the yes');
+        self::assertStringContainsString('**Etiquetas:** SF-C00', $second['message'], 'the basics are shown again with the tag');
     }
 
     public function testTheDraftModeSavesNothingAndHandsBackTheApprovedDraftWithItsFlow(): void

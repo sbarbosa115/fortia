@@ -1,6 +1,12 @@
 import type {Project, ProjectAssignation} from '@console/entities/project';
 import {describe, expect, it} from 'vitest';
-import {answersOf, dueLabelOf, nextStepOf, reviewTextOf} from './rows';
+import {
+  answersOf,
+  dueLabelOf,
+  nextStepOf,
+  reviewMix,
+  reviewTextOf,
+} from './rows';
 
 function assignation(
   overrides: Partial<ProjectAssignation> = {},
@@ -13,6 +19,7 @@ function assignation(
     state: 'progress',
     completed: false,
     review_status: 'not_ready',
+    requires_review: true,
     attempt: 1,
     due_date: null,
     overdue: false,
@@ -38,6 +45,7 @@ function project(
     progress_percent: 0,
     completed_assignations: 0,
     approved_assignations: 0,
+    done_assignations: 0,
     total_assignations: assignations.length,
     assignations,
     available_assignations: null,
@@ -143,5 +151,15 @@ describe('the deadline urgency', () => {
 
   it('reads as plain history once the project is completed', () => {
     expect(dueLabelOf('2026-09-26', true, today)?.level).toBe('done');
+  });
+});
+
+describe('review is chosen per questionnaire', () => {
+  it('says whether all, none or some of its questionnaires require review', () => {
+    const on = assignation();
+    const off = assignation({assignations_id: 'a-2', requires_review: false});
+    expect(reviewMix(project('progress', [on, on]))).toBe('all');
+    expect(reviewMix(project('progress', [off]))).toBe('none');
+    expect(reviewMix(project('progress', [on, off]))).toBe('some');
   });
 });

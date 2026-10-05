@@ -35,8 +35,10 @@ final class ProjectOutput
         public readonly array $assignations,
         #[OA\Property(type: 'array', nullable: true, items: new OA\Items(ref: new Model(type: ProjectAvailableAssignationOutput::class)))]
         public readonly ?array $available_assignations = null,
-        /** Its follow-ups go to review once complete; false: they are simply completed. */
+        /** Any of its follow-ups goes to review once complete (each one says so in assignations[].requires_review). */
         public readonly bool $requires_review = true,
+        /** Its follow-ups that are done: approved when reviewed, complete otherwise. */
+        public readonly int $done_assignations = 0,
     ) {
     }
 
@@ -66,6 +68,7 @@ final class ProjectOutput
             array_map(ProjectAssignationOutput::of(...), $assignations),
             null === $available ? null : array_map(ProjectAvailableAssignationOutput::of(...), $available),
             (bool) ($data['requires_review'] ?? true),
+            (int) ($data['done_assignations'] ?? 0),
         );
     }
 }

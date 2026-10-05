@@ -3,29 +3,30 @@ export const GUIDE_TOPICS = [
   'getting-started',
   'questionnaires',
   'organizations',
-  'projects',
+  'assignations',
   'analytics',
-  'brand-integrations',
+  'brand',
   'account',
 ] as const;
 
 export type GuideTopic = (typeof GUIDE_TOPICS)[number];
 
-/** The ids of the 13 guides, in reading order (previous/next follow it). */
+/** The ids of the 14 guides, in reading order (previous/next follow it). */
 export const GUIDE_IDS = [
   'welcome',
   'first-questionnaire',
+  'question-types',
   'create-with-ai',
   'edit-questionnaires',
   'share-and-collect',
   'organizations-and-members',
   'assignations',
-  'projects',
+  'review-and-corrections',
   'dashboard',
   'answers-and-exports',
   'brand-customization',
-  'store-quiz-funnel',
   'users-and-roles',
+  'system-settings',
 ] as const;
 
 export type GuideId = (typeof GUIDE_IDS)[number];

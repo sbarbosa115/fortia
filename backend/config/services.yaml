@@ -48,6 +48,10 @@ services:
         arguments:
             $model: '%env(LLM_MODEL)%'
 
+    App\Shared\Infrastructure\Llm\ProviderLlmKeyCheck:
+        arguments:
+            $provider: '%env(LLM_PROVIDER)%'
+
     # The secrets an account saves in /profile › System (its SMTP password, its OpenAI key) are sealed with this key.
     App\Shared\Application\Security\SecretBox: '@App\Shared\Infrastructure\Security\SodiumSecretBox'
     App\Shared\Infrastructure\Security\SodiumSecretBox:
@@ -90,6 +94,9 @@ when@test:
         App\Tests\Support\TestClock: ~
         App\Tests\Support\EchoJobHandler: ~
         App\Shared\Domain\Clock: '@App\Tests\Support\TestClock'
+        # LLM_PROVIDER=fake never lacks a key; the tests switch it to see what the chat says without one.
+        App\Tests\Support\SwitchableLlmKeyCheck: ~
+        App\Shared\Application\Llm\LlmKeyCheck: '@App\Tests\Support\SwitchableLlmKeyCheck'
 
         # Services the tests call directly even where no controller uses them yet.
         App\Shared\Infrastructure\Llm\Fake\FakeLanguageModel: ~

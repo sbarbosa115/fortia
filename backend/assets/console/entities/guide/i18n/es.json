@@ -3,9 +3,9 @@
     "getting-started": "Primeros pasos",
     "questionnaires": "Cuestionarios",
     "organizations": "Organizaciones",
-    "projects": "Proyectos",
+    "assignations": "Asignaciones",
     "analytics": "Analítica",
-    "brand-integrations": "Marca e integraciones",
+    "brand": "Marca",
     "account": "Cuenta"
   },
   "readingTime_one": "{{count}} min de lectura",

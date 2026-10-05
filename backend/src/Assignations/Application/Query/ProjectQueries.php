@@ -112,6 +112,7 @@ final class ProjectQueries
         $progress = [];
         $states = [];
         $completed = 0;
+        $done = 0;
         foreach ($assignations as $assignation) {
             $p = $this->followUps->of($assignation);
             $due = $assignation->dueDate() ?? $project->dueDate();
@@ -119,6 +120,8 @@ final class ProjectQueries
             $progress[] = $p;
             $states[] = $state;
             $completed += $p->ended ? 1 : 0;
+            // Done: approved when it is reviewed, otherwise complete.
+            $done += ($p->requiresReview ? ProjectStatus::APPROVED === $state : $p->ended) ? 1 : 0;
             $rows[] = self::assignationRow($assignation, $p, $state, $due, $today);
         }
 
@@ -130,13 +133,14 @@ final class ProjectQueries
             'name' => $project->name(),
             'description' => $project->description(),
             'due_date' => $project->dueDate(),
-            'requires_review' => $project->requiresReview(),
+            'requires_review' => [] === $assignations ? $project->requiresReview() : [] !== array_filter($progress, static fn (FollowUpProgress $p): bool => $p->requiresReview),
             'created_at' => Iso::datetime($project->createdAt()),
             'updated_at' => Iso::datetime($project->updatedAt()),
             'state' => ProjectStatus::ofProject($states),
             'progress_percent' => ProjectStatus::progressPercent($progress),
             'completed_assignations' => $completed,
             'approved_assignations' => \count(array_filter($states, static fn (string $s): bool => ProjectStatus::APPROVED === $s)),
+            'done_assignations' => $done,
             'total_assignations' => \count($assignations),
             'assignations' => $rows,
         ];
@@ -153,6 +157,7 @@ final class ProjectQueries
             'state' => $state,
             'completed' => $p->ended,
             'review_status' => $p->reviewStatus,
+            'requires_review' => $p->requiresReview,
             'attempt' => $a->currentAttempt(),
             'due_date' => $due,
             'overdue' => !$p->ended && ProjectStatus::isOverdue($due, $today),

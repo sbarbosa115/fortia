@@ -1,6 +1,6 @@
 import type {GuideId, GuideText} from '../model/types';
 
-/** Las 13 guías de la documentación en español (PRD §10.18). Mismos ids, orden y temas que content/en.ts. */
+/** Las 14 guías de la documentación en español (PRD §10.18). Mismos ids, orden y temas que content/en.ts. */
 export const GUIDES_ES: Record<GuideId, GuideText> = {
   'welcome': {
     title: 'Bienvenido a Mappi',
@@ -11,16 +11,16 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'que-es-mappi',
         heading: 'Qué hace Mappi',
         paragraphs: [
-          'Mappi convierte cuestionarios en acciones. Diseñas un cuestionario (muchas veces con ayuda de la IA), lo envías a las personas que deben responderlo y Mappi convierte sus respuestas en resultados: una puntuación y un nivel, una recomendación de productos, un perfil o un simple mensaje de agradecimiento.',
-          'Todo sucede en la consola. Quien responde nunca necesita una cuenta: abre un enlace, responde y ve su resultado.',
+          'Mappi te ayuda a recolectar información con cuestionarios. Diseñas un cuestionario (muchas veces con ayuda de la IA), lo envías a las personas que deben responderlo y sigues sus respuestas hasta tener todo lo que necesitas: las lees, las revisas, pides correcciones y ves los resultados en un tablero.',
+          'Todo sucede en la consola. Quien responde nunca necesita una cuenta de Mappi: abre un enlace y responde.',
         ],
       },
       {
         id: 'menu',
         heading: 'El menú lateral',
         paragraphs: [
-          'El menú agrupa la consola en tres bloques. Diseño reúne Experiencia IA (la página de inicio), Experiencia de diseño, Cuestionarios y Personalización. Enviar y seguir reúne Organizaciones, Asignaciones y Proyectos. Configuración reúne Usuarios, Perfil y esta Documentación.',
-          'Abajo encuentras el selector de idioma, el bloque de tu cuenta y Cerrar sesión. El selector de idioma solo cambia el idioma de la consola; el idioma de los correos y de las pantallas de quien responde es el idioma de tu cuenta, en Perfil.',
+          'El menú agrupa la consola en tres bloques. Diseñar reúne Experiencia IA (la página de inicio), Diseñar experiencia, Cuestionarios y Personalización. Enviar y hacer seguimiento reúne Organizaciones y Asignaciones. Configuración reúne Usuarios, Perfil y esta Documentación.',
+          'Abajo encuentras el selector de idioma y tu cuenta, con el botón para cerrar sesión. El selector de idioma solo cambia el idioma de la consola; el idioma de los correos y de las pantallas de quien responde es el idioma de tu cuenta, en Perfil.',
         ],
         screenshot: {
           name: 'ai-experience',
@@ -32,10 +32,10 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         heading: 'De la idea a los resultados',
         paragraphs: ['Un recorrido típico tiene cuatro pasos:'],
         steps: [
-          'Crea un cuestionario en Experiencia IA o desde Cuestionarios → Nuevo cuestionario.',
-          'Publícalo y comparte su enlace, o asígnalo a los miembros de una organización.',
-          'Sigue las respuestas a medida que llegan en Respuestas.',
-          'Lee el tablero para entender los resultados y actuar.',
+          'Crea un cuestionario en Experiencia IA, o paso a paso en Diseñar experiencia.',
+          'Comparte su enlace público, o envíalo a una organización con una asignación y una fecha límite.',
+          'Sigue las respuestas a medida que llegan: en Respuestas para el enlace público, en la asignación para una organización.',
+          'Revisa las respuestas, pide correcciones cuando falte algo y lee el tablero.',
         ],
       },
       {
@@ -50,75 +50,121 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
   'first-questionnaire': {
     title: 'Crea tu primer cuestionario',
     summary:
-      'Elige un tipo, escribe los detalles, agrega preguntas y decide qué ven las personas al final, en tres pasos.',
+      'Escribe los detalles, agrega las preguntas y decide qué ven las personas al final, en tres pasos y con vista previa en vivo.',
     sections: [
       {
-        id: 'elige-un-tipo',
-        heading: 'Elige un tipo',
+        id: 'empieza',
+        heading: 'Empieza un cuestionario',
         paragraphs: [
-          'Ve a Cuestionarios y haz clic en Nuevo cuestionario. Mappi ofrece cuatro tipos: Regular para encuestas clásicas que terminan con un mensaje de agradecimiento, Diagnóstico para puntuar a cada persona y ubicarla en niveles, Quiz Funnel para recomendar productos de tu tienda y Encadenado para generar un cuestionario a la medida a partir de las primeras respuestas y tus instrucciones.',
+          'Haz clic en Diseñar experiencia en el menú, o en Nuevo cuestionario en Cuestionarios, y elige Regular: un cuestionario clásico que termina con el mensaje que tú elijas. A la izquierda lo construyes en tres pasos; a la derecha una vista previa en vivo muestra, en móvil o escritorio, lo que verá quien responde.',
         ],
         screenshot: {
-          name: 'questionnaire-new',
-          alt: 'Los cuatro tipos de cuestionario para elegir',
+          name: 'questionnaire-editor',
+          alt: 'El editor de cuestionarios con sus pasos y la vista previa en vivo',
         },
       },
       {
         id: 'detalles',
         heading: 'Paso 1: detalles',
         paragraphs: [
-          'Escribe un título (obligatorio) y, si quieres, un enlace personalizado (slug): letras minúsculas, números y guiones. Si dejas el slug vacío, Mappi lo genera a partir del título. También puedes activar una página de bienvenida y un aviso que la persona debe leer primero.',
+          'Escribe un título (obligatorio), una descripción y, si quieres, un enlace personalizado (slug): letras minúsculas, números y guiones. Si dejas el slug vacío, Mappi lo genera a partir del título.',
+          'Agrega etiquetas para encontrar el cuestionario más adelante, por ejemplo AP-03: presiona Enter o una coma después de cada una (hasta 20). También puedes activar una landing page con el título y la descripción, y un aviso que quien responde debe aceptar antes de empezar.',
         ],
       },
       {
         id: 'preguntas',
         heading: 'Paso 2: preguntas',
         paragraphs: [
-          'Agrega preguntas y agrúpalas por categoría. Cada pregunta tiene un título, un tipo de respuesta (selección única o múltiple, lista, ranking, texto, audio, rango, archivo o un mensaje) y puede ser obligatoria. Arrastra las preguntas para reordenarlas o moverlas a otra categoría.',
+          'Haz clic en Agregar pregunta y elige su tipo: selección, lista desplegable, ranking, texto, audio, rango, archivo, tabla o un mensaje. Cada pregunta tiene un título, una descripción y una categoría opcionales, y puede ser obligatoria o no. Arrastra las preguntas para reordenarlas o pasarlas a otra categoría, y duplica las que quieras reutilizar.',
         ],
-        tip: 'Las preguntas de texto y audio pueden hacer hasta cinco repreguntas cuando una respuesta no cumple tus criterios de aceptación.',
+        tip: 'La guía «Tipos de pregunta» explica cada tipo, incluidas las tablas y las plantillas de archivo.',
       },
       {
-        id: 'final',
-        heading: 'Paso 3: el final',
+        id: 'al-terminar',
+        heading: 'Paso 3: al terminar',
         paragraphs: [
-          'Decide qué ve la persona al terminar: un mensaje de agradecimiento, una llamada a la acción con un botón o un formulario para capturar sus datos. En un diagnóstico, en cambio, defines los niveles, de 0 a la puntuación máxima y sin huecos.',
-          'Nada se guarda hasta que haces clic en Crear y confirmas. Después puedes copiar el enlace, ver el cuestionario o seguir editando.',
+          'Decide qué ve quien responde al final agregando elementos de la lista: un mensaje de agradecimiento, un llamado a la acción (un botón con enlace, que siempre se abre en una pestaña nueva) y un formulario para capturar su nombre, correo y teléfono.',
+          'Nada se guarda hasta que haces clic en Crear y confirmas. Después puedes copiar el enlace, ver el cuestionario, seguir editando o crear otro.',
         ],
+      },
+    ],
+  },
+  'question-types': {
+    title: 'Tipos de pregunta',
+    summary:
+      'Qué tipo elegir para cada pregunta, y cómo configurar tablas, archivos y preguntas de seguimiento para las respuestas abiertas.',
+    sections: [
+      {
+        id: 'opciones',
+        heading: 'Opciones',
+        paragraphs: [
+          'Selección única, selección múltiple y lista desplegable muestran una lista de opciones que tú escribes. Ranking pide ordenar las opciones por preferencia arrastrándolas. Rango muestra un deslizador entre el mínimo y el máximo que definas; un rango de 0 a 10 tiene una gráfica NPS en el tablero.',
+        ],
+      },
+      {
+        id: 'abiertas',
+        heading: 'Texto y audio',
+        paragraphs: [
+          'Las preguntas de texto y de audio reciben una respuesta abierta. En una de texto puedes limitar el tipo de dato (libre, RFC, NIT o teléfono) y los caracteres permitidos (letras, números, símbolos).',
+          'Ambas pueden hacer preguntas de seguimiento: define el máximo de seguimientos (hasta 5) y escribe hasta 10 criterios de aceptación. Cuando la IA ve que una respuesta no los cumple, le pide a la persona que la amplíe.',
+        ],
+      },
+      {
+        id: 'tablas',
+        heading: 'Tablas',
+        paragraphs: [
+          'Una pregunta de tabla se construye sobre la misma tabla, tal como la verá quien responde. Escribe en los encabezados para nombrar las columnas (hasta 20); usa el menú de cada columna para renombrarla, moverla o eliminarla.',
+          'Elige quién escribe las filas. Con filas fijas nombras cada fila en su primera celda y la persona llena todas. Con «La persona podrá agregar filas», ella agrega las suyas, hasta el límite que definas (hasta 50).',
+        ],
+      },
+      {
+        id: 'archivos',
+        heading: 'Archivos y plantillas',
+        paragraphs: [
+          'Una pregunta de archivo permite subir archivos. Puedes adjuntar una plantilla (hasta 20 MB) que la persona descarga, llena y vuelve a subir. Cuántos archivos se pueden adjuntar en una pregunta se define en Perfil → Configuración (de 1 a 20).',
+        ],
+        tip: 'Una pregunta de mensaje no pide respuesta: úsala para dar instrucciones o contexto entre preguntas.',
       },
     ],
   },
   'create-with-ai': {
     title: 'Crea un cuestionario con IA',
     summary:
-      'Describe lo que necesitas en Experiencia IA y deja que Mappi redacte, ajuste y cree el cuestionario contigo.',
+      'Describe lo que necesitas en Experiencia IA, o adjunta un documento con tus preguntas, y deja que el asistente construya el cuestionario contigo.',
     sections: [
       {
         id: 'inicia-un-chat',
         heading: 'Inicia un chat',
         paragraphs: [
-          'Experiencia IA es la página de inicio de la consola. Escribe lo que quieres crear —por ejemplo, «un diagnóstico de madurez digital para tiendas pequeñas, 8 preguntas»— y presiona Enter. Mayúsculas+Enter agrega un salto de línea.',
-          'El asistente responde con un borrador que aparece en la vista previa en vivo a la derecha, donde puedes responder las preguntas como lo haría una persona.',
+          'Experiencia IA es la página de inicio de la consola. Escribe lo que quieres crear, por ejemplo «un cuestionario de evaluación de proveedores, 8 preguntas, con la etiqueta AP-03», y presiona Enter. Shift+Enter agrega un salto de línea.',
+          'El asistente responde con un borrador que aparece en la vista previa en vivo a la derecha, donde puedes recorrer la bienvenida, las preguntas y el resultado como lo haría quien responde.',
         ],
         screenshot: {
           name: 'ai-experience',
-          alt: 'Experiencia IA con el chat y la vista previa en vivo',
+          alt: 'Experiencia IA, lista para tu primer mensaje',
         },
+      },
+      {
+        id: 'documentos',
+        heading: 'Constrúyelo desde un documento',
+        paragraphs: [
+          '¿Ya tienes las preguntas? Pégalas en el chat, o adjunta un documento Word, PDF, Markdown, de texto o CSV con el botón del clip. El asistente lo lee y construye el cuestionario con esas preguntas.',
+        ],
       },
       {
         id: 'ajusta',
         heading: 'Ajusta el borrador',
         paragraphs: [
-          'Pide cambios con tus palabras: agrega una pregunta, cambia el tono, tradúcelo, usa una escala de 1 a 10. Cuando el asistente ofrece opciones, aparecen como botones de respuesta rápida.',
+          'Pide cambios con tus palabras: agrega una pregunta, cambia el título o el tono, tradúcelo, ponle etiquetas. Cuando el asistente ofrece opciones, aparecen como botones de respuesta rápida.',
         ],
-        tip: 'Una conversación admite hasta 40 mensajes. Haz clic en Nuevo chat para empezar de nuevo.',
+        tip: 'Las conversaciones largas no son problema: el asistente siempre trabaja con los mensajes más recientes. Haz clic en Nuevo chat para empezar de cero.',
       },
       {
         id: 'crealo',
         heading: 'Créalo',
         paragraphs: [
-          'Cuando el borrador te guste, pídele al asistente que lo cree. Aparece una tarjeta «Cuestionario creado» con botones para editarlo o verlo. Desde ahí es un cuestionario normal: puedes editarlo, compartirlo y leer sus respuestas.',
-          'El asistente también puede hacer otras tareas por ti, como listar tus organizaciones o tus asignaciones.',
+          'Cuando el borrador te guste, pídele al asistente que lo cree. Aparece una tarjeta «Cuestionario creado» con botones para editarlo o verlo. Desde ahí es un cuestionario normal: puedes editarlo, compartirlo y asignarlo.',
+          'El asistente también responde preguntas sobre tu cuenta, como los detalles de un cuestionario, una organización o una asignación.',
         ],
       },
     ],
@@ -132,7 +178,8 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'el-listado',
         heading: 'El listado',
         paragraphs: [
-          'Cuestionarios lista todos los cuestionarios de tu cuenta. Busca por título (⌘/Ctrl+K lleva al buscador), filtra por tipo y estado y ordena por fecha de creación o de actualización. Cada fila muestra el tipo, el número de preguntas y un interruptor de Activo.',
+          'Cuestionarios lista todos los cuestionarios de tu cuenta. Busca por título o etiqueta (Ctrl+K lleva al buscador), filtra por tipo y estado, y ordena por fecha de creación o de actualización. Cada fila muestra el número de preguntas, las etiquetas, el tipo y un interruptor Activo.',
+          'Los íconos de cada fila te permiten ver el cuestionario, copiar su enlace, editarlo y abrir su analítica; el botón Respuestas abre sus respuestas.',
         ],
         screenshot: {
           name: 'questionnaires',
@@ -143,50 +190,51 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'activar',
         heading: 'Activo e inactivo',
         paragraphs: [
-          'Solo los cuestionarios activos aceptan respuestas. Apaga el interruptor para dejar de recibir respuestas sin borrar nada; enciéndelo de nuevo cuando quieras.',
+          'Solo los cuestionarios activos reciben respuestas. Apaga el interruptor para dejar de recibir respuestas sin borrar nada; vuelve a encenderlo cuando quieras.',
         ],
       },
       {
         id: 'editar',
         heading: 'Editar',
         paragraphs: [
-          'Haz clic en Editar para abrir los mismos tres pasos que usaste al crearlo. No hay guardado automático: haz clic en Guardar cambios al terminar.',
+          'Haz clic en el ícono de editar para abrir los mismos tres pasos que usaste al crearlo. No hay guardado automático: haz clic en Guardar cambios al terminar.',
         ],
       },
       {
         id: 'bloqueado',
         heading: 'Cuestionarios bloqueados',
         paragraphs: [
-          'Cuando un cuestionario tiene respuestas queda bloqueado, para que las respuestas sigan correspondiendo a las preguntas que se respondieron. Para cambiarlo, haz clic en Crear una copia: obtienes un cuestionario nuevo sin respuestas, listo para editar.',
+          'Cuando un cuestionario tiene respuestas queda bloqueado, para que las respuestas sigan correspondiendo a las preguntas que se respondieron. Se sigue abriendo en el editor, en solo lectura, bajo el aviso «Bloqueado para conservar las respuestas». Para cambiarlo, haz clic en Crear una copia: obtienes un cuestionario nuevo sin respuestas, listo para editar.',
         ],
-        tip: 'Las copias conservan las preguntas, el final y la configuración, con un enlace nuevo.',
+        tip: 'Las copias conservan las preguntas, el final, las etiquetas y la configuración, con un enlace nuevo.',
       },
     ],
   },
   'share-and-collect': {
     title: 'Comparte un cuestionario y recibe respuestas',
     summary:
-      'Publica un cuestionario, comparte su enlace público y sigue cada respuesta a medida que llega.',
+      'Comparte el enlace público de un cuestionario y sigue cada respuesta a medida que llega.',
     sections: [
       {
         id: 'enlace-publico',
         heading: 'El enlace público',
         paragraphs: [
-          'Cada cuestionario tiene un enlace público construido con su slug. Cópialo desde el listado (Copiar enlace) o desde la pantalla de éxito al crearlo, y compártelo por correo, en tu sitio web o en redes sociales. Cualquiera con el enlace puede responder mientras el cuestionario esté activo.',
+          'Cada cuestionario tiene un enlace público construido con su slug. Cópialo desde el listado o desde la pantalla de éxito al crearlo, y compártelo por correo, en tu sitio web o en redes sociales. Cualquiera con el enlace puede responder mientras el cuestionario esté activo.',
         ],
+        tip: 'Para enviar un cuestionario a los miembros de una organización, con fecha límite y recordatorios, usa una asignación.',
       },
       {
         id: 'pruebalo',
         heading: 'Pruébalo primero',
         paragraphs: [
-          'Abre el enlace tú mismo antes de compartirlo: respóndelo como lo haría una persona y revisa la pantalla de resultado. Tus respuestas de prueba aparecen en Respuestas como cualquier otra.',
+          'Abre el enlace tú mismo antes de compartirlo: respóndelo como lo haría otra persona y revisa la pantalla final. Tus respuestas de prueba aparecen en Respuestas como cualquier otra.',
         ],
       },
       {
         id: 'respuestas',
         heading: 'Sigue las respuestas',
         paragraphs: [
-          'Abre Respuestas desde la fila del cuestionario. Cada sesión muestra cuándo empezó, el nombre y el correo si la persona los dejó, el progreso y el estado: Llenando, Diligenciado, Procesando o Completado. Haz clic en Ver para leer cada respuesta con el tiempo dedicado y el resultado que recibió la persona.',
+          'Haz clic en Respuestas en la fila del cuestionario. Cada sesión muestra cuándo empezó, el nombre, el correo y el teléfono si la persona los dejó, el avance y el estado: Respondiendo, Enviada, Procesando o Completada. Haz clic en Ver para leer cada respuesta con el tiempo dedicado.',
         ],
         screenshot: {
           name: 'answers',
@@ -195,9 +243,9 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
       },
       {
         id: 'archivos',
-        heading: 'Archivos y audio',
+        heading: 'Archivos, audio y tablas',
         paragraphs: [
-          'Las imágenes, los PDF, el audio y el video que suben las personas se pueden previsualizar en el detalle de la respuesta, y cualquier archivo se puede descargar.',
+          'Las imágenes, PDF, audios y videos que suben las personas se pueden previsualizar en el detalle de la respuesta, y cualquier archivo se puede descargar. Las respuestas de tabla se muestran como una tabla.',
         ],
       },
     ],
@@ -211,105 +259,125 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'para-que',
         heading: 'Para qué sirven las organizaciones',
         paragraphs: [
-          'Una organización es una empresa, un cliente o un equipo cuyos miembros responderán tus cuestionarios. Las asignaciones y los proyectos siempre se hacen para una organización.',
+          'Una organización es una empresa, un cliente o un equipo cuyos miembros responderán tus cuestionarios. Cada asignación se hace para una organización, y todos sus miembros pueden responderla.',
         ],
         screenshot: {
           name: 'organizations',
-          alt: 'Las tarjetas de organizaciones',
+          alt: 'Las tarjetas de las organizaciones',
         },
       },
       {
         id: 'crear',
         heading: 'Crea una organización',
         paragraphs: [
-          'Haz clic en Nueva organización y escribe su nombre. El dominio de correo es opcional: si lo defines, Mappi te avisa de los miembros cuyo correo usa otro dominio, pero los guarda igual.',
+          'Haz clic en Nueva organización y escribe su nombre. El dominio de correo es opcional: si lo defines, Mappi te avisa de los miembros cuyo correo usa otro dominio, pero los guarda de todas formas. También puedes crear una organización sin salir del asistente de asignaciones.',
         ],
       },
       {
         id: 'miembros',
         heading: 'Agrega miembros',
         paragraphs: [
-          'Cada miembro necesita un nombre y al menos un correo o un teléfono; el cargo y el área son opcionales y te permiten enviar una asignación solo a una parte de la organización. Los nombres se guardan sin tildes y en minúsculas para que las búsquedas siempre los encuentren.',
+          'Cada miembro necesita un nombre y al menos un correo o un teléfono; el rol y el área son opcionales. Los miembros entran a sus asignaciones con el correo o el teléfono que guardaste aquí, así que revísalos bien.',
         ],
       },
       {
         id: 'csv',
         heading: 'Importa desde CSV',
         paragraphs: [
-          'Descarga la plantilla, llena una fila por miembro e impórtala. El archivo puede usar comas o punto y coma, y las columnas pueden estar en inglés o en español (name/nombre, email/correo, phone/telefono, role/rol, area/área). Las filas que no se pueden importar se listan con el motivo.',
+          'Descarga la plantilla, llena una fila por miembro e impórtala. El archivo puede usar comas o punto y coma, y las columnas pueden estar en español o en inglés (nombre/name, correo/email, telefono/phone, rol/role, area). Las filas que no se pueden importar se listan con el motivo.',
         ],
-        tip: 'Eliminar una organización elimina sus miembros. No se permite mientras asignaciones o proyectos la usen.',
+        tip: 'Eliminar una organización elimina sus miembros. No se permite mientras alguna asignación la use.',
       },
     ],
   },
   'assignations': {
     title: 'Envía cuestionarios con asignaciones',
     summary:
-      'Asigna un cuestionario a los miembros de una organización, elige quién responde y envía recordatorios.',
+      'Envía uno o varios cuestionarios a una organización con una fecha límite, y deja que sus miembros los respondan juntos.',
     sections: [
       {
-        id: 'tipos',
-        heading: 'Por defecto y seguimiento',
+        id: 'que-es',
+        heading: 'Qué es una asignación',
         paragraphs: [
-          'Una asignación por defecto le da a cada miembro su propia sesión. Una asignación de seguimiento se responde en conjunto en una sola sesión compartida, y quienes la responden reciben un recordatorio diario hasta completarla; después revisas cada respuesta y puedes devolverla para corrección.',
+          'Una asignación envía uno o varios cuestionarios a una organización, con una fecha límite. Cada cuestionario se responde en conjunto: los miembros de la organización comparten una sola sesión, así que cualquiera puede continuar donde otro lo dejó.',
         ],
       },
       {
         id: 'crear',
         heading: 'Crea una asignación',
-        steps: [
-          'Ve a Asignaciones y haz clic en Nueva.',
-          'Elige el tipo, la organización y quién responde: todos, algunas personas, un área o un cargo.',
-          'Escoge el cuestionario y ponle un nombre a la asignación.',
-          'Decide qué datos de registro llena la persona (el correo o el teléfono debe ser obligatorio).',
-          'Guarda y copia el enlace para compartirlo.',
-        ],
         paragraphs: [],
+        steps: [
+          'Ve a Asignaciones y haz clic en Nueva asignación.',
+          'Cuestionarios: elige todos los cuestionarios que responderá la organización. Búscalos por nombre o etiqueta, o fíltralos por una o varias etiquetas.',
+          'Organización: elige quién responde, o crea una organización nueva ahí mismo.',
+          'Nombre y fecha límite: ponle un nombre que solo ve tu equipo, elige la fecha límite y decide si requiere revisión.',
+          'Haz clic en Crear. Nada se guarda antes.',
+        ],
         screenshot: {
-          name: 'assignations',
-          alt: 'El listado de asignaciones',
+          name: 'assignation-new',
+          alt: 'El asistente de nueva asignación',
         },
       },
       {
-        id: 'progreso',
-        heading: 'Sigue el progreso',
+        id: 'como-responden',
+        heading: 'Cómo responden los miembros',
         paragraphs: [
-          'El listado muestra cuántas personas o preguntas están completas. Abre una asignación para ver quién la completó y quién está pendiente, exportar la lista a CSV o enviar un recordatorio por correo.',
-        ],
-        tip: 'Puedes asignar el mismo cuestionario a todas las organizaciones que necesites, sin copias. Cada asignación guarda sus propias respuestas: ábrela para verlas.',
-      },
-    ],
-  },
-  'projects': {
-    title: 'Proyectos',
-    summary:
-      'Agrupa las asignaciones de seguimiento de una organización bajo una fecha límite y mira de un vistazo qué necesita tu atención.',
-    sections: [
-      {
-        id: 'que-es',
-        heading: 'Qué es un proyecto',
-        paragraphs: [
-          'Un proyecto agrupa asignaciones de seguimiento de una organización con una fecha límite. El listado te dice su estado —sin empezar, en progreso, requiere tu revisión, en corrección, completado o vencido— y el siguiente paso.',
-        ],
-        screenshot: {
-          name: 'projects',
-          alt: 'El listado de proyectos con sus pestañas',
-        },
-      },
-      {
-        id: 'asistente',
-        heading: 'Crea un proyecto en tres pasos',
-        paragraphs: [
-          'Nuevo proyecto te guía por las preguntas (redáctalas con IA o escoge un cuestionario existente), la organización y su audiencia, y el proyecto con su fecha límite. Nada se guarda hasta que haces clic en Crear; entonces Mappi crea el cuestionario, la asignación y el proyecto a la vez.',
+          'Copia el enlace de un cuestionario desde la asignación y envíalo a la organización. Los miembros entran con el correo o el teléfono que tienen en la organización y continúan desde la pregunta en la que va la sesión.',
+          'Mientras un cuestionario no esté terminado, los miembros reciben un recordatorio diario: un correo por persona con todo lo que tiene pendiente. También puedes enviar un recordatorio en cualquier momento con Enviar recordatorio.',
         ],
       },
       {
         id: 'revision',
-        heading: 'Revisa y corrige',
+        heading: 'Con o sin revisión',
         paragraphs: [
-          'Abre un proyecto para ver cada asignación con sus respuestas y su estado de revisión. Aprueba o rechaza cada respuesta con un comentario y envía las rechazadas a corrección: las personas reciben un nuevo intento por correo.',
+          'Con «Requiere revisión» activado, un cuestionario completado pasa a Por revisar: apruebas sus respuestas o lo devuelves a corrección. Desactivado, un cuestionario completado queda como Completado y sus respuestas son definitivas.',
         ],
-        tip: 'Usa las pestañas (Por revisar, En corrección, Vencidos…) para ver solo los proyectos que te necesitan.',
+        tip: 'Puedes asignar el mismo cuestionario a todas las organizaciones que necesites, sin copias. Cada asignación guarda sus propias respuestas.',
+      },
+    ],
+  },
+  'review-and-corrections': {
+    title: 'Sigue, revisa y corrige',
+    summary:
+      'Mira qué asignaciones te necesitan, revisa cada respuesta y devuelve a corrección lo que falte.',
+    sections: [
+      {
+        id: 'el-listado',
+        heading: 'El listado de asignaciones',
+        paragraphs: [
+          'Asignaciones muestra cada asignación con su organización, su estado, cuántos cuestionarios están listos, la fecha límite y el siguiente paso. El estado de una asignación es el de su cuestionario más urgente. Despliega una fila para ver sus cuestionarios y en qué pregunta va cada uno.',
+          'Usa las pestañas (Todas, Por revisar, En progreso, En corrección, Vencidas y Completadas) y el buscador para ver solo lo que te necesita.',
+        ],
+        screenshot: {
+          name: 'assignations',
+          alt: 'El listado de asignaciones con sus pestañas',
+        },
+      },
+      {
+        id: 'estados',
+        heading: 'Cómo avanza un cuestionario',
+        paragraphs: [
+          'Sin respuestas: enviaste el enlace y nadie ha empezado. Respondiendo: hay una parte respondida. Por revisar: todo está respondido y te toca a ti. En corrección: pediste corregir algunas respuestas. Aprobada o Completado: está terminado. Vencida: pasó la fecha límite sin terminar.',
+        ],
+      },
+      {
+        id: 'revisa',
+        heading: 'Revisa las respuestas',
+        paragraphs: [
+          'Abre un cuestionario de la asignación para ver la tabla de respuestas del intento actual. Haz clic en una respuesta para aprobarla o rechazarla, con un comentario opcional que leen quienes responden al corregirla.',
+        ],
+        screenshot: {
+          name: 'assignation-detail',
+          alt: 'Las respuestas de un cuestionario en una asignación, con su revisión',
+        },
+      },
+      {
+        id: 'correccion',
+        heading: 'Envía a corrección',
+        paragraphs: [
+          'Cuando todas las respuestas están revisadas y al menos una está rechazada, haz clic en Enviar a corrección. Se abre un intento nuevo conservando las respuestas aprobadas, y quienes responden reciben un correo para corregir las rechazadas. Los intentos anteriores se pueden leer desde el selector de Intento.',
+        ],
+        tip: 'Desde el listado también puedes editar una asignación (nombre, descripción, fecha límite y revisión) o eliminarla; sus cuestionarios y sus respuestas se conservan.',
       },
     ],
   },
@@ -322,7 +390,7 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'abrir',
         heading: 'Abre el tablero',
         paragraphs: [
-          'Haz clic en Analítica en la fila de un cuestionario. La primera vez, Mappi elige la mejor gráfica para cada pregunta, lo que puede tardar hasta medio minuto.',
+          'Haz clic en el ícono de analítica en la fila de un cuestionario, o en Tablero desde sus respuestas. La primera vez, Mappi elige la mejor gráfica para cada pregunta, lo que puede tardar hasta medio minuto.',
         ],
         screenshot: {
           name: 'dashboard',
@@ -333,14 +401,14 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'resumen',
         heading: 'El resumen',
         paragraphs: [
-          'Las tarjetas superiores muestran la tasa de finalización (sesiones completadas sobre todas las iniciadas), el número de sesiones, el tiempo promedio para completar y la pregunta donde más personas dejan de responder.',
+          'Las tarjetas superiores muestran la tasa de finalización (sesiones completadas sobre todas las iniciadas), el número de sesiones, el tiempo promedio para terminar y la pregunta donde más personas dejan de responder.',
         ],
       },
       {
         id: 'embudo',
         heading: 'El embudo',
         paragraphs: [
-          'El embudo va de Iniciadas, pasando por cada pregunta, hasta Completadas, para que veas exactamente dónde se van las personas. Los tramos largos sin abandono se agrupan para mantenerlo corto.',
+          'El embudo va de Iniciaron, pasando por cada pregunta, hasta Completaron, para que veas exactamente dónde se van las personas. Los tramos largos sin abandono se agrupan para que sea corto.',
         ],
       },
       {
@@ -361,7 +429,7 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'filtrar',
         heading: 'Filtra las respuestas',
         paragraphs: [
-          'Respuestas muestra por defecto las sesiones completadas. Cambia el filtro de estado para ver las que aún se están llenando, alterna las fechas entre tu hora local y UTC y elige cuántas filas cargar por página.',
+          'Respuestas muestra por defecto las sesiones completadas. Cambia el filtro de estado para ver las que aún se están llenando, alterna las fechas entre tu hora local y UTC, y elige cuántas filas cargar por página.',
         ],
         screenshot: {
           name: 'answers',
@@ -372,14 +440,14 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'detalle',
         heading: 'El detalle de una sesión',
         paragraphs: [
-          'Cada sesión muestra los datos de la persona, el tiempo total, cada pregunta con su respuesta y el tiempo dedicado, y el resultado que recibió: el nivel y la puntuación de un diagnóstico, los productos recomendados o el perfil generado.',
+          'Cada sesión muestra los datos de quien respondió, el tiempo total, y cada pregunta con su respuesta y el tiempo dedicado.',
         ],
       },
       {
         id: 'exportar',
         heading: 'Exporta a una hoja de cálculo',
         paragraphs: [
-          'Usa Exportar a Google Sheets para enviar todas las respuestas a una hoja de cálculo nueva. En una asignación también puedes exportar a CSV la lista de personas con su estado.',
+          'Usa Exportar a Google Sheets para enviar todas las respuestas a una hoja de cálculo nueva. Mientras Google Sheets no esté configurado en el servidor, el botón queda deshabilitado y lo indica.',
         ],
       },
     ],
@@ -393,7 +461,7 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'desde-tu-sitio',
         heading: 'Empieza desde tu sitio web',
         paragraphs: [
-          'En Personalización, escribe la URL de tu sitio web y guarda: Mappi lee tu sitio y elige por ti tu logo, tus colores y tu fuente. Después puedes ajustarlo todo.',
+          'En Personalización, escribe la URL de tu sitio web y guarda: Mappi lee tu sitio y elige tu logo, colores y fuente por ti. Después puedes ajustarlo todo.',
         ],
         screenshot: {
           name: 'customization',
@@ -404,76 +472,86 @@ export const GUIDES_ES: Record<GuideId, GuideText> = {
         id: 'ajusta',
         heading: 'Ajusta a mano',
         paragraphs: [
-          'Elige una de seis fuentes, pega la URL de tu logo y escoge el color de tu marca. A partir de ese color Mappi deriva los botones, el tono al pasar el cursor, un texto legible, los enlaces y el borde de los campos con foco. La vista previa muestra lo que verán las personas.',
+          'Elige una fuente, pega la URL de tu logo y escoge el color de tu marca. A partir de ese color Mappi define los botones, el tono al pasar el cursor, un texto legible, los enlaces y el borde de los campos con foco. La vista previa muestra lo que verán las personas.',
         ],
       },
       {
-        id: 'guardar',
+        id: 'guarda',
         heading: 'Guarda',
         paragraphs: [
-          'Haz clic en Guardar para aplicar los estilos a todos los cuestionarios de la cuenta. Restablecer solo vuelve a los valores por defecto en pantalla hasta que guardes.',
+          'Haz clic en Guardar para aplicar los estilos a todos los cuestionarios de la cuenta. Restablecer solo devuelve los valores por defecto en pantalla hasta que guardes.',
         ],
-      },
-    ],
-  },
-  'store-quiz-funnel': {
-    title: 'Recomienda productos con un quiz funnel',
-    summary:
-      'Conecta tu tienda o lee tu sitio web y genera un quiz que recomienda el producto adecuado al final.',
-    sections: [
-      {
-        id: 'tienda',
-        heading: 'Paso 1: tu tienda',
-        paragraphs: [
-          'Crea un Quiz Funnel desde Nuevo cuestionario. Si tu tienda funciona con Shopify, autoriza la conexión y carga tus productos. Si no, escribe la URL de tu tienda y elige cuántos productos leer (5, 10, 20 o 30).',
-        ],
-      },
-      {
-        id: 'productos',
-        heading: 'Paso 2: productos',
-        paragraphs: [
-          'Revisa los productos que encontró Mappi y quita los que no quieras recomendar. Cargarlos es opcional: Generar lee tu sitio web si te saltas este paso.',
-        ],
-      },
-      {
-        id: 'generar',
-        heading: 'Paso 3: genera',
-        paragraphs: [
-          'Elige el tipo de quiz —una experiencia o un perfilamiento— y haz clic en Generar. En unos minutos obtienes un cuestionario cuyo resultado recomienda productos de tu catálogo, con su enlace y su precio.',
-        ],
-        tip: 'Con Shopify, activa el bloque de Mappi en el editor de tu tema para que el quiz aparezca en tu tienda.',
       },
     ],
   },
   'users-and-roles': {
     title: 'Usuarios y roles',
     summary:
-      'Invita a tu equipo, elige quién puede hacer cambios y entiende qué puede hacer la persona dueña de la cuenta.',
+      'Invita a tu equipo, elige quién puede hacer cambios y define el idioma y los límites de la cuenta.',
     sections: [
       {
         id: 'roles',
         heading: 'Roles',
         paragraphs: [
-          'Los usuarios Administrador tienen acceso completo, incluso para crear otros usuarios. Los usuarios de solo lectura pueden verlo todo, pero no hacer cambios. La persona dueña es el usuario que creó la cuenta y siempre tiene acceso completo.',
+          'Los usuarios Administrador tienen acceso total, incluido crear otros usuarios. Los de Solo lectura pueden verlo todo pero no hacer cambios. El propietario es el usuario que creó la cuenta y siempre tiene acceso total.',
         ],
         screenshot: {name: 'users', alt: 'Los usuarios de la cuenta'},
       },
       {
         id: 'agregar',
         heading: 'Agrega un usuario',
+        paragraphs: [],
         steps: [
           'Ve a Usuarios y haz clic en Nuevo usuario.',
           'Escribe el nombre completo, el correo y una contraseña de al menos 8 caracteres.',
           'Elige el rol: Administrador o Solo lectura.',
-          'Haz clic en Crear y comparte las credenciales con tu compañero.',
+          'Haz clic en Crear usuario y comparte las credenciales con tu compañero.',
         ],
-        paragraphs: [],
       },
       {
         id: 'perfil',
         heading: 'Configuración de la cuenta',
         paragraphs: [
-          'En Perfil → Configuración, elige el idioma de la cuenta (cambia los correos y las pantallas de quien responde, no la consola), el máximo de archivos por pregunta y tus píxeles de seguimiento.',
+          'En Perfil → Configuración, elige el idioma de la cuenta (cambia los correos y las pantallas de quien responde, no la consola), el máximo de archivos por pregunta y tus píxeles de seguimiento (Meta, LinkedIn y Google Ads).',
+        ],
+      },
+    ],
+  },
+  'system-settings': {
+    title: 'Servidor de correo, OpenAI y analítica',
+    summary:
+      'Envía los correos de la cuenta por tu propio servidor, cobra la IA a tu clave de OpenAI y recibe los eventos de la cuenta en tu propio servicio.',
+    sections: [
+      {
+        id: 'donde',
+        heading: 'La pestaña Sistema',
+        paragraphs: [
+          'Abre Perfil → Sistema. Cada bloque indica si la cuenta usa su propio servicio («Tu servidor», «Tu clave») o el de Mappi. Las contraseñas y claves se guardan cifradas y solo se muestran sus últimos 4 caracteres.',
+        ],
+        screenshot: {
+          name: 'profile-system',
+          alt: 'La pestaña Sistema de Perfil',
+        },
+      },
+      {
+        id: 'smtp',
+        heading: 'Servidor de correo (SMTP)',
+        paragraphs: [
+          'Los recordatorios, el estado de los seguimientos y los correos de corrección se pueden enviar por tu propio servidor. Escribe el servidor, el puerto, el cifrado, el usuario, la contraseña y el remitente, y haz clic en Validar: Mappi envía un correo de prueba y te dice qué falló si no pudo. Usa el servidor de Mappi para volver.',
+        ],
+      },
+      {
+        id: 'openai',
+        heading: 'Clave de API de OpenAI',
+        paragraphs: [
+          'Las funciones de IA (el chat, la generación de cuestionarios, los tableros y la evaluación de respuestas abiertas) funcionan con OpenAI. Con tu propia clave se cobran a tu cuenta de OpenAI; sin ella se usa la clave de Mappi. Quitar mi clave vuelve a la de Mappi.',
+        ],
+      },
+      {
+        id: 'analitica',
+        heading: 'Servicio de analítica',
+        paragraphs: [
+          'Cada evento de la cuenta (cuestionarios creados, respuestas, inicios de sesión…) se envía a un servicio de analítica. Define tu propio endpoint y tu clave de API para recibirlos en {URL base}/events; sin ellos se usa el servicio de Mappi.',
         ],
       },
     ],

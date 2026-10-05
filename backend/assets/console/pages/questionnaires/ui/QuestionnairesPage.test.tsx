@@ -1,5 +1,6 @@
 import {
   fetchQuestionnaires,
+  fetchQuestionnaireTags,
   type QuestionnaireRow,
   setQuestionnaireActive,
 } from '@console/entities/questionnaire';
@@ -18,6 +19,7 @@ import {QuestionnairesPage} from './QuestionnairesPage';
 vi.mock('@console/entities/questionnaire', async (original) => ({
   ...(await original<typeof import('@console/entities/questionnaire')>()),
   fetchQuestionnaires: vi.fn(),
+  fetchQuestionnaireTags: vi.fn(),
   setQuestionnaireActive: vi.fn(),
 }));
 vi.mock('@console/entities/viewer', async (original) => ({
@@ -96,9 +98,12 @@ function renderPage() {
 describe('QuestionnairesPage', () => {
   beforeEach(() => {
     vi.mocked(useViewer).mockReturnValue(viewer(true));
+    vi.mocked(fetchQuestionnaireTags).mockResolvedValue({
+      tags: ['AP-03', 'SF-C00'],
+    });
   });
 
-  it('lists the questionnaires with their type, questions and count', async () => {
+  it('lists the questionnaires with their questions and count, and no type (every one is standard)', async () => {
     fetchMock.mockResolvedValue(
       page([
         row(),
@@ -129,9 +134,11 @@ describe('QuestionnairesPage', () => {
     const table = within(screen.getByRole('table'));
     expect(table.getByText('3 questions')).toBeInTheDocument();
     expect(table.getByText('1 question')).toBeInTheDocument();
-    expect(table.getByText('Chaining')).toBeInTheDocument();
-    expect(table.getByText('Diagnostic')).toBeInTheDocument();
-    expect(table.getByText('Standard')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('columnheader', {name: 'Type'}),
+      'one type only: no Type column',
+    ).toBeNull();
+    expect(screen.queryByRole('combobox', {name: 'Type'})).toBeNull();
     expect(
       screen.getByRole('link', {name: 'View Customer survey'}),
     ).toHaveAttribute('href', '/f/customer-survey');
@@ -155,6 +162,38 @@ describe('QuestionnairesPage', () => {
         expect.objectContaining({search: 'café', page: 1}),
       ),
     );
+  });
+
+  it("searches the account's tags as the user types and filters by the one picked, on the server", async () => {
+    fetchMock.mockResolvedValue(page([row()]));
+    renderPage();
+    await screen.findByRole('link', {name: 'Customer survey'});
+    const tag = screen.getByRole('combobox', {name: 'Tag'});
+    await waitFor(() => expect(tag).toBeEnabled());
+
+    await userEvent.type(tag, 'sf');
+    expect(
+      within(screen.getByRole('listbox', {name: 'Tag'}))
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+      'the options narrow as the user types',
+    ).toEqual(['SF-C00']);
+    fetchMock.mockResolvedValue(page([]));
+    await userEvent.click(screen.getByRole('option', {name: 'SF-C00'}));
+
+    expect(
+      await screen.findByRole('heading', {name: 'No matches'}),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({tag: 'SF-C00', page: 1}),
+    );
+    expect(tag).toHaveValue('SF-C00');
+    fetchMock.mockResolvedValue(page([row()]));
+    await userEvent.click(screen.getByRole('button', {name: 'Clear filters'}));
+    expect(
+      await screen.findByRole('link', {name: 'Customer survey'}),
+    ).toBeInTheDocument();
+    expect(tag).toHaveValue('');
   });
 
   it('offers the first questionnaire when there is none', async () => {

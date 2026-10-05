@@ -19,6 +19,7 @@ import {
   type NewOrganization,
   type PickedQuestionnaire,
   type Progress,
+  reviewedIds,
   runCreate,
   type Step,
   stepErrors,
@@ -115,11 +116,30 @@ export function useAssignationWizard() {
     forget(['organizationId']);
   };
 
-  // --- Step 3: the name and the deadline ---------------------------------------------------------------------
+  // --- Step 3: the name, the deadline and which questionnaires are reviewed ---------------------------------
 
   const [name, setName] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [requiresReview, setRequiresReview] = useState(true);
+  // Review is chosen per questionnaire: every picked one requires it unless switched off here.
+  const [withoutReview, setWithoutReview] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+  // No review by default ("No, close automatically"); on Yes each questionnaire is reviewed unless switched off.
+  const [reviewEnabled, setReviewEnabledState] = useState(false);
+  const reviewChoices = reviewedIds(questionnaires, withoutReview);
+  const reviewIds = reviewEnabled ? reviewChoices : [];
+  const setReview = (id: string, on: boolean) =>
+    setWithoutReview((current) => {
+      const next = new Set(current);
+      if (on) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const setReviewEnabled = (on: boolean) => {
+    setReviewEnabledState(on);
+    // Back to "Yes" with every one switched off: start again from all of them.
+    if (on && reviewChoices.length === 0) setWithoutReview(new Set());
+  };
 
   // --- Steps -----------------------------------------------------------------------------------------------
 
@@ -157,7 +177,7 @@ export function useAssignationWizard() {
           name,
           dueDate,
           registrationTitle: t('registrationTitle'),
-          requiresReview,
+          reviewQuestionnaireIds: reviewIds,
         },
         progress,
         DEPS,
@@ -225,8 +245,10 @@ export function useAssignationWizard() {
     setName,
     dueDate,
     setDueDate,
-    requiresReview,
-    setRequiresReview,
+    reviewEnabled,
+    setReviewEnabled,
+    reviewIds,
+    setReview,
     // Create
     submit,
     creating: create.isPending,

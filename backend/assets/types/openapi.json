@@ -634,7 +634,7 @@
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Partial. assignation_ids replaces the set; organization_id may only be sent unchanged.",
+                "summary": "Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups; organization_id may only be sent unchanged.",
                 "operationId": "put_api_projects_update",
                 "parameters": [
                     {
@@ -673,7 +673,7 @@
                         "description": "FORBIDDEN"
                     },
                     "404": {
-                        "description": "PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND"
+                        "description": "PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
                     },
                     "409": {
                         "description": "ASSIGNATION_IN_OTHER_PROJECT"
@@ -5333,6 +5333,11 @@
                     },
                     "review": {
                         "$ref": "#/components/schemas/ProjectReviewCountsOutput"
+                    },
+                    "requires_review": {
+                        "title": "Once complete it goes to review; false: it is simply completed.",
+                        "type": "boolean",
+                        "default": true
                     }
                 },
                 "type": "object"
@@ -5443,9 +5448,14 @@
                         "default": null
                     },
                     "requires_review": {
-                        "title": "Its follow-ups go to review once complete; false: they are simply completed.",
+                        "title": "Any of its follow-ups goes to review once complete (each one says so in assignations[].requires_review).",
                         "type": "boolean",
                         "default": true
+                    },
+                    "done_assignations": {
+                        "title": "Its follow-ups that are done: approved when reviewed, complete otherwise.",
+                        "type": "integer",
+                        "default": 0
                     }
                 },
                 "type": "object"
@@ -5496,7 +5506,7 @@
                         "nullable": true
                     },
                     "questionnaire_ids": {
-                        "title": "create only: each one becomes a new follow-up of the organization",
+                        "title": "each one becomes a new follow-up of the organization that joins the project",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -5508,8 +5518,24 @@
                         "type": "boolean",
                         "nullable": true
                     },
+                    "review_questionnaire_ids": {
+                        "title": "those of questionnaire_ids whose follow-ups go to review once complete; the others are\nsimply completed. Not sent: requires_review decides (on update, true when not sent).",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
+                    "review_assignation_ids": {
+                        "title": "update only: the project's follow-ups that go to review once complete; its other ones are\nsimply completed (ids outside the project are ignored)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "nullable": true
+                    },
                     "registration_title": {
-                        "title": "Create only: the title of the new follow-ups' registration slide, in the console's language.",
+                        "title": "The title of the new follow-ups' registration slide, in the console's language.",
                         "type": "string",
                         "nullable": true,
                         "maxLength": 200

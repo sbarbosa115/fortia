@@ -20,11 +20,11 @@ function guide(over: Partial<Guide>): Guide {
 }
 
 describe('the guide catalogue (PRD §10.18)', () => {
-  it('has 13 guides in both languages, with the same ids in the same order', () => {
+  it('has 14 guides in both languages, with the same ids in the same order', () => {
     const en = guidesFor('en');
     const es = guidesFor('es');
 
-    expect(en).toHaveLength(13);
+    expect(en).toHaveLength(14);
     expect(es.map((g) => g.id)).toEqual(en.map((g) => g.id));
     expect(es.map((g) => g.topic)).toEqual(en.map((g) => g.topic));
   });

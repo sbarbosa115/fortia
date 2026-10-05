@@ -158,9 +158,19 @@ export function shortDay(
 /** 0–100: the project's assignations approved, out of all of them. */
 /** The questionnaires that are done: approved ones, or completed ones when the assignation does not require review. */
 export function doneCount(project: Project): number {
-  return project.requires_review
-    ? project.approved_assignations
-    : project.completed_assignations;
+  return project.done_assignations;
+}
+
+/** Review is per questionnaire: 'all', 'none' or 'some' of the project's questionnaires require it. */
+export function reviewMix(project: Project): 'all' | 'none' | 'some' {
+  if (project.assignations.length === 0) {
+    return project.requires_review ? 'all' : 'none';
+  }
+  const reviewed = project.assignations.filter(
+    (item) => item.requires_review,
+  ).length;
+  if (reviewed === project.assignations.length) return 'all';
+  return reviewed === 0 ? 'none' : 'some';
 }
 
 export function approvalPercent(project: Project): number {

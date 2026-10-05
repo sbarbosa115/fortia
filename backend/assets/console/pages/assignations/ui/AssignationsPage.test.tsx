@@ -3,7 +3,12 @@ import {
   fetchProjects,
   type Project,
   type ProjectAssignation,
+  updateProject,
 } from '@console/entities/project';
+import {
+  fetchQuestionnaires,
+  type QuestionnairePage,
+} from '@console/entities/questionnaire';
 import type {Viewer} from '@console/entities/viewer';
 import {ApiError} from '@shared/api';
 import {testI18n} from '@shared/i18n/testing';
@@ -24,6 +29,11 @@ vi.mock('@console/entities/project', async (original) => ({
   ...(await original<typeof import('@console/entities/project')>()),
   fetchProjects: vi.fn(),
   deleteProject: vi.fn(),
+  updateProject: vi.fn(),
+}));
+vi.mock('@console/entities/questionnaire', async (original) => ({
+  ...(await original<typeof import('@console/entities/questionnaire')>()),
+  fetchQuestionnaires: vi.fn(),
 }));
 vi.mock('@console/entities/viewer', () => ({useViewer: () => mocks.viewer}));
 
@@ -56,6 +66,7 @@ function assignation(
     state: 'progress',
     completed: false,
     review_status: 'not_ready',
+    requires_review: true,
     attempt: 1,
     due_date: '2099-12-01',
     overdue: false,
@@ -82,6 +93,7 @@ function project(overrides: Partial<Project> = {}): Project {
     progress_percent: 69,
     completed_assignations: 1,
     approved_assignations: 0,
+    done_assignations: 0,
     total_assignations: 2,
     assignations: [
       assignation(),
@@ -343,10 +355,6 @@ describe('AssignationsPage', () => {
     const dialog = within(screen.getByRole('dialog'));
     expect(dialog.getByLabelText(/Organization/)).toHaveValue('Acme Retail');
     expect(dialog.getByLabelText(/Organization/)).toHaveAttribute('readonly');
-    expect(
-      dialog.queryByRole('combobox'),
-      'its questionnaires are set by the wizard, not here',
-    ).not.toBeInTheDocument();
     await userEvent.clear(dialog.getByLabelText(/Deadline/));
     await userEvent.clear(dialog.getByLabelText(/Assignation name/));
     await userEvent.click(dialog.getByRole('button', {name: 'Save'}));
@@ -357,6 +365,70 @@ describe('AssignationsPage', () => {
     expect(
       dialog.getByText('The assignation name is required'),
     ).toBeInTheDocument();
+  });
+
+  it('adds and removes questionnaires from the edit dialog', async () => {
+    fetchMock.mockResolvedValue(page([project()]));
+    vi.mocked(updateProject).mockResolvedValue(project());
+    vi.mocked(fetchQuestionnaires).mockResolvedValue({
+      items: [
+        {questionnaire_id: 'q-1', title: 'Store checklist', question_count: 8},
+        {questionnaire_id: 'q-5', title: 'Supplier audit', question_count: 6},
+        {questionnaire_id: 'q-6', title: 'Draft', question_count: 0},
+      ],
+      total: 3,
+      total_pages: 1,
+    } as unknown as QuestionnairePage);
+    renderPage();
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'More actions for Store opening Q4',
+      }),
+    );
+    await userEvent.click(
+      screen.getByRole('menuitem', {name: 'Edit assignation'}),
+    );
+    const dialog = within(screen.getByRole('dialog'));
+
+    await userEvent.click(
+      dialog.getByRole('button', {name: 'Remove Visual review'}),
+    );
+    expect(dialog.getByText('Will be removed')).toBeInTheDocument();
+    await userEvent.click(
+      dialog.getByRole('button', {name: 'Add questionnaires'}),
+    );
+    expect(
+      await dialog.findByRole('button', {name: 'Add Supplier audit'}),
+    ).toBeEnabled();
+    expect(
+      dialog.queryByRole('button', {name: 'Add Store checklist'}),
+      'a questionnaire it already has is not offered',
+    ).not.toBeInTheDocument();
+    expect(
+      dialog.getByRole('button', {name: 'Add Draft'}),
+      'a questionnaire without questions cannot be added',
+    ).toBeDisabled();
+    await userEvent.click(
+      dialog.getByRole('button', {name: 'Add Supplier audit'}),
+    );
+    expect(dialog.getByRole('switch', {name: 'Supplier audit'})).toBeChecked();
+    expect(
+      dialog.queryByRole('button', {name: 'Add Supplier audit'}),
+    ).not.toBeInTheDocument();
+    await userEvent.click(dialog.getByRole('button', {name: 'Save'}));
+
+    await waitFor(() =>
+      expect(vi.mocked(updateProject)).toHaveBeenCalledWith(
+        'p-1',
+        expect.objectContaining({
+          assignation_ids: ['a-1'],
+          review_assignation_ids: ['a-1'],
+          questionnaire_ids: ['q-5'],
+          review_questionnaire_ids: ['q-5'],
+          registration_title: 'Tell us who you are',
+        }),
+      ),
+    );
   });
 
   it('disables the changes for a read-only user, with the reason', async () => {

@@ -1273,5 +1273,97 @@
 .asg-wiz__review {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.asg-wiz__review-title {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  margin-bottom: -4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.asg-wiz__info {
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: help;
+}
+.asg-wiz__info:hover,
+.asg-wiz__info:focus-visible {
+  color: var(--color-primary);
+}
+.asg-wiz__segmented {
+  display: inline-flex;
+  align-self: flex-start;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 8px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg);
+}
+.asg-wiz__segment {
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+.asg-wiz__segment:hover {
+  color: var(--color-text);
+}
+.asg-wiz__segment[aria-checked='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgb(19 17 29 / 12%);
+}
+.asg-wiz__review-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.asg-wiz__review-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.asg-wiz__review-item + .asg-wiz__review-item {
+  border-top: 1px solid var(--color-border);
+}
+.asg-wiz__review-item .toggle {
+  min-width: 0;
+  font-size: 14px;
+  text-align: left;
+}
+.asg-wiz__review-item .badge {
+  flex: none;
+}
+.asg-wiz__review-note {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--color-text-muted);
 }

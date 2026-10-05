@@ -99,6 +99,14 @@ export function addPicked(
   return [...picked, ...questionnaires.filter((item) => !ids.has(item.id))];
 }
 
+/** The picked questionnaires that require review: all of them except those switched off in step 3. */
+export function reviewedIds(
+  picked: PickedQuestionnaire[],
+  withoutReview: ReadonlySet<string>,
+): string[] {
+  return picked.map((item) => item.id).filter((id) => !withoutReview.has(id));
+}
+
 /** Takes these questionnaires out of the picked ones. */
 export function removePicked(
   picked: PickedQuestionnaire[],
@@ -153,8 +161,8 @@ export type CreatePlan = {
   name: string;
   dueDate: string;
   registrationTitle: string;
-  /** A completed questionnaire goes to "Pending review"; without it, it is simply completed. */
-  requiresReview: boolean;
+  /** Those of questionnaireIds that go to "Pending review" once completed; the others are simply completed. */
+  reviewQuestionnaireIds: string[];
 };
 
 /** The API calls of Create, injected so the order and the retry are tested without a server. */
@@ -197,7 +205,7 @@ export async function runCreate(
     due_date: plan.dueDate.trim(),
     questionnaire_ids: plan.questionnaireIds,
     registration_title: plan.registrationTitle,
-    requires_review: plan.requiresReview,
+    review_questionnaire_ids: plan.reviewQuestionnaireIds,
   });
   return {projectId: created.project_id};
 }

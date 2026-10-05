@@ -26,6 +26,8 @@ final class ProjectAssignationOutput
         public readonly int $percent,
         public readonly ProjectAssignationProgressOutput $progress,
         public readonly ProjectReviewCountsOutput $review,
+        /** Once complete it goes to review; false: it is simply completed. */
+        public readonly bool $requires_review = true,
     ) {
     }
 
@@ -46,6 +48,7 @@ final class ProjectAssignationOutput
             (int) $data['percent'],
             ProjectAssignationProgressOutput::of((array) $data['progress']),
             ProjectReviewCountsOutput::of((array) $data['review']),
+            (bool) ($data['requires_review'] ?? true),
         );
     }
 }

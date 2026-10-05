@@ -2,7 +2,7 @@ import {initials, type Project} from '@console/entities/project';
 import {Icon} from '@shared/ui';
 import {Fragment, type MouseEvent, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {approvalPercent, shortDay} from '../model/rows';
+import {approvalPercent, reviewMix, shortDay} from '../model/rows';
 import {AssignationsPanel} from './AssignationsPanel';
 import {Deadline} from './Deadline';
 import {NextStepAction} from './NextStepAction';
@@ -83,15 +83,22 @@ export function ProjectTable({
             const open = expanded.has(project.project_id);
             const panelId = `project-${project.project_id}-assignations`;
             const created = shortDay(project.created_at, i18n.language);
-            const approvalLabel = project.requires_review
-              ? t('approvedOf', {
-                  approved: project.approved_assignations,
-                  total: project.total_assignations,
-                })
-              : t('completedOf', {
-                  completed: project.completed_assignations,
-                  total: project.total_assignations,
-                });
+            const mix = reviewMix(project);
+            const approvalLabel =
+              mix === 'all'
+                ? t('approvedOf', {
+                    approved: project.approved_assignations,
+                    total: project.total_assignations,
+                  })
+                : mix === 'none'
+                  ? t('completedOf', {
+                      completed: project.completed_assignations,
+                      total: project.total_assignations,
+                    })
+                  : t('doneOf', {
+                      done: project.done_assignations,
+                      total: project.total_assignations,
+                    });
             const percent = approvalPercent(project);
             const nextStep = (
               <div data-row-actions>
