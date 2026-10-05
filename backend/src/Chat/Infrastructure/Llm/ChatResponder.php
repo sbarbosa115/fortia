@@ -343,7 +343,7 @@ final class ChatResponder implements FakeLlmResponder
 
     /**
      * The basic the user asks to change, in their words: "el título que sea X", "cambia el tema a X", "title: X",
-     * "ponle de título X", "set the title X", "llámalo X"; with $bare (the basics are not confirmed yet) a verb alone
+     * "ponle de título X", "set the title X", "el título ponle X", "llámalo X"; with $bare (the basics are not confirmed yet) a verb alone
      * names the title too: "ponle X", "cámbialo a X", "make it X".
      *
      * @return array<string, string>|null
@@ -360,7 +360,9 @@ final class ChatResponder implements FakeLlmResponder
         $naming = '\b(?:ll[aá]m(?:alo|ala|elo|ele|ese)|que\s+se\s+llame|renombr\w*|call\s+it|name\s+it|rename\s+it)\b(?:\s+(?:a|como|to|as))?';
 
         if (1 === preg_match('/\b'.$field.'\b'.$of.'\s*'.$connector.'\s*(.+)$/iu', $typed, $m)
-            || 1 === preg_match('/'.$verb.$filler.'\s+'.$field.'\b'.$of.'\s*(?:'.$connector.')?\s*(.+)$/iu', $typed, $m)) {
+            || 1 === preg_match('/'.$verb.$filler.'\s+'.$field.'\b'.$of.'\s*(?:'.$connector.')?\s*(.+)$/iu', $typed, $m)
+            // The field first, then the verb: "el título ponle X", "al título cámbialo a X", "the title, set it to X".
+            || 1 === preg_match('/\b'.$field.'\b'.$of.'[\s,:]*'.$verb.'(?:\s+(?:it|lo|la))?(?:\s+(?:a|por|como|to|as))?[\s:]*(.+)$/iu', $typed, $m)) {
             [$name, $value] = [$m[1], $m[2]];
         } elseif (1 === preg_match('/'.$naming.'\s*(.+)$/iu', $typed, $m)) {
             [$name, $value] = ['title', $m[1]];
