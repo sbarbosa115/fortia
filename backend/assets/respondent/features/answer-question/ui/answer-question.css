@@ -851,20 +851,24 @@
 .answer-table {
   margin-inline: calc(50% - min(424px, 50vw - 16px));
 }
-.answer-table__scroll {
-  overflow-x: auto;
+.answer-table__box {
+  overflow: hidden;
   border: 1px solid var(--color-border);
   border-radius: 16px;
   background: var(--color-surface);
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 4%);
 }
+.answer-table__scroll {
+  overflow-x: auto;
+}
 .answer-table__scroll:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: inset var(--focus-ring);
 }
 .answer-table__table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
   font-size: 15px;
 }
@@ -883,7 +887,7 @@
   overflow-wrap: anywhere;
   vertical-align: bottom;
 }
-.answer-table__table tbody tr + tr {
+.answer-table__table tbody tr + tr > * {
   border-top: 1px solid var(--color-border);
 }
 .answer-table__table tbody th {
@@ -1044,97 +1048,69 @@
   color: var(--color-text-muted);
   font-size: 13px;
 }
-.answer-table__hint kbd {
-  display: inline-block;
-  margin: 0 2px;
-  padding: 1px 8px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
+.answer-table__swipe {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+.answer-table__swipe svg {
+  width: 14px;
+  height: 14px;
+}
+/* Every column keeps a usable width: past the screen's width the sheet scrolls sideways, with the first column (the
+   row's number or name) and the remove buttons pinned. */
+.answer-table__table {
+  min-width: calc(56px + var(--columns, 1) * 150px + 44px);
+}
+.answer-table__table tr > :first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   background: var(--color-surface);
-  box-shadow: 0 1px 0 var(--color-border);
-  color: var(--color-text);
-  font: inherit;
-  font-weight: 600;
+  box-shadow: 1px 0 0 var(--color-border);
+}
+.answer-table__table thead tr > :first-child {
+  background: color-mix(in srgb, var(--color-bg) 70%, var(--color-surface));
+}
+.answer-table__table tbody .answer-table__actions {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background: var(--color-surface);
+}
+.answer-table__table thead .answer-table__actions {
+  position: sticky;
+  right: 0;
+  background: color-mix(in srgb, var(--color-bg) 70%, var(--color-surface));
 }
 @media (max-width: 639px) {
-  .answer-table__scroll {
-    overflow: visible;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
+  .answer-table__table {
+    font-size: 15px;
   }
-  .answer-table__table,
-  .answer-table__table tbody,
-  .answer-table__table tr,
-  .answer-table__table tbody td,
-  .answer-table__table tbody th {
-    display: block;
-    width: auto;
-  }
-  .answer-table__table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .answer-table__table tbody tr {
-    position: relative;
+  .answer-table__table thead th,
+  .answer-table__table thead td {
     padding: 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    background: var(--color-surface);
-  }
-  .answer-table__table tbody tr + tr {
-    margin-top: 8px;
-  }
-  .answer-table__table tbody th {
-    padding: 0 0 8px;
-  }
-  .answer-table__table tbody td[data-label] {
-    border-left: 0;
-  }
-  .answer-table__table tbody td + td {
-    margin-top: 10px;
+    font-size: 13px;
   }
   .answer-table__table .answer-table__index {
-    width: auto;
-    margin-bottom: 6px;
-    text-align: left;
+    width: 44px;
   }
-  .answer-table__table .answer-table__index::before {
-    content: '#';
+  .answer-table__corner {
+    width: 128px;
   }
-  .answer-table__table tbody td[data-label]::before {
-    content: attr(data-label);
-    display: block;
-    margin-bottom: 4px;
-    color: var(--color-text-muted);
-    font-size: 12px;
-    font-weight: 600;
+  .answer-table__table tbody th {
+    padding: 0 12px;
+    font-size: 14px;
   }
   .answer-table__cell {
-    height: 44px;
+    height: 52px;
     padding: 0 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-  }
-  .answer-table__cell:focus {
-    border-color: var(--color-primary);
-  }
-  .answer-table__table .answer-table__actions {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: auto;
-    margin: 0;
   }
   .answer-table__footer {
-    margin-top: 8px;
-    padding: 4px 0;
-    border-top: 0;
-  }
-  .answer-table__hint--keys {
-    display: none;
+    padding: 12px;
   }
 }

@@ -1,7 +1,7 @@
 import {publicFlowUrl} from '@shared/config';
 import {slugify} from '@shared/lib';
 import {Icon} from '@shared/ui';
-import {type ReactNode, useEffect, useState} from 'react';
+import {type CSSProperties, type ReactNode, useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {isOptionType} from '../model/draft';
 import {useEditorContext} from '../model/EditorContext';
@@ -392,8 +392,8 @@ function PreviewQuestion({
 }
 
 /**
- * A table as the respondent gets it: a sheet that scrolls sideways with its first column in view, and on a phone a
- * card per row with each column's name over its field. Without fixed rows, one row and "Add row" (up to the limit).
+ * A table as the respondent gets it: a sheet with the column names on top, numbered rows (or the fixed rows' names)
+ * and "Add a row" under it; wider than the screen it scrolls sideways with the first column in view.
  */
 function PreviewTable({question}: {question: DraftQuestion}) {
   const {t} = useTranslation('pages.questionnaire-editor');
@@ -410,10 +410,16 @@ function PreviewTable({question}: {question: DraftQuestion}) {
   return (
     <div className="pv-sheet">
       <div className="pv-sheet__scroll">
-        <table className="pv-sheet__table">
+        <table
+          className="pv-sheet__table"
+          style={{'--columns': columns.length} as CSSProperties}
+        >
           <thead>
             <tr>
-              <th className="pv-sheet__first" scope="col">
+              <th
+                scope="col"
+                className={fixed ? 'pv-sheet__first' : 'pv-sheet__index'}
+              >
                 {fixed ? '' : '#'}
               </th>
               {columns.map((column, i) => (
@@ -428,18 +434,12 @@ function PreviewTable({question}: {question: DraftQuestion}) {
               <tr key={r}>
                 <th
                   scope="row"
-                  className={
-                    fixed
-                      ? 'pv-sheet__first'
-                      : 'pv-sheet__first pv-sheet__index'
-                  }
+                  className={fixed ? 'pv-sheet__first' : 'pv-sheet__index'}
                 >
                   {row}
                 </th>
-                {columns.map((column, c) => (
-                  <td key={c} data-label={column}>
-                    <span className="pv-sheet__cell" />
-                  </td>
+                {columns.map((_, c) => (
+                  <td key={c} />
                 ))}
               </tr>
             ))}

@@ -67,6 +67,6 @@
     "remove": "Remove {{row}}",
     "add": "Add a row",
     "limit": "You can add up to {{max}} rows.",
-    "enterHint": "or press <key>Enter</key> on the last row"
+    "swipe": "Swipe to see every column"
   }
 }

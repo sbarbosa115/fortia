@@ -208,7 +208,11 @@
       "leaveFixedBody_one": "Se perderá la fila que creaste y la persona agregará sus propias filas.",
       "leaveFixedBody_other": "Se perderán las {{count}} filas que creaste y la persona agregará sus propias filas.",
       "leaveFixed": "Quitar filas fijas"
-    }
+    },
+    "templateDrop": "Arrastra un archivo aquí o haz clic para elegirlo",
+    "templateDownload": "Descargar plantilla",
+    "templateUploading": "Subiendo…",
+    "templateKind": "Archivo {{ext}} · la persona lo descarga desde la pregunta"
   },
   "end": {
     "title": "Al terminar",

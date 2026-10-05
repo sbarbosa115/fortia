@@ -67,6 +67,6 @@
     "remove": "Quitar {{row}}",
     "add": "Agregar una fila",
     "limit": "Puedes agregar hasta {{max}} filas.",
-    "enterHint": "o pulsa <key>Enter</key> en la última fila"
+    "swipe": "Desliza para ver todas las columnas"
   }
 }

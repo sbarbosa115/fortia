@@ -395,21 +395,103 @@
   gap: var(--space-1);
 }
 
-/* A file question's template: its name opens it; replace or remove it. */
-.template-field__name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  border: 0;
-  background: none;
-  padding: 0;
-  color: var(--color-primary);
+/* A file question's template: a drop area to upload it, then a file card (download, replace, remove). */
+.template-drop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
   font: inherit;
   text-align: left;
-  text-decoration: underline;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.template-drop:hover:not(:disabled),
+.template-drop[data-dragging] {
+  border-color: var(--color-primary);
+  background: color-mix(
+    in srgb,
+    var(--color-primary-soft) 55%,
+    var(--color-surface)
+  );
+}
+.template-drop:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.template-drop:disabled {
+  cursor: progress;
+}
+.template-drop__icon,
+.template-card__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.template-drop__text,
+.template-card__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.template-drop__text strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.template-drop__text span,
+.template-card__meta {
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+}
+.template-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+.template-card__name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
+}
+.template-card__actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+.template-card__remove.btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger);
+}
+@media (max-width: 560px) {
+  .template-card {
+    flex-wrap: wrap;
+  }
+  .template-card__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 /* A table question, built on the table itself (as in Notion or Sheets): grey bold headers typed in place, thin cell

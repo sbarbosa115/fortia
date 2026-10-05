@@ -208,7 +208,11 @@
       "leaveFixedBody_one": "The row you created will be lost and the respondent will add their own rows.",
       "leaveFixedBody_other": "The {{count}} rows you created will be lost and the respondent will add their own rows.",
       "leaveFixed": "Remove fixed rows"
-    }
+    },
+    "templateDrop": "Drop a file here or click to choose one",
+    "templateDownload": "Download template",
+    "templateUploading": "Uploading…",
+    "templateKind": "{{ext}} file · the respondent downloads it from the question"
   },
   "end": {
     "title": "When it ends",

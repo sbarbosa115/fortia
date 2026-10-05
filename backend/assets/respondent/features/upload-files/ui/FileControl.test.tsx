@@ -38,7 +38,10 @@ describe('FileControl (PRD §9.9)', () => {
   it('uploads a chosen file and saves its object key', async () => {
     upload.mockResolvedValue('ACME0001/s1/q1/abc.pdf');
     const {onChange, input} = renderFiles();
-    expect(screen.getByText('0 / 2 files')).toBeInTheDocument();
+    expect(
+      screen.queryByText(/^\d+ (\/ \d+ )?files?$/),
+      'no counter before the first file, and never "of 2": the limit is a cap, not a target',
+    ).toBeNull();
     await userEvent.upload(input, new File(['x'], 'report.pdf'));
     await waitFor(() =>
       expect(onChange).toHaveBeenLastCalledWith(['ACME0001/s1/q1/abc.pdf']),
@@ -49,7 +52,7 @@ describe('FileControl (PRD §9.9)', () => {
       expect.any(Function),
       null,
     );
-    expect(screen.getByText('1 / 2 files')).toBeInTheDocument();
+    expect(screen.getByText('1 file')).toBeInTheDocument();
   });
 
   it('offers Try again after a failed upload', async () => {
@@ -166,7 +169,7 @@ describe('FileControl (PRD §9.9)', () => {
     await waitFor(() =>
       expect(onChange).toHaveBeenLastCalledWith(['k/1.png', 'k/2.png']),
     );
-    expect(screen.getByText('2 / 3 files')).toBeInTheDocument();
+    expect(screen.getByText('2 files')).toBeInTheDocument();
     expect(
       screen.getAllByText(/^screenshot-\d{8}-\d{6}(-\d+)?\.png$/),
     ).toHaveLength(2);
