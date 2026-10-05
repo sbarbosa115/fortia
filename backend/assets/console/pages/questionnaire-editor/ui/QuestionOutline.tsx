@@ -97,7 +97,7 @@ export function QuestionOutline() {
                       <button
                         type="button"
                         className="outline__remove"
-                        disabled={!canRemove}
+                        disabled={!canRemove || editor.locked}
                         aria-label={t('questions.delete', {n: index + 1})}
                         title={
                           canRemove
@@ -115,14 +115,16 @@ export function QuestionOutline() {
             </div>
           );
         })}
-        <button
-          type="button"
-          className="outline__add"
-          onClick={() => editor.addQuestion()}
-        >
-          <Icon name="plus" size={14} />
-          {t('questions.add')}
-        </button>
+        {editor.locked ? null : (
+          <button
+            type="button"
+            className="outline__add"
+            onClick={() => editor.addQuestion()}
+          >
+            <Icon name="plus" size={14} />
+            {t('questions.add')}
+          </button>
+        )}
       </div>
     </div>
   );

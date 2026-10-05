@@ -2,11 +2,11 @@ import {
   questionnairePublicUrl,
   type QuestionnaireRow,
 } from '@console/entities/questionnaire';
-import {Badge, Icon, IconButton, useToast} from '@shared/ui';
+import {Icon, IconButton, useToast} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {Link} from 'react-router';
 
-/** View (new tab), Copy link, Edit, Answers and Analytics ("New"), in the house order (PRD §10.6). */
+/** The icons View (new tab), Copy link, Edit and Analytics, then Answers on the right (PRD §10.6). */
 export function RowActions({
   row,
   readOnlyReason,
@@ -67,18 +67,18 @@ export function RowActions({
         </Link>
       )}
       <Link
+        className="btn btn--ghost btn--sm btn--icon"
+        to={`/questionnaires/${row.questionnaire_id}/dashboard`}
+        aria-label={t('actions.analytics', {title: row.title})}
+        title={t('actions.analytics', {title: row.title})}
+      >
+        <Icon name="chart" />
+      </Link>
+      <Link
         className="btn btn--ghost btn--sm"
         to={`/questionnaires/${row.questionnaire_id}/answers`}
       >
         {t('actions.answers')}
-      </Link>
-      <Link
-        className="btn btn--ghost btn--sm"
-        to={`/questionnaires/${row.questionnaire_id}/dashboard`}
-      >
-        <Icon name="chart" />
-        {t('actions.analytics')}
-        <Badge tone="accent">{t('actions.new')}</Badge>
       </Link>
     </>
   );

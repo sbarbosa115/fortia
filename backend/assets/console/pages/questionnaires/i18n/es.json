@@ -46,8 +46,7 @@
     "copyLink": "Copiar el enlace de {{title}}",
     "edit": "Editar {{title}}",
     "answers": "Respuestas",
-    "analytics": "Analítica",
-    "new": "Nuevo"
+    "analytics": "Analítica de {{title}}"
   },
   "linkCopied": "Enlace copiado",
   "linkNotCopied": "No pudimos copiar el enlace. Abre el cuestionario y cópialo desde la barra de direcciones.",

@@ -14,7 +14,8 @@
   },
   "chip": {
     "draft": "Draft · saved when you create it",
-    "editing": "Editing · saved when you save changes"
+    "editing": "Editing · saved when you save changes",
+    "locked": "Locked · read-only"
   },
   "steps": {
     "label": "Steps",
@@ -363,14 +364,14 @@
     "crumb": "Done"
   },
   "locked": {
-    "badge": "Locked",
     "title": "Locked to preserve answers",
-    "body": "This questionnaire already has answers, so it can't be edited. Create a copy to change it.",
+    "body": "This questionnaire has already been answered, so its questions stay fixed to avoid altering the data already collected. Create an editable copy — the current answers stay intact.",
     "copy": "Create a copy",
     "confirmTitle": "Create a copy?",
     "confirmBody": "A new questionnaire is created in your account, with no answers, ready to edit.",
     "confirmYes": "Yes, create copy",
-    "copied": "Copy created"
+    "copied": "Copy created",
+    "saveBlocked": "This questionnaire already has answers: create a copy to change it."
   },
   "generic": {
     "title": "Edit questionnaire",

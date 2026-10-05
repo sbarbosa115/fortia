@@ -56,10 +56,13 @@ export function useEditor({
   initial,
   mode,
   questionnaireId,
+  initialLocked = false,
 }: {
   initial: Draft;
   mode: EditorMode;
   questionnaireId: string | null;
+  /** It has answers: shown read-only under the Locked banner, and never saved. */
+  initialLocked?: boolean;
 }) {
   const {t} = useTranslation('pages.questionnaire-editor');
   const viewer = useViewer();
@@ -78,7 +81,7 @@ export function useEditor({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<SavedResult | null>(null);
-  const [locked, setLocked] = useState(false);
+  const [locked, setLocked] = useState(initialLocked);
   const [slugInUse, setSlugInUse] = useState<string | null>(null);
   /** The question a refused save pointed at (single-page editor): its card is outlined until it is edited. */
   const [flagged, setFlagged] = useState<string | null>(null);
@@ -274,7 +277,10 @@ export function useEditor({
     goTo,
     back: () => (step > 1 ? goTo((step - 1) as Step) : undefined),
     primary,
-    primaryDisabledReason: message(primaryIssues[0]),
+    primaryDisabledReason:
+      locked && step === 3
+        ? t('locked.saveBlocked')
+        : message(primaryIssues[0]),
     confirmOpen,
     closeConfirm: () => setConfirmOpen(false),
     save,

@@ -9,7 +9,6 @@ import {returnToSearch, useReturnTo} from '../model/returnTo';
 import {useEditorData} from '../model/useEditorData';
 import {CreationEditor} from './CreationEditor';
 import {GenericEditor} from './GenericEditor';
-import {LockedView} from './LockedView';
 import './editor.css';
 import './shell.css';
 
@@ -55,9 +54,6 @@ function EditExisting({id, routeKind}: {id: string; routeKind?: string}) {
   if (isError) {
     return <ErrorState error={error} onRetry={() => void refetch()} />;
   }
-  if (data.locked) {
-    return <LockedView questionnaire={data.questionnaire} />;
-  }
   const wanted = editRouteKind(data.kind);
   const asked = routeKind === 'chaining' ? 'prompt' : routeKind;
   if (wanted === null) {
@@ -65,7 +61,12 @@ function EditExisting({id, routeKind}: {id: string; routeKind?: string}) {
       return <Navigate to={`/questionnaires/${id}/edit${search}`} replace />;
     }
     return (
-      <EditorProvider initial={data.draft} mode="edit" questionnaireId={id}>
+      <EditorProvider
+        initial={data.draft}
+        mode="edit"
+        questionnaireId={id}
+        locked={data.locked}
+      >
         <GenericEditor />
       </EditorProvider>
     );
@@ -76,7 +77,12 @@ function EditExisting({id, routeKind}: {id: string; routeKind?: string}) {
     );
   }
   return (
-    <EditorProvider initial={data.draft} mode="edit" questionnaireId={id}>
+    <EditorProvider
+      initial={data.draft}
+      mode="edit"
+      questionnaireId={id}
+      locked={data.locked}
+    >
       <CreationEditor />
     </EditorProvider>
   );

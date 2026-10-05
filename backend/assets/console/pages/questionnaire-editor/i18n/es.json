@@ -14,7 +14,8 @@
   },
   "chip": {
     "draft": "Borrador · se guarda al crear",
-    "editing": "Editando · se guarda al guardar cambios"
+    "editing": "Editando · se guarda al guardar cambios",
+    "locked": "Bloqueado · solo lectura"
   },
   "steps": {
     "label": "Pasos",
@@ -363,14 +364,14 @@
     "crumb": "Listo"
   },
   "locked": {
-    "badge": "Bloqueado",
     "title": "Bloqueado para conservar las respuestas",
-    "body": "Este cuestionario ya tiene respuestas, así que no se puede editar. Crea una copia para cambiarlo.",
+    "body": "Este cuestionario ya ha sido respondido, así que sus preguntas quedan fijas para no alterar los datos ya recolectados. Crea una copia editable — las respuestas actuales se mantienen intactas.",
     "copy": "Crear una copia",
     "confirmTitle": "¿Crear una copia?",
     "confirmBody": "Se crea un cuestionario nuevo en tu cuenta, sin respuestas y listo para editar.",
     "confirmYes": "Sí, crear copia",
-    "copied": "Copia creada"
+    "copied": "Copia creada",
+    "saveBlocked": "Este cuestionario ya tiene respuestas: crea una copia para cambiarlo."
   },
   "generic": {
     "title": "Editar cuestionario",

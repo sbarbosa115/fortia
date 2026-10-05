@@ -379,20 +379,81 @@
 
 /* Preview */
 
-/* Success and Locked */
-.editor--success,
-.editor--locked {
+/* Success */
+.editor--success {
   max-width: 880px;
   margin: 0 auto;
   padding: var(--space-6) 0;
 }
 
-.locked__questions {
-  margin: 0;
-  padding-left: var(--space-5);
+/* Locked (it has answers): an orange banner above the editor, which stays visible but read-only. */
+.locked-banner {
+  --locked: #ea580c;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  align-items: center;
+  gap: 16px;
+  margin-bottom: var(--space-6);
+  padding: 20px;
+  border: 1px solid color-mix(in srgb, #fed7aa 80%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, #fff7ed 80%, transparent);
+}
+.locked-banner__icon {
+  display: inline-flex;
+  flex: none;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--locked);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 5%);
+}
+.locked-banner__text {
+  flex: 1;
+  min-width: 0;
+}
+.locked-banner__title {
+  margin: 0;
+  color: #431407;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.locked-banner__body {
+  margin: 4px 0 0;
+  color: color-mix(in srgb, #7c2d12 80%, transparent);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.locked-banner .locked-banner__copy.btn {
+  flex: none;
+  border-color: var(--locked);
+  background: var(--locked);
+  color: #fff;
+}
+.locked-banner .locked-banner__copy.btn:hover:not(:disabled) {
+  border-color: #c2410c;
+  background: #c2410c;
+}
+@media (max-width: 640px) {
+  .locked-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+/* The read-only editor: a plain wrapper that disables every control in it at once. */
+.lock-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lock-fieldset:disabled {
+  cursor: default;
 }
 
 /* A file question's template: a drop area to upload it, then a file card (download, replace, remove). */
