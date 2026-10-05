@@ -3665,6 +3665,11 @@
                         },
                         "nullable": true
                     },
+                    "max_rows": {
+                        "description": "Without fixed rows, the most rows the respondent may add (none: 50)",
+                        "type": "integer",
+                        "nullable": true
+                    },
                     "template": {
                         "oneOf": [
                             {

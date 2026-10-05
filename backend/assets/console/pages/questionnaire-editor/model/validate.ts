@@ -75,6 +75,9 @@ function questions(draft: Draft): Issue[] {
       } else if (new Set(labels).size !== labels.length) {
         add('errors.uniqueColumns', field, {title});
       }
+      if (question.tableRows.some((row) => row.label.trim() === '')) {
+        add('errors.rowLabel', field, {title});
+      }
     }
     if (question.type === 'range') {
       const min = toNumber(question.rangeMin);

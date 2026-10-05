@@ -68,7 +68,7 @@ export const OPTION_FIELD_TYPES: FieldType[] = [
   'single_selection_with_score',
 ];
 
-/** A table's columns, and the most fixed rows it may have (the server keeps 20 and 50). */
+/** A table's columns, and the most rows it may have, fixed or added by the respondent (the server keeps 20 and 50). */
 export const MAX_TABLE_COLUMNS = 20;
 export const MAX_TABLE_ROWS = 50;
 
@@ -99,6 +99,9 @@ export type DraftOption = {
   base: Record<string, unknown>;
 };
 
+/** A table's fixed row, keyed for React and drag and drop. */
+export type DraftTableRow = {key: string; label: string};
+
 export type DraftQuestion = {
   /** Stable key for React and drag and drop. */
   key: string;
@@ -117,8 +120,10 @@ export type DraftQuestion = {
   textFormat: TextFormat;
   rangeMin: string;
   rangeMax: string;
-  /** A table's fixed row labels (none: the respondent adds rows); its columns are `options`. */
-  tableRows: string[];
+  /** A table's fixed rows (none: the respondent adds rows); its columns are `options`. */
+  tableRows: DraftTableRow[];
+  /** Without fixed rows, the most rows the respondent may add (1 to MAX_TABLE_ROWS). */
+  tableMaxRows: number;
   /** A file question's template: the file the respondent downloads, fills in and uploads. */
   template: FileTemplate | null;
   /** email / tel / phone controls are edited as text and saved back with their own type. */

@@ -106,6 +106,8 @@ final class Questions
         $type = ControlType::tryFrom($control['type']);
         if (ControlType::Table === $type && [] !== ($rows = TableAnswer::rowLabels($c['rows'] ?? null))) {
             $control['rows'] = $rows;
+        } elseif (ControlType::Table === $type && null !== ($maxRows = TableAnswer::maxRowsOf($c['max_rows'] ?? null))) {
+            $control['max_rows'] = $maxRows;
         }
         if (ControlType::File === $type && null !== ($template = FileTemplate::normalize($c['template'] ?? null))) {
             $control['template'] = $template;

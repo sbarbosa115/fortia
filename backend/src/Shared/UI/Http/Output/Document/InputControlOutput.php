@@ -9,8 +9,8 @@ use OpenApi\Attributes as OA;
 /**
  * The answer field of a question (PRD §6.5 InputControl). value, timestamp, skipped and locked exist only in a
  * session: value is the selected value(s), the transcriptions of an audio answer, the storage keys of files, or a
- * table's rows ({column value: text}). A table's options are its columns and `rows` its fixed rows; a file question
- * may have a template to download.
+ * table's rows ({column value: text}). A table's options are its columns, `rows` its fixed rows and `max_rows` the
+ * most rows a respondent adds without them; a file question may have a template to download.
  */
 final class InputControlOutput
 {
@@ -29,6 +29,8 @@ final class InputControlOutput
         public readonly array $validations,
         #[OA\Property(description: 'A table\'s fixed rows (none: the respondent adds rows)', type: 'array', items: new OA\Items(type: 'string'), nullable: true)]
         public readonly ?array $rows,
+        #[OA\Property(description: 'Without fixed rows, the most rows the respondent may add (none: 50)', nullable: true)]
+        public readonly ?int $max_rows,
         #[OA\Property(ref: new Model(type: FileTemplateOutput::class), nullable: true)]
         public readonly ?FileTemplateOutput $template,
         #[OA\Property(nullable: true, oneOf: [new OA\Schema(type: 'string'), new OA\Schema(type: 'number'), new OA\Schema(type: 'boolean')])]
@@ -54,6 +56,7 @@ final class InputControlOutput
             array_map(static fn (array $o): OptionOutput => OptionOutput::fromArray($o), array_values(array_filter((array) ($c['options'] ?? []), 'is_array'))),
             array_map(static fn (array $v): ValidationOutput => ValidationOutput::fromArray($v), array_values(array_filter((array) ($c['validations'] ?? []), 'is_array'))),
             isset($c['rows']) && \is_array($c['rows']) ? array_values(array_map('strval', array_filter($c['rows'], 'is_scalar'))) : null,
+            isset($c['max_rows']) && \is_int($c['max_rows']) ? $c['max_rows'] : null,
             FileTemplateOutput::fromArray($c['template'] ?? null),
             $c['default_value'] ?? null,
             $c['value'] ?? null,

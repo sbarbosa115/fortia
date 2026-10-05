@@ -335,13 +335,7 @@ function PreviewQuestion({
       </span>
     );
   } else if (type === 'table') {
-    control = (
-      <div className="pv-table">
-        {question.options.map((option, i) => (
-          <span key={option.key}>{label(option.label, i)}</span>
-        ))}
-      </div>
-    );
+    control = <PreviewTable question={question} />;
   } else if (type === 'message') {
     control = <p className="pv-small">{t('shopper.message')}</p>;
   }
@@ -393,6 +387,76 @@ function PreviewQuestion({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * A table as the respondent gets it: a sheet that scrolls sideways with its first column in view, and on a phone a
+ * card per row with each column's name over its field. Without fixed rows, one row and "Add row" (up to the limit).
+ */
+function PreviewTable({question}: {question: DraftQuestion}) {
+  const {t} = useTranslation('pages.questionnaire-editor');
+  const columns = question.options.map(
+    (option, i) =>
+      option.label.trim() || t('questions.table.columnN', {n: i + 1}),
+  );
+  const fixed = question.tableRows.length > 0;
+  const rows = fixed
+    ? question.tableRows.map(
+        (row, i) => row.label.trim() || t('questions.table.rowN', {n: i + 1}),
+      )
+    : ['1'];
+  return (
+    <div className="pv-sheet">
+      <div className="pv-sheet__scroll">
+        <table className="pv-sheet__table">
+          <thead>
+            <tr>
+              <th className="pv-sheet__first" scope="col">
+                {fixed ? '' : '#'}
+              </th>
+              {columns.map((column, i) => (
+                <th key={i} scope="col">
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, r) => (
+              <tr key={r}>
+                <th
+                  scope="row"
+                  className={
+                    fixed
+                      ? 'pv-sheet__first'
+                      : 'pv-sheet__first pv-sheet__index'
+                  }
+                >
+                  {row}
+                </th>
+                {columns.map((column, c) => (
+                  <td key={c} data-label={column}>
+                    <span className="pv-sheet__cell" />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {fixed ? null : (
+        <div className="pv-sheet__add">
+          <span className="pv-sheet__add-icon" aria-hidden>
+            <Icon name="plus" size={12} />
+          </span>
+          {t('shopper.addRow')}
+          <span className="pv-sheet__limit">
+            {t('shopper.maxRows', {max: question.tableMaxRows})}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

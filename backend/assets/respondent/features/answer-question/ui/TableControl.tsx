@@ -11,8 +11,8 @@ import type {ControlProps} from '../model/types';
 
 /**
  * A table: a column per option, laid out as a sheet. With fixed rows (`rows`) each row is labelled and filled in;
- * without them the rows are numbered and the respondent adds rows (up to 50, also with Enter on the last row) and
- * removes them. The value is the list of rows, each {column value: text}.
+ * without them the rows are numbered and the respondent adds rows (up to the control's `max_rows`, else 50; also with
+ * Enter on the last row) and removes them. The value is the list of rows, each {column value: text}.
  */
 export function TableControl({
   question,
@@ -24,6 +24,7 @@ export function TableControl({
   const columns = tableColumns(control);
   const fixed = control.rows ?? [];
   const growable = fixed.length === 0;
+  const maxRows = control.max_rows ?? MAX_TABLE_ROWS;
   const [rows, setRows] = useState<TableRow[]>(() => {
     const saved = tableRowsOf(control.value);
     if (!growable) {
@@ -32,7 +33,7 @@ export function TableControl({
     return saved.length > 0 ? saved : [{}];
   });
   const tableRef = useRef<HTMLTableElement>(null);
-  const canAdd = growable && !disabled && rows.length < MAX_TABLE_ROWS;
+  const canAdd = growable && !disabled && rows.length < maxRows;
 
   const update = (next: TableRow[]) => {
     setRows(next);
@@ -165,9 +166,9 @@ export function TableControl({
               </span>
               {t('table.add')}
             </button>
-            {rows.length >= MAX_TABLE_ROWS ? (
+            {rows.length >= maxRows ? (
               <span className="answer-table__hint">
-                {t('table.limit', {max: MAX_TABLE_ROWS})}
+                {t('table.limit', {max: maxRows})}
               </span>
             ) : (
               <span className="answer-table__hint answer-table__hint--keys">

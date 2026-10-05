@@ -2,15 +2,11 @@ import {Button, Icon, IconButton, TextInput} from '@shared/ui';
 import {useTranslation} from 'react-i18next';
 import {isScored, newOption} from '../model/draft';
 import {useEditorContext} from '../model/EditorContext';
-import {
-  type DraftOption,
-  type DraftQuestion,
-  MAX_TABLE_COLUMNS,
-} from '../model/types';
+import {type DraftOption, type DraftQuestion} from '../model/types';
 
 /**
  * Labelled answer choices, numbered as in the admin console; the scored types also carry a numeric score per choice
- * (PRD §10.5). A table's columns are edited the same way.
+ * (PRD §10.5).
  */
 export function OptionsEditor({
   question,
@@ -22,21 +18,12 @@ export function OptionsEditor({
   const {t} = useTranslation('pages.questionnaire-editor');
   const editor = useEditorContext();
   const scored = isScored(question.type, editor.draft.kind);
-  // A table's options are its columns: the same list, its own words.
-  const words =
-    question.type === 'table'
-      ? {
-          legend: 'questions.columns',
-          label: 'questions.columnLabel',
-          add: 'questions.addColumn',
-          remove: 'questions.removeColumn',
-        }
-      : {
-          legend: scored ? 'questions.scoredOptions' : 'questions.options',
-          label: 'questions.optionLabel',
-          add: scored ? 'questions.addScoredOption' : 'questions.addOption',
-          remove: 'questions.removeOption',
-        };
+  const words = {
+    legend: scored ? 'questions.scoredOptions' : 'questions.options',
+    label: 'questions.optionLabel',
+    add: scored ? 'questions.addScoredOption' : 'questions.addOption',
+    remove: 'questions.removeOption',
+  };
   const marker =
     question.type === 'ranking'
       ? 'grip'
@@ -108,10 +95,6 @@ export function OptionsEditor({
           size="sm"
           variant="ghost"
           icon={<Icon name="plus" size={14} />}
-          disabled={
-            question.type === 'table' &&
-            question.options.length >= MAX_TABLE_COLUMNS
-          }
           onClick={() =>
             setOptions([
               ...question.options,

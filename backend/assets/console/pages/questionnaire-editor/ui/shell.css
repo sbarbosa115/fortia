@@ -1332,20 +1332,152 @@ button.pv-button:disabled {
 .pv-drop svg {
   color: var(--color-primary);
 }
-.pv-table {
+/* A table question: a sheet that scrolls sideways with its first column pinned; on the phone, a card per row. */
+.pv-sheet {
   display: grid;
-  grid-auto-flow: column;
-  gap: 1px;
-  overflow: hidden;
+  gap: var(--space-2);
+}
+.pv-sheet__scroll {
+  overflow-x: auto;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+}
+.pv-sheet__table {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 11.5px;
+}
+.pv-sheet__table th,
+.pv-sheet__table td {
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+.pv-sheet__table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.pv-sheet__table thead th {
+  min-width: 96px;
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--color-hover) 70%, #fff);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: bottom;
+}
+.pv-sheet__table td {
+  padding: 4px;
+  border-left: 1px solid var(--color-border);
+}
+.pv-sheet__table .pv-sheet__first {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 72px;
+  max-width: 110px;
+  padding: 8px 10px;
+  background: #fff;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  box-shadow: 1px 0 0 var(--color-border);
+}
+.pv-sheet__table thead .pv-sheet__first {
+  background: color-mix(in srgb, var(--color-hover) 70%, #fff);
+}
+.pv-sheet__table .pv-sheet__index {
+  min-width: 28px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.pv-sheet__cell {
+  display: block;
+  height: 26px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-hover) 45%, transparent);
+}
+.pv-sheet__add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 600;
 }
-.pv-table span {
-  padding: var(--space-2);
-  background: var(--color-hover);
+.pv-sheet__add-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: #fff;
+}
+.pv-sheet__limit {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+/* The phone: every column in full, as one card per row with the column's name over its field. */
+.preview__frame--mobile .pv-sheet__scroll {
+  overflow: visible;
+  border: 0;
+  background: transparent;
+}
+.preview__frame--mobile .pv-sheet__table,
+.preview__frame--mobile .pv-sheet__table tbody,
+.preview__frame--mobile .pv-sheet__table tr,
+.preview__frame--mobile .pv-sheet__table tbody th,
+.preview__frame--mobile .pv-sheet__table td {
+  display: block;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+}
+.preview__frame--mobile .pv-sheet__table thead {
+  display: none;
+}
+.preview__frame--mobile .pv-sheet__table tbody tr {
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #fff;
+}
+.preview__frame--mobile .pv-sheet__table tbody tr + tr {
+  margin-top: 8px;
+}
+.preview__frame--mobile .pv-sheet__table tbody tr > * {
+  position: static;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+.preview__frame--mobile .pv-sheet__table tbody th {
+  margin-bottom: 6px;
+}
+.preview__frame--mobile .pv-sheet__table .pv-sheet__index {
+  text-align: left;
+}
+.preview__frame--mobile .pv-sheet__table .pv-sheet__index::before {
+  content: '#';
+}
+.preview__frame--mobile .pv-sheet__table td + td {
+  margin-top: 8px;
+}
+.preview__frame--mobile .pv-sheet__table td::before {
+  content: attr(data-label);
+  display: block;
+  margin-bottom: 3px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+.preview__frame--mobile .pv-sheet__cell {
+  height: 30px;
+  border: 1px solid var(--color-border);
+  background: #fff;
 }
 .pv-nav {
   position: sticky;

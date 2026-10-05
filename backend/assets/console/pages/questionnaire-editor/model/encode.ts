@@ -9,6 +9,7 @@ import {
   type FlowState,
   LAYOUT_BLOCKS,
   type LayoutBlock,
+  MAX_TABLE_ROWS,
   RESULT_COPY_KEYS,
 } from './types';
 
@@ -118,8 +119,14 @@ function encodeQuestion(
   };
   if (question.type === 'table') {
     control['rows'] = question.tableRows
-      .map((row) => row.trim())
+      .map((row) => row.label.trim())
       .filter(Boolean);
+    if (
+      question.tableRows.length === 0 &&
+      question.tableMaxRows < MAX_TABLE_ROWS
+    ) {
+      control['max_rows'] = question.tableMaxRows;
+    }
   }
   if (question.type === 'file' && question.template) {
     control['template'] = question.template;

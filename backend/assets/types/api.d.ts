@@ -1215,6 +1215,8 @@ export interface components {
             validations: components["schemas"]["ValidationOutput"][];
             /** @description A table's fixed rows (none: the respondent adds rows) */
             rows?: string[] | null;
+            /** @description Without fixed rows, the most rows the respondent may add (none: 50) */
+            max_rows?: number | null;
             template?: components["schemas"]["FileTemplateOutput"] | null;
             /** @default null */
             default_value: (string | number | boolean) | null;

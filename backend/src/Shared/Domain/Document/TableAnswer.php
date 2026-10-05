@@ -4,7 +4,8 @@ namespace App\Shared\Domain\Document;
 
 /**
  * A table question: the control's options are its columns (label, and the value that keys a cell), its `rows` the
- * optional fixed row labels. Without fixed rows the respondent adds rows, up to MAX_ROWS.
+ * optional fixed row labels. Without fixed rows the respondent adds rows, up to the control's `max_rows` (1 to
+ * MAX_ROWS, MAX_ROWS when absent).
  *
  * The answer (the control's value) is a list of rows, each `{column key: text}`; with fixed rows the list follows
  * their order. Whatever a respondent sends is reduced to that shape: unknown columns are dropped, cells capped,
@@ -71,6 +72,33 @@ final class TableAnswer
     }
 
     /**
+     * A `max_rows` setting as stored: a whole number from 1 to MAX_ROWS, or null (absent, invalid, or MAX_ROWS itself).
+     */
+    public static function maxRowsOf(mixed $value): ?int
+    {
+        if (\is_string($value) && ctype_digit($value)) {
+            $value = (int) $value;
+        }
+        if (!\is_int($value) || $value < 1 || $value >= self::MAX_ROWS) {
+            return null;
+        }
+
+        return $value;
+    }
+
+    /**
+     * The most rows a respondent may send: the fixed rows, else the control's `max_rows`, else MAX_ROWS.
+     *
+     * @param array<string, mixed> $control
+     */
+    public static function maxRows(array $control): int
+    {
+        $fixed = \count(self::rowLabels($control['rows'] ?? []));
+
+        return 0 !== $fixed ? $fixed : (self::maxRowsOf($control['max_rows'] ?? null) ?? self::MAX_ROWS);
+    }
+
+    /**
      * A respondent's answer in the stored shape, or null when nothing is filled in.
      *
      * @param array<string, mixed> $control
@@ -84,6 +112,7 @@ final class TableAnswer
         }
         $keys = array_keys(self::columns($control));
         $fixed = \count(self::rowLabels($control['rows'] ?? []));
+        $max = self::maxRows($control);
         $rows = [];
         foreach (array_values($value) as $i => $raw) {
             if (0 !== $fixed && $i >= $fixed) {
@@ -102,7 +131,7 @@ final class TableAnswer
             if ([] !== $row || 0 !== $fixed) {
                 $rows[] = $row;
             }
-            if (\count($rows) >= self::MAX_ROWS) {
+            if (\count($rows) >= $max) {
                 break;
             }
         }

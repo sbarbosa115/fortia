@@ -1,5 +1,5 @@
 import type {Schema} from '@shared/api';
-import {emptyDraft, newKey} from './draft';
+import {emptyDraft, newKey, newTableRow} from './draft';
 import {
   type ChainEnding,
   type Draft,
@@ -10,6 +10,7 @@ import {
   type FlowState,
   LAYOUT_BLOCKS,
   type LayoutBlock,
+  MAX_TABLE_ROWS,
   RESULT_COPY_KEYS,
   TEXT_CHARSETS,
   type TextCharset,
@@ -136,6 +137,7 @@ export function decodeQuestion(
   const {
     options: controlOptions = [],
     rows: _rows,
+    max_rows: _maxRows,
     template: _template,
     ...controlBase
   } = control ?? {options: []};
@@ -165,7 +167,14 @@ export function decodeQuestion(
     textFormat: textFormat(validations),
     rangeMin: rangeBound(validations, 'min', '0'),
     rangeMax: rangeBound(validations, 'max', '10'),
-    tableRows: control?.type === 'table' ? [...(control.rows ?? [])] : [],
+    tableRows:
+      control?.type === 'table'
+        ? (control.rows ?? []).map((row) => newTableRow(row))
+        : [],
+    tableMaxRows:
+      control?.type === 'table' && control.max_rows
+        ? control.max_rows
+        : MAX_TABLE_ROWS,
     template: control?.type === 'file' ? (control.template ?? null) : null,
     rawType,
     base: base as Record<string, unknown>,
