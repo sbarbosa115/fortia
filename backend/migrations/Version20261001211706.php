@@ -2,7 +2,7 @@
 
 namespace DoctrineMigrations;
 
-use App\Shared\Infrastructure\Persistence\CollatedMigration;
+use App\Shared\Infrastructure\Persistence\PortableMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
@@ -10,7 +10,7 @@ use Doctrine\DBAL\Schema\Schema;
  * payments, the fake payment gateway), Integrations' (API keys, webhooks and their deliveries), and the usage tag of
  * the event log.
  */
-final class Version20261001211706 extends CollatedMigration
+final class Version20261001211706 extends PortableMigration
 {
     public function getDescription(): string
     {

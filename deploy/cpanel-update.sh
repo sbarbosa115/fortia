@@ -325,6 +325,22 @@ if ! has_collation "$COLLATION"; then
     for SUGGESTED in utf8mb4_0900_ai_ci utf8mb4_uca1400_ai_ci utf8mb4_unicode_520_ci; do has_collation "$SUGGESTED" && break; done
     fail "The database server has no $COLLATION collation. In backend/.env.local set DB_COLLATION=$SUGGESTED (it ignores case and accents the same way), then run again."
 fi
+# Every table is InnoDB (the migrations and doctrine.yaml name it): a server whose default is MyISAM or Aria refuses the
+# utf8mb4 indexes ("max key length is 1000 bytes") and has no transactions. Before that was so, a first run on such a
+# server stopped halfway and left MyISAM tables behind. Doctrine's own doctrine_migration_versions takes the server's
+# default whatever doctrine.yaml says; it only lists the migrations run, so it may stay as it is.
+console dbal:run-sql "SELECT CONCAT('innodb:', SUPPORT) FROM information_schema.ENGINES WHERE ENGINE = 'InnoDB'" --env=prod --no-debug 2>/dev/null | grep -qE 'innodb:(YES|DEFAULT)' \
+    || fail "The database server has no InnoDB engine, which every table needs. Ask the host to enable it, then run again."
+OTHER_TABLES="$(console dbal:run-sql "SELECT CONCAT('table:', TABLE_NAME, ':', ENGINE) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE' AND ENGINE <> 'InnoDB' AND TABLE_NAME <> 'doctrine_migration_versions'" --env=prod --no-debug 2>/dev/null | grep -oE 'table:[A-Za-z0-9_]+:[A-Za-z]+' | cut -d: -f2- | tr '\n' ' ' || true)"
+if [[ -n "$OTHER_TABLES" ]]; then
+    USERS="$(console dbal:run-sql "SELECT CONCAT('users:', COUNT(*)) FROM app_user" --env=prod --no-debug 2>/dev/null | grep -oE 'users:[0-9]+' | cut -d: -f2 || true)"
+    if [[ "${USERS:-0}" == "0" ]]; then
+        fail "These tables are not InnoDB: ${OTHER_TABLES}. Nobody has signed up yet, so they are what a failed first run left behind. Empty the database (it drops every table in it), then run again:
+    $PHP_BIN $BACKEND/bin/console doctrine:schema:drop --full-database --force --env=prod --no-debug"
+    fi
+    fail "These tables are not InnoDB: ${OTHER_TABLES}. Back up the database, convert each one with ALTER TABLE <name> ENGINE = InnoDB (phpMyAdmin › SQL), then run again."
+fi
+note "Engine:     InnoDB."
 # The tables keep the collation they were created with: a DB_COLLATION changed afterwards would mix two of them.
 TABLES_COLLATION="$(console dbal:run-sql "SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'app_user'" --env=prod --no-debug 2>/dev/null | grep -oE 'utf8mb4_[a-z0-9_]+' | head -1 || true)"
 if [[ -n "$TABLES_COLLATION" && "$TABLES_COLLATION" != "$COLLATION" ]]; then

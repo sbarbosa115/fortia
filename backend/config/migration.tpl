@@ -2,10 +2,10 @@
 
 namespace <namespace>;
 
-use App\Shared\Infrastructure\Persistence\CollatedMigration;
+use App\Shared\Infrastructure\Persistence\PortableMigration;
 use Doctrine\DBAL\Schema\Schema;
 
-final class <className> extends CollatedMigration
+final class <className> extends PortableMigration
 {
     public function getDescription(): string
     {
