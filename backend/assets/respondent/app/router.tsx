@@ -8,6 +8,7 @@ import {
   useEffect,
 } from 'react';
 import {createBrowserRouter, Navigate, useParams} from 'react-router';
+import {homeTarget} from './homeTarget';
 import {RouteError} from './RouteError';
 
 function page<M extends Record<string, unknown>>(
@@ -27,8 +28,7 @@ function page<M extends Record<string, unknown>>(
 /** "/" goes to the marketing site (PRD §9.2), replacing the history entry; in dev, HOME_REDIRECT_URL (the console). */
 function MarketingRedirect() {
   useEffect(() => {
-    const config = appConfig();
-    window.location.replace(config.homeRedirectUrl || config.marketingSiteUrl);
+    window.location.replace(homeTarget(appConfig(), window.location.href));
   }, []);
   return <LoadingState />;
 }

@@ -132,6 +132,17 @@ done
 for key in APP_URL FRONTEND_URL ADMIN_FRONTEND_URL DEFAULT_URI; do
     [[ "$(env_value "$key")" == https://* ]] || warn "$key is not https: $(env_value "$key")"
 done
+# "/" sends visitors to HOME_REDIRECT_URL, else MARKETING_SITE_URL: one that is "/" itself would reload the page forever
+# (the app opens the console instead).
+FRONTEND_HOME="$(env_value FRONTEND_URL)"; FRONTEND_HOME="${FRONTEND_HOME%/}"
+for key in HOME_REDIRECT_URL MARKETING_SITE_URL; do
+    value="$(env_value "$key")"; value="${value%/}"
+    [[ -n "$(env_value "$key")" ]] || continue
+    if [[ "$value" == "$FRONTEND_HOME" || -z "$value" ]]; then
+        warn "$key is this app's own home ($(env_value "$key")), so \"/\" opens the console. Point it at the marketing site (or HOME_REDIRECT_URL=/console to mean it)."
+    fi
+    [[ "$key" == HOME_REDIRECT_URL ]] && break
+done
 [[ "$(env_value CORS_ALLOW_ORIGIN)" != *localhost* ]] \
     || warn "CORS_ALLOW_ORIGIN still allows only localhost: set it to the domain (see deploy/env.local.example)."
 if [[ "$(env_value LLM_PROVIDER)" == "fake" || ( "$(env_value LLM_PROVIDER)" == "auto" && -z "$(env_value OPENAI_API_KEY)" ) ]]; then
