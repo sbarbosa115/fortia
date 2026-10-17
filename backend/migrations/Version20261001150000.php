@@ -2,14 +2,14 @@
 
 namespace DoctrineMigrations;
 
-use App\Shared\Infrastructure\Persistence\CollatedMigration;
+use App\Shared\Infrastructure\Persistence\PortableMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
  * Billing's own tables (item 2): the payments recorded from invoice.paid, the payment webhook events already applied
  * (idempotency), and the fake payment gateway's state and outbox (dev and tests).
  */
-final class Version20261001150000 extends CollatedMigration
+final class Version20261001150000 extends PortableMigration
 {
     public function getDescription(): string
     {

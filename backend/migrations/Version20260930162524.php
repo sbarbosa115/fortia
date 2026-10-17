@@ -2,13 +2,13 @@
 
 namespace DoctrineMigrations;
 
-use App\Shared\Infrastructure\Persistence\CollatedMigration;
+use App\Shared\Infrastructure\Persistence\PortableMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260930162524 extends CollatedMigration
+final class Version20260930162524 extends PortableMigration
 {
     public function getDescription(): string
     {

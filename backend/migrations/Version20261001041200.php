@@ -2,11 +2,11 @@
 
 namespace DoctrineMigrations;
 
-use App\Shared\Infrastructure\Persistence\CollatedMigration;
+use App\Shared\Infrastructure\Persistence\PortableMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /** Integrations (D19): the webhook delivery log keeps what went wrong on the last failed attempt. */
-final class Version20261001041200 extends CollatedMigration
+final class Version20261001041200 extends PortableMigration
 {
     public function getDescription(): string
     {

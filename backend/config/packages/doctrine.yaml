@@ -6,6 +6,8 @@ doctrine:
             charset: utf8mb4
             # DB_COLLATION (.env); migrations and raw SQL name utf8mb4_0900_ai_ci and get this one (Collation).
             collation: '%env(DB_COLLATION)%'
+            # Never the server's default: MyISAM or Aria refuse the utf8mb4 indexes and have no transactions.
+            engine: InnoDB
     orm:
         validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore
