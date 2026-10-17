@@ -4,3 +4,5 @@ doctrine_migrations:
         # as migrations classes should NOT be autoloaded
         'DoctrineMigrations': '%kernel.project_dir%/migrations'
     enable_profiler: false
+    # New migrations extend CollatedMigration, so they run with DB_COLLATION.
+    custom_template: '%kernel.project_dir%/config/migration.tpl'

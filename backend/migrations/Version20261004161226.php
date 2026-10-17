@@ -2,13 +2,13 @@
 
 namespace DoctrineMigrations;
 
+use App\Shared\Infrastructure\Persistence\CollatedMigration;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * A questionnaire's tags: a JSON list of free-text labels ("AP-03", "NP-12"…). Existing questionnaires get none.
  */
-final class Version20261004161226 extends AbstractMigration
+final class Version20261004161226 extends CollatedMigration
 {
     public function getDescription(): string
     {

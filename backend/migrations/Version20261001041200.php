@@ -2,11 +2,11 @@
 
 namespace DoctrineMigrations;
 
+use App\Shared\Infrastructure\Persistence\CollatedMigration;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /** Integrations (D19): the webhook delivery log keeps what went wrong on the last failed attempt. */
-final class Version20261001041200 extends AbstractMigration
+final class Version20261001041200 extends CollatedMigration
 {
     public function getDescription(): string
     {
