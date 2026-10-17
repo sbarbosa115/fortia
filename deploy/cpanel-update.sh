@@ -14,7 +14,7 @@
 #      (cPanel › Select PHP Version › Extensions), and the upload limits (MultiPHP INI Editor): upload_max_filesize
 #      500M, post_max_size 520M, memory_limit 512M — answers take files up to 500 MB (PRD §13.5)
 #   4. Create the database and its user in cPanel (MySQL Databases), the user with ALL PRIVILEGES on it. The schema uses
-#      the utf8mb4_0900_ai_ci collation: MySQL 8, or a MariaDB recent enough to know it (this script checks)
+#      MySQL 8 or MariaDB 10.6+. A MariaDB before 11.4.5 needs DB_COLLATION in .env.local (this script says which)
 #   5. cp deploy/env.local.example backend/.env.local, fill it in, chmod 600 it
 #   6. Node 22+ for the UI build (cPanel › Setup Node.js App, any app name: only its node/npm are used), or build it
 #      on your machine and upload it:  docker compose run --rm -e NODE_ENV=production node npm run build
@@ -309,12 +309,28 @@ if [[ -z "$CONFIGURED_VERSION" || "$real_is_mariadb" != "$conf_is_mariadb" ]]; t
     [[ "$real_is_mariadb" == "1" ]] && SUGGESTED="$SUGGESTED-MariaDB"
     fail "serverVersion does not match the database server. In backend/.env.local set serverVersion=$SUGGESTED in DATABASE_URL, then run again."
 fi
-# Every table is created with utf8mb4_0900_ai_ci (config/packages/doctrine.yaml, the migrations), which is also what
-# makes search ignore case and accents. MySQL 8 has it; MariaDB only in its recent releases.
-if ! console dbal:run-sql "SHOW COLLATION LIKE 'utf8mb4_0900_ai_ci'" --env=prod --no-debug 2>/dev/null | grep -q 'utf8mb4_0900_ai_ci'; then
-    fail "The database server has no utf8mb4_0900_ai_ci collation, which every table uses. Ask the host for MySQL 8 (or a MariaDB that has it, 11.4.5+), then run again."
+# Every table is created with DB_COLLATION (utf8mb4_0900_ai_ci unless .env.local sets another), which is also what
+# makes search ignore case and accents. MySQL 8 and MariaDB 11.4.5+ have the default; an older MariaDB has an
+# equivalent: utf8mb4_uca1400_ai_ci (10.10+), else utf8mb4_unicode_520_ci.
+# Tried, not looked up: dbal:run-sql prints no rows for SHOW COLLATION, and MariaDB 10.10+ lists its uca1400
+# collations without the utf8mb4_ prefix.
+has_collation() {
+    [[ "$1" =~ ^utf8mb4_[a-z0-9_]+$ ]] || return 1
+    console dbal:run-sql "SELECT CONVERT('a' USING utf8mb4) COLLATE $1" --env=prod --no-debug >/dev/null 2>&1
+}
+console dbal:run-sql "SELECT t.x FROM JSON_TABLE('[1]', '\$[*]' COLUMNS(x INT PATH '\$')) AS t" --env=prod --no-debug >/dev/null 2>&1 \
+    || fail "The database server has no JSON_TABLE, which the questionnaire search needs. It takes MySQL 8 or MariaDB 10.6+; ask the host for one, then run again."
+COLLATION="$(env_value DB_COLLATION)"; COLLATION="${COLLATION:-utf8mb4_0900_ai_ci}"
+if ! has_collation "$COLLATION"; then
+    for SUGGESTED in utf8mb4_0900_ai_ci utf8mb4_uca1400_ai_ci utf8mb4_unicode_520_ci; do has_collation "$SUGGESTED" && break; done
+    fail "The database server has no $COLLATION collation. In backend/.env.local set DB_COLLATION=$SUGGESTED (it ignores case and accents the same way), then run again."
 fi
-note "Collation:  utf8mb4_0900_ai_ci is available."
+# The tables keep the collation they were created with: a DB_COLLATION changed afterwards would mix two of them.
+TABLES_COLLATION="$(console dbal:run-sql "SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'app_user'" --env=prod --no-debug 2>/dev/null | grep -oE 'utf8mb4_[a-z0-9_]+' | head -1 || true)"
+if [[ -n "$TABLES_COLLATION" && "$TABLES_COLLATION" != "$COLLATION" ]]; then
+    fail "The tables use $TABLES_COLLATION but DB_COLLATION is $COLLATION. Set DB_COLLATION=$TABLES_COLLATION in backend/.env.local (never change it once the tables exist), then run again."
+fi
+note "Collation:  $COLLATION is available."
 
 step "Database migrations"
 # A migration is the only step here that can destroy data, so it never runs without a dump first. The dump is

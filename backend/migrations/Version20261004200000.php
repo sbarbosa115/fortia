@@ -2,14 +2,14 @@
 
 namespace DoctrineMigrations;
 
+use App\Shared\Infrastructure\Persistence\CollatedMigration;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Whether a project's follow-ups go to review once complete (requires_review) or are simply completed. Existing
  * projects and assignations keep the review.
  */
-final class Version20261004200000 extends AbstractMigration
+final class Version20261004200000 extends CollatedMigration
 {
     public function getDescription(): string
     {

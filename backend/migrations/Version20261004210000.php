@@ -2,14 +2,14 @@
 
 namespace DoctrineMigrations;
 
+use App\Shared\Infrastructure\Persistence\CollatedMigration;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * An account's own usage/analytics service (/profile › System, PRD §13.8): its base URL and its API key, sealed by
  * SecretBox. Without them the platform's ANALYTICS_BASE_URL and ANALYTICS_API_KEY are used.
  */
-final class Version20261004210000 extends AbstractMigration
+final class Version20261004210000 extends CollatedMigration
 {
     public function getDescription(): string
     {

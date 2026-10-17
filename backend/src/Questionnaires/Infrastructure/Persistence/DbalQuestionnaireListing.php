@@ -7,6 +7,7 @@ use App\Questionnaires\Application\Query\QuestionnaireListing;
 use App\Shared\Domain\Document\QuestionnaireTags;
 use App\Shared\Domain\Iso;
 use App\Shared\Domain\Text;
+use App\Shared\Infrastructure\Persistence\Collation;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Query\QueryBuilder;
 
@@ -14,16 +15,19 @@ use Doctrine\DBAL\Query\QueryBuilder;
  * GET /questionnaire in SQL: one query for the page (never the questions document) and one for the total. The
  * listing "type" filter is the kind a row shows as: its on_completed type, else its own type (quiz funnel and
  * diagnostic), else "default". Search: every word in the title or in one of the tags, with LIKE escaped; the table's
- * utf8mb4_0900_ai_ci collation ignores case and accents (PRD §8.1). Tag: one of the row's tags, whole, also without case or accents.
+ * collation (DB_COLLATION, Collation) ignores case and accents (PRD §8.1). Tag: one of the row's tags, whole, also without case or accents.
  */
 final class DbalQuestionnaireListing implements QuestionnaireListing
 {
     private const COLUMNS = 'q.questionnaire_id, q.customer_id, q.parent, q.origin_session_id, q.title, q.description, q.created_at, q.updated_at, q.is_active, q.on_completed, q.landing_page, q.capture_user_data, q.question_count, q.is_chain, q.slug, q.type, q.tags';
     private const TAGS = "JSON_TABLE(q.tags, '$[*]' COLUMNS(tag VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci PATH '$')) AS t";
+
+    private readonly string $tags;
     private const KIND = "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(q.on_completed, '$.type')), CASE WHEN q.type = 'diagnostic' THEN 'diagnostic' WHEN q.type IN ('quiz_funnel', 'ecommerce') THEN 'quiz_funnel' ELSE 'default' END)";
 
     public function __construct(private readonly Connection $connection)
     {
+        $this->tags = Collation::apply(self::TAGS, Collation::of($connection));
     }
 
     public function page(ListingCriteria $criteria): array
@@ -59,7 +63,7 @@ final class DbalQuestionnaireListing implements QuestionnaireListing
     {
         $qb = $this->connection->createQueryBuilder()
             ->select('t.tag')
-            ->from('questionnaire q, '.self::TAGS)
+            ->from('questionnaire q, '.$this->tags)
             ->where("q.parent = 'ROOT'")
             ->orderBy('q.created_at')
             ->addOrderBy('q.questionnaire_id');
@@ -93,11 +97,11 @@ final class DbalQuestionnaireListing implements QuestionnaireListing
         if (null !== $criteria->tag) {
             // A count, not EXISTS: MySQL 8.4 turns a lone EXISTS into a semijoin that reads the JSON_TABLE before q
             // (FirstMatch) and loses the correlation, so on a real-sized table the filter finds nothing.
-            $qb->andWhere('(SELECT COUNT(*) FROM '.self::TAGS.' WHERE t.tag = :tag) > 0')->setParameter('tag', $criteria->tag);
+            $qb->andWhere('(SELECT COUNT(*) FROM '.$this->tags.' WHERE t.tag = :tag) > 0')->setParameter('tag', $criteria->tag);
         }
         foreach ($criteria->searchWords as $i => $word) {
             // A word may be in the title or in one of the tags ("AP-03", "rrhh").
-            $qb->andWhere("(q.title LIKE :word$i OR EXISTS (SELECT 1 FROM ".self::TAGS." WHERE t.tag LIKE :word$i))")->setParameter("word$i", '%'.Text::escapeLike($word).'%');
+            $qb->andWhere("(q.title LIKE :word$i OR EXISTS (SELECT 1 FROM ".$this->tags." WHERE t.tag LIKE :word$i))")->setParameter("word$i", '%'.Text::escapeLike($word).'%');
         }
 
         return $qb;

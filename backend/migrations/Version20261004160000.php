@@ -2,14 +2,14 @@
 
 namespace DoctrineMigrations;
 
+use App\Shared\Infrastructure\Persistence\CollatedMigration;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * An account's system settings (/profile › System): its own SMTP server and OpenAI key, the secrets sealed by
  * SecretBox. One row per account at most, gone with the account.
  */
-final class Version20261004160000 extends AbstractMigration
+final class Version20261004160000 extends CollatedMigration
 {
     public function getDescription(): string
     {

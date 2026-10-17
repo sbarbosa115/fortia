@@ -2,15 +2,15 @@
 
 namespace DoctrineMigrations;
 
+use App\Shared\Infrastructure\Persistence\CollatedMigration;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Plans, limits and integrations are gone: drop Billing's tables (plans, features, customer plans, usage counters,
  * payments, the fake payment gateway), Integrations' (API keys, webhooks and their deliveries), and the usage tag of
  * the event log.
  */
-final class Version20261001211706 extends AbstractMigration
+final class Version20261001211706 extends CollatedMigration
 {
     public function getDescription(): string
     {

@@ -2,13 +2,13 @@
 
 namespace DoctrineMigrations;
 
+use App\Shared\Infrastructure\Persistence\CollatedMigration;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260930162524 extends AbstractMigration
+final class Version20260930162524 extends CollatedMigration
 {
     public function getDescription(): string
     {
