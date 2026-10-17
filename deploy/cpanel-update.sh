@@ -293,6 +293,11 @@ for entry in console respondent; do
 done
 # A dev build (npm run dev/watch) has unhashed names and source maps: it works, but slowly and uncached.
 grep -qE '\.[0-9a-f]{8}\.js' "$ENTRYPOINTS" || warn "public/build/ is a development build (no hashed file names): build it with \"npm run build\"."
+# A production build made without NODE_ENV=production calls React's jsxDEV, which production React does not have: the
+# page stays blank with "jsxDEV is not a function". npm run build sets it; a build made by other means may not.
+if grep -qE '\.[0-9a-f]{8}\.js' "$ENTRYPOINTS" && grep -lq 'jsxDEV' "$BACKEND"/public/build/*.js 2>/dev/null; then
+    fail "public/build/ was built without NODE_ENV=production (it calls jsxDEV, so the pages crash). Rebuild with \"npm run build\" in backend/, or: docker compose run --rm -e NODE_ENV=production node npm run build"
+fi
 
 step "Database server"
 # Doctrine picks its SQL dialect from serverVersion in DATABASE_URL, not from the server. A MySQL version string on
