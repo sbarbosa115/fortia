@@ -24,6 +24,14 @@ export function AssignationFormPage() {
   const {step, errors} = wizard;
   const missing = STEPS.filter((index) => errors[index] !== null);
   const current = errors[step] ?? null;
+  const adding = wizard.destination === 'existing';
+  // Step 3 words itself for where the questionnaires go: a new assignation, or one that exists.
+  const heroKey =
+    step === 2 && adding ? 'details.existingHero' : `${STEP_KEYS[step]}.hero`;
+  const subtitleKey =
+    step === 2 && adding
+      ? 'details.existingSubtitle'
+      : `${STEP_KEYS[step]}.subtitle`;
 
   return (
     <div className="asg-wiz">
@@ -76,7 +84,9 @@ export function AssignationFormPage() {
               <span className={wizard.creating ? 'asg-wiz__spin' : undefined}>
                 <Icon name={wizard.creating ? 'loader' : 'plus'} size={16} />
               </span>
-              {wizard.creating ? t('actions.creating') : t('actions.create')}
+              {wizard.creating
+                ? t(adding ? 'actions.adding' : 'actions.creating')
+                : t(adding ? 'actions.add' : 'actions.create')}
             </button>
           ) : (
             <button
@@ -98,15 +108,15 @@ export function AssignationFormPage() {
             <p className="asg-wiz__kicker">
               {t('kicker', {number: step + 1, total: STEPS.length})}
             </p>
-            <h1 className="asg-wiz__title">{t(`${STEP_KEYS[step]}.hero`)}</h1>
-            <p className="asg-wiz__subtitle">
-              {t(`${STEP_KEYS[step]}.subtitle`)}
-            </p>
+            <h1 className="asg-wiz__title">{t(heroKey)}</h1>
+            <p className="asg-wiz__subtitle">{t(subtitleKey)}</p>
           </div>
 
           {wizard.showMissing && missing.length > 0 ? (
             <div className="asg-wiz__missing" role="alert">
-              <p className="asg-wiz__missing-title">{t('missing.title')}</p>
+              <p className="asg-wiz__missing-title">
+                {t(adding ? 'missing.titleAdding' : 'missing.title')}
+              </p>
               <ul>
                 {missing.map((index) => (
                   <li key={index}>

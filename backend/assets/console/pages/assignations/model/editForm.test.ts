@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {
+  acceptsQuestionnaires,
   draftFrom,
   editErrors,
   toPayload,
@@ -21,6 +22,28 @@ const project = {
 };
 
 describe('the edit dialog form (PRD §10.12)', () => {
+  it('adds questionnaires only while the assignation is not complete nor overdue', () => {
+    const today = '2026-10-19';
+    expect(acceptsQuestionnaires('progress', '2026-12-01', today)).toBe(true);
+    expect(
+      acceptsQuestionnaires('review', today, today),
+      'the due date itself is not overdue',
+    ).toBe(true);
+    expect(
+      acceptsQuestionnaires('completed', '2026-12-01', today),
+      'a completed assignation takes no more questionnaires',
+    ).toBe(false);
+    expect(acceptsQuestionnaires('approved', '2026-12-01', today)).toBe(false);
+    expect(
+      acceptsQuestionnaires('overdue', '2026-10-18', today),
+      'an overdue assignation takes no more questionnaires',
+    ).toBe(false);
+    expect(
+      acceptsQuestionnaires('overdue', '2026-11-30', today),
+      'moving its deadline forward reopens it',
+    ).toBe(true);
+  });
+
   it('starts from the assignation', () => {
     expect(draftFrom(project)).toEqual({
       name: 'Store opening Q4',

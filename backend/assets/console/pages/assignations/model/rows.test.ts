@@ -49,6 +49,7 @@ function project(
     total_assignations: assignations.length,
     assignations,
     available_assignations: null,
+    accepts_questionnaires: true,
   };
 }
 

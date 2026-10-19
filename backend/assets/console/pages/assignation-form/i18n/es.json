@@ -12,7 +12,7 @@
     "label": "Pasos",
     "questionnaires": "Cuestionarios",
     "organization": "Organización",
-    "details": "Nombre y fecha límite",
+    "details": "Asignación",
     "done": "completo",
     "incomplete": "incompleto"
   },
@@ -102,7 +102,24 @@
     "reviewCount_other": "Revisarás {{count}} de {{total}} · desactiva los que no necesites revisar",
     "reviewOn": "Pendiente de revisión",
     "reviewOff": "Cierre automático",
-    "reviewOffNote": "Al terminar, cada cuestionario queda como “Completado”, sin revisión."
+    "reviewOffNote": "Al terminar, cada cuestionario queda como “Completado”, sin revisión.",
+    "destination": "¿Dónde los ponemos?",
+    "destinationNew": "Crear una asignación nueva",
+    "destinationExisting": "Agregar a una existente",
+    "existingHero": "Agrégalos a una asignación",
+    "existingSubtitle": "Los cuestionarios se suman a una asignación abierta de la organización y siguen su fecha límite. Las completadas o vencidas no admiten más.",
+    "existingQuestion": "Elige la asignación",
+    "existingSearch": "Buscar asignación…",
+    "existingLabel": "Asignaciones abiertas",
+    "noExisting": "{{organization}} no tiene asignaciones abiertas",
+    "noExistingHint": "Las asignaciones completadas o vencidas no admiten más cuestionarios.",
+    "createInstead": "Crear una nueva",
+    "noExistingMatches": "Ninguna asignación coincide con tu búsqueda.",
+    "clearSearch": "Limpiar búsqueda",
+    "inheritedDeadline": "Los cuestionarios vencen el {{date}}, la fecha límite de esta asignación.",
+    "skipped_one": "{{count}} cuestionario elegido ya está en esta asignación y no se agrega de nuevo:",
+    "skipped_other": "{{count}} cuestionarios elegidos ya están en esta asignación y no se agregan de nuevo:",
+    "skippedLabel": "Ya están en esta asignación"
   },
   "summary": {
     "title": "Lo que vamos a crear",
@@ -125,11 +142,15 @@
     "pickedLabel": "Cuestionarios elegidos",
     "unpick": "Quitar {{title}}",
     "showAll": "Ver los {{count}}",
-    "showLess": "Ver menos"
+    "showLess": "Ver menos",
+    "existing": "Existente",
+    "adding_one": "agrega {{count}}",
+    "adding_other": "agrega {{count}}"
   },
   "missing": {
     "title": "Falta completar antes de crear:",
-    "goTo": "Ir al paso {{number}}"
+    "goTo": "Ir al paso {{number}}",
+    "titleAdding": "Falta completar antes de agregar:"
   },
   "errors": {
     "questionnairesRequired": "Elige al menos un cuestionario",
@@ -138,13 +159,17 @@
     "nameTooLong": "Usa 200 caracteres o menos",
     "deadlineRequired": "Elige una fecha límite",
     "deadlineInvalid": "Escribe una fecha límite válida",
-    "deadlinePast": "La fecha límite no puede estar en el pasado"
+    "deadlinePast": "La fecha límite no puede estar en el pasado",
+    "assignationRequired": "Elige una asignación",
+    "allAlreadyIn": "Todos los cuestionarios elegidos ya están en esta asignación"
   },
   "actions": {
     "back": "Volver",
     "continue": "Continuar",
     "create": "Crear",
-    "creating": "Creando..."
+    "creating": "Creando...",
+    "add": "Agregar",
+    "adding": "Agregando..."
   },
   "organizationDialog": {
     "title": "Nueva organización",
@@ -177,5 +202,14 @@
     "noMembers": "Aún no hay miembros",
     "domainWarning": "{{count}} miembro(s) usan un dominio distinto de {{domain}}. Se guardarán igual.",
     "save": "Crear organización"
+  },
+  "added_one": "Se agregó {{count}} cuestionario a {{name}}",
+  "added_other": "Se agregaron {{count}} cuestionarios a {{name}}",
+  "states": {
+    "pending": "Sin empezar",
+    "progress": "En progreso",
+    "review": "Requiere tu revisión",
+    "correction": "En corrección",
+    "empty": "Sin cuestionarios"
   }
 }

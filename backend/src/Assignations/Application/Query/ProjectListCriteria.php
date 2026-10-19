@@ -35,7 +35,7 @@ final class ProjectListCriteria
      * @param array<string, mixed> $query the query string
      *
      * @throws InvalidProjectStatus
-     * @throws Rejected            INVALID_UUID
+     * @throws Rejected             INVALID_UUID
      */
     public static function fromQuery(array $query, ?string $customerId): self
     {

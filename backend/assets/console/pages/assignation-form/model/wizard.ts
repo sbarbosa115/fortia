@@ -4,7 +4,11 @@ import {
   type OrganizationPayload,
   toPayload as membersPayload,
 } from '@console/entities/organization';
-import type {NewProjectPayload} from '@console/entities/project';
+import type {
+  NewProjectPayload,
+  Project,
+  ProjectPayload,
+} from '@console/entities/project';
 
 /** The wizard's three steps: the questionnaires, the organization, then the name and the deadline. */
 export type Step = 0 | 1 | 2;
@@ -32,11 +36,27 @@ export type NewOrganization = {
   members: MemberDraft[];
 };
 
+/** Where step 3 puts the questionnaires: a new assignation, or one of the organization's that is still open. */
+export type Destination = 'new' | 'existing';
+
+/** An assignation of the organization that still takes questionnaires (not complete nor overdue). */
+export type ExistingAssignation = {
+  id: string;
+  name: string;
+  dueDate: string | null;
+  state: string;
+  /** The questionnaires it already has. */
+  questionnaireIds: string[];
+};
+
 export type WizardState = {
   questionnaires: PickedQuestionnaire[];
   organizationId: string | null;
   name: string;
   dueDate: string;
+  destination: Destination;
+  /** The existing assignation chosen in step 3 (destination `existing`). */
+  existing: ExistingAssignation | null;
 };
 
 export type DetailsErrors = {
@@ -68,12 +88,59 @@ export function stepErrors(
   state: WizardState,
   today: string,
 ): (string | null)[] {
-  const details = detailsErrors(state, today);
   return [
     state.questionnaires.length === 0 ? 'questionnairesRequired' : null,
     state.organizationId === null ? 'organizationRequired' : null,
-    details.name ?? details.dueDate ?? null,
+    state.destination === 'existing'
+      ? existingError(state)
+      : detailsError(state, today),
   ];
+}
+
+function detailsError(state: WizardState, today: string): string | null {
+  const details = detailsErrors(state, today);
+  return details.name ?? details.dueDate ?? null;
+}
+
+/** An existing assignation takes its name and deadline along: it only has to be chosen and miss something picked. */
+function existingError(state: WizardState): string | null {
+  if (state.existing === null) return 'assignationRequired';
+  return toAdd(state.questionnaires, state.existing).length === 0
+    ? 'allAlreadyIn'
+    : null;
+}
+
+export function existingOf(project: Project): ExistingAssignation {
+  return {
+    id: project.project_id,
+    name: project.name,
+    dueDate: project.due_date ?? null,
+    state: project.state,
+    questionnaireIds: project.assignations.map((a) => a.questionnaire_id),
+  };
+}
+
+/** The assignations step 3 offers: those that still take questionnaires (not complete nor overdue). */
+export function openAssignations(projects: Project[]): ExistingAssignation[] {
+  return projects.filter((p) => p.accepts_questionnaires).map(existingOf);
+}
+
+/** The picked questionnaires the existing assignation already has: they are not added again. */
+export function alreadyIn(
+  picked: PickedQuestionnaire[],
+  existing: ExistingAssignation | null,
+): PickedQuestionnaire[] {
+  const ids = new Set(existing?.questionnaireIds ?? []);
+  return picked.filter((item) => ids.has(item.id));
+}
+
+/** The picked questionnaires that become new follow-ups: all of them, or those the existing assignation lacks. */
+export function toAdd(
+  picked: PickedQuestionnaire[],
+  existing: ExistingAssignation | null,
+): PickedQuestionnaire[] {
+  const ids = new Set(existing?.questionnaireIds ?? []);
+  return picked.filter((item) => !ids.has(item.id));
 }
 
 export function isReachable(errors: (string | null)[], step: Step): boolean {
@@ -155,6 +222,8 @@ export type Progress = {
 
 /** Everything Create needs, decided from the wizard's state. */
 export type CreatePlan = {
+  /** The existing assignation the questionnaires join; null creates a new one with the name and the deadline. */
+  existingId: string | null;
   newOrganization: NewOrganization | null;
   organizationId: string;
   questionnaireIds: string[];
@@ -171,10 +240,15 @@ export type CreateDeps = {
     payload: OrganizationPayload,
   ) => Promise<{organization_id: string}>;
   createProject: (payload: NewProjectPayload) => Promise<{project_id: string}>;
+  updateProject: (
+    id: string,
+    payload: ProjectPayload,
+  ) => Promise<{project_id: string}>;
 };
 
 /**
- * Create, in order: the new organization, then the assignation with one follow-up per questionnaire. A questionnaire
+ * Create, in order: the new organization, then the assignation with one follow-up per questionnaire — or, for an
+ * existing assignation, only its new follow-ups (it keeps its name and its deadline). A questionnaire
  * other organizations already have is assigned as it is (PRD §6.14): each assignation keeps its own answers. The new
  * organization's id goes to `save` at once, so a retry with that progress does not create it again.
  */
@@ -184,6 +258,14 @@ export async function runCreate(
   deps: CreateDeps,
   save: (progress: Progress) => void,
 ): Promise<{projectId: string}> {
+  if (plan.existingId !== null) {
+    const updated = await deps.updateProject(plan.existingId, {
+      questionnaire_ids: plan.questionnaireIds,
+      registration_title: plan.registrationTitle,
+      review_questionnaire_ids: plan.reviewQuestionnaireIds,
+    });
+    return {projectId: updated.project_id};
+  }
   const progress: Progress = {...start};
 
   let organizationId = plan.organizationId;

@@ -11,6 +11,8 @@ export type ProjectListParams = {
   q: string;
   page: number;
   pageSize: number;
+  /** Only this organization's assignations. */
+  organizationId?: string;
 };
 
 /** PUT /projects/{id}: only what changes; assignation_ids replaces the set, questionnaire_ids adds new follow-ups. */
@@ -47,6 +49,7 @@ export function fetchProjects(params: ProjectListParams): Promise<ProjectPage> {
       q: params.q.trim() || undefined,
       page: params.page,
       page_size: params.pageSize,
+      organization_id: params.organizationId,
     },
   });
 }
@@ -76,7 +79,7 @@ export function createProject(payload: NewProjectPayload): Promise<Project> {
   return api.post<Project>('/projects', payload);
 }
 
-/** Every project of the account, 100 per request (the list has no organization filter). */
+/** Every project of the account, 100 per request. */
 export async function fetchAllProjects(): Promise<Project[]> {
   const params = {status: null, q: '', page: 1, pageSize: 100};
   const first = await fetchProjects(params);

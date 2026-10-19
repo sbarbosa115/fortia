@@ -1367,3 +1367,29 @@
   font-size: 13px;
   color: var(--color-text-muted);
 }
+
+/* Step 3: a new assignation or an existing one */
+.asg-wiz__destination {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.asg-wiz__inherited,
+.asg-wiz__skipped-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+.asg-wiz__skipped {
+  padding: 12px 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+.asg-wiz__skipped ul {
+  margin: 6px 0 0;
+  padding-left: 22px;
+  font-size: 13px;
+}

@@ -151,6 +151,7 @@
     "removeHint": "Removing a questionnaire keeps the answers it already has.",
     "noQuestionnaires": "This assignation has no questionnaires. Add one so the organization can answer it.",
     "addQuestionnaires": "Add questionnaires",
+    "closed": "This assignation is complete or overdue: it takes no more questionnaires.",
     "addOne": "Add {{name}}",
     "pickerSearch": "Search questionnaire by name or tag",
     "pickerLabel": "Questionnaires you can add",

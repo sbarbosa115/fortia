@@ -12,7 +12,7 @@
     "label": "Steps",
     "questionnaires": "Questionnaires",
     "organization": "Organization",
-    "details": "Name and deadline",
+    "details": "Assignation",
     "done": "complete",
     "incomplete": "incomplete"
   },
@@ -102,7 +102,24 @@
     "reviewCount_other": "You will review {{count}} of {{total}} · switch off the ones you don't need to review",
     "reviewOn": "Pending review",
     "reviewOff": "Closes automatically",
-    "reviewOffNote": "Once finished, each questionnaire is marked “Completed”, with no review."
+    "reviewOffNote": "Once finished, each questionnaire is marked “Completed”, with no review.",
+    "destination": "Where do they go?",
+    "destinationNew": "Create a new assignation",
+    "destinationExisting": "Add to an existing one",
+    "existingHero": "Add them to an assignation",
+    "existingSubtitle": "The questionnaires join an open assignation of the organization and follow its deadline. Complete or overdue assignations take no more.",
+    "existingQuestion": "Choose the assignation",
+    "existingSearch": "Search an assignation…",
+    "existingLabel": "Open assignations",
+    "noExisting": "{{organization}} has no open assignation",
+    "noExistingHint": "Complete or overdue assignations take no more questionnaires.",
+    "createInstead": "Create a new one instead",
+    "noExistingMatches": "No assignation matches your search.",
+    "clearSearch": "Clear search",
+    "inheritedDeadline": "The questionnaires are due on {{date}}, this assignation’s deadline.",
+    "skipped_one": "{{count}} picked questionnaire is already in this assignation and is not added again:",
+    "skipped_other": "{{count}} picked questionnaires are already in this assignation and are not added again:",
+    "skippedLabel": "Already in this assignation"
   },
   "summary": {
     "title": "What we're going to create",
@@ -125,11 +142,15 @@
     "pickedLabel": "Picked questionnaires",
     "unpick": "Remove {{title}}",
     "showAll": "Show all {{count}}",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "existing": "Existing",
+    "adding_one": "adds {{count}}",
+    "adding_other": "adds {{count}}"
   },
   "missing": {
     "title": "Complete these before creating:",
-    "goTo": "Go to step {{number}}"
+    "goTo": "Go to step {{number}}",
+    "titleAdding": "Complete these before adding:"
   },
   "errors": {
     "questionnairesRequired": "Choose at least one questionnaire",
@@ -138,13 +159,17 @@
     "nameTooLong": "Use 200 characters or fewer",
     "deadlineRequired": "Choose a deadline",
     "deadlineInvalid": "Enter a valid deadline",
-    "deadlinePast": "The deadline can't be in the past"
+    "deadlinePast": "The deadline can't be in the past",
+    "assignationRequired": "Choose an assignation",
+    "allAlreadyIn": "Every picked questionnaire is already in this assignation"
   },
   "actions": {
     "back": "Back",
     "continue": "Continue",
     "create": "Create",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "add": "Add",
+    "adding": "Adding..."
   },
   "organizationDialog": {
     "title": "New organization",
@@ -177,5 +202,14 @@
     "noMembers": "No members yet",
     "domainWarning": "{{count}} member(s) use a domain other than {{domain}}. They will be saved anyway.",
     "save": "Create organization"
+  },
+  "added_one": "{{count}} questionnaire added to {{name}}",
+  "added_other": "{{count}} questionnaires added to {{name}}",
+  "states": {
+    "pending": "Not started",
+    "progress": "In progress",
+    "review": "Needs your review",
+    "correction": "In correction",
+    "empty": "No questionnaires"
   }
 }
