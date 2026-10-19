@@ -34,9 +34,9 @@ final class DoctrineProjectRepository extends DoctrineRepository implements Proj
         return $this->repository()->findBy($criteria, ['createdAt' => 'DESC']);
     }
 
-    public function search(?string $customerId, array $words, int $offset = 0, ?int $limit = null): array
+    public function search(?string $customerId, array $words, int $offset = 0, ?int $limit = null, ?string $organizationId = null): array
     {
-        $qb = $this->filtered($customerId, $words)
+        $qb = $this->filtered($customerId, $words, $organizationId)
             ->select('p.project_id')
             ->orderBy('p.created_at', 'DESC')
             ->addOrderBy('p.project_id', 'DESC')
@@ -57,9 +57,9 @@ final class DoctrineProjectRepository extends DoctrineRepository implements Proj
         return array_values(array_filter(array_map(static fn (string $id): ?Project => $byId[$id] ?? null, $ids)));
     }
 
-    public function countSearch(?string $customerId, array $words): int
+    public function countSearch(?string $customerId, array $words, ?string $organizationId = null): int
     {
-        return (int) $this->filtered($customerId, $words)->select('COUNT(*)')->executeQuery()->fetchOne();
+        return (int) $this->filtered($customerId, $words, $organizationId)->select('COUNT(*)')->executeQuery()->fetchOne();
     }
 
     public function add(Project $project): void
@@ -73,13 +73,16 @@ final class DoctrineProjectRepository extends DoctrineRepository implements Proj
     }
 
     /** @param list<string> $words */
-    private function filtered(?string $customerId, array $words): QueryBuilder
+    private function filtered(?string $customerId, array $words, ?string $organizationId): QueryBuilder
     {
         $qb = $this->em->getConnection()->createQueryBuilder()
             ->from('project', 'p')
             ->leftJoin('p', 'organization', 'o', 'o.organization_id = p.organization_id');
         if (null !== $customerId) {
             $qb->andWhere('p.customer_id = :customer')->setParameter('customer', $customerId);
+        }
+        if (null !== $organizationId) {
+            $qb->andWhere('p.organization_id = :organization')->setParameter('organization', $organizationId);
         }
         foreach ($words as $i => $word) {
             // Every word in the name or in the organization's name; the collation ignores case and accents.

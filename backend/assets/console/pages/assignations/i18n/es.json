@@ -151,6 +151,7 @@
     "removeHint": "Al quitar un cuestionario se conservan las respuestas que ya tiene.",
     "noQuestionnaires": "Esta asignación no tiene cuestionarios. Agrega uno para que la organización lo responda.",
     "addQuestionnaires": "Agregar cuestionarios",
+    "closed": "Esta asignación ya está completada o vencida: no admite más cuestionarios.",
     "addOne": "Agregar {{name}}",
     "pickerSearch": "Buscar cuestionario por nombre o etiqueta",
     "pickerLabel": "Cuestionarios que puedes agregar",

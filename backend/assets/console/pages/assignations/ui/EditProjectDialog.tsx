@@ -3,6 +3,7 @@ import {
   PROJECTS_QUERY_KEY,
   updateProject,
 } from '@console/entities/project';
+import {todayIso} from '@shared/lib';
 import {
   Badge,
   Button,
@@ -19,6 +20,7 @@ import {useMutation, useQueryClient} from '@tanstack/react-query';
 import {type FormEvent, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {
+  acceptsQuestionnaires,
   draftFrom,
   type EditDraft,
   editErrors,
@@ -50,6 +52,8 @@ export function EditProjectDialog({
   const [draft, setDraft] = useState<EditDraft>(() => draftFrom(project));
   const [submitted, setSubmitted] = useState(false);
   const [picking, setPicking] = useState(false);
+  // A complete or overdue assignation takes no more questionnaires; moving the deadline forward reopens it.
+  const open = acceptsQuestionnaires(project.state, draft.dueDate, todayIso());
   // The questionnaires it has (taken out or not) and the ones added: the picker leaves them out.
   const present = new Set([
     ...project.assignations.map((item) => item.questionnaire_id),
@@ -278,7 +282,7 @@ export function EditProjectDialog({
           {draft.removedIds.length > 0 ? (
             <p className="project-form__note">{t('form.removeHint')}</p>
           ) : null}
-          {picking ? (
+          {picking && open ? (
             <QuestionnairePicker
               excluded={present}
               onPick={(questionnaire) =>
@@ -291,10 +295,14 @@ export function EditProjectDialog({
               <Button
                 size="sm"
                 icon={<Icon name="plus" size={16} />}
+                disabled={!open}
                 onClick={() => setPicking(true)}
               >
                 {t('form.addQuestionnaires')}
               </Button>
+              {open ? null : (
+                <p className="project-form__note">{t('form.closed')}</p>
+              )}
             </div>
           )}
         </fieldset>

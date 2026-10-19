@@ -60,7 +60,7 @@ function PickedList({wizard}: {wizard: AssignationWizardState}) {
 /** "What we're going to create": the questionnaires, the organization and the assignation, pending ones dashed. */
 export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
   const {t, i18n} = useTranslation('pages.assignation-form');
-  const {questionnaires, organization, errors} = wizard;
+  const {questionnaires, organization, errors, existing} = wizard;
   const pending = (step: number) => t('summary.step', {number: step});
 
   const items: Item[] = [
@@ -104,10 +104,28 @@ export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
       tone: 'project',
       icon: 'list-checks',
       done: errors[2] === null,
-      title: wizard.name.trim() || t('summary.assignationPending'),
-      detail: wizard.dueDate
-        ? t('summary.due', {date: formatDate(wizard.dueDate, i18n.language)})
-        : pending(3),
+      title: existing
+        ? existing.name
+        : wizard.destination === 'existing'
+          ? t('summary.existingPending')
+          : wizard.name.trim() || t('summary.assignationPending'),
+      detail: existing
+        ? [
+            t('summary.existing'),
+            existing.dueDate
+              ? t('summary.due', {
+                  date: formatDate(existing.dueDate, i18n.language),
+                })
+              : null,
+            t('summary.adding', {count: wizard.adding.length}),
+          ]
+            .filter(Boolean)
+            .join(' · ')
+        : wizard.dueDate
+          ? t('summary.due', {
+              date: formatDate(wizard.dueDate, i18n.language),
+            })
+          : pending(3),
     },
   ];
 
@@ -148,7 +166,13 @@ export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
           </li>
         ))}
       </ul>
-      <p className="asg-wiz__note">{t('summary.nothingSaved')}</p>
+      <p className="asg-wiz__note">
+        {t(
+          wizard.destination === 'existing'
+            ? 'summary.nothingSavedAdding'
+            : 'summary.nothingSaved',
+        )}
+      </p>
     </aside>
   );
 }

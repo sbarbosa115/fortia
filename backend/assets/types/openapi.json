@@ -535,6 +535,15 @@
                             "type": "string",
                             "maxLength": 200
                         }
+                    },
+                    {
+                        "name": "organization_id",
+                        "in": "query",
+                        "description": "Only this organization's projects",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
                     }
                 ],
                 "responses": {
@@ -549,7 +558,7 @@
                         }
                     },
                     "400": {
-                        "description": "INVALID_PROJECT_STATUS"
+                        "description": "INVALID_PROJECT_STATUS, INVALID_UUID"
                     }
                 }
             },
@@ -634,7 +643,7 @@
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups; organization_id may only be sent unchanged.",
+                "summary": "Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups (not to a complete or overdue\nproject: 409 PROJECT_CLOSED); organization_id may only be sent unchanged.",
                 "operationId": "put_api_projects_update",
                 "parameters": [
                     {
@@ -676,7 +685,7 @@
                         "description": "PROJECT_NOT_FOUND, ASSIGNATION_NOT_FOUND, QUESTIONNAIRE_NOT_FOUND"
                     },
                     "409": {
-                        "description": "ASSIGNATION_IN_OTHER_PROJECT"
+                        "description": "ASSIGNATION_IN_OTHER_PROJECT, PROJECT_CLOSED"
                     }
                 }
             },
@@ -5456,6 +5465,11 @@
                         "title": "Its follow-ups that are done: approved when reviewed, complete otherwise.",
                         "type": "integer",
                         "default": 0
+                    },
+                    "accepts_questionnaires": {
+                        "title": "It takes new questionnaires: it is not complete (completed or approved) and its deadline has not passed.",
+                        "type": "boolean",
+                        "default": true
                     }
                 },
                 "type": "object"

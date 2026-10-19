@@ -4,19 +4,27 @@ import {
   ORGANIZATIONS_QUERY_KEY,
   useOrganizations,
 } from '@console/entities/organization';
-import {createProject, PROJECTS_QUERY_KEY} from '@console/entities/project';
+import {
+  createProject,
+  fetchProjects,
+  PROJECTS_QUERY_KEY,
+  updateProject,
+} from '@console/entities/project';
 import {QUESTIONNAIRES_QUERY_KEY} from '@console/entities/questionnaire';
 import {todayIso} from '@shared/lib';
 import {useToast} from '@shared/ui';
-import {useMutation, useQueryClient} from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigate} from 'react-router';
 import {
+  alreadyIn,
   type CreateDeps,
+  type Destination,
   isReachable,
   NEW_ORGANIZATION,
   type NewOrganization,
+  openAssignations,
   type PickedQuestionnaire,
   type Progress,
   reviewedIds,
@@ -26,12 +34,17 @@ import {
   togglePicked,
   addPicked,
   removePicked,
+  toAdd,
 } from './wizard';
 
 const DEPS: CreateDeps = {
   createOrganization,
   createProject,
+  updateProject,
 };
+
+/** The open assignations step 3 offers are read from one page this big: an organization has far fewer. */
+const EXISTING_PAGE_SIZE = 100;
 
 /** The organization chosen in step 2, listed or created here. */
 export type WizardOrganization = {
@@ -43,7 +56,8 @@ export type WizardOrganization = {
 
 /**
  * The state of /assignations/new: the questionnaires (step 1), the organization (step 2, listed or created here and
- * saved on Create), the name and the deadline (step 3). Nothing is saved until Create.
+ * saved on Create), then (step 3) a new assignation's name and deadline, or one of the organization's open
+ * assignations to add them to. Nothing is saved until Create.
  */
 export function useAssignationWizard() {
   const {t} = useTranslation('pages.assignation-form');
@@ -106,6 +120,7 @@ export function useAssignationWizard() {
   const chooseOrganization = (id: string) => {
     if (id !== organizationId) {
       setOrganizationId(id);
+      setExistingId(null);
       forget(['organizationId']);
     }
   };
@@ -113,8 +128,39 @@ export function useAssignationWizard() {
     setNewOrganization(value);
     setOrganizationId(NEW_ORGANIZATION);
     setOrganizationDialog(false);
+    setExistingId(null);
     forget(['organizationId']);
   };
+
+  // --- Step 3: a new assignation, or an open one of the organization ---------------------------------------
+
+  const [destinationChoice, setDestination] = useState<Destination>('new');
+  const [existingId, setExistingId] = useState<string | null>(null);
+  // An organization created here has no assignation yet: only a new one.
+  const canAddToExisting = organization !== null && !organization.isNew;
+  const destination: Destination = canAddToExisting ? destinationChoice : 'new';
+  const existingQuery = useQuery({
+    queryKey: [...PROJECTS_QUERY_KEY, 'organization', organization?.id],
+    queryFn: () =>
+      fetchProjects({
+        status: null,
+        q: '',
+        page: 1,
+        pageSize: EXISTING_PAGE_SIZE,
+        organizationId: organization?.id,
+      }),
+    enabled: destination === 'existing',
+  });
+  const existingAssignations = useMemo(
+    () => openAssignations(existingQuery.data?.projects ?? []),
+    [existingQuery.data],
+  );
+  const existing =
+    destination === 'existing'
+      ? (existingAssignations.find((a) => a.id === existingId) ?? null)
+      : null;
+  // The questionnaires that become new follow-ups: those the existing assignation already has are skipped.
+  const adding = toAdd(questionnaires, existing);
 
   // --- Step 3: the name, the deadline and which questionnaires are reviewed ---------------------------------
 
@@ -126,7 +172,7 @@ export function useAssignationWizard() {
   );
   // No review by default ("No, close automatically"); on Yes each questionnaire is reviewed unless switched off.
   const [reviewEnabled, setReviewEnabledState] = useState(false);
-  const reviewChoices = reviewedIds(questionnaires, withoutReview);
+  const reviewChoices = reviewedIds(adding, withoutReview);
   const reviewIds = reviewEnabled ? reviewChoices : [];
   const setReview = (id: string, on: boolean) =>
     setWithoutReview((current) => {
@@ -144,7 +190,14 @@ export function useAssignationWizard() {
   // --- Steps -----------------------------------------------------------------------------------------------
 
   const errors = stepErrors(
-    {questionnaires, organizationId: organization?.id ?? null, name, dueDate},
+    {
+      questionnaires,
+      organizationId: organization?.id ?? null,
+      name,
+      dueDate,
+      destination,
+      existing,
+    },
     today,
   );
   const goTo = (target: Step) => {
@@ -171,9 +224,10 @@ export function useAssignationWizard() {
       }
       return runCreate(
         {
+          existingId: existing?.id ?? null,
           newOrganization: organization.isNew ? newOrganization : null,
           organizationId: organization.id,
-          questionnaireIds: questionnaires.map((q) => q.id),
+          questionnaireIds: adding.map((q) => q.id),
           name,
           dueDate,
           registrationTitle: t('registrationTitle'),
@@ -185,7 +239,11 @@ export function useAssignationWizard() {
       );
     },
     onSuccess: async () => {
-      toast.success(t('created'));
+      toast.success(
+        existing
+          ? t('added', {count: adding.length, name: existing.name})
+          : t('created'),
+      );
       // The list is not mounted here, so invalidating would show its old page first: drop it to load fresh.
       queryClient.removeQueries({queryKey: PROJECTS_QUERY_KEY});
       await Promise.all(
@@ -241,6 +299,17 @@ export function useAssignationWizard() {
     closeOrganizationDialog: () => setOrganizationDialog(false),
     saveNewOrganization,
     // Step 3
+    canAddToExisting,
+    destination,
+    setDestination,
+    existingAssignations,
+    existingLoading: existingQuery.isPending,
+    existingError: existingQuery.error,
+    retryExisting: () => void existingQuery.refetch(),
+    existing,
+    chooseExisting: setExistingId,
+    adding,
+    skipped: alreadyIn(questionnaires, existing),
     name,
     setName,
     dueDate,

@@ -37,6 +37,22 @@ export type EditErrors = Partial<
 
 const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
+/**
+ * Whether the assignation takes new questionnaires: not once it is complete (completed or approved) nor once the
+ * deadline (as edited: moving it forward reopens it) has passed. The API refuses them with 409 PROJECT_CLOSED.
+ */
+export function acceptsQuestionnaires(
+  state: string,
+  dueDate: string,
+  today: string,
+): boolean {
+  return (
+    state !== 'completed' &&
+    state !== 'approved' &&
+    !(dueDate !== '' && dueDate < today)
+  );
+}
+
 export function draftFrom(project: {
   name: string;
   description?: string | null;

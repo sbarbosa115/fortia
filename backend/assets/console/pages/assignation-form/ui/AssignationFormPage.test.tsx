@@ -1,5 +1,11 @@
 import type {Organization} from '@console/entities/organization';
-import {createProject, type Project} from '@console/entities/project';
+import {
+  createProject,
+  fetchProjects,
+  type Project,
+  type ProjectPage,
+  updateProject,
+} from '@console/entities/project';
 import {
   copyQuestionnaire,
   fetchQuestionnaires,
@@ -29,6 +35,8 @@ vi.mock('@console/entities/organization', async (original) => ({
 vi.mock('@console/entities/project', async (original) => ({
   ...(await original<typeof import('@console/entities/project')>()),
   createProject: vi.fn(),
+  updateProject: vi.fn(),
+  fetchProjects: vi.fn(),
 }));
 vi.mock('@console/entities/questionnaire', async (original) => ({
   ...(await original<typeof import('@console/entities/questionnaire')>()),
@@ -77,6 +85,49 @@ function page(items: unknown[]): QuestionnairePage {
     total_items: items.length,
     total_pages: 1,
   } as unknown as QuestionnairePage;
+}
+
+/** An assignation of Acme Retail with its questionnaires; `accepts` false when it is complete or overdue. */
+function project(
+  id: string,
+  name: string,
+  questionnaireIds: string[],
+  accepts = true,
+): Project {
+  return {
+    project_id: id,
+    organization_id: 'o-1',
+    name,
+    due_date: '2099-11-30',
+    state: 'progress',
+    accepts_questionnaires: accepts,
+    assignations: questionnaireIds.map((questionnaireId, i) => ({
+      assignations_id: `${id}-a${i}`,
+      questionnaire_id: questionnaireId,
+    })),
+  } as unknown as Project;
+}
+
+function projectPage(projects: Project[]): ProjectPage {
+  return {
+    projects,
+    pagination: {
+      page: 1,
+      page_size: 100,
+      total_items: projects.length,
+      total_pages: 1,
+      has_next: false,
+      has_previous: false,
+    },
+  } as unknown as ProjectPage;
+}
+
+/** Store audit and Warehouse audit picked, Acme Retail chosen, on step 3. */
+async function reachStepThree() {
+  renderPage();
+  await pickTwoAndContinue();
+  await userEvent.click(screen.getByRole('radio', {name: /Acme Retail/}));
+  await userEvent.click(continueButton());
 }
 
 function renderPage() {
@@ -138,6 +189,154 @@ describe('AssignationFormPage', () => {
     vi.mocked(createProject).mockResolvedValue({
       project_id: 'p-1',
     } as unknown as Project);
+    vi.mocked(updateProject).mockResolvedValue({
+      project_id: 'p-9',
+    } as unknown as Project);
+    vi.mocked(fetchProjects).mockResolvedValue(
+      projectPage([
+        project('p-9', 'Q3 audits', ['q-2']),
+        project('p-8', 'Old audit', [], false),
+      ]),
+    );
+  });
+
+  it('adds the questionnaires to an open assignation of the organization, skipping those it already has', async () => {
+    await reachStepThree();
+
+    const where = screen.getByRole('radiogroup', {name: 'Where do they go?'});
+    expect(
+      within(where).getByRole('radio', {name: 'Create a new assignation'}),
+      'a new assignation by default, as before',
+    ).toBeChecked();
+    await userEvent.click(
+      within(where).getByRole('radio', {name: 'Add to an existing one'}),
+    );
+
+    expect(
+      screen.queryByRole('textbox', {name: /Assignation name/}),
+      'the existing assignation keeps its name',
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Nothing is saved until you press Add/),
+      'the summary speaks of adding, like the button',
+    ).toBeInTheDocument();
+    expect(screen.getByText('Choose it in step 3')).toBeInTheDocument();
+    const list = await screen.findByRole('radiogroup', {
+      name: 'Open assignations',
+    });
+    expect(fetchProjects).toHaveBeenCalledWith(
+      expect.objectContaining({organizationId: 'o-1'}),
+    );
+    expect(
+      within(list).queryByRole('radio', {name: /Old audit/}),
+      'a complete or overdue assignation takes no more questionnaires',
+    ).not.toBeInTheDocument();
+    await userEvent.click(within(list).getByRole('radio', {name: /Q3 audits/}));
+
+    expect(
+      screen.getByText(/The questionnaires are due on/),
+      "the deadline is the assignation's",
+    ).toBeInTheDocument();
+    const skipped = screen.getByRole('list', {
+      name: 'Already in this assignation',
+    });
+    expect(
+      within(skipped).getByText('Warehouse audit'),
+      'a questionnaire it already has is not added again',
+    ).toBeInTheDocument();
+    const review = screen.getByRole('group', {name: /^Review/});
+    await userEvent.click(
+      within(review).getByRole('radio', {name: 'Yes, I want to review them'}),
+    );
+    expect(
+      within(review).getAllByRole('switch'),
+      'review is chosen only for the questionnaires that are added',
+    ).toHaveLength(1);
+    expect(
+      within(review).getByRole('switch', {name: 'Store audit'}),
+    ).toBeChecked();
+
+    await userEvent.click(screen.getByRole('button', {name: 'Add'}));
+
+    expect(await screen.findByText('Assignations list')).toBeInTheDocument();
+    expect(updateProject).toHaveBeenCalledWith('p-9', {
+      questionnaire_ids: ['q-1'],
+      registration_title: 'Tell us who you are',
+      review_questionnaire_ids: ['q-1'],
+    });
+    expect(createProject).not.toHaveBeenCalled();
+  });
+
+  it('cannot add when the chosen assignation already has every picked questionnaire', async () => {
+    vi.mocked(fetchProjects).mockResolvedValue(
+      projectPage([project('p-9', 'Q3 audits', ['q-1', 'q-2'])]),
+    );
+    await reachStepThree();
+    await userEvent.click(
+      screen.getByRole('radio', {name: 'Add to an existing one'}),
+    );
+    await userEvent.click(
+      await screen.findByRole('radio', {name: /Q3 audits/}),
+    );
+
+    expect(
+      screen.getAllByText(
+        'Every picked questionnaire is already in this assignation',
+      ).length,
+    ).toBeGreaterThan(0);
+    await userEvent.click(screen.getByRole('button', {name: 'Add'}));
+    expect(updateProject).not.toHaveBeenCalled();
+  });
+
+  it('says when the organization has no open assignation, with a way to create a new one', async () => {
+    vi.mocked(fetchProjects).mockResolvedValue(
+      projectPage([project('p-8', 'Old audit', [], false)]),
+    );
+    await reachStepThree();
+    await userEvent.click(
+      screen.getByRole('radio', {name: 'Add to an existing one'}),
+    );
+
+    expect(
+      await screen.findByText(/Acme Retail has no open assignation/),
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole('button', {name: 'Create a new one instead'}),
+    );
+    expect(
+      screen.getByRole('textbox', {name: /Assignation name/}),
+    ).toBeInTheDocument();
+  });
+
+  it('searches the open assignations by name, with a way back when nothing matches', async () => {
+    vi.mocked(fetchProjects).mockResolvedValue(
+      projectPage([
+        project('p-9', 'Q3 audits', []),
+        project('p-7', 'Supplier onboarding', []),
+      ]),
+    );
+    await reachStepThree();
+    await userEvent.click(
+      screen.getByRole('radio', {name: 'Add to an existing one'}),
+    );
+    const search = await screen.findByRole('searchbox', {
+      name: 'Search an assignation…',
+    });
+
+    await userEvent.type(search, 'onbóarding');
+    const list = screen.getByRole('radiogroup', {name: 'Open assignations'});
+    expect(within(list).getAllByRole('radio')).toHaveLength(1);
+    await userEvent.clear(search);
+    await userEvent.type(search, 'zzz');
+    expect(
+      screen.getByText('No assignation matches your search.'),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', {name: 'Clear search'}));
+    expect(
+      within(
+        screen.getByRole('radiogroup', {name: 'Open assignations'}),
+      ).getAllByRole('radio'),
+    ).toHaveLength(2);
   });
 
   it('picks several questionnaires with checkboxes before going on', async () => {

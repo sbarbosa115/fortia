@@ -220,6 +220,20 @@ final class ProjectStatusTest extends TestCase
         self::assertFalse(ProjectStatus::matchesFilter(ProjectStatus::REVIEW, 'approved'));
     }
 
+    public function testAProjectTakesNewQuestionnairesUntilItIsCompleteOrOverdue(): void
+    {
+        $today = '2026-10-19';
+
+        foreach ([ProjectStatus::EMPTY, ProjectStatus::PENDING, ProjectStatus::PROGRESS, ProjectStatus::REVIEW, ProjectStatus::CORRECTION] as $state) {
+            self::assertTrue(ProjectStatus::acceptsQuestionnaires($state, '2026-12-01', $today), "an open assignation ($state) takes more questionnaires");
+        }
+        self::assertFalse(ProjectStatus::acceptsQuestionnaires(ProjectStatus::COMPLETED, '2026-12-01', $today), 'a completed assignation takes no more questionnaires');
+        self::assertFalse(ProjectStatus::acceptsQuestionnaires(ProjectStatus::APPROVED, '2026-12-01', $today), 'an approved assignation is complete too');
+        self::assertFalse(ProjectStatus::acceptsQuestionnaires(ProjectStatus::PENDING, '2026-10-18', $today), 'an overdue assignation takes no more questionnaires');
+        self::assertFalse(ProjectStatus::acceptsQuestionnaires(ProjectStatus::REVIEW, '2026-10-18', $today), 'overdue by its deadline whatever its state');
+        self::assertTrue(ProjectStatus::acceptsQuestionnaires(ProjectStatus::PENDING, $today, $today), 'the due date itself is not overdue');
+    }
+
     /** @return array<string, mixed> */
     private static function q(string $id, ?string $value = null, bool $skipped = false, ?string $review = null, int $reviewAttempt = 1, bool $locked = false): array
     {

@@ -120,6 +120,7 @@
     "ASSIGNATION_ORGANIZATION_MISMATCH": "Todas las asignaciones deben ser de la organización del proyecto.",
     "ASSIGNATION_NOT_FOLLOW_UP": "Solo las asignaciones de seguimiento pueden estar en un proyecto.",
     "ASSIGNATION_IN_OTHER_PROJECT": "Esa asignación ya pertenece a otro proyecto.",
+    "PROJECT_CLOSED": "Esta asignación ya está completada o vencida: no admite más cuestionarios.",
     "INVALID_LANGUAGE": "Ese idioma no es válido.",
     "VIDEO_NOT_FOUND": "Ese video no existe.",
     "INVALID_DATE_RANGE": "Las fechas no son válidas.",

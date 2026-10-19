@@ -114,6 +114,7 @@ function project(overrides: Partial<Project> = {}): Project {
       }),
     ],
     available_assignations: null,
+    accepts_questionnaires: true,
     ...overrides,
   };
 }
@@ -364,6 +365,32 @@ describe('AssignationsPage', () => {
     ).toBeInTheDocument();
     expect(
       dialog.getByText('The assignation name is required'),
+    ).toBeInTheDocument();
+  });
+
+  it('does not add questionnaires to a complete assignation, saying why', async () => {
+    fetchMock.mockResolvedValue(
+      page([project({state: 'completed', accepts_questionnaires: false})]),
+    );
+    renderPage();
+    await userEvent.click(
+      await screen.findByRole('button', {
+        name: 'More actions for Store opening Q4',
+      }),
+    );
+    await userEvent.click(
+      screen.getByRole('menuitem', {name: 'Edit assignation'}),
+    );
+    const dialog = within(screen.getByRole('dialog'));
+
+    expect(
+      dialog.getByRole('button', {name: 'Add questionnaires'}),
+      'a complete or overdue assignation takes no more questionnaires',
+    ).toBeDisabled();
+    expect(
+      dialog.getByText(
+        'This assignation is complete or overdue: it takes no more questionnaires.',
+      ),
     ).toBeInTheDocument();
   });
 
