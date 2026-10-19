@@ -216,6 +216,11 @@ describe('AssignationFormPage', () => {
       screen.queryByRole('textbox', {name: /Assignation name/}),
       'the existing assignation keeps its name',
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/Nothing is saved until you press Add/),
+      'the summary speaks of adding, like the button',
+    ).toBeInTheDocument();
+    expect(screen.getByText('Choose it in step 3')).toBeInTheDocument();
     const list = await screen.findByRole('radiogroup', {
       name: 'Open assignations',
     });

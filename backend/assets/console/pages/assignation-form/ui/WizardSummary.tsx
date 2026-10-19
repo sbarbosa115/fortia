@@ -106,7 +106,9 @@ export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
       done: errors[2] === null,
       title: existing
         ? existing.name
-        : wizard.name.trim() || t('summary.assignationPending'),
+        : wizard.destination === 'existing'
+          ? t('summary.existingPending')
+          : wizard.name.trim() || t('summary.assignationPending'),
       detail: existing
         ? [
             t('summary.existing'),
@@ -164,7 +166,13 @@ export function WizardSummary({wizard}: {wizard: AssignationWizardState}) {
           </li>
         ))}
       </ul>
-      <p className="asg-wiz__note">{t('summary.nothingSaved')}</p>
+      <p className="asg-wiz__note">
+        {t(
+          wizard.destination === 'existing'
+            ? 'summary.nothingSavedAdding'
+            : 'summary.nothingSaved',
+        )}
+      </p>
     </aside>
   );
 }

@@ -145,7 +145,9 @@
     "showLess": "Show less",
     "existing": "Existing",
     "adding_one": "adds {{count}}",
-    "adding_other": "adds {{count}}"
+    "adding_other": "adds {{count}}",
+    "existingPending": "Choose it in step 3",
+    "nothingSavedAdding": "Nothing is saved until you press Add. Each questionnaire added is a new follow-up of the assignation, due on its deadline."
   },
   "missing": {
     "title": "Complete these before creating:",
