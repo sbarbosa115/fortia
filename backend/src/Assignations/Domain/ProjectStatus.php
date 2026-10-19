@@ -93,6 +93,15 @@ final class ProjectStatus
         return (int) round($sum / \count($progress));
     }
 
+    /**
+     * Whether a project takes new questionnaires: not once it is complete (completed or approved) nor once its
+     * deadline has passed.
+     */
+    public static function acceptsQuestionnaires(string $state, ?string $dueDate, string $today): bool
+    {
+        return !\in_array($state, [self::COMPLETED, self::APPROVED], true) && !self::isOverdue($dueDate, $today);
+    }
+
     /** Whether a project in $state is listed under the `status` filter $filter (§8.9). */
     public static function matchesFilter(string $state, string $filter): bool
     {

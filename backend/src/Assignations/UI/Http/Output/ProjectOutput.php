@@ -39,6 +39,8 @@ final class ProjectOutput
         public readonly bool $requires_review = true,
         /** Its follow-ups that are done: approved when reviewed, complete otherwise. */
         public readonly int $done_assignations = 0,
+        /** It takes new questionnaires: it is not complete (completed or approved) and its deadline has not passed. */
+        public readonly bool $accepts_questionnaires = true,
     ) {
     }
 
@@ -69,6 +71,7 @@ final class ProjectOutput
             null === $available ? null : array_map(ProjectAvailableAssignationOutput::of(...), $available),
             (bool) ($data['requires_review'] ?? true),
             (int) ($data['done_assignations'] ?? 0),
+            (bool) ($data['accepts_questionnaires'] ?? true),
         );
     }
 }

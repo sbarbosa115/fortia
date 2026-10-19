@@ -252,6 +252,33 @@ final class ProjectApiTest extends ApiTestCase
         self::assertCount(4, $this->data($this->api('GET', $url, as: $owner))['assignations'], 'a refusal adds nothing');
     }
 
+    public function testQuestionnairesCannotBeAddedToACompletedOrOverdueAssignation(): void
+    {
+        $owner = $this->account('ACME0001');
+        $org = $this->organization('ACME0001', 'Acme');
+        $q = $this->questionnaire('ACME0001');
+        $this->clock()->set('2026-10-19T15:00:00Z');
+        $done = $this->followUp('ACME0001', $org, 'Done', questions: 1);
+        $this->answer($done, answered: 1, ended: true);
+        $completed = $this->project('ACME0001', $org, 'Completed', '2026-12-01', [$done]);
+        $this->api('PUT', self::URL.'/'.$completed, ['requires_review' => false], as: $owner);
+        $overdue = $this->project('ACME0001', $org, 'Overdue', '2026-10-18', [$this->followUp('ACME0001', $org, 'Late')]);
+        $open = $this->project('ACME0001', $org, 'Open', '2026-10-19', [$this->followUp('ACME0001', $org, 'Pending')]);
+
+        self::assertFalse($this->data($this->api('GET', self::URL.'/'.$completed, as: $owner))['accepts_questionnaires'], 'a completed assignation says it takes no more questionnaires');
+        self::assertFalse($this->data($this->api('GET', self::URL.'/'.$overdue, as: $owner))['accepts_questionnaires'], 'an overdue one neither');
+        self::assertTrue($this->data($this->api('GET', self::URL.'/'.$open, as: $owner))['accepts_questionnaires'], 'an open one does, on its due date too');
+
+        $this->assertApiError($this->api('PUT', self::URL.'/'.$completed, ['questionnaire_ids' => [$q]], as: $owner), 409, 'PROJECT_CLOSED', 'a completed assignation takes no more questionnaires');
+        $this->assertApiError($this->api('PUT', self::URL.'/'.$overdue, ['questionnaire_ids' => [$q]], as: $owner), 409, 'PROJECT_CLOSED', 'an overdue assignation takes no more questionnaires');
+        self::assertSame(1, $this->data($this->api('GET', self::URL.'/'.$overdue, as: $owner))['total_assignations'], 'a refusal adds nothing');
+        self::assertSame('Renamed', $this->data($this->api('PUT', self::URL.'/'.$overdue, ['name' => 'Renamed'], as: $owner))['name'], 'other changes are still allowed');
+
+        $reopened = $this->data($this->api('PUT', self::URL.'/'.$overdue, ['due_date' => '2026-11-30', 'questionnaire_ids' => [$q]], as: $owner));
+        self::assertSame(2, $reopened['total_assignations'], 'moving the deadline forward in the same change reopens it');
+        self::assertSame(2, $this->data($this->api('PUT', self::URL.'/'.$open, ['questionnaire_ids' => [$q]], as: $owner))['total_assignations'], 'an open assignation takes more questionnaires');
+    }
+
     public function testAReadOnlyUserCannotChangeProjects(): void
     {
         $owner = $this->account('ACME0001');
@@ -444,6 +471,27 @@ final class ProjectApiTest extends ApiTestCase
         self::assertSame(['Store audit'], $names('áudit'), 'accents and case are ignored');
         self::assertSame(['100% done_ish'], $names('100%'), '% matches literally');
         self::assertSame([], $names('zzz'));
+    }
+
+    public function testTheListFiltersByOrganization(): void
+    {
+        $owner = $this->account('ACME0001');
+        $this->account('GLOBEX01');
+        $retail = $this->organization('ACME0001', 'Acme Retail');
+        $logistics = $this->organization('ACME0001', 'Acme Logistics');
+        $this->project('ACME0001', $retail, 'Store audit', '2026-12-01', [], createdAt: '2026-09-01T10:00:00Z');
+        $this->project('ACME0001', $retail, 'Store review', '2026-12-01', [], createdAt: '2026-09-02T10:00:00Z');
+        $this->project('ACME0001', $logistics, 'Fleet review', '2026-12-01', []);
+        $globex = $this->organization('GLOBEX01', 'Globex');
+        $this->project('GLOBEX01', $globex, 'Theirs', '2026-12-01', []);
+
+        $list = fn (string $query): array => $this->data($this->api('GET', self::URL.'?'.$query, as: $owner));
+
+        self::assertSame(['Store review', 'Store audit'], array_column($list('organization_id='.$retail)['projects'], 'name'), "the wizard lists one organization's assignations");
+        self::assertSame(2, $list('organization_id='.strtoupper($retail))['pagination']['total_items'], 'the total counts that organization only, and the id ignores case');
+        self::assertSame(['Store review'], array_column($list('organization_id='.$retail.'&q=review')['projects'], 'name'), 'with the search too');
+        self::assertSame([], $list('organization_id='.$globex)['projects'], "another account's organization lists nothing");
+        $this->assertApiError($this->api('GET', self::URL.'?organization_id=nope', as: $owner), 400, 'INVALID_UUID');
     }
 
     public function testTheListFiltersByState(): void

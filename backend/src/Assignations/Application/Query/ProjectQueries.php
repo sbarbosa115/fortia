@@ -57,6 +57,18 @@ final class ProjectQueries
         return $data;
     }
 
+    /** The project's state (§7.12), or null when it does not exist. */
+    public function state(string $projectId): ?string
+    {
+        $project = $this->projects->find($projectId);
+        if (null === $project) {
+            return null;
+        }
+        $names = [];
+
+        return (string) $this->enrich($project, $this->assignations->listByProject($projectId), $this->today(), $names)['state'];
+    }
+
     /**
      * One page of GET /projects, newest first. Without a status filter the page is cut in SQL; the state is
      * computed from the sessions, so with one every matching project is evaluated and the page cut afterwards.
@@ -68,15 +80,15 @@ final class ProjectQueries
         $today = $this->today();
         $names = [];
         if (null === $criteria->status) {
-            $projects = $this->projects->search($criteria->customerId, $criteria->searchWords, $criteria->offset(), $criteria->pageSize);
+            $projects = $this->projects->search($criteria->customerId, $criteria->searchWords, $criteria->offset(), $criteria->pageSize, $criteria->organizationId);
 
             return [
                 'items' => $this->enrichAll($projects, $today, $names),
-                'total' => $this->projects->countSearch($criteria->customerId, $criteria->searchWords),
+                'total' => $this->projects->countSearch($criteria->customerId, $criteria->searchWords, $criteria->organizationId),
             ];
         }
         $matching = array_values(array_filter(
-            $this->enrichAll($this->projects->search($criteria->customerId, $criteria->searchWords), $today, $names),
+            $this->enrichAll($this->projects->search($criteria->customerId, $criteria->searchWords, organizationId: $criteria->organizationId), $today, $names),
             static fn (array $p): bool => ProjectStatus::matchesFilter((string) $p['state'], (string) $criteria->status),
         ));
 
@@ -124,6 +136,7 @@ final class ProjectQueries
             $done += ($p->requiresReview ? ProjectStatus::APPROVED === $state : $p->ended) ? 1 : 0;
             $rows[] = self::assignationRow($assignation, $p, $state, $due, $today);
         }
+        $state = ProjectStatus::ofProject($states);
 
         return [
             'project_id' => $project->projectId(),
@@ -136,7 +149,8 @@ final class ProjectQueries
             'requires_review' => [] === $assignations ? $project->requiresReview() : [] !== array_filter($progress, static fn (FollowUpProgress $p): bool => $p->requiresReview),
             'created_at' => Iso::datetime($project->createdAt()),
             'updated_at' => Iso::datetime($project->updatedAt()),
-            'state' => ProjectStatus::ofProject($states),
+            'state' => $state,
+            'accepts_questionnaires' => ProjectStatus::acceptsQuestionnaires($state, $project->dueDate(), $today),
             'progress_percent' => ProjectStatus::progressPercent($progress),
             'completed_assignations' => $completed,
             'approved_assignations' => \count(array_filter($states, static fn (string $s): bool => ProjectStatus::APPROVED === $s)),

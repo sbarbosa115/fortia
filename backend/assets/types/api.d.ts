@@ -168,7 +168,10 @@ export interface paths {
         };
         /** The enriched project, with the follow-ups that may join it (available_assignations). */
         get: operations["get_api_projects_get"];
-        /** Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups; organization_id may only be sent unchanged. */
+        /**
+         * Partial. assignation_ids replaces the set, questionnaire_ids adds new follow-ups (not to a complete or overdue
+         *     project: 409 PROJECT_CLOSED); organization_id may only be sent unchanged.
+         */
         put: operations["put_api_projects_update"];
         post?: never;
         /** 204. Its assignations are unlinked, not deleted. */
@@ -1669,6 +1672,11 @@ export interface components {
              * @default 0
              */
             done_assignations: number;
+            /**
+             * It takes new questionnaires: it is not complete (completed or approved) and its deadline has not passed.
+             * @default true
+             */
+            accepts_questionnaires: boolean;
         };
         ProjectListOutput: {
             projects: components["schemas"]["ProjectOutput"][];
@@ -2881,6 +2889,8 @@ export interface operations {
                 status?: "review" | "progress" | "correction" | "overdue" | "completed" | "approved";
                 /** @description Every word in the project's or its organization's name */
                 q?: string;
+                /** @description Only this organization's projects */
+                organization_id?: string;
             };
             header?: never;
             path?: never;
@@ -2897,7 +2907,7 @@ export interface operations {
                     "application/json": components["schemas"]["ProjectListOutput"];
                 };
             };
-            /** @description INVALID_PROJECT_STATUS */
+            /** @description INVALID_PROJECT_STATUS, INVALID_UUID */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3039,7 +3049,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description ASSIGNATION_IN_OTHER_PROJECT */
+            /** @description ASSIGNATION_IN_OTHER_PROJECT, PROJECT_CLOSED */
             409: {
                 headers: {
                     [name: string]: unknown;

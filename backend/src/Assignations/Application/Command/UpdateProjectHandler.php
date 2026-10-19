@@ -2,8 +2,11 @@
 
 namespace App\Assignations\Application\Command;
 
+use App\Assignations\Application\Query\ProjectQueries;
+use App\Assignations\Domain\Error\ProjectClosed;
 use App\Assignations\Domain\Error\ProjectNotFound;
 use App\Assignations\Domain\Event\AssignationCreated;
+use App\Assignations\Domain\ProjectStatus;
 use App\Assignations\Domain\Repository\AssignationRepository;
 use App\Assignations\Domain\Repository\ProjectRepository;
 use App\Shared\Application\Bus\EventBus;
@@ -21,6 +24,7 @@ final class UpdateProjectHandler
         private readonly ProjectFollowUps $followUps,
         private readonly EventBus $events,
         private readonly Clock $clock,
+        private readonly ProjectQueries $queries,
     ) {
     }
 
@@ -47,6 +51,10 @@ final class UpdateProjectHandler
         // checked before anything is added.
         /** @var list<string> $questionnaireIds */
         $questionnaireIds = (array) ($fields['questionnaire_ids'] ?? []);
+        // A complete or overdue assignation takes no more questionnaires; a deadline moved in the same change counts.
+        if ([] !== $questionnaireIds && !ProjectStatus::acceptsQuestionnaires((string) $this->queries->state($project->projectId()), $dueDate, ProjectStatus::todayForOverdue($now))) {
+            throw new ProjectClosed();
+        }
         $registrationTitle = isset($fields['registration_title']) ? (string) $fields['registration_title'] : null;
         $created = $this->followUps->build($command->caller, $project->customerId(), $project->organizationId(), $questionnaireIds, $dueDate, $registrationTitle, $now);
         if (null !== $members || [] !== $created) {

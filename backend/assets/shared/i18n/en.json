@@ -120,6 +120,7 @@
     "ASSIGNATION_ORGANIZATION_MISMATCH": "Every assignation must belong to the project's organization.",
     "ASSIGNATION_NOT_FOLLOW_UP": "Only follow-up assignations can join a project.",
     "ASSIGNATION_IN_OTHER_PROJECT": "That assignation already belongs to another project.",
+    "PROJECT_CLOSED": "This assignation is complete or overdue: it takes no more questionnaires.",
     "INVALID_LANGUAGE": "That language is not valid.",
     "VIDEO_NOT_FOUND": "That video does not exist.",
     "INVALID_DATE_RANGE": "The dates are not valid.",
